@@ -7,8 +7,7 @@ all: ./build/sonicengine.cue
 dir: ./build
 
 run: ./build/sonicengine.cue
-	pcsx-redux-appimage -gdb -run -interpreter \
-		-loadiso ./build/sonicengine.cue
+	pcsx-redux-appimage -gdb -run -interpreter -iso ./build/sonicengine.cue
 
 ./build/sonicengine.cue: ./build
 	cmake --build ./build
