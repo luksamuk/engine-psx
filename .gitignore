@@ -3,3 +3,15 @@ build/
 *~
 *#*#
 
+/memcard1.mcd
+/memcard2.mcd
+/offscreen.frag
+/offscreen.lua
+/offscreen.vert
+/output.frag
+/output.lua
+/output.vert
+/pcsx.json
+/vram-viewer.frag
+/vram-viewer.lua
+/vram-viewer.vert
