@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<iso_project>
+  <track type="data">
+    <identifiers
+	system		= "PLAYSTATION"
+	volume		= "SONICENGINE"
+	volume_set	= "SONICENGINE"
+	publisher	= "luksamuk"
+	data_preparer	= "PSN00BSDK ${PSN00BSDK_VERSION}"
+	application	= "PLAYSTATION"
+	copyright	= "README.TXT;1" />
+    <!-- <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEA.DAT" /> -->
+    <directory_tree>
+      <file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
+      <file name="SONIC.EXE" type="data" source="sonic.exe" />
+      <dummy sectors="1024"/>
+    </directory_tree>
+  </track>
+</iso_project>
+
