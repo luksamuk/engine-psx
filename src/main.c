@@ -5,6 +5,7 @@
 #include <inline_c.h>
 
 #include "render.h"
+#include "util.h"
 #include <stdio.h>
 
 static int  x = 32,  y = 32;
@@ -92,22 +93,18 @@ engine_draw()
         setRGB2(poly,   0,   0, 128);
         setRGB3(poly, 128, 128,   0);
 
-        gte_ldv0(&vertices[faces[i]]);
-        gte_ldv1(&vertices[faces[i + 1]]);
-        gte_ldv2(&vertices[faces[i + 2]]);
-        gte_rtpt();
-        gte_nclip();
-        gte_stopz(&nclip);
-        if(nclip <= 0) continue;
+        nclip = RotAverageNclip4(
+            &vertices[faces[i]],
+            &vertices[faces[i + 1]],
+            &vertices[faces[i + 2]],
+            &vertices[faces[i + 3]],
+            (long *)&poly->x0,
+            (long *)&poly->x1,
+            (long *)&poly->x2,
+            (long *)&poly->x3,
+            &otz);
 
-        gte_stsxy0(&poly->x0);
-        gte_ldv0(&vertices[faces[i + 3]]);
-        gte_rtps();
-        gte_stsxy3(&poly->x1, &poly->x2, &poly->x3);
-        gte_avsz4();
-        gte_stotz(&otz);
-
-        if((otz > 0) && (otz < OT_LENGTH)) {
+        if((nclip > 0) && (otz > 0) && (otz < OT_LENGTH)) {
             sort_prim(poly, otz);
             increment_prim(sizeof(POLY_G4));
         }
