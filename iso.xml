@@ -13,6 +13,14 @@
     <directory_tree>
       <file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
       <file name="SONIC.EXE" type="data" source="sonic.exe" />
+      <dir name="SPRITES">
+	<file name="SONIC.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/tiles/sonic.tim" />
+	<file name="SONIC.CHARA"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/tiles/sonic.chara" />
+      </dir>
       <dummy sectors="1024"/>
     </directory_tree>
   </track>

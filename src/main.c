@@ -2,13 +2,18 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <psxgte.h>
+#include <psxcd.h>
 #include <inline_c.h>
 
 #include "render.h"
 #include "util.h"
+#include "chara.h"
+#include <stdlib.h>
 #include <stdio.h>
 
-static int  x = 32,  y = 32;
+#define SPRTSZ 56
+
+static int  x = (SPRTSZ >> 1),  y = (SPRTSZ >> 1);
 static int dx = 1,  dy = 1;
 
 static SVECTOR vertices[] = {
@@ -38,18 +43,35 @@ static VECTOR  pos      = { 0, 0, 450 };
 static VECTOR  scale    = { ONE, ONE, ONE };
 static MATRIX  world    = { 0 };
 
+static Chara *sonic_chara = NULL;
+
 void
 engine_init()
 {
     setup_context();
     set_clear_color(63, 0, 127);
+    CdInit();
+
+    unsigned long filelength;
+    TIM_IMAGE tim;
+    char *timfile = file_read("\\SPRITES\\SONIC.TIM;1", &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    }
+
+    sonic_chara = load_chara("\\SPRITES\\SONIC.CHARA;1", &tim);
+    printf("Size: %d x %d\n", sonic_chara->width, sonic_chara->height);
+    printf("Frames: %d\nAnims: %d\n", sonic_chara->numframes, sonic_chara->numanims);
+    printf("TPage: (%d %d)  Clut: (%d %d)\n", sonic_chara->prectx, sonic_chara->precty,
+           sonic_chara->crectx, sonic_chara->crecty);
 }
 
 void
 engine_update()
 {
-    if(x < 32 || x > (SCREEN_XRES - 32)) dx = -dx;
-    if(y < 32 || y > (SCREEN_YRES - 32)) dy = -dy;
+    if(x < (SPRTSZ >> 1) || x > (SCREEN_XRES - 32)) dx = -dx;
+    if(y < (SPRTSZ >> 1) || y > (SCREEN_YRES - 32)) dy = -dy;
 
     x += dx;
     y += dy;
@@ -62,14 +84,16 @@ engine_update()
 void
 engine_draw()
 {
-    // Gouraud-shaded triangle
+    chara_render_test(sonic_chara);
+    
+    // Gouraud-shaded SQUARE
     POLY_G4 *poly = (POLY_G4 *) get_next_prim();
     setPolyG4(poly);
     setXY4(poly,
-           x - 32, y - 32,
-           x + 32, y - 32,
-           x - 32, y + 32,
-           x + 32, y + 32);
+           x - (SPRTSZ >> 1), y - (SPRTSZ >> 1),
+           x + (SPRTSZ >> 1), y - (SPRTSZ >> 1),
+           x - (SPRTSZ >> 1), y + (SPRTSZ >> 1),
+           x + (SPRTSZ >> 1), y + (SPRTSZ >> 1));
     setRGB0(poly, 255, 0, 0);
     setRGB1(poly, 0, 255, 0);
     setRGB2(poly, 0, 0, 255);

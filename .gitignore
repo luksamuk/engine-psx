@@ -15,3 +15,9 @@ build/
 /vram-viewer.frag
 /vram-viewer.lua
 /vram-viewer.vert
+/hw-renderer.frag
+/hw-renderer.vert
+/hw-renderer.lua
+/16-to-24.frag
+/16-to-24.vert
+/16-to-24.lua
