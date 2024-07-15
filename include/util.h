@@ -8,11 +8,11 @@ int RotAverageNclip4(SVECTOR *a, SVECTOR *b, SVECTOR *c, SVECTOR *d,
                      long *xy0, long *xy1, long *xy2, long *xy3,
                      int *otz);
 
-char *file_read(const char *filename, unsigned long *length);
-void load_texture(char *data, TIM_IMAGE *tim);
+uint8_t *file_read(const char *filename, uint32_t *length);
+void load_texture(uint8_t *data, TIM_IMAGE *tim);
 
-char  get_byte(char *bytes, unsigned long *b);
-short get_short_be(char *bytes, unsigned long *b);
-short get_short_le(char *bytes, unsigned long *b);
+uint8_t  get_byte(uint8_t *bytes, uint32_t *b);
+uint16_t get_short_be(uint8_t *bytes, uint32_t *b);
+uint16_t get_short_le(uint8_t *bytes, uint32_t *b);
 
 #endif

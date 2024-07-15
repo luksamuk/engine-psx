@@ -4,29 +4,29 @@
 #include <psxgpu.h>
 
 typedef struct {
-    unsigned char x;
-    unsigned char y;
-    unsigned char cols;
-    unsigned char rows;
-    unsigned short *tiles;
+    uint8_t x;
+    uint8_t y;
+    uint8_t cols;
+    uint8_t rows;
+    uint16_t *tiles;
 } CharaFrame;
 
 typedef struct {
     char name[16];
-    unsigned char start;
-    unsigned char end;
+    uint8_t start;
+    uint8_t end;
 } CharaAnim;
 
 typedef struct {
-    unsigned short width;
-    unsigned short height;
-    unsigned short numframes;
-    unsigned short numanims;
+    uint16_t width;
+    uint16_t height;
+    uint16_t numframes;
+    uint16_t numanims;
     CharaFrame *frames;
     CharaAnim *anims;
 
-    unsigned short crectx, crecty;
-    unsigned short prectx, precty;
+    uint16_t crectx, crecty;
+    uint16_t prectx, precty;
 } Chara;
 
 Chara *load_chara(const char *filename, TIM_IMAGE *tim);

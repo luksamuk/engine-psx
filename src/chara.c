@@ -7,8 +7,8 @@
 Chara *
 load_chara(const char *filename, TIM_IMAGE *tim)
 {
-    char *bytes;
-    unsigned long b, length;
+    uint8_t *bytes;
+    uint32_t b, length;
 
     bytes = file_read(filename, &length);
     if(bytes == NULL) {
@@ -25,20 +25,20 @@ load_chara(const char *filename, TIM_IMAGE *tim)
     chara->numanims = get_short_be(bytes, &b);
 
     chara->frames = (CharaFrame *)malloc(chara->numframes * sizeof(CharaFrame));
-    for(unsigned int i = 0; i < chara->numframes; i++) {
+    for(uint16_t i = 0; i < chara->numframes; i++) {
         chara->frames[i].x = get_byte(bytes, &b);
         chara->frames[i].y = get_byte(bytes, &b);
         chara->frames[i].cols = get_byte(bytes, &b);
         chara->frames[i].rows = get_byte(bytes, &b);
-        short numtiles = (short)chara->frames[i].cols * (short)chara->frames[i].rows;
-        chara->frames[i].tiles = (unsigned short *)malloc(numtiles * sizeof(unsigned short));
-        for(short j = 0; j < numtiles; j++) {
-            chara->frames[i].tiles[j] = get_short_be(bytes, &b);
+        uint16_t numtiles = chara->frames[i].cols * chara->frames[i].rows;
+        chara->frames[i].tiles = (uint16_t *)malloc(numtiles * sizeof(uint16_t));
+        for(uint16_t j = 0; j < numtiles; j++) {
+            chara->frames[i].tiles[j] = (uint16_t) get_short_be(bytes, &b);
         }
     }
 
     chara->anims = (CharaAnim *)malloc(chara->numanims * sizeof(CharaAnim));
-    for(unsigned int i = 0; i < chara->numanims; i++) {
+    for(uint16_t i = 0; i < chara->numanims; i++) {
         for(int j = 0; j < 15; j++) {
             chara->anims[i].name[j] = get_byte(bytes, &b);
         }
@@ -75,70 +75,65 @@ free_chara(Chara *chara)
 
 #include <psxgpu.h>
 #include "render.h"
+#include <inline_c.h>
 
-#define ADVANCE_TIMER 30
+#define ADVANCE_TIMER 15
 
 static short sx = 50, sy = 50;
 static short advance = ADVANCE_TIMER;
 static short framenum = 0;
 
+/* static SVECTOR c_rot    = { 0 }; */
+/* static VECTOR  c_pos    = { 50, 50, 0 }; */
+/* static VECTOR  c_scale  = { ONE, ONE, ONE }; */
+/* static MATRIX  c_world  = { 0 }; */
+
 void
 chara_render_test(Chara *chara)
 {
+    int changed = 0;
     advance--;
     if(advance < 0) {
         advance = ADVANCE_TIMER;
         framenum = (framenum + 1) % chara->numframes;
+        changed = 1;
     }
+
+    /* RotMatrix(&c_rot, &c_world); */
+    /* TransMatrix(&c_world, &c_pos); */
+    /* ScaleMatrix(&c_world, &c_scale); */
+    /* gte_SetRotMatrix(&c_world); */
+    /* gte_SetTransMatrix(&c_world); */
+
+    uint16_t SEVEN = ONE * 7;
     
     CharaFrame *frame = &chara->frames[framenum];
 
-    for(unsigned short row = 0; row < frame->rows; row++) {
-        for(unsigned short col = 0; col < frame->cols; col++) {
-            unsigned short idx = (row * frame->cols) + col;
+    for(uint16_t row = 0; row < frame->rows; row++) {
+        for(uint16_t col = 0; col < frame->cols; col++) {
+            uint16_t idx = (row * frame->cols) + col;
             idx = frame->tiles[idx];
             if(idx == 0) continue;
 
             // Get upper left UV from frame index on tileset
-            unsigned char v0idx = idx >> 5; // divide by 32
-            unsigned char u0idx = idx - (v0idx << 5);
+            uint16_t v0idx = idx >> 5; // divide by 32
+            uint16_t u0idx = idx - (v0idx << 5);
 
-            unsigned char u0, v0;
-            u0 = u0idx * 8;  v0 = v0idx * 8;
-            
-            /* unsigned char u1, v1, u2, v2, u3, v3; */
-            /* u1 = u0 + 7;     v1 = v0; */
-            /* u2 = u0;         v2 = v0 + 7; */
-            /* u3 = u0 + 7;     v3 = v0 + 7; */
-            
-            /*printf("%d =>  uv0 = (%d %d), uv1 = (%d %d), uv2 = (%d %d), uv3 = (%d %d)\n",
-              idx, u0, v0, u1, v1, u2, v2, u3, v3);*/
+            uint8_t u0, v0;
+            u0 = (char)u0idx * 8;  v0 = (char)v0idx * 8;
 
-            short x0 = sx + (col * 7) + frame->x;
-            short y0 = sy + (row * 7) + frame->y;
+            uint16_t x0 = sx + (col * 8) + frame->x;
+            uint16_t y0 = sy + (row * 8) + frame->y;
 
-            SPRT_8 *sprt = (SPRT_8 *) get_next_prim();
-            increment_prim(sizeof(SPRT_8));
+            SPRT *sprt = (SPRT *) get_next_prim();
+            increment_prim(sizeof(SPRT));
             setSprt8(sprt);
             setXY0(sprt, x0, y0);
+            setWH(sprt, SEVEN, SEVEN);
             setRGB0(sprt, 128, 128, 128);
             setUV0(sprt, u0, v0);
             setClut(sprt, chara->crectx, chara->crecty);
             sort_prim(sprt, 1);
-
-            /* POLY_FT4 *poly = (POLY_FT4 *) get_next_prim(); */
-            /* increment_prim(sizeof(POLY_FT4)); */
-            /* setPolyFT4(poly); */
-            /* setRGB0(poly, 128, 128, 128); */
-            /* poly->tpage = getTPage(0, 0, chara->prectx, chara->precty); */
-            /* setClut(poly, chara->crectx, chara->crecty); */
-            /* setUV4(poly, u0, v0, u1, v1, u2, v2, u3, v3); */
-            /* setXY4(poly, */
-            /*        x0,     y0, */
-            /*        x0 + 7, y0, */
-            /*        x0,     y0 + 7, */
-            /*        x0 + 7, y0 + 7); */
-            /* sort_prim(poly, 1); */
         }
     }
 

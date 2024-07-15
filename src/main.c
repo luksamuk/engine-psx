@@ -52,9 +52,9 @@ engine_init()
     set_clear_color(63, 0, 127);
     CdInit();
 
-    unsigned long filelength;
+    uint32_t filelength;
     TIM_IMAGE tim;
-    char *timfile = file_read("\\SPRITES\\SONIC.TIM;1", &filelength);
+    uint8_t *timfile = file_read("\\SPRITES\\SONIC.TIM;1", &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
         free(timfile);

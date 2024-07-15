@@ -82,7 +82,6 @@ def parse_layout(j):
         "num_animations": len(animations),
         "animations": animations,
     }
-    # pprint(res)
     return res
 
 
@@ -102,29 +101,6 @@ def parse_layout(j):
 #    6.1. Name: 16 bytes.
 #    6.2. Frame start: byte (8 bits)
 #    6.3. Frame end: byte (8 bits)
-
-# def print_binary_layout(layout):
-#     print("# header")
-#     print("spritewidth:", c_ushort(layout.get("sprite_width")))
-#     print("spriteheight:", c_ushort(layout.get("sprite_height")))
-#     print("numframes:", c_ushort(layout.get("num_frames")))
-#     print("numanims:", c_ushort(layout.get("num_animations")))
-#     print("# frame data")
-#     for i, frame in enumerate(layout.get("frames")):
-#         print(f"## frame {i}")
-#         print("x:", c_ubyte(frame.get("x")))
-#         print("y:", c_ubyte(frame.get("y")))
-#         print("cols:", c_ubyte(frame.get("cols")))
-#         print("rows:", c_ubyte(frame.get("rows")))
-#         tiles = [c_ushort(t) for t in frame.get("tiles")]
-#         print("tiles:", tiles)
-#     for anim in layout.get("animations"):
-#         name = [c_ubyte(0 if x == " " else ord(x)) for x in list(anim.get("name"))]
-#         print("name:", name)
-#         print("start:", c_ubyte(anim.get("start")))
-#         print("end:", c_ubyte(anim.get("end")))
-
-
 def write_binary_data(layout, f):
     f.write(c_ushort(layout.get("sprite_width")))
     f.write(c_ushort(layout.get("sprite_height")))
@@ -150,7 +126,6 @@ def main():
     outfile = sys.argv[2]
     j = load_json(jsonfile)
     l = parse_layout(j)
-    # print_binary_layout(l)
     with open(outfile, "wb") as f:
         write_binary_data(l, f)
 
