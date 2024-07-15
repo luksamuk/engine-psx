@@ -61,10 +61,6 @@ engine_init()
     }
 
     sonic_chara = load_chara("\\SPRITES\\SONIC.CHARA;1", &tim);
-    printf("Size: %d x %d\n", sonic_chara->width, sonic_chara->height);
-    printf("Frames: %d\nAnims: %d\n", sonic_chara->numframes, sonic_chara->numanims);
-    printf("TPage: (%d %d)  Clut: (%d %d)\n", sonic_chara->prectx, sonic_chara->precty,
-           sonic_chara->crectx, sonic_chara->crecty);
 }
 
 void
