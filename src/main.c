@@ -118,10 +118,10 @@ engine_draw()
             &vertices[faces[i + 1]],
             &vertices[faces[i + 2]],
             &vertices[faces[i + 3]],
-            (long *)&poly->x0,
-            (long *)&poly->x1,
-            (long *)&poly->x2,
-            (long *)&poly->x3,
+            (uint32_t *)&poly->x0,
+            (uint32_t *)&poly->x1,
+            (uint32_t *)&poly->x2,
+            (uint32_t *)&poly->x3,
             &otz);
 
         if((nclip > 0) && (otz > 0) && (otz < OT_LENGTH)) {

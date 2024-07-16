@@ -8,6 +8,8 @@ typedef struct {
     uint8_t y;
     uint8_t cols;
     uint8_t rows;
+    uint16_t width;
+    uint16_t height;
     uint16_t *tiles;
 } CharaFrame;
 

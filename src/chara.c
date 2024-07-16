@@ -30,6 +30,8 @@ load_chara(const char *filename, TIM_IMAGE *tim)
         chara->frames[i].y = get_byte(bytes, &b);
         chara->frames[i].cols = get_byte(bytes, &b);
         chara->frames[i].rows = get_byte(bytes, &b);
+        chara->frames[i].width = get_short_be(bytes, &b);
+        chara->frames[i].height = get_short_be(bytes, &b);
         uint16_t numtiles = chara->frames[i].cols * chara->frames[i].rows;
         chara->frames[i].tiles = (uint16_t *)malloc(numtiles * sizeof(uint16_t));
         for(uint16_t j = 0; j < numtiles; j++) {
@@ -51,6 +53,7 @@ load_chara(const char *filename, TIM_IMAGE *tim)
     chara->crecty = tim->crect->y;
     chara->prectx = tim->prect->x;
     chara->precty = tim->prect->y;*/
+    printf("%d %d\n", tim->prect->x, tim->prect->y);
     chara->crectx = 320;
     chara->crecty = 256;
     chara->prectx = 320;
@@ -77,69 +80,81 @@ free_chara(Chara *chara)
 #include "render.h"
 #include <inline_c.h>
 
-#define ADVANCE_TIMER 15
+#define ADVANCE_TIMER 60
 
-static short sx = 50, sy = 50;
-static short advance = ADVANCE_TIMER;
-static short framenum = 0;
+/* static int16_t sx = 50, sy = 50; */
+static int16_t advance = ADVANCE_TIMER;
+static int16_t framenum = 0;
+
+static uint8_t flip_x = 1;
 
 /* static SVECTOR c_rot    = { 0 }; */
-/* static VECTOR  c_pos    = { 50, 50, 0 }; */
-/* static VECTOR  c_scale  = { ONE, ONE, ONE }; */
+static SVECTOR  pos    = { SCREEN_XRES >> 1, SCREEN_YRES >> 1, 0 };
+/* static VECTOR  c_scale  = { -ONE, ONE, ONE }; */
 /* static MATRIX  c_world  = { 0 }; */
 
 void
 chara_render_test(Chara *chara)
 {
-    int changed = 0;
-    advance--;
-    if(advance < 0) {
-        advance = ADVANCE_TIMER;
-        framenum = (framenum + 1) % chara->numframes;
-        changed = 1;
-    }
-
-    /* RotMatrix(&c_rot, &c_world); */
-    /* TransMatrix(&c_world, &c_pos); */
-    /* ScaleMatrix(&c_world, &c_scale); */
-    /* gte_SetRotMatrix(&c_world); */
-    /* gte_SetTransMatrix(&c_world); */
-
-    uint16_t SEVEN = ONE * 7;
-    
     CharaFrame *frame = &chara->frames[framenum];
 
+    int16_t left = frame->x >> 3;
+    int16_t right = 7 - (frame->width >> 3) - left;
+
     for(uint16_t row = 0; row < frame->rows; row++) {
-        for(uint16_t col = 0; col < frame->cols; col++) {
+        for(uint16_t colx = 0; colx < frame->cols; colx++) {
+            uint16_t col = flip_x ? frame->cols - colx - 1 : colx;
             uint16_t idx = (row * frame->cols) + col;
             idx = frame->tiles[idx];
             if(idx == 0) continue;
 
-            // Get upper left UV from frame index on tileset
+            // Get upper left UV from tile index on tileset
             uint16_t v0idx = idx >> 5; // divide by 32
             uint16_t u0idx = idx - (v0idx << 5);
 
-            uint8_t u0, v0;
-            u0 = (char)u0idx * 8;  v0 = (char)v0idx * 8;
+            uint8_t
+                u0 = (u0idx << 3),
+                v0 = (v0idx << 3);
 
-            uint16_t x0 = sx + (col * 8) + frame->x;
-            uint16_t y0 = sy + (row * 8) + frame->y;
+            SVECTOR xy0 = {
+                pos.vx + (colx << 3) + frame->x,
+                pos.vy + (row << 3) + frame->y - (chara->height >> 1),
+                0, 0,
+            };
 
-            SPRT *sprt = (SPRT *) get_next_prim();
-            increment_prim(sizeof(SPRT));
-            setSprt8(sprt);
-            setXY0(sprt, x0, y0);
-            setWH(sprt, SEVEN, SEVEN);
-            setRGB0(sprt, 128, 128, 128);
-            setUV0(sprt, u0, v0);
-            setClut(sprt, chara->crectx, chara->crecty);
-            sort_prim(sprt, 1);
+            // I don't know why, but it works
+            uint8_t tw, th;
+            tw = (u0 < 248 ? 8 : 7);
+            th = (v0 < 248 ? 8 : 7);
+
+            if(flip_x) {
+                if(u0 > 0) { u0--; }
+                xy0.vx += (right << 4);
+            } else {
+                xy0.vx -= (left << 3);
+            }
+            xy0.vx -= (chara->width >> 1);
+            
+
+            POLY_FT4 *poly = (POLY_FT4 *) get_next_prim();
+            increment_prim(sizeof(POLY_FT4));
+            setPolyFT4(poly);
+            setRGB0(poly, 128, 128, 128);
+            setTPage(poly, 0, 0, chara->prectx, chara->precty);
+            setClut(poly, chara->crectx, chara->crecty);
+            setXYWH(poly, xy0.vx, xy0.vy, 8, 8);
+            
+            if(flip_x) {
+                setUV4(
+                    poly,
+                    u0 + tw, v0,
+                    u0,      v0,
+                    u0 + tw, v0 + th,
+                    u0, v0 + th);
+            } else {
+                setUVWH(poly, u0, v0, tw, th);
+            }
+            sort_prim(poly, 1);
         }
     }
-
-    // Sort tpage
-    DR_TPAGE *tpri = (DR_TPAGE *) get_next_prim();
-    increment_prim(sizeof(DR_TPAGE));
-    setDrawTPage(tpri, 0, 0, getTPage(0, 0, chara->prectx, chara->precty));
-    sort_prim(tpri, OT_LENGTH - 1);
 }

@@ -8,7 +8,7 @@
 int
 RotAverageNclip4(
     SVECTOR *a, SVECTOR *b, SVECTOR *c, SVECTOR *d,
-    long *xy0, long *xy1, long *xy2, long *xy3,
+    uint32_t *xy0, uint32_t *xy1, uint32_t *xy2, uint32_t *xy3,
     int *otz)
 {
     int nclip = 0;
@@ -30,6 +30,16 @@ exit:
     return nclip;
 }
 
+int
+RotTransPers(SVECTOR *v, uint32_t *xy0)
+{
+    int otz = 0;
+    gte_ldv0(v);
+    gte_rtps();
+    gte_stsxy0(xy0);
+    gte_stotz(&otz);
+    return otz;
+}
 
 uint8_t *
 file_read(const char *filename, uint32_t *length)

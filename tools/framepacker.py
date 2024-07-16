@@ -59,6 +59,8 @@ def parse_layout(j):
         {
             "cols": t.get("tilemap").get("width"),
             "rows": t.get("tilemap").get("height"),
+            "width": t.get("bounds").get("width"),
+            "height": t.get("bounds").get("height"),
             "x": t.get("bounds").get("x"),
             "y": t.get("bounds").get("y"),
             "tiles": t.get("tilemap").get("tiles"),
@@ -96,7 +98,9 @@ def parse_layout(j):
 #    5.2. Y offset: byte (8 bits)
 #    5.3. Columns: byte (8 bits)
 #    5.4. Rows: byte (8 bits)
-#    5.5. Tiles: Columns * Rows * short (16 bits per tile)
+#    5.5. Width: short (16 bits)
+#    5.6. Height: short (16 bits)
+#    5.7. Tiles: Columns * Rows * short (16 bits per tile)
 # 6. Array of animation data.
 #    6.1. Name: 16 bytes.
 #    6.2. Frame start: byte (8 bits)
@@ -111,6 +115,8 @@ def write_binary_data(layout, f):
         f.write(c_ubyte(frame.get("y")))
         f.write(c_ubyte(frame.get("cols")))
         f.write(c_ubyte(frame.get("rows")))
+        f.write(c_ushort(frame.get("width")))
+        f.write(c_ushort(frame.get("height")))
         for t in frame.get("tiles"):
             f.write(c_ushort(t))
     for anim in layout.get("animations"):
