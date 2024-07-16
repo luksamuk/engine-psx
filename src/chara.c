@@ -1,6 +1,8 @@
 #include "chara.h"
 #include "util.h"
-
+#include "render.h"
+#include <psxgpu.h>
+#include <inline_c.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -41,12 +43,22 @@ load_chara(const char *filename, TIM_IMAGE *tim)
 
     chara->anims = (CharaAnim *)malloc(chara->numanims * sizeof(CharaAnim));
     for(uint16_t i = 0; i < chara->numanims; i++) {
-        for(int j = 0; j < 15; j++) {
+        for(int j = 0; j < 16; j++) {
             chara->anims[i].name[j] = get_byte(bytes, &b);
         }
         chara->anims[i].name[15] = '\0';
+        for(int j = 14; j >= 0; j--) {
+            if(chara->anims[i].name[j] != ' ')
+                break;
+            chara->anims[i].name[j] = '\0';
+        }
         chara->anims[i].start = get_byte(bytes, &b);
         chara->anims[i].end = get_byte(bytes, &b);
+    }
+
+    for(uint16_t i = 0; i < chara->numanims; i++) {
+        printf("Animation: %s (%d -> %d)\n",
+               chara->anims[i].name, chara->anims[i].start, chara->anims[i].end);
     }
 
     /*chara->crectx = tim->crect->x;
@@ -76,25 +88,10 @@ free_chara(Chara *chara)
     }
 }
 
-#include <psxgpu.h>
-#include "render.h"
-#include <inline_c.h>
 
-#define ADVANCE_TIMER 60
-
-/* static int16_t sx = 50, sy = 50; */
-static int16_t advance = ADVANCE_TIMER;
-static int16_t framenum = 0;
-
-static uint8_t flip_x = 1;
-
-/* static SVECTOR c_rot    = { 0 }; */
-static SVECTOR  pos    = { SCREEN_XRES >> 1, SCREEN_YRES >> 1, 0 };
-/* static VECTOR  c_scale  = { -ONE, ONE, ONE }; */
-/* static MATRIX  c_world  = { 0 }; */
 
 void
-chara_render_test(Chara *chara)
+chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8_t flipx)
 {
     CharaFrame *frame = &chara->frames[framenum];
 
@@ -103,7 +100,7 @@ chara_render_test(Chara *chara)
 
     for(uint16_t row = 0; row < frame->rows; row++) {
         for(uint16_t colx = 0; colx < frame->cols; colx++) {
-            uint16_t col = flip_x ? frame->cols - colx - 1 : colx;
+            uint16_t col = flipx ? frame->cols - colx - 1 : colx;
             uint16_t idx = (row * frame->cols) + col;
             idx = frame->tiles[idx];
             if(idx == 0) continue;
@@ -117,8 +114,8 @@ chara_render_test(Chara *chara)
                 v0 = (v0idx << 3);
 
             SVECTOR xy0 = {
-                pos.vx + (colx << 3) + frame->x,
-                pos.vy + (row << 3) + frame->y - (chara->height >> 1),
+                vx + (colx << 3) + frame->x,
+                vy + (row << 3) + frame->y - (chara->height >> 1),
                 0, 0,
             };
 
@@ -127,7 +124,7 @@ chara_render_test(Chara *chara)
             tw = (u0 < 248 ? 8 : 7);
             th = (v0 < 248 ? 8 : 7);
 
-            if(flip_x) {
+            if(flipx) {
                 if(u0 > 0) { u0--; }
                 xy0.vx += (right << 4);
             } else {
@@ -144,7 +141,7 @@ chara_render_test(Chara *chara)
             setClut(poly, chara->crectx, chara->crecty);
             setXYWH(poly, xy0.vx, xy0.vy, 8, 8);
             
-            if(flip_x) {
+            if(flipx) {
                 setUV4(
                     poly,
                     u0 + tw, v0,
@@ -157,4 +154,25 @@ chara_render_test(Chara *chara)
             sort_prim(poly, 1);
         }
     }
+}
+
+#define TEST_ADVANCE_TIMER 15
+
+void
+chara_render_test(Chara *chara)
+{
+    static int16_t advance = TEST_ADVANCE_TIMER;
+    static int16_t frame_num = 0;
+
+    static uint8_t flip = 0;
+
+    advance--;
+    if(advance < 0) {
+        advance = TEST_ADVANCE_TIMER;
+        frame_num = (frame_num + 1) % (chara->numframes - 1);
+        if(frame_num == 0) flip = !flip;
+    }
+    chara_render_frame(chara, frame_num,
+                       (SCREEN_XRES >> 1), (SCREEN_YRES >> 1),
+                       flip);
 }

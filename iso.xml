@@ -16,10 +16,10 @@
       <dir name="SPRITES">
 	<file name="SONIC.TIM"
 	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/sprites/tiles/sonic.tim" />
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/SONIC.TIM" />
 	<file name="SONIC.CHARA"
 	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/sprites/tiles/sonic.chara" />
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/SONIC.CHARA" />
       </dir>
       <dummy sectors="1024"/>
     </directory_tree>

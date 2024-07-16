@@ -34,6 +34,9 @@ typedef struct {
 Chara *load_chara(const char *filename, TIM_IMAGE *tim);
 void  free_chara(Chara *chara);
 
+void chara_render_frame(Chara *chara, int16_t framenum,
+                        int16_t vx, int16_t vy, uint8_t flipx);
 void chara_render_test(Chara *chara);
+
 
 #endif
