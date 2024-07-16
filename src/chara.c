@@ -126,7 +126,7 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
 
             if(flipx) {
                 if(u0 > 0) { u0--; }
-                xy0.vx += (right << 4);
+                xy0.vx -= (right << 4);
             } else {
                 xy0.vx -= (left << 3);
             }
@@ -156,7 +156,7 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
     }
 }
 
-#define TEST_ADVANCE_TIMER 15
+#define TEST_ADVANCE_TIMER 30
 
 void
 chara_render_test(Chara *chara)
@@ -175,4 +175,12 @@ chara_render_test(Chara *chara)
     chara_render_frame(chara, frame_num,
                        (SCREEN_XRES >> 1), (SCREEN_YRES >> 1),
                        flip);
+
+    char buffer[255] = { 0 };
+    snprintf(buffer, 255,
+             "Counter: %d\n"
+             "Frame:   %d\n"
+             "Flip?    %s\n",
+             advance, frame_num, flip ? "Yes" : "No");
+    draw_text(8, 8, 0, buffer);
 }

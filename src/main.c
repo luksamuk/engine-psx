@@ -129,13 +129,6 @@ engine_draw()
             increment_prim(sizeof(POLY_G4));
         }
     }
-
-    // Draw some text in front of the square (Z = 0, primitives with higher
-    // Z indices are drawn first).
-    draw_text(8, 8, 0,
-              "Hello world!\n"
-              "Running on PSX.\n"
-              "Built using PSn00bSDK.");
 }
 
 int

@@ -21,6 +21,11 @@
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/SONIC.CHARA" />
       </dir>
+      <dir name="AUDIO">
+	<file name="BGM001.XA"
+	      type="xa"
+	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM001.XA" />
+      </dir>
       <dummy sectors="1024"/>
     </directory_tree>
   </track>
