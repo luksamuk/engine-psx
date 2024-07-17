@@ -1,9 +1,11 @@
 struct FrameData {
     u8 x;
     u8 y;
-    u8 cols;
+    u8 columns;
     u8 rows;
-    be u16 tiles[rows * cols];
+    be u16 width;
+    be u16 height;
+    be u16 tiles[rows * columns];
 };
 
 struct AnimData {
