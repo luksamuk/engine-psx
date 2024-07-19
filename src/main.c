@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -8,8 +10,7 @@
 #include "render.h"
 #include "util.h"
 #include "chara.h"
-#include <stdlib.h>
-#include <stdio.h>
+#include "sound.h"
 
 #define SPRTSZ 56
 
@@ -50,6 +51,7 @@ engine_init()
 {
     setup_context();
     set_clear_color(63, 0, 127);
+    sound_init();
     CdInit();
 
     uint32_t filelength;
@@ -61,11 +63,19 @@ engine_init()
     }
 
     sonic_chara = load_chara("\\SPRITES\\SONIC.CHARA;1", &tim);
+
+
+    // Start playback after we don't need the CD anymore.
+    // NOTE: This .XA contains songs of different lengths, so there is a
+    // huge silence at the end of channel 0.
+    sound_play_xa("\\BGM001.XA;1", 0, 1);
 }
 
 void
 engine_update()
 {
+    sound_update();
+
     if(x < (SPRTSZ >> 1) || x > (SCREEN_XRES - 32)) dx = -dx;
     if(y < (SPRTSZ >> 1) || y > (SCREEN_YRES - 32)) dy = -dy;
 
@@ -129,6 +139,16 @@ engine_draw()
             increment_prim(sizeof(POLY_G4));
         }
     }
+
+    uint8_t minute, second, sector;
+    sound_xa_get_pos(&minute, &second, &sector);
+    char buffer[255] = { 0 };
+    snprintf(buffer, 255,
+             "%02u:%02u:%03u\n"
+             "CD status: %02x\n",
+             minute, second, sector,
+             sound_get_cd_status());
+    draw_text(8, 216, 0, buffer);
 }
 
 int

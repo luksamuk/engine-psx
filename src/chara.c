@@ -123,13 +123,16 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
             uint8_t tw, th;
             tw = (u0 < 248 ? 8 : 7);
             th = (v0 < 248 ? 8 : 7);
-
             if(flipx) {
-                if(u0 > 0) { u0--; }
-                xy0.vx -= (right << 4);
-            } else {
-                xy0.vx -= (left << 3);
+                if (u0 > 0) u0--;
+                if (u0 + tw >= 254) tw--;
             }
+
+            /* if(flipx) { */
+            /*     xy0.vx -= (right << 4); */
+            /* } else { */
+            /*     xy0.vx -= (left << 3); */
+            /* } */
             xy0.vx -= (chara->width >> 1);
             
 
@@ -156,7 +159,7 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
     }
 }
 
-#define TEST_ADVANCE_TIMER 30
+#define TEST_ADVANCE_TIMER 7
 
 void
 chara_render_test(Chara *chara)

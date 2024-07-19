@@ -4,6 +4,8 @@
 #include <psxgpu.h>
 #include <psxgte.h>
 
+#define BCD_TO_DEC(x) (((x & 0xF0) >> 4) * 10 + (x & 0x0F))
+
 int RotTransPers(SVECTOR *v, uint32_t *xy0);
 int RotAverageNclip4(SVECTOR *a, SVECTOR *b, SVECTOR *c, SVECTOR *d,
                      uint32_t *xy0, uint32_t *xy1, uint32_t *xy2, uint32_t *xy3,
