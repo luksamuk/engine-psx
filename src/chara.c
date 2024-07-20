@@ -114,7 +114,7 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
                 v0 = (v0idx << 3);
 
             SVECTOR xy0 = {
-                vx + (colx << 3) + frame->x,
+                vx + (colx << 3) + (flipx ? (right << 3) : frame->x) - (chara->width >> 1),
                 vy + (row << 3) + frame->y - (chara->height >> 1),
                 0, 0,
             };
@@ -128,14 +128,8 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
                 if (u0 + tw >= 254) tw--;
             }
 
-            /* if(flipx) { */
-            /*     xy0.vx -= (right << 4); */
-            /* } else { */
-            /*     xy0.vx -= (left << 3); */
-            /* } */
-            xy0.vx -= (chara->width >> 1);
-            
-
+            // Use a textured quad since we need to reverse
+            // our UVs manually
             POLY_FT4 *poly = (POLY_FT4 *) get_next_prim();
             increment_prim(sizeof(POLY_FT4));
             setPolyFT4(poly);
