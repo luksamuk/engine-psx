@@ -67,14 +67,15 @@ def parse_layout(j):
         }
         for t in tiles
     ]
+    tags = j.get("tags")
     animations = [
         {
             "name": "{:<16}".format(t.get("name").upper().replace(" ", "")),
             "start": t.get("from"),
             "end": t.get("to"),
         }
-        for t in j.get("tags")
-    ]
+        for t in tags
+    ] if tags else []
 
     res = {
         "sprite_width": width,
