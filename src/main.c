@@ -11,6 +11,7 @@
 #include "util.h"
 #include "chara.h"
 #include "sound.h"
+#include "input.h"
 
 #define SPRTSZ 56
 
@@ -46,6 +47,9 @@ static MATRIX  world    = { 0 };
 
 static Chara *sonic_chara = NULL;
 
+#define MUSIC_NUM_CHANNELS 2
+static uint8_t music_channel = 0;
+
 void
 engine_init()
 {
@@ -53,6 +57,7 @@ engine_init()
     set_clear_color(63, 0, 127);
     sound_init();
     CdInit();
+    pad_init();
 
     uint32_t filelength;
     TIM_IMAGE tim;
@@ -66,15 +71,14 @@ engine_init()
 
 
     // Start playback after we don't need the CD anymore.
-    // NOTE: This .XA contains songs of different lengths, so there is a
-    // huge silence at the end of channel 0.
-    sound_play_xa("\\BGM001.XA;1", 0, 1);
+    sound_play_xa("\\AUDIO\\BGM001.XA;1", 0, music_channel);
 }
 
 void
 engine_update()
 {
     sound_update();
+    pad_update();
 
     if(x < (SPRTSZ >> 1) || x > (SCREEN_XRES - 32)) dx = -dx;
     if(y < (SPRTSZ >> 1) || y > (SCREEN_YRES - 32)) dy = -dy;
@@ -85,6 +89,11 @@ engine_update()
     rotation.vx += 6;
     rotation.vy -= 8;
     rotation.vz -= 12;
+
+    if(pad_pressed(PAD_CROSS)) {
+        music_channel = (music_channel + 1) % MUSIC_NUM_CHANNELS;
+        sound_xa_set_channel(music_channel);
+    }
 }
 
 void
@@ -144,9 +153,9 @@ engine_draw()
     sound_xa_get_pos(&minute, &second, &sector);
     char buffer[255] = { 0 };
     snprintf(buffer, 255,
-             "%02u:%02u:%03u\n"
+             "%02u:%02u:%03u  Chn: %u\n"
              "CD status: %02x\n",
-             minute, second, sector,
+             minute, second, sector, music_channel,
              sound_get_cd_status());
     draw_text(8, 216, 0, buffer);
 }
