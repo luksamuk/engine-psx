@@ -12,6 +12,7 @@
 #include "chara.h"
 #include "sound.h"
 #include "input.h"
+#include "player.h"
 
 #define SPRTSZ 56
 
@@ -39,13 +40,11 @@ static short faces[] = {
 };
 
 static SVECTOR rotation = { 0 };
-static VECTOR  vel      = { 0 };
-static VECTOR  acc      = { 0 };
 static VECTOR  pos      = { 0, 0, 450 };
 static VECTOR  scale    = { ONE, ONE, ONE };
 static MATRIX  world    = { 0 };
 
-static Chara sonic_chara;
+static Player player;
 
 #define MUSIC_NUM_CHANNELS 2
 static uint8_t music_channel = 0;
@@ -67,7 +66,8 @@ engine_init()
         free(timfile);
     }
 
-    load_chara(&sonic_chara, "\\SPRITES\\SONIC.CHARA;1", &tim);
+    load_player(&player, "\\SPRITES\\SONIC.CHARA;1", &tim);
+    player.pos = (VECTOR){ (uint32_t)(SCREEN_XRES) << 9, (uint32_t)(SCREEN_YRES) << 11, 0 };
 
 
     // Start playback after we don't need the CD anymore.
@@ -90,16 +90,34 @@ engine_update()
     rotation.vy -= 8;
     rotation.vz -= 12;
 
-    if(pad_pressed(PAD_CROSS)) {
-        music_channel = (music_channel + 1) % MUSIC_NUM_CHANNELS;
+    int channel_changed = 0;
+    /* if(pad_pressed(PAD_CROSS)) { */
+    /*     music_channel = (music_channel + 1) % MUSIC_NUM_CHANNELS; */
+    /*     sound_xa_set_channel(music_channel); */
+    /* } */
+    if(pad_pressed(PAD_R1)) {
+        music_channel++;
+        channel_changed = 1;
+    }
+
+    if(pad_pressed(PAD_L1)) {
+        music_channel--;
+        channel_changed = 1;
+    }
+
+    if(channel_changed) {
+        music_channel = music_channel % MUSIC_NUM_CHANNELS;
         sound_xa_set_channel(music_channel);
     }
+
+    player_update(&player);
 }
 
 void
 engine_draw()
 {
-    chara_render_test(&sonic_chara);
+    //chara_render_test(&player.chara);
+    player_draw(&player);
     
     // Gouraud-shaded SQUARE
     POLY_G4 *poly = (POLY_G4 *) get_next_prim();
@@ -152,15 +170,14 @@ engine_draw()
     uint32_t elapsed_sectors;
     sound_xa_get_elapsed_sectors(&elapsed_sectors);
 
-    uint8_t minute, second, sector;
-    sound_xa_get_pos(&minute, &second, &sector);
+    // Sound debug
     char buffer[255] = { 0 };
     snprintf(buffer, 255,
-             "%02u:%02u:%03u  Chn: %u // Sectors: %06u\n"
-             "CD status: %02x\n",
-             minute, second, sector, music_channel, elapsed_sectors,
-             sound_get_cd_status());
-    draw_text(8, 216, 0, buffer);
+             "%06u\n"
+             "CH %3u",
+             elapsed_sectors,
+             music_channel);
+    draw_text(256, 12, 0, buffer);
 }
 
 int

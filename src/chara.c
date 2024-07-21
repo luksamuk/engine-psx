@@ -51,13 +51,16 @@ load_chara(Chara *chara, const char *filename, TIM_IMAGE *tim)
                 break;
             chara->anims[i].name[j] = '\0';
         }
+        chara->anims[i].hname = adler32(chara->anims[i].name);
         chara->anims[i].start = get_byte(bytes, &b);
         chara->anims[i].end = get_byte(bytes, &b);
     }
 
     for(uint16_t i = 0; i < chara->numanims; i++) {
-        printf("Animation: %s (%d -> %d)\n",
-               chara->anims[i].name, chara->anims[i].start, chara->anims[i].end);
+        printf("Animation: %s (h: %08x) [%d -> %d]\n",
+               chara->anims[i].name,
+               chara->anims[i].hname,
+               chara->anims[i].start, chara->anims[i].end);
     }
 
     /*chara->crectx = tim->crect->x;
@@ -150,31 +153,23 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
     }
 }
 
-#define TEST_ADVANCE_TIMER 7
+/* #define TEST_ADVANCE_TIMER 7 */
 
-void
-chara_render_test(Chara *chara)
-{
-    static int16_t advance = TEST_ADVANCE_TIMER;
-    static int16_t frame_num = 0;
+/* void */
+/* chara_render_test(Chara *chara) */
+/* { */
+/*     static int16_t advance = TEST_ADVANCE_TIMER; */
+/*     static int16_t frame_num = 0; */
 
-    static uint8_t flip = 0;
+/*     static uint8_t flip = 0; */
 
-    advance--;
-    if(advance < 0) {
-        advance = TEST_ADVANCE_TIMER;
-        frame_num = (frame_num + 1) % (chara->numframes - 1);
-        if(frame_num == 0) flip = !flip;
-    }
-    chara_render_frame(chara, frame_num,
-                       (SCREEN_XRES >> 1), (SCREEN_YRES >> 1),
-                       flip);
-
-    char buffer[255] = { 0 };
-    snprintf(buffer, 255,
-             "Counter: %d\n"
-             "Frame:   %d\n"
-             "Flip?    %s\n",
-             advance, frame_num, flip ? "Yes" : "No");
-    draw_text(8, 12, 0, buffer);
-}
+/*     advance--; */
+/*     if(advance < 0) { */
+/*         advance = TEST_ADVANCE_TIMER; */
+/*         frame_num = (frame_num + 1) % (chara->numframes - 1); */
+/*         if(frame_num == 0) flip = !flip; */
+/*     } */
+/*     chara_render_frame(chara, frame_num, */
+/*                        (SCREEN_XRES >> 1), (SCREEN_YRES >> 1), */
+/*                        flip); */
+/* } */
