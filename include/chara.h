@@ -31,7 +31,7 @@ typedef struct {
     uint16_t prectx, precty;
 } Chara;
 
-Chara *load_chara(const char *filename, TIM_IMAGE *tim);
+void load_chara(Chara *chara, const char *filename, TIM_IMAGE *tim);
 void  free_chara(Chara *chara);
 
 void chara_render_frame(Chara *chara, int16_t framenum,

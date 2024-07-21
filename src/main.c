@@ -45,7 +45,7 @@ static VECTOR  pos      = { 0, 0, 450 };
 static VECTOR  scale    = { ONE, ONE, ONE };
 static MATRIX  world    = { 0 };
 
-static Chara *sonic_chara = NULL;
+static Chara sonic_chara;
 
 #define MUSIC_NUM_CHANNELS 2
 static uint8_t music_channel = 0;
@@ -67,11 +67,11 @@ engine_init()
         free(timfile);
     }
 
-    sonic_chara = load_chara("\\SPRITES\\SONIC.CHARA;1", &tim);
+    load_chara(&sonic_chara, "\\SPRITES\\SONIC.CHARA;1", &tim);
 
 
     // Start playback after we don't need the CD anymore.
-    sound_play_xa("\\AUDIO\\BGM001.XA;1", 0, music_channel);
+    sound_play_xa("\\AUDIO\\BGM001.XA;1", 0, music_channel, 7100);
 }
 
 void
@@ -99,7 +99,7 @@ engine_update()
 void
 engine_draw()
 {
-    chara_render_test(sonic_chara);
+    chara_render_test(&sonic_chara);
     
     // Gouraud-shaded SQUARE
     POLY_G4 *poly = (POLY_G4 *) get_next_prim();

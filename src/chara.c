@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-Chara *
-load_chara(const char *filename, TIM_IMAGE *tim)
+void
+load_chara(Chara *chara, const char *filename, TIM_IMAGE *tim)
 {
     uint8_t *bytes;
     uint32_t b, length;
@@ -15,12 +15,11 @@ load_chara(const char *filename, TIM_IMAGE *tim)
     bytes = file_read(filename, &length);
     if(bytes == NULL) {
         printf("Error reading %s from the CD.\n", bytes);
-        return NULL;
+        return;
     }
 
     b = 0;
 
-    Chara *chara = (Chara *)malloc(sizeof(Chara));
     chara->width = get_short_be(bytes, &b);
     chara->height = get_short_be(bytes, &b);
     chara->numframes = get_short_be(bytes, &b);
@@ -71,7 +70,6 @@ load_chara(const char *filename, TIM_IMAGE *tim)
     chara->prectx = 320;
     chara->precty = 0; // why not loading correctly???
 
-    return chara;
     free(bytes);
 }
 
@@ -84,7 +82,6 @@ free_chara(Chara *chara)
         }
         free(chara->frames);
         free(chara->anims);
-        free(chara);
     }
 }
 
