@@ -40,9 +40,11 @@ void sound_update(void);
 uint32_t sound_upload_sample(const uint32_t *data, uint32_t size);
 
 uint32_t sound_get_cd_status(void);
-void     sound_play_xa(const char *filename, int double_speed, uint8_t channel);
+void     sound_play_xa(const char *filename, int double_speed,
+                       uint8_t channel, uint32_t loopback_sector);
 void     sound_stop_xa(void);
 void     sound_xa_set_channel(uint8_t channel);
 void     sound_xa_get_pos(uint8_t *minute, uint8_t *second, uint8_t *sector);
+void     sound_xa_get_elapsed_sectors(uint32_t *out);
 
 #endif

@@ -149,13 +149,16 @@ engine_draw()
         }
     }
 
+    uint32_t elapsed_sectors;
+    sound_xa_get_elapsed_sectors(&elapsed_sectors);
+
     uint8_t minute, second, sector;
     sound_xa_get_pos(&minute, &second, &sector);
     char buffer[255] = { 0 };
     snprintf(buffer, 255,
-             "%02u:%02u:%03u  Chn: %u\n"
+             "%02u:%02u:%03u  Chn: %u // Sectors: %06u\n"
              "CD status: %02x\n",
-             minute, second, sector, music_channel,
+             minute, second, sector, music_channel, elapsed_sectors,
              sound_get_cd_status());
     draw_text(8, 216, 0, buffer);
 }

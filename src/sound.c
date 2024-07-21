@@ -22,12 +22,19 @@ static uint32_t next_sample_addr = SPU_ALLOC_START_ADDR;
 // sectors read from the CD. Due to DMA limitations, it can't
 // be allocated on the stack -- especially not in the interrupt
 // callback's stack, whose size is very limited.
-static XACDSector _sector;
+/* static XACDSector _sector; */
 
 // Current .XA audio data start location.
 static CdlLOC   _xa_loc;
 static int      _xa_should_play = 0;
 static uint32_t _cd_status = 0;
+static uint32_t _xa_loopback_sector = 0;
+
+// Read error threshold. If surpasses the limit, restart the music.
+#define CD_MAX_ERR_THRESHOLD 10
+static uint8_t _cd_err_threshold = 0;
+
+static uint32_t _cd_elapsed_sectors = 0;
 
 void
 sound_init(void)
@@ -47,9 +54,6 @@ sound_update(void)
 {
     CdControl(CdlNop, 0, 0);
     _cd_status = CdStatus();
-    if(_cd_status == 0 && _xa_should_play) {
-        CdControl(CdlReadS, &_xa_loc, 0);
-    }
 }
 
 uint32_t
@@ -82,10 +86,14 @@ sound_upload_sample(const uint32_t *data, uint32_t size)
 void _xacd_event_callback(CdlIntrResult, uint8_t *);
 
 void
-sound_play_xa(const char *filename, int double_speed, uint8_t channel)
+sound_play_xa(const char *filename, int double_speed,
+              uint8_t channel, uint32_t loopback_sector)
 {
     CdlFILE file;
     CdlFILTER filter;
+
+    // Stop sound if playing. We'll need the CD right now
+    sound_stop_xa();
     
     if(!CdSearchFile(&file, filename)) {
         printf("Could not find .XA file %s.\n", filename);
@@ -93,7 +101,9 @@ sound_play_xa(const char *filename, int double_speed, uint8_t channel)
     }
 
     int sectorn = CdPosToInt(&file.pos);
-    printf("%s: Sector %d (size: %d).\n", filename, sectorn, file.size);
+    int numsectors = (file.size + 2047) / 2048;
+    printf("%s: Sector %d (size: %d => %d sectors).\n",
+           filename, sectorn, file.size, numsectors);
 
     // Save current file location
     _xa_loc = file.pos;
@@ -111,6 +121,8 @@ sound_play_xa(const char *filename, int double_speed, uint8_t channel)
     filter.file = 1;
     filter.chan = channel;
 
+    _cd_elapsed_sectors = 0;
+    _xa_loopback_sector = loopback_sector;
     CdControl(CdlSetfilter, &filter, 0);
     CdControl(CdlReadS, &_xa_loc, 0);
     _xa_should_play = 1;
@@ -120,28 +132,32 @@ sound_play_xa(const char *filename, int double_speed, uint8_t channel)
 void
 _xacd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
 {   
-    // Only handle sector-ready events.
-    //if(event != CdlDataReady) {
-    //printf("Event: %d\n", event);
-        //    return;
-        //}
-
-    /* // Fetch sector */
-    /* CdGetSector(&_sector, sizeof(XACDSector) / 4); */
-
-    /* // Check if it is part of the .XA audio file. */
-    /* // If it isn't, restart playback. */
-    /* // Be wary that the XA header has two copies of itself. */
-    /* // See: https://problemkaputt.de/psx-spx.htm#cdromsectorencoding */
-    /* if(!(_sector.xa_header[0].submode & XA_TYPE_AUDIO) && */
-    /*    !(_sector.xa_header[1].submode & XA_TYPE_AUDIO)) { */
-    /*     printf("Got submode %x / %x\n", _sector.xa_header[0].submode, _sector.xa_header[1].submode); */
-    /*     //CdControlF(CdlReadS, &_xa_loc); */
-    /* } */
-
-    // End of playback is issuing an error, so...
-    if(event != CdlDiskError) return;
-    CdControlF(CdlReadS, &_xa_loc);
+    switch(event) {
+    case CdlDataReady:
+        _cd_err_threshold = 0; // Reset error threshold
+        _cd_elapsed_sectors++;
+        if((_xa_loopback_sector > 0) && (_cd_elapsed_sectors > _xa_loopback_sector)) {
+            // Loop back to beginning
+            _cd_err_threshold = 0;
+            _cd_elapsed_sectors = 0;
+            CdControlF(CdlReadS, &_xa_loc);
+        }
+        break;
+    case CdlDiskError:
+        printf("Caught error\n");
+        _cd_err_threshold++;
+        if(_cd_err_threshold > CD_MAX_ERR_THRESHOLD) {
+            // Reset music if too many errs
+            CdControl(CdlPause, 0, 0);
+            CdSync(0, 0);
+            _cd_err_threshold = 0;
+            _cd_elapsed_sectors = 0;
+            printf("Resetting playback\n");
+            CdControlF(CdlReadS, &_xa_loc);
+        }
+        break;
+    default: break;
+    };
 }
 
 
@@ -152,8 +168,9 @@ sound_stop_xa(void)
     // of a full stop. Halting the playback completely also
     // stops CD from spinning and may increase time until
     // next playback
-    _xa_should_play = 0;
     CdControl(CdlPause, 0, 0);
+    _xa_should_play = 0;
+    _xa_loopback_sector = 0;
 }
 
 void
@@ -182,4 +199,10 @@ sound_xa_get_pos(uint8_t *minute, uint8_t *second, uint8_t *sector)
     if(minute) *minute = BCD_TO_DEC(info.minute);
     if(second) *second = BCD_TO_DEC(info.second);
     if(sector) *sector = info.sector;
+}
+
+void
+sound_xa_get_elapsed_sectors(uint32_t *out)
+{
+    *out = _cd_elapsed_sectors;
 }
