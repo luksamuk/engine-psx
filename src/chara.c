@@ -176,5 +176,5 @@ chara_render_test(Chara *chara)
              "Frame:   %d\n"
              "Flip?    %s\n",
              advance, frame_num, flip ? "Yes" : "No");
-    draw_text(8, 8, 0, buffer);
+    draw_text(8, 12, 0, buffer);
 }
