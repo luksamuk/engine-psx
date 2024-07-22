@@ -1,10 +1,12 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "player.h"
 #include "util.h"
 #include "input.h"
 #include "render.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "sound.h"
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
@@ -22,6 +24,8 @@
 #define ANIM_CROUCHDOWN 0x104802fd
 #define ANIM_LOOKUP     0x067001db
 
+SoundEffect sfx_jump = { 0 };
+
 void
 load_player(Player *player,
             const char *chara_filename,
@@ -36,6 +40,8 @@ load_player(Player *player,
     player->anim_dir = 1;
     player->idle_timer = ANIM_IDLE_TIMER_MAX;
     player->grnd = player->jmp = 0;
+
+    if(sfx_jump.addr == 0) sfx_jump = sound_load_vag("\\SFX\\JUMP.VAG;1");
 }
 
 void
@@ -153,6 +159,7 @@ player_update(Player *player)
             player->grnd = 0;
             player->jmp = 1;
             player_set_animation_direct(player, ANIM_ROLLING);
+            sound_play_vag(sfx_jump);
         }
     }
 

@@ -14,7 +14,7 @@ load_chara(Chara *chara, const char *filename, TIM_IMAGE *tim)
 
     bytes = file_read(filename, &length);
     if(bytes == NULL) {
-        printf("Error reading %s from the CD.\n", bytes);
+        printf("Error reading CHARA file %s from the CD.\n", filename);
         return;
     }
 

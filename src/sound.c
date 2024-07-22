@@ -4,6 +4,7 @@
 #include <psxspu.h>
 #include <psxapi.h>
 #include <assert.h>
+#include <stdlib.h>
 
 // First 4KB of SPU RAM are reserved for capture buffers.
 // psxspu additionally uploads a dummy sample (16 bytes) at 0x1000
@@ -17,6 +18,11 @@
 // incrementing it; the only way to deallocate is by removing
 // everything (in this case, resetting this pointer).
 static uint32_t next_sample_addr = SPU_ALLOC_START_ADDR;
+
+// Address of next channel for playing .VAG samples.
+// Channels are always cycling.
+#define MAX_CHANNELS 24
+static int32_t next_channel = 0;
 
 // Used by the CD handler callback as a temporary area for
 // sectors read from the CD. Due to DMA limitations, it can't
@@ -34,6 +40,7 @@ static uint32_t _xa_loopback_sector = 0;
 #define CD_MAX_ERR_THRESHOLD 10
 static uint8_t _cd_err_threshold = 0;
 
+// Elapsed CD sectors from start of .XA playback
 static uint32_t _cd_elapsed_sectors = 0;
 
 void
@@ -63,7 +70,7 @@ sound_get_cd_status(void)
 }
 
 uint32_t
-sound_upload_sample(const uint32_t *data, uint32_t size)
+sound_upload_vag(const uint32_t *data, uint32_t size)
 {
     uint32_t addr = next_sample_addr;
     // Round size up to a multiple of 64, since DMA transfers
@@ -82,6 +89,57 @@ sound_upload_sample(const uint32_t *data, uint32_t size)
     next_sample_addr = addr + size;
     return addr;
 }
+
+SoundEffect
+sound_load_vag(const char *filename)
+{
+    uint8_t *bytes;
+    uint32_t length;
+    bytes = file_read(filename, &length);
+    if(bytes == NULL) {
+        printf("Error reading VAG file %s from the CD.\n", filename);
+        return (SoundEffect){ 0 };
+    }
+
+    const VAGHeader *hdr = (const VAGHeader *)bytes;
+    const uint32_t *data = (const uint32_t *)(bytes + sizeof(VAGHeader));
+    uint32_t sample_rate = __builtin_bswap32(hdr->sample_rate);
+    uint32_t addr = sound_upload_vag(data, __builtin_bswap32(hdr->size));
+    free(bytes);
+    return (SoundEffect) { addr, sample_rate };
+}
+
+int32_t
+_get_next_channel()
+{
+    int32_t ch = next_channel;
+    next_channel = (ch + 1) % MAX_CHANNELS;
+    return ch;
+}
+
+void
+sound_play_vag(SoundEffect sfx)
+{
+    int ch = _get_next_channel();
+    SpuSetKey(0, 1 << ch);
+
+    // SPU expects sample rate to be in 4.12 fixed-point format
+    // (with 1.0 = 44100 Hz), and the address must be in 8-byte
+    // units.
+    SPU_CH_FREQ(ch) = getSPUSampleRate(sfx.sample_rate);
+    SPU_CH_ADDR(ch) = getSPUAddr(sfx.addr);
+
+    // Set channel volume and ADSR parameters.
+    // 0x80ff and 0x1fee are dummy values that disable ADSR envelope entirely.
+    SPU_CH_VOL_L(ch) = 0x3fff;
+    SPU_CH_VOL_R(ch) = 0x3fff;
+    SPU_CH_ADSR1(ch) = 0x00ff;
+    SPU_CH_ADSR2(ch) = 0x0000;
+
+    // Start playback
+    SpuSetKey(1, 1 << ch);
+}
+
 
 void _xacd_event_callback(CdlIntrResult, uint8_t *);
 

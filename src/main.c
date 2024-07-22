@@ -14,10 +14,10 @@
 #include "input.h"
 #include "player.h"
 
-#define SPRTSZ 56
+/* #define SPRTSZ 56 */
 
-static int  x = (SPRTSZ >> 1),  y = (SPRTSZ >> 1);
-static int dx = 1,  dy = 1;
+/* static int  x = (SPRTSZ >> 1),  y = (SPRTSZ >> 1); */
+/* static int dx = 1,  dy = 1; */
 
 static SVECTOR vertices[] = {
     { -64, -64, -64, 0 },
@@ -67,11 +67,14 @@ engine_init()
     }
 
     load_player(&player, "\\SPRITES\\SONIC.CHARA;1", &tim);
-    player.pos = (VECTOR){ (uint32_t)(SCREEN_XRES) << 9, (uint32_t)(SCREEN_YRES) << 11, 0 };
-
+    player.pos = (VECTOR){
+        (uint32_t)(SCREEN_XRES) << 9,
+        (uint32_t)(SCREEN_YRES) << 11,
+        0
+    };
 
     // Start playback after we don't need the CD anymore.
-    sound_play_xa("\\AUDIO\\BGM001.XA;1", 0, music_channel, 7100);
+    sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, 7100);
 }
 
 void
@@ -80,21 +83,17 @@ engine_update()
     sound_update();
     pad_update();
 
-    if(x < (SPRTSZ >> 1) || x > (SCREEN_XRES - 32)) dx = -dx;
-    if(y < (SPRTSZ >> 1) || y > (SCREEN_YRES - 32)) dy = -dy;
+    /* if(x < (SPRTSZ >> 1) || x > (SCREEN_XRES - 32)) dx = -dx; */
+    /* if(y < (SPRTSZ >> 1) || y > (SCREEN_YRES - 32)) dy = -dy; */
 
-    x += dx;
-    y += dy;
+    /* x += dx; */
+    /* y += dy; */
 
     rotation.vx += 6;
     rotation.vy -= 8;
     rotation.vz -= 12;
 
     int channel_changed = 0;
-    /* if(pad_pressed(PAD_CROSS)) { */
-    /*     music_channel = (music_channel + 1) % MUSIC_NUM_CHANNELS; */
-    /*     sound_xa_set_channel(music_channel); */
-    /* } */
     if(pad_pressed(PAD_R1)) {
         music_channel++;
         channel_changed = 1;
@@ -120,19 +119,19 @@ engine_draw()
     player_draw(&player);
     
     // Gouraud-shaded SQUARE
-    POLY_G4 *poly = (POLY_G4 *) get_next_prim();
-    setPolyG4(poly);
-    setXY4(poly,
-           x - (SPRTSZ >> 1), y - (SPRTSZ >> 1),
-           x + (SPRTSZ >> 1), y - (SPRTSZ >> 1),
-           x - (SPRTSZ >> 1), y + (SPRTSZ >> 1),
-           x + (SPRTSZ >> 1), y + (SPRTSZ >> 1));
-    setRGB0(poly, 255, 0, 0);
-    setRGB1(poly, 0, 255, 0);
-    setRGB2(poly, 0, 0, 255);
-    setRGB3(poly, 255, 255, 0);
-    sort_prim(poly, 1);
-    increment_prim(sizeof(POLY_G4));
+    /* POLY_G4 *poly = (POLY_G4 *) get_next_prim(); */
+    /* setPolyG4(poly); */
+    /* setXY4(poly, */
+    /*        x - (SPRTSZ >> 1), y - (SPRTSZ >> 1), */
+    /*        x + (SPRTSZ >> 1), y - (SPRTSZ >> 1), */
+    /*        x - (SPRTSZ >> 1), y + (SPRTSZ >> 1), */
+    /*        x + (SPRTSZ >> 1), y + (SPRTSZ >> 1)); */
+    /* setRGB0(poly, 255, 0, 0); */
+    /* setRGB1(poly, 0, 255, 0); */
+    /* setRGB2(poly, 0, 0, 255); */
+    /* setRGB3(poly, 255, 255, 0); */
+    /* sort_prim(poly, 1); */
+    /* increment_prim(sizeof(POLY_G4)); */
 
     // Gouraud-shaded cube
     RotMatrix(&rotation, &world);
