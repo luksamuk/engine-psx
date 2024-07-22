@@ -1,16 +1,91 @@
 #+title: engine-psx
 
-* engine-psx
-
 Open source platformer engine built for the PSX.
 
 Uses [[https://github.com/Lameguy64/PSn00bSDK/tree/master][PSn00bSDK]].
 
+#+html: <center>
+[[file:./screenshots/engine-psx-072224.gif]]
+#+html: </center>
+
+/Engine short video running on DuckStation, dated 07/22/2024./
+
 * About
 
-To-do.
+This is a  platformer game engine build for the  PlayStation 1, heavily inspired
+by Sonic The Hedgehog. The focus here is on experimentation, attempting to build
+a sane 2D engine in pure C while taking advantage of what the PlayStation has to
+offer in terms of hardware.
+
+This  engine is  opensource and  can be  built by  anyone. Also,  since it  uses
+Psn00bSDK, it  also contains no  copyrighted material.  Plus, any tools  used in
+this project are modern, opensource or cheap to acquire.
+
+Some assets use different formats than  common formats. This is because I needed
+a better  way to process  these files,  or the PlayStation  recognizes different
+formats.
+
+All code  is tested  under emulators  PCSX-Redux and  DuckStation, and  are also
+tested on real hardware (a PlayStation model SCPH-5501).
+
+** Recommended tools
+
+Here are some tools I've been using:
+
+- GIMP  with G'Mic  plugin (to  reduce  image colormaps  to 256  colors with  no
+  dithering);
+- Aseprite (for handling sprite sheets and tilemaps), plus some useful [[https://github.com/Gabinou/tilemap_scripts_aseprite][script files]] (tweak
+  =export_tileset.lua= so  it only exports with  a =row_len= of =32=,  since all
+  tiles are 8x8);
+- =mkpsxiso=, to build the ISO files;
+- =gcc-mipsel= compiler toolchain;
+- =timedit=, to import images and convert them to .TIM format;
+- =wav2vag=, to convert .WAV sound effects to .VAG audio;
+- =psxavenc=, to convert music to a preliminary .XA format;
+- =xainterleave=, to  interleave .XA  files into a  single, ready-for-production
+  .XA file;
+- =cdrdao=, if you intend on burning your ISO on a CD-R;
+- =CMake= and =GNU Make=, for build scripts.
+
+Some  of   these  tools  are   already  available  when  you   properly  install
+PSn00bSDK. Just follow [[https://github.com/Lameguy64/PSn00bSDK/blob/master/doc/installation.md][this guide]].
+
+** Running on real hardware
+
+#+html: <center>
+[[file:./screenshots/engine-psx-realhardware-072124.gif]]
+#+html: </center>
+
+/Engine short video running on a PlayStation SCPH-5001, dated 07/21/2024./
+
+In theory,  to burn the  disc, you  would need a  Sony license file  which comes
+bundled with the Psy-Q SDK (which *I AM NOT* using). Tweak =iso.xml= to add such
+file. I  cannot guarantee that  it will  work on real  hardware if this  file is
+omitted.
+
+You most likely will need a PlayStation  console that allows you to run homebrew
+software --  I did  not do anything  on my  model, but again,  I bought  it from
+someone else, and I  didn't open it up to check if it  was still intact from day
+one.
+
+You will also  need a CD drive  capable of burning CD images  to physical disks,
+and *you will also need good quality  CD-R disks. Do not ignore this.* If you're
+a fellow brazillian, I recommend Multilaser.
+
+Remember also that this method was tested in an SCPH-5501 model.
+
+Use a command  such as this to burn  your image into the disk  by using =cdrdao=
+(*do not* use other software, unless you know what you're doing):
+
+#+begin_src bash
+cd build/
+cdrdao write --speed 1 --driver generic-mmc-raw --swap -n --eject "sonicengine.cue"
+#+end_src
+
+If you're on  Windows or you need  more information on other  methods, check out
+[[https://alex-free.github.io/psx-cdr/][this awesome guide]].
 
 * License
 
-Licensed under the Mozilla Public License 2.0
+Licensed under the Mozilla Public License 2.0.
 
