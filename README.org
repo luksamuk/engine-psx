@@ -86,6 +86,16 @@ cdrdao write --speed 1 --driver generic-mmc-raw --swap -n --eject "sonicengine.c
 If you're on  Windows or you need  more information on other  methods, check out
 [[https://alex-free.github.io/psx-cdr/][this awesome guide]].
 
+** Running on your browser
+
+If you're using a  browser emulator such as [[https://emulatorjs.org/][EmulatorJS]] and you  need your .ISO +
+.CUE to be a single file, you might  want to use something to convert it to .CHD
+format. You can do this by using a tool called [[https://github.com/thingsiplay/tochd][tochd]]:
+
+#+begin_src bash
+tochd -d . -- ./build/sonicengine.cue
+#+end_src
+
 * License
 
 Licensed under the Mozilla Public License 2.0.
