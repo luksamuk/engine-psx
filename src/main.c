@@ -46,7 +46,13 @@ static MATRIX  world    = { 0 };
 
 static Player player;
 
-#define MUSIC_NUM_CHANNELS 2
+#define BGM001_NUM_CHANNELS 2
+#define BGM001_LOOP_SECTOR  7100
+#define BGM002_NUM_CHANNELS 7
+#define BGM002_LOOP_SECTOR  870
+
+static uint8_t cur_bgm = 0;
+static uint8_t music_num_channels = BGM001_NUM_CHANNELS;
 static uint8_t music_channel = 0;
 
 void
@@ -74,7 +80,11 @@ engine_init()
     };
 
     // Start playback after we don't need the CD anymore.
-    sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, 7100);
+    sound_stop_xa();
+    music_num_channels = BGM001_NUM_CHANNELS;
+    music_channel = 0;
+    cur_bgm = 0;
+    sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, BGM001_LOOP_SECTOR);
 }
 
 void
@@ -93,19 +103,29 @@ engine_update()
     rotation.vy -= 8;
     rotation.vz -= 12;
 
-    int channel_changed = 0;
-    if(pad_pressed(PAD_R1)) {
+    // Change music
+    if(pad_pressed(PAD_L2) && cur_bgm != 0) {
+        sound_stop_xa();
+        music_num_channels = BGM001_NUM_CHANNELS;
+        music_channel = 0;
+        cur_bgm = 0;
+        sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, BGM001_LOOP_SECTOR);
+    } else if(pad_pressed(PAD_R2) && cur_bgm != 1) {
+        sound_stop_xa();
+        music_num_channels = BGM002_NUM_CHANNELS;
+        music_channel = 0;
+        cur_bgm = 1;
+        sound_play_xa("\\BGM\\BGM002.XA;1", 1, music_channel, BGM002_LOOP_SECTOR);
+    }
+    
+    // Change music channel
+    if(pad_pressed(PAD_R1) && (music_channel < music_num_channels - 1)) {
         music_channel++;
-        channel_changed = 1;
+        sound_xa_set_channel(music_channel);
     }
 
-    if(pad_pressed(PAD_L1)) {
+    if(pad_pressed(PAD_L1) && (music_channel > 0)) {
         music_channel--;
-        channel_changed = 1;
-    }
-
-    if(channel_changed) {
-        music_channel = music_channel % MUSIC_NUM_CHANNELS;
         sound_xa_set_channel(music_channel);
     }
 
@@ -172,11 +192,14 @@ engine_draw()
     // Sound debug
     char buffer[255] = { 0 };
     snprintf(buffer, 255,
-             "%06u\n"
-             "CH %3u",
-             elapsed_sectors,
-             music_channel);
-    draw_text(256, 12, 0, buffer);
+             "MUS %2u/2\n"
+             "CHN  %1u/%1u\n"
+             "%08u",
+             cur_bgm + 1,
+             music_channel + 1,
+             music_num_channels,
+             elapsed_sectors);
+    draw_text(240, 12, 0, buffer);
 }
 
 int

@@ -9,7 +9,7 @@
 	data_preparer	= "PSN00BSDK ${PSN00BSDK_VERSION}"
 	application	= "PLAYSTATION"
 	copyright	= "README.TXT;1" />
-    <!-- <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEA.DAT" /> -->
+    <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEA.DAT" />
     <directory_tree>
       <file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
 
@@ -40,6 +40,9 @@
 	<file name="BGM001.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM001.XA" />
+	<file name="BGM002.XA"
+	      type="xa"
+	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM002.XA" />
       </dir>
 
       <dummy sectors="1024"/>
