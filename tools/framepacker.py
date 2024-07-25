@@ -22,6 +22,12 @@ import ctypes
 c_ushort = ctypes.c_ushort.__ctype_be__
 
 
+# Global variables
+jsonfile = ""
+outfile = ""
+is_level = False
+
+
 def load_json(filename):
     with open(filename) as fp:
         return json.load(fp)
@@ -68,14 +74,18 @@ def parse_layout(j):
         for t in tiles
     ]
     tags = j.get("tags")
-    animations = [
-        {
-            "name": "{:<16}".format(t.get("name").upper().replace(" ", "")),
-            "start": t.get("from"),
-            "end": t.get("to"),
-        }
-        for t in tags
-    ] if tags else []
+    animations = (
+        [
+            {
+                "name": "{:<16}".format(t.get("name").upper().replace(" ", "")),
+                "start": t.get("from"),
+                "end": t.get("to"),
+            }
+            for t in tags
+        ]
+        if tags
+        else []
+    )
 
     res = {
         "sprite_width": width,
@@ -106,7 +116,7 @@ def parse_layout(j):
 #    6.1. Name: 16 bytes.
 #    6.2. Frame start: byte (8 bits)
 #    6.3. Frame end: byte (8 bits)
-def write_binary_data(layout, f):
+def write_binary_data_sprite(layout, f):
     f.write(c_ushort(layout.get("sprite_width")))
     f.write(c_ushort(layout.get("sprite_height")))
     f.write(c_ushort(layout.get("num_frames")))
@@ -128,13 +138,45 @@ def write_binary_data(layout, f):
         f.write(c_ubyte(anim.get("end")))
 
 
+# Binary layout:
+# --> MUST BE SAVED IN BIG ENDIAN FORMAT.
+# 1. Tile width: short (16 bits)
+# 2. Number of tiles: short (16 bits)
+# 3. Array of frame data.
+#    3.1. Columns: byte (8 bits)
+#    3.2. Rows: byte (8 bits)
+#    3.3. Tiles: Columns * Rows * short (16 bits per tile)
+def write_binary_data_level(layout, f):
+    f.write(c_ushort(layout.get("sprite_width")))
+    f.write(c_ushort(layout.get("num_frames")))
+    for frame in layout.get("frames"):
+        f.write(c_ubyte(frame.get("cols")))
+        f.write(c_ubyte(frame.get("rows")))
+        for t in frame.get("tiles"):
+            f.write(c_ushort(t))
+
+
 def main():
-    jsonfile = sys.argv[1]
-    outfile = sys.argv[2]
+    global jsonfile, outfile, is_level
+
+    # Parse command options
+    i = 1
+    while i < len(sys.argv):
+        if sys.argv[i] == "--tilemap":
+            is_level = True
+        else:
+            jsonfile = sys.argv[i]
+            outfile = sys.argv[i + 1]
+            break
+        i += 1
+
     j = load_json(jsonfile)
     l = parse_layout(j)
     with open(outfile, "wb") as f:
-        write_binary_data(l, f)
+        if not is_level:
+            write_binary_data_sprite(l, f)
+        else:
+            write_binary_data_level(l, f)
 
 
 if __name__ == "__main__":
