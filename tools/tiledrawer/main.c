@@ -16,14 +16,13 @@ static char *tilemap128 = NULL;
 
 
 typedef struct {
-    uint8_t cols;
-    uint8_t rows;
     uint16_t *subtiles;
 } TilemapTile;
 
 typedef struct {
     uint16_t    tile_width;
     uint16_t    num_tiles;
+    uint16_t    frame_side;
     TilemapTile *tiles;
 } Tilemap;
 
@@ -55,12 +54,13 @@ load_map(Tilemap *map, const char *filename)
     map->tile_width = INT16_LE(buf);
     fread(&buf, sizeof(uint16_t), 1, fp);
     map->num_tiles = INT16_LE(buf);
+    fread(&buf, sizeof(uint16_t), 1, fp);
+    map->frame_side = INT16_LE(buf);
+
+    uint16_t num_subtiles = map->frame_side * map->frame_side;
 
     map->tiles = malloc(map->num_tiles * sizeof(TilemapTile));
     for(uint16_t i = 0; i < map->num_tiles; i++) {
-        fread(&map->tiles[i].cols, sizeof(uint8_t), 1, fp);
-        fread(&map->tiles[i].rows, sizeof(uint8_t), 1, fp);
-        uint16_t num_subtiles = map->tiles[i].cols * map->tiles[i].rows;
         map->tiles[i].subtiles = malloc(num_subtiles * sizeof(uint16_t));
         for(uint16_t j = 0; j < num_subtiles; j++) {
             fread(&buf, sizeof(uint16_t), 1, fp);
@@ -116,11 +116,11 @@ draw_tile8(uint16_t idx)
 }
 
 void
-draw_tile16(TilemapTile *tile)
+draw_tile16(TilemapTile *tile, uint16_t frame_side)
 {
     uint16_t idx = 0;
-    for(int j = 0; j < tile->rows; j++) {
-        for(int i = 0; i < tile->cols; i++) {
+    for(int j = 0; j < frame_side; j++) {
+        for(int i = 0; i < frame_side; i++) {
             glPushMatrix();
             glTranslatef(i * 8, j * 8, 0);
             draw_tile8(tile->subtiles[idx]);
@@ -131,16 +131,16 @@ draw_tile16(TilemapTile *tile)
 }
 
 void
-draw_tile128(TilemapTile *tile)
+draw_tile128(TilemapTile *tile, uint16_t frame_side)
 {
     uint16_t idx = 0;
-    for(int j = 0; j < tile->rows; j++) {
-        for(int i = 0; i < tile->cols; i++) {
+    for(int j = 0; j < frame_side; j++) {
+        for(int i = 0; i < frame_side; i++) {
             TilemapTile *tile16 = &map16.tiles[tile->subtiles[idx]];
 
             glPushMatrix();
             glTranslatef((float)(i * 16), (float)(j * 16), 0);
-            draw_tile16(tile16);
+            draw_tile16(tile16, map16.frame_side);
             glPopMatrix();
             idx++;
         }
@@ -159,7 +159,7 @@ draw_map_tile()
     glLoadIdentity();
     //glTranslatef(left, top, 0);
     glScalef(4.0f, 4.0f, 0.0f);
-    draw_tile128(tile128);
+    draw_tile128(tile128, map128.frame_side);
     glPopMatrix();
     glBindTexture(GL_TEXTURE_2D, 0);
 }

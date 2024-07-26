@@ -56,6 +56,8 @@ def main():
         f.write(c_ubyte(j.get("_unused")))
         layer_data = j.get("layer_data")
         for layer in layer_data:
+            print(layer.get("width"))
+            print(layer.get("height"))
             f.write(c_ubyte(layer.get("width")))
             f.write(c_ubyte(layer.get("height")))
             for tile in layer.get("tiles"):

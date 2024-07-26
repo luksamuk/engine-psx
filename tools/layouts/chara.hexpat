@@ -1,3 +1,5 @@
+// -*- mode: c; -*-
+
 struct FrameData {
     u8 x;
     u8 y;

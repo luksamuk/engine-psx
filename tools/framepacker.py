@@ -142,16 +142,15 @@ def write_binary_data_sprite(layout, f):
 # --> MUST BE SAVED IN BIG ENDIAN FORMAT.
 # 1. Tile width: short (16 bits)
 # 2. Number of tiles: short (16 bits)
-# 3. Array of frame data.
-#    3.1. Columns: byte (8 bits)
-#    3.2. Rows: byte (8 bits)
-#    3.3. Tiles: Columns * Rows * short (16 bits per tile)
+# 3. Frame rows / columns: short (16 bits)
+# 4. Array of frame data.
+#    4.1. Tiles: Columns * Rows * short (16 bits per tile)
 def write_binary_data_level(layout, f):
     f.write(c_ushort(layout.get("sprite_width")))
     f.write(c_ushort(layout.get("num_frames")))
+    frames = layout.get("frames")
+    f.write(c_ushort(frames[0].get("cols") if frames else 0))
     for frame in layout.get("frames"):
-        f.write(c_ubyte(frame.get("cols")))
-        f.write(c_ubyte(frame.get("rows")))
         for t in frame.get("tiles"):
             f.write(c_ushort(t))
 

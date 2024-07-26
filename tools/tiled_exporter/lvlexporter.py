@@ -27,8 +27,8 @@ class PSXPreLevel(Plugin):
             if isTileLayerAt(tileMap, i):
                 layer = {}
                 tileLayer = tileLayerAt(tileMap, i)
-                assert tileLayer.width() <= 256, f"max layer width is 256"
-                assert tileLayer.height() <= 32, f"max layer height is 32"
+                assert tileLayer.width() < 256, f"max layer width is 255"
+                assert tileLayer.height() < 32, f"max layer height is 31"
                 layer["width"] = tileLayer.width()
                 layer["height"] = tileLayer.height()
                 layer["tiles"] = []
