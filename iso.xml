@@ -9,7 +9,7 @@
 	data_preparer	= "PSN00BSDK ${PSN00BSDK_VERSION}"
 	application	= "PLAYSTATION"
 	copyright	= "README.TXT;1" />
-    <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEA.DAT" />
+    <!-- <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEA.DAT" /> -->
     <directory_tree>
       <file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
 
@@ -22,6 +22,23 @@
 	<file name="SONIC.CHARA"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/SONIC.CHARA" />
+      </dir>
+
+      <dir name="LEVELS">
+	<dir name="R0">
+	  <file name="Z1.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z1.LVL" />
+	  <file name="MAP128.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/MAP128.MAP" />
+	  <file name="MAP16.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/MAP16.MAP" />
+	  <file name="TILES.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/TILES.TIM" />
+	</dir>
       </dir>
 
       <dir name="SFX">
