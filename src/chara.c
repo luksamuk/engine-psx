@@ -63,11 +63,18 @@ load_chara(Chara *chara, const char *filename, TIM_IMAGE *tim)
                chara->anims[i].start, chara->anims[i].end);
     }
 
-    /*chara->crectx = tim->crect->x;
-    chara->crecty = tim->crect->y;
-    chara->prectx = tim->prect->x;
-    chara->precty = tim->prect->y;*/
-    printf("%d %d\n", tim->prect->x, tim->prect->y);
+    /* chara->crectx = tim->crect->x; */
+    /* chara->crecty = tim->crect->y; */
+    /* chara->prectx = tim->prect->x; */
+    /* chara->precty = tim->prect->y; */
+    /* printf("prect: %d %d %d %d, %x\n", */
+    /*        tim->prect->x, tim->prect->y, */
+    /*        tim->prect->w, tim->prect->h, */
+    /*        getTPage(tim->mode & 0x3, 1, tim->prect->x, tim->prect->y)); */
+    /* printf("crect: %d %d %d %d, %x\n", */
+    /*        tim->crect->x, tim->crect->y, */
+    /*        tim->crect->w, tim->crect->h, */
+    /*        getClut(tim->crect->x, tim->crect->y)); */
     chara->crectx = 320;
     chara->crecty = 256;
     chara->prectx = 320;
@@ -148,7 +155,7 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
             } else {
                 setUVWH(poly, u0, v0, tw, th);
             }
-            sort_prim(poly, 1);
+            sort_prim(poly, 3); // 3 = sprite and background layer
         }
     }
 }

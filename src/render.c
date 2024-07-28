@@ -76,7 +76,7 @@ get_next_prim()
 }
 
 void
-increment_prim(size_t size)
+increment_prim(uint32_t size)
 {
     ctx.next_packet += size;
 }

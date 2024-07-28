@@ -19,6 +19,5 @@ uint16_t get_short_be(uint8_t *bytes, uint32_t *b);
 uint16_t get_short_le(uint8_t *bytes, uint32_t *b);
 
 uint32_t adler32(const char *s);
-uint32_t cityhash32_sub24(const char *s);
 
 #endif

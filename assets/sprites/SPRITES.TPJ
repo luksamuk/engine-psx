@@ -1,6 +1,0 @@
-<tim_project>
-    <properties buffer_res="2" buffer_order="0"/>
-    <tim_group name="global">
-        <tim file="SONIC.TIM"/>
-    </tim_group>
-</tim_project>

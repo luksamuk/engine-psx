@@ -6,6 +6,7 @@
 #include <psxgte.h>
 #include <psxcd.h>
 #include <inline_c.h>
+#include <hwregs_c.h>
 
 #include "render.h"
 #include "util.h"
@@ -13,6 +14,17 @@
 #include "sound.h"
 #include "input.h"
 #include "player.h"
+#include "level.h"
+
+/* typedef struct { */
+/* 	int irq_count, last_irq_count, irqs_per_sec; */
+/* } TimerState; */
+
+/* static volatile TimerState timer_state; */
+
+/* static void timer0_handler(void) { */
+/* 	timer_state.irq_count++; */
+/* } */
 
 /* #define SPRTSZ 56 */
 
@@ -44,7 +56,10 @@ static VECTOR  pos      = { 0, 0, 450 };
 static VECTOR  scale    = { ONE, ONE, ONE };
 static MATRIX  world    = { 0 };
 
-static Player player;
+static Player     player;
+static TileMap16  map16;
+static TileMap128 map128;
+static LevelData  leveldata;
 
 #define BGM001_NUM_CHANNELS 2
 #define BGM001_LOOP_SECTOR  7100
@@ -54,6 +69,8 @@ static Player player;
 static uint8_t cur_bgm = 0;
 static uint8_t music_num_channels = BGM001_NUM_CHANNELS;
 static uint8_t music_channel = 0;
+
+static VECTOR cam_pos = { 0 };
 
 void
 engine_init()
@@ -78,6 +95,21 @@ engine_init()
         (uint32_t)(SCREEN_YRES) << 11,
         0
     };
+
+    // Load level data
+    timfile = file_read("\\LEVELS\\R0\\TILES.TIM;1", &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    }
+    
+    load_map(&map16, "\\LEVELS\\R0\\MAP16.MAP;1");
+    load_map(&map128, "\\LEVELS\\R0\\MAP128.MAP;1");
+    load_lvl(&leveldata, "\\LEVELS\\R0\\Z1.LVL;1");
+    //cam_pos.vx = 1216 * ONE;
+    //cam_pos.vy = 448 * ONE;
+    cam_pos.vx = CENTERX * ONE;
+    cam_pos.vy = CENTERY * ONE;
 
     // Start playback after we don't need the CD anymore.
     sound_stop_xa();
@@ -129,7 +161,25 @@ engine_update()
         sound_xa_set_channel(music_channel);
     }
 
-    player_update(&player);
+#define SPD (8 * ONE)
+
+    if(pad_pressing(PAD_RIGHT)) {
+        cam_pos.vx += SPD;
+    }
+
+    if(pad_pressing(PAD_LEFT)) {
+        cam_pos.vx -= SPD;
+    }
+
+    if(pad_pressing(PAD_UP)) {
+        cam_pos.vy -= SPD;
+    }
+
+    if(pad_pressing(PAD_DOWN)) {
+        cam_pos.vy += SPD;
+    }
+
+    //player_update(&player);
 }
 
 void
@@ -137,7 +187,9 @@ engine_draw()
 {
     //chara_render_test(&player.chara);
     player_draw(&player);
-    
+
+    render_lvl(&leveldata, &map128, &map16, cam_pos.vx, cam_pos.vy);
+
     // Gouraud-shaded SQUARE
     /* POLY_G4 *poly = (POLY_G4 *) get_next_prim(); */
     /* setPolyG4(poly); */
@@ -192,14 +244,16 @@ engine_draw()
     // Sound debug
     char buffer[255] = { 0 };
     snprintf(buffer, 255,
+             "VMD %4s\n"
              "MUS %2u/2\n"
              "CHN  %1u/%1u\n"
              "%08u",
+             GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
              cur_bgm + 1,
              music_channel + 1,
              music_num_channels,
              elapsed_sectors);
-    draw_text(240, 12, 0, buffer);
+             draw_text(240, 12, 0, buffer);
 }
 
 int
