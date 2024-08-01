@@ -7,10 +7,19 @@
 /* TODO: ALL LEVEL DATA SHOULD PROBABLY BE USING A LEVEL-WIDE ARENA ALLOCATOR. */
 
 typedef struct {
+    uint8_t floor[8];
+    uint8_t rwall[8];
+    uint8_t ceiling[8];
+    uint8_t lwall[8];
+} Collision;
+
+typedef struct {
     uint16_t tile_width;
     uint16_t num_tiles;
     uint16_t frame_side;
     uint16_t *frames;
+
+    Collision **collision;
 } TileMapping;
 
 typedef TileMapping TileMap16;
@@ -32,7 +41,7 @@ typedef struct {
     uint16_t clutmode, _unused1;
 } LevelData;
 
-void load_map(TileMapping *mapping, const char *filename);
+void load_map(TileMapping *mapping, const char *filename, const char *collision_filename);
 void free_map(TileMapping *mapping);
 
 void load_lvl(LevelData *lvl, const char *filename);

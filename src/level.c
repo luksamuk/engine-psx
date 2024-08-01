@@ -5,7 +5,41 @@
 #include "render.h"
 
 void
-load_map(TileMapping *mapping, const char *filename)
+_load_collision(TileMap16 *mapping, const char *filename)
+{
+    uint8_t *bytes;
+    uint32_t b, length;
+
+    bytes = file_read(filename, &length);
+    if(bytes == NULL) {
+        printf("Error reading COLLISION file %s from the CD.\n", filename);
+        return;
+    }
+
+    b = 0;
+
+    uint16_t num_tiles = get_short_be(bytes, &b);
+
+    for(uint16_t i = 0; i < num_tiles; i++) {
+        uint16_t tile_id = get_short_be(bytes, &b);
+        mapping->collision[tile_id] = malloc(sizeof(Collision));
+        Collision *collision = mapping->collision[tile_id];
+
+        for(int j = 0; j < 8; j++)
+            collision->floor[j] = get_byte(bytes, &b);
+        for(int j = 0; j < 8; j++)
+            collision->rwall[j] = get_byte(bytes, &b);
+        for(int j = 0; j < 8; j++)
+            collision->ceiling[j] = get_byte(bytes, &b);
+        for(int j = 0; j < 8; j++)
+            collision->lwall[j] = get_byte(bytes, &b);
+    }
+
+    free(bytes);
+}
+
+void
+load_map(TileMapping *mapping, const char *filename, const char *collision_filename)
 {
     uint8_t *bytes;
     uint32_t b, length;
@@ -32,12 +66,30 @@ load_map(TileMapping *mapping, const char *filename)
     }
 
     free(bytes);
+
+    if(!collision_filename) {
+        mapping->collision = NULL;
+        return;
+    }
+
+    // Load collision data
+    mapping->collision = malloc(mapping->num_tiles * sizeof(Collision *));
+    for(uint16_t i = 0; i < mapping->num_tiles; i++) {
+        mapping->collision[i] = NULL;
+    }
+    _load_collision(mapping, collision_filename);
 }
 
 void
 free_map(TileMapping *mapping)
 {
     free(mapping->frames);
+    for(uint16_t i = 0; i < mapping->num_tiles; i++) {
+        if(mapping->collision[i] != NULL) {
+            free(mapping->collision[i]);
+        }
+    }
+    free(mapping->collision);
 }
 
 void
