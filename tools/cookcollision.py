@@ -123,32 +123,64 @@ def parse_json(j):
                 x = round(o.get("x"), 0)
                 y = round(o.get("y"), 0)
                 if o.get("polygon"):
-                    # Treat as triangle
                     vertices = o.get("polygon")
-                    points = [
-                        # xy0
-                        [
-                            round(vertices[0].get("x"), 0) + x,
-                            round(vertices[0].get("y"), 0) + y,
-                        ],
-                        # xy1
-                        [
-                            round(vertices[1].get("x"), 0) + x,
-                            round(vertices[1].get("y"), 0) + y,
-                        ],
-                        # xy2
-                        [
-                            round(vertices[2].get("x"), 0) + x,
-                            round(vertices[2].get("y"), 0) + y,
-                        ],
-                    ]
-                    res.append(
-                        {
-                            "id": id,
-                            "type": "triangle",
-                            "points": points,
-                        }
-                    )
+                    if len(vertices) == 3:
+                        # Triangle
+                        points = [
+                            # xy0
+                            [
+                                round(vertices[0].get("x"), 0) + x,
+                                round(vertices[0].get("y"), 0) + y,
+                            ],
+                            # xy1
+                            [
+                                round(vertices[1].get("x"), 0) + x,
+                                round(vertices[1].get("y"), 0) + y,
+                            ],
+                            # xy2
+                            [
+                                round(vertices[2].get("x"), 0) + x,
+                                round(vertices[2].get("y"), 0) + y,
+                            ],
+                        ]
+                        res.append(
+                            {
+                                "id": id,
+                                "type": "triangle",
+                                "points": points,
+                            }
+                        )
+                    elif len(vertices) == 4:
+                        # Degenerate quad
+                        points = [
+                            # xy0
+                            [
+                                round(vertices[0].get("x"), 0) + x,
+                                round(vertices[0].get("y"), 0) + y,
+                            ],
+                            # xy1
+                            [
+                                round(vertices[1].get("x"), 0) + x,
+                                round(vertices[1].get("y"), 0) + y,
+                            ],
+                            # xy2
+                            [
+                                round(vertices[2].get("x"), 0) + x,
+                                round(vertices[2].get("y"), 0) + y,
+                            ],
+                            # xy3
+                            [
+                                round(vertices[3].get("x"), 0) + x,
+                                round(vertices[3].get("y"), 0) + y,
+                            ],
+                        ]
+                        res.append(
+                            {
+                                "id": id,
+                                "type": "quad",
+                                "points": points,
+                            }
+                        )
                 else:
                     # Treat as quad
                     width = round(o.get("width"), 0)
