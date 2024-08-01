@@ -26,13 +26,13 @@ class Direction(Enum):
     RIGHT = 3
 
 
-def point_in_geometry(p, geometry, points):
+def point_in_geometry(p, points):
     point = Point(p[0], p[1])
     shape = Polygon(points)
     return shape.contains(point) or shape.intersects(point)
 
 
-def get_height_mask(d: Direction, geometry, points):
+def get_height_mask(d: Direction, points):
     # Perform iterative linecast.
     # Linecast checks for a point within a geometry starting at a height
     # of 15 until 1 (inclusive). 0 means no collision at that height.
@@ -56,7 +56,7 @@ def get_height_mask(d: Direction, geometry, points):
                 x = 16 - height
                 y = 15 - pos
 
-            if point_in_geometry([x, y], geometry, points):
+            if point_in_geometry([x, y], points):
                 found = True
                 heightmask.append(height)
                 break
@@ -68,17 +68,16 @@ def get_height_mask(d: Direction, geometry, points):
 def parse_masks(tiles):
     res = []
     for tile in tiles:
-        geometry = tile.get("type")
         points = tile.get("points")
         id = tile.get("id")
         res.append(
             {
                 "id": tile.get("id"),
                 "masks": {
-                    "floor": get_height_mask(Direction.DOWN, geometry, points),
-                    "ceiling": get_height_mask(Direction.UP, geometry, points),
-                    "rwall": get_height_mask(Direction.RIGHT, geometry, points),
-                    "lwall": get_height_mask(Direction.LEFT, geometry, points),
+                    "floor": get_height_mask(Direction.DOWN, points),
+                    "ceiling": get_height_mask(Direction.UP, points),
+                    "rwall": get_height_mask(Direction.RIGHT, points),
+                    "lwall": get_height_mask(Direction.LEFT, points),
                 },
             }
         )
@@ -126,7 +125,6 @@ def parse_json(j):
                         res.append(
                             {
                                 "id": id,
-                                "type": "triangle",
                                 "points": points,
                             }
                         )
@@ -157,7 +155,6 @@ def parse_json(j):
                         res.append(
                             {
                                 "id": id,
-                                "type": "quad",
                                 "points": points,
                             }
                         )
@@ -178,7 +175,6 @@ def parse_json(j):
                     res.append(
                         {
                             "id": id,
-                            "type": "quad",
                             "points": points,
                         }
                     )
