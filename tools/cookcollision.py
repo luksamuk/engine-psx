@@ -10,7 +10,13 @@ from enum import Enum
 from pprint import pp as pprint
 from math import sqrt
 
+# Ensure binary C types are encoded as big endian
 c_ushort = c_ushort.__ctype_be__
+
+# This package depends on shapely because I'm fed up with attempting to code
+# point and polygon checking myself. On arch linux, install python-shapely.
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
 
 
 class Direction(Enum):
@@ -20,33 +26,10 @@ class Direction(Enum):
     RIGHT = 3
 
 
-def sign(p1, p2, p3):
-    return ((p1[0] - p3[0]) * (p2[1] - p3[1])) - ((p2[0] - p3[0]) * (p1[1] - p3[1]))
-
-
-def point_in_triangle(p, v1, v2, v3):
-    d1 = sign(p, v1, v2)
-    d2 = sign(p, v2, v3)
-    d3 = sign(p, v3, v1)
-    has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
-    has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
-    return not (has_neg and has_pos
-
-
-def point_in_square(p, v1, v2, v3, v4):
-    d1 = sign(p, v1, v2)
-    d2 = sign(p, v2, v3)
-    d3 = sign(p, v3, v4)
-    d4 = sign(p, v4, v1)
-    has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0) or (d4 < 0)
-    has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0) or (d4 > 0)
-    return not (has_neg and has_pos)
-
-
 def point_in_geometry(p, geometry, points):
-    if geometry == "quad":
-        return point_in_square(p, points[0], points[1], points[2], points[3])
-    return point_in_triangle(p, points[0], points[1], points[2])
+    point = Point(p[0], p[1])
+    shape = Polygon(points)
+    return shape.contains(point) or shape.intersects(point)
 
 
 def get_height_mask(d: Direction, geometry, points):
@@ -187,10 +170,10 @@ def parse_json(j):
                         [x, y],
                         # xy1
                         [x + width, y],
-                        # xy2
-                        [x, y + height],
                         # xy3
                         [x + width, x + height],
+                        # xy2
+                        [x, y + height],
                     ]
                     res.append(
                         {
@@ -238,7 +221,7 @@ def main():
     j = load_json(jsonfile)
     parsed = parse_json(j)
     masks = parse_masks(parsed)
-    pprint(list(filter(lambda x: x.get("id") == 7, masks))[0])
+    # pprint(list(filter(lambda x: x.get("id") == 1, masks))[0])
     with open(outfile, "wb") as f:
         write_file(f, masks)
 
