@@ -30,20 +30,17 @@ def point_in_triangle(p, v1, v2, v3):
     d3 = sign(p, v3, v1)
     has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
     has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
-    return not (has_neg and has_pos)
-
-
-def is_left(p0, p1, p2):
-    return ((p1[0] - p0[0]) * (p2[1] - p0[1])) - ((p2[0] - p0[0]) * (p1[1] - p0[1]))
+    return not (has_neg and has_pos
 
 
 def point_in_square(p, v1, v2, v3, v4):
-    return (
-        (is_left(v1, v2, p) > 0)
-        and (is_left(v2, v3, p) > 0)
-        and (is_left(v3, v4, p) > 0)
-        and (is_left(v4, v1, p) > 0)
-    )
+    d1 = sign(p, v1, v2)
+    d2 = sign(p, v2, v3)
+    d3 = sign(p, v3, v4)
+    d4 = sign(p, v4, v1)
+    has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0) or (d4 < 0)
+    has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0) or (d4 > 0)
+    return not (has_neg and has_pos)
 
 
 def point_in_geometry(p, geometry, points):
@@ -241,7 +238,7 @@ def main():
     j = load_json(jsonfile)
     parsed = parse_json(j)
     masks = parse_masks(parsed)
-    # pprint(list(filter(lambda x: x.get("id") == 4, masks))[0])
+    pprint(list(filter(lambda x: x.get("id") == 7, masks))[0])
     with open(outfile, "wb") as f:
         write_file(f, masks)
 
