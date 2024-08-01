@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.10" tiledversion="1.11.0" name="tiles16" tilewidth="16" tileheight="16" tilecount="48" columns="16">
+ <editorsettings>
+  <export target="collision16.json" format="json"/>
+ </editorsettings>
  <image source="tiles16.png" width="256" height="48"/>
  <tile id="1">
   <objectgroup draworder="index" id="2">

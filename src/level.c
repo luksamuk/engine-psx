@@ -255,7 +255,7 @@ render_lvl(
 {
     int16_t cx = (cam_x >> 12),
         cy = (cam_y >> 12);
-    _render_layer(lvl, map128, map16, cx, cy, 3, 0);
+    _render_layer(lvl, map128, map16, cx, cy, 4, 0);
     _render_layer(lvl, map128, map16, cx, cy, 2, 1);
 
     DR_TPAGE *tpage = get_next_prim();

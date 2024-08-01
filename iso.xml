@@ -3,7 +3,7 @@
   <track type="data">
     <identifiers
 	system		= "PLAYSTATION"
-	volume		= "SONICENGINE"
+	volume		= "SCUS-00001"
 	volume_set	= "SONICENGINE"
 	publisher	= "luksamuk"
 	data_preparer	= "PSN00BSDK ${PSN00BSDK_VERSION}"
@@ -13,7 +13,7 @@
     <directory_tree>
       <file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
 
-      <file name="SONIC.EXE" type="data" source="sonic.exe" />
+      <file name="ENGINE.EXE" type="data" source="engine.exe" />
 
       <dir name="SPRITES">
 	<file name="SONIC.TIM"
@@ -35,6 +35,9 @@
 	  <file name="MAP16.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/MAP16.MAP" />
+	  <file name="R0.COLLISION"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/R0.COLLISION" />
 	  <file name="TILES.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/TILES.TIM" />
