@@ -492,25 +492,62 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     // x or y pushbacks.
     // But, if our height on heightmask has a 0 height, then we proceed.
     uint8_t mask_byte = 0;
+    int16_t h;
     if(mask0) {
         mask_byte = mask0[index >> 1];
         mask_byte = mask_byte >> (((index & 0x1) ^ 0x1) << 2);
         mask_byte = mask_byte & 0xf;
-    }
 
+        if(mask_byte > 0) {
+            h = (direction == 0) ? vx : vy;
+            h = ((magnitude < 0) ? 0 : 16) - (h & 0x0f);
+        }
+    }
+    
     // Piece 1 is verified if and only if last piece had no collision or
     // if there was no collision on that spot.
     if((mask_byte == 0) && mask1) {
         mask_byte = mask1[index >> 1];
         mask_byte = mask_byte >> (((index & 0x1) ^ 0x1) << 2);
         mask_byte = mask_byte & 0xf;
+
+        if(mask_byte > 0) {
+            h = (direction == 0) ? vx : vy;
+            h = ((magnitude < 0) ? 0 : 16) - ((h + abs(magnitude)) & 0xf);
+        }
     }
 
     // Now mask_byte holds a number [0-15] telling the height on that tile.
     // Regardless, we need to calculate the proper X or Y value and leverage the
     // value of mask_byte to ensure we have our proper pushback value.
     CollisionEvent ev = { 0 };
-    ev.collided = (mask_byte > 0);
+
+    // It is not enough for us just to have a mask with a cute height value.
+    // We need to know if, within our piece, the casted line reaches that
+    // height.
+    // We can deduce that by taking the mod of the magnitude on the direction
+    // of the casted line.
+    // Let's take a ground (top to bottom) collision for instance; here, our
+    // magnitude is positive.
+    // Take the Y position of the end by adding the magnitude to VY. Then take
+    // the integer remainder (VY + Magnitude) % 16. This is how deep we are at
+    // the LAST detected piece, with respect to its top.
+    // We need to be careful here with this depth. If we have two pieces and
+
+    // Now, there are two ways to calculate depth, depending on what piece
+    // we found the collision at. On both these ways, we will calculate the
+    // pushback with respect to the (VX, VY) point.
+
+    // If we found a collision at piece 0, take h = (16 - (VY % 16)) to know
+    // the start height inside our piece. If h > height, we have no
+    // collision; otherwise, we do have a collision, and the pushback from
+    // the tip of our line should be (height - h).
+
+    // If we found a collision at piece 1, take h = (16 - ((VY + Magnitude) % 16)).
+    // Perform the exact same check as above, except the retrieved height should
+    // be from piece 1.
+    
+    ev.collided = (mask_byte > 0) && (h <= mask_byte);
 
     // The pushback is, with respect to the linecast's start X or Y position
     // (deducible by the direction), the amount that should be added or
@@ -519,13 +556,14 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     
     if(ev.collided) {
         ev.direction = direction;
-        if(ev.direction == 0) { // horizontal
-            // TODO
-            ev.pushback = mask_byte;
-        } else { // vertical
-            // TODO
-            ev.pushback = mask_byte;
-        }
+        ev.pushback = (int16_t)mask_byte - h - (magnitude < 0 ? 16 : 0);
+        /* if(ev.direction == 0) { // horizontal */
+        /*     // TODO */
+        /*     ev.pushback = (int16_t)mask_byte - h - (magnitude < 0 ? 16 : 0); */
+        /* } else { // vertical */
+        /*     // TODO */
+        /*     ev.pushback = (int16_t)mask_byte - h - (magnitude < 0 ? 16 : 0); */
+        /* } */
     }
     
     return ev;

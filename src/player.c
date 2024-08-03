@@ -10,7 +10,7 @@
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
-#define DUMMY_GROUND        ((432 - 64 - 8) << 12)
+//#define DUMMY_GROUND        ((432 - 64 - 8) << 12)
 
 // Adler32 sums of animation names for ease of use
 #define ANIM_STOPPED    0x08cd0220
@@ -23,6 +23,8 @@
 #define ANIM_PUSHING    0x08b2021f
 #define ANIM_CROUCHDOWN 0x104802fd
 #define ANIM_LOOKUP     0x067001db
+
+extern int debug_mode;
 
 SoundEffect sfx_jump = { 0 };
 
@@ -141,12 +143,12 @@ player_update(Player *player)
     if(!player->grnd) {
         player->vel.vy += Y_GRAVITY;
 
-        if(player->pos.vy >= DUMMY_GROUND) {
-            player->vel.vy = 0;
-            player->pos.vy = DUMMY_GROUND;
-            player->grnd = 1;
-            player->jmp = 0;
-        }
+        /* if(player->pos.vy >= DUMMY_GROUND) { */
+        /*     player->vel.vy = 0; */
+        /*     player->pos.vy = DUMMY_GROUND; */
+        /*     player->grnd = 1; */
+        /*     player->jmp = 0; */
+        /* } */
 
         if(player->jmp
            && !pad_pressing(PAD_CROSS)

@@ -22,6 +22,8 @@ volatile int timer_counter = 0;
 volatile int frame_counter = 0;
 volatile int frame_rate = 0;
 
+static int debug_mode = 0;
+
 /* #define SPRTSZ 56 */
 
 /* static int  x = (SPRTSZ >> 1),  y = (SPRTSZ >> 1); */
@@ -169,6 +171,10 @@ engine_update()
         sound_xa_set_channel(music_channel);
     }
 
+    if(pad_pressed(PAD_SELECT)) {
+        debug_mode = !debug_mode;
+    }
+
 /* #define SPD (8 * ONE) */
 
 /*     if(pad_pressing(PAD_RIGHT)) { */
@@ -197,8 +203,8 @@ engine_update()
         anchory = (player.pos.vy >> 12) + 4;
 
     uint16_t grn_ceil_dist = 8;
-    uint16_t grn_mag   = 12;
-    uint16_t ceil_mag  = 12;
+    uint16_t grn_mag   = 14;
+    uint16_t ceil_mag  = 14;
     uint16_t left_mag  = 12;
     uint16_t right_mag = 12;
     
@@ -228,75 +234,105 @@ engine_update()
     uint16_t
         ax = anchorx - (cam_pos.vx >> 12) + CENTERX,
         ay = anchory - (cam_pos.vy >> 12) + CENTERY;
-    
-    LINE_F2 line;
-    setLineF2(&line);
 
-    // Ground sensor left
-    setRGB0(&line, 0, 93, 0);
-    setXY2(&line, ax - grn_ceil_dist, ay + 8, ax - grn_ceil_dist, ay + 8 + grn_mag);
-    DrawPrim((void *)&line);
-    // (dot)
-    if(ev_grnd1.collided) setRGB0(&line, 255, 0, 0);
-    else                  setRGB0(&line, 255, 255, 255);
-    setXY2(&line, ax - grn_ceil_dist, ay + 8 + grn_mag, ax - grn_ceil_dist, ay + 8 + grn_mag);
-    DrawPrim((void *)&line);
-    
-    // Ground sensor right
-    setRGB0(&line, 23, 99, 63);
-    setXY2(&line, ax + grn_ceil_dist, ay + 8, ax + grn_ceil_dist, ay + 8 + grn_mag);
-    DrawPrim((void *)&line);
-    // (dot)
-    if(ev_grnd2.collided) setRGB0(&line, 255, 0, 0);
-    else                  setRGB0(&line, 255, 255, 255);
-    setXY2(&line, ax + grn_ceil_dist, ay + 8 + grn_mag, ax + grn_ceil_dist, ay + 8 + grn_mag);
-    DrawPrim((void *)&line);
-    
-    // Ceiling sensor left
-    setRGB0(&line, 0, 68, 93);
-    setXY2(&line, ax - grn_ceil_dist, ay - 8, ax - grn_ceil_dist, ay - 8 - ceil_mag);
-    DrawPrim((void *)&line);
-    // (dot)
-    if(ev_ceil1.collided) setRGB0(&line, 255, 0, 0);
-    else                  setRGB0(&line, 255, 255, 255);
-    setXY2(&line, ax - grn_ceil_dist, ay - 8 - ceil_mag, ax - grn_ceil_dist, ay - 8 - ceil_mag);
-    DrawPrim((void *)&line);
-    
-    // Ceiling sensor right
-    setRGB0(&line, 99, 94, 23);
-    setXY2(&line, ax + grn_ceil_dist, ay - 8, ax + grn_ceil_dist, ay - 8 - ceil_mag);
-    DrawPrim((void *)&line);
-    // (dot)
-    if(ev_ceil2.collided) setRGB0(&line, 255, 0, 0);
-    else                  setRGB0(&line, 255, 255, 255);
-    setXY2(&line, ax + grn_ceil_dist, ay - 8 - ceil_mag, ax + grn_ceil_dist, ay - 8 - ceil_mag);
-    DrawPrim((void *)&line);
-    
-    // Left sensor
-    setRGB0(&line, 99, 23, 99);
-    setXY2(&line, ax, ay, ax - left_mag, ay);
-    DrawPrim((void *)&line);
-    // (dot)
-    if(ev_left.collided) setRGB0(&line, 255, 0, 0);
-    else                 setRGB0(&line, 255, 255, 255);
-    setXY2(&line, ax - left_mag, ay, ax - left_mag, ay);
-    DrawPrim((void *)&line);
-    
-    // Right sensor
-    setRGB0(&line, 99, 23, 99);
-    setXY2(&line, ax, ay, ax + right_mag, ay);
-    DrawPrim((void *)&line);
-    // (dot)
-    if(ev_right.collided) setRGB0(&line, 255, 0, 0);
-    else                  setRGB0(&line, 255, 255, 255);
-    setXY2(&line, ax + right_mag, ay, ax + right_mag, ay);
-    DrawPrim((void *)&line);
+    if(debug_mode) {
+        LINE_F2 line;
+        setLineF2(&line);
 
-    // Player center (dot)
-    setRGB0(&line, 255, 255, 255);
-    setXY2(&line, ax, ay, ax, ay);
-    DrawPrim((void *)&line);
+        // Ground sensor left
+        setRGB0(&line, 0, 93, 0);
+        setXY2(&line, ax - grn_ceil_dist, ay + 8, ax - grn_ceil_dist, ay + 8 + grn_mag);
+        DrawPrim((void *)&line);
+        // (dot)
+        if(ev_grnd1.collided) setRGB0(&line, 255, 0, 0);
+        else                  setRGB0(&line, 255, 255, 255);
+        setXY2(&line, ax - grn_ceil_dist, ay + 8 + grn_mag, ax - grn_ceil_dist, ay + 8 + grn_mag);
+        DrawPrim((void *)&line);
+    
+        // Ground sensor right
+        setRGB0(&line, 23, 99, 63);
+        setXY2(&line, ax + grn_ceil_dist, ay + 8, ax + grn_ceil_dist, ay + 8 + grn_mag);
+        DrawPrim((void *)&line);
+        // (dot)
+        if(ev_grnd2.collided) setRGB0(&line, 255, 0, 0);
+        else                  setRGB0(&line, 255, 255, 255);
+        setXY2(&line, ax + grn_ceil_dist, ay + 8 + grn_mag, ax + grn_ceil_dist, ay + 8 + grn_mag);
+        DrawPrim((void *)&line);
+    
+        // Ceiling sensor left
+        setRGB0(&line, 0, 68, 93);
+        setXY2(&line, ax - grn_ceil_dist, ay - 8, ax - grn_ceil_dist, ay - 8 - ceil_mag);
+        DrawPrim((void *)&line);
+        // (dot)
+        if(ev_ceil1.collided) setRGB0(&line, 255, 0, 0);
+        else                  setRGB0(&line, 255, 255, 255);
+        setXY2(&line, ax - grn_ceil_dist, ay - 8 - ceil_mag, ax - grn_ceil_dist, ay - 8 - ceil_mag);
+        DrawPrim((void *)&line);
+    
+        // Ceiling sensor right
+        setRGB0(&line, 99, 94, 23);
+        setXY2(&line, ax + grn_ceil_dist, ay - 8, ax + grn_ceil_dist, ay - 8 - ceil_mag);
+        DrawPrim((void *)&line);
+        // (dot)
+        if(ev_ceil2.collided) setRGB0(&line, 255, 0, 0);
+        else                  setRGB0(&line, 255, 255, 255);
+        setXY2(&line, ax + grn_ceil_dist, ay - 8 - ceil_mag, ax + grn_ceil_dist, ay - 8 - ceil_mag);
+        DrawPrim((void *)&line);
+    
+        // Left sensor
+        setRGB0(&line, 99, 23, 99);
+        setXY2(&line, ax, ay, ax - left_mag, ay);
+        DrawPrim((void *)&line);
+        // (dot)
+        if(ev_left.collided) setRGB0(&line, 255, 0, 0);
+        else                 setRGB0(&line, 255, 255, 255);
+        setXY2(&line, ax - left_mag, ay, ax - left_mag, ay);
+        DrawPrim((void *)&line);
+    
+        // Right sensor
+        setRGB0(&line, 99, 23, 99);
+        setXY2(&line, ax, ay, ax + right_mag, ay);
+        DrawPrim((void *)&line);
+        // (dot)
+        if(ev_right.collided) setRGB0(&line, 255, 0, 0);
+        else                  setRGB0(&line, 255, 255, 255);
+        setXY2(&line, ax + right_mag, ay, ax + right_mag, ay);
+        DrawPrim((void *)&line);
 
+        // Player center (dot)
+        setRGB0(&line, 255, 255, 255);
+        setXY2(&line, ax, ay, ax, ay);
+        DrawPrim((void *)&line);
+    }
+
+    /* Player collision detection */
+    if(ev_right.collided && player.vel.vx > 0) {
+        player.vel.vx = 0;
+        player.pos.vx = ((player.pos.vx >> 12) - (int32_t)(ev_right.pushback)) << 12;
+    }
+
+    if(ev_left.collided && player.vel.vx < 0) {
+        player.vel.vx = 0;
+        player.pos.vx = ((player.pos.vx >> 12) + (int32_t)(ev_left.pushback) - 4) << 12;
+    }
+
+    if(!player.grnd) {
+        if((ev_grnd1.collided || ev_grnd2.collided) && (player.vel.vy > 0)) {
+            player.vel.vy = 0;
+            int32_t pushback =
+                (ev_grnd1.pushback > ev_grnd2.pushback)
+                ? ev_grnd1.pushback
+                : ev_grnd2.pushback;
+            player.pos.vy = ((player.pos.vy >> 12) - pushback) << 12;
+            player.grnd = 1;
+            player.jmp = 0;
+        }
+    } else {
+        if(!ev_grnd1.collided && !ev_grnd2.collided) {
+            player.grnd = 0;
+        }
+    }
+    
     player_update(&player);
 }
 
