@@ -41,6 +41,13 @@ typedef struct {
     uint16_t clutmode, _unused1;
 } LevelData;
 
+typedef struct {
+    uint8_t collided;
+    uint8_t direction; // horizontal/vertical
+    int16_t pushback;
+} CollisionEvent;
+
+
 void load_map(TileMapping *mapping, const char *filename, const char *collision_filename);
 void free_map(TileMapping *mapping);
 
@@ -50,5 +57,10 @@ void free_lvl(LevelData *lvl);
 void render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     int32_t cam_x, int32_t cam_y);
+
+
+CollisionEvent linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
+                        int32_t vx, int32_t vy, uint8_t direction,
+                        int32_t magnitude);
 
 #endif

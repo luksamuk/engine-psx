@@ -17,7 +17,7 @@ typedef struct {
 
     CharaAnim *cur_anim;
     VECTOR    pos;
-    VECTOR    vel;
+    VECTOR    vel; // vel.vz = ground speed
     uint8_t   anim_frame;
     uint8_t   anim_timer;
     int8_t    anim_dir;
@@ -36,6 +36,6 @@ CharaAnim *player_get_animation(Player *player, uint32_t sum);
 CharaAnim *player_get_animation_by_name(Player *player, const char *name);
 
 void player_update(Player *player);
-void player_draw(Player *player);
+void player_draw(Player *player, VECTOR *screen_pos);
 
 #endif

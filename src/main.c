@@ -15,16 +15,12 @@
 #include "input.h"
 #include "player.h"
 #include "level.h"
+#include "timer.h"
 
-/* typedef struct { */
-/* 	int irq_count, last_irq_count, irqs_per_sec; */
-/* } TimerState; */
-
-/* static volatile TimerState timer_state; */
-
-/* static void timer0_handler(void) { */
-/* 	timer_state.irq_count++; */
-/* } */
+// Timer-related
+volatile int timer_counter = 0;
+volatile int frame_counter = 0;
+volatile int frame_rate = 0;
 
 /* #define SPRTSZ 56 */
 
@@ -68,18 +64,28 @@ static LevelData  leveldata;
 
 static uint8_t cur_bgm = 0;
 static uint8_t music_num_channels = BGM001_NUM_CHANNELS;
-static uint8_t music_channel = 0;
+static uint8_t music_channel = 1;
 
 static VECTOR cam_pos = { 0 };
+
+static CollisionEvent ev = { 0 };
 
 void
 engine_init()
 {
     setup_context();
-    set_clear_color(63, 0, 127);
     sound_init();
     CdInit();
     pad_init();
+    timer_init();
+
+    // Present a "Now Loading..." text
+    swap_buffers();
+    draw_text(CENTERX - 52, CENTERY - 4, 0, "Now Loading...");
+    swap_buffers();
+    swap_buffers();
+
+    set_clear_color(63, 0, 127);
 
     uint32_t filelength;
     TIM_IMAGE tim;
@@ -90,11 +96,7 @@ engine_init()
     }
 
     load_player(&player, "\\SPRITES\\SONIC.CHARA;1", &tim);
-    player.pos = (VECTOR){
-        (uint32_t)(SCREEN_XRES) << 9,
-        (uint32_t)(SCREEN_YRES) << 11,
-        0
-    };
+    player.pos = (VECTOR){ CENTERX << 12, CENTERY << 12, 0 };
 
     // Load level data
     timfile = file_read("\\LEVELS\\R0\\TILES.TIM;1", &filelength);
@@ -162,32 +164,38 @@ engine_update()
         sound_xa_set_channel(music_channel);
     }
 
-#define SPD (8 * ONE)
+/* #define SPD (8 * ONE) */
 
-    if(pad_pressing(PAD_RIGHT)) {
-        cam_pos.vx += SPD;
-    }
+/*     if(pad_pressing(PAD_RIGHT)) { */
+/*         cam_pos.vx += SPD; */
+/*     } */
 
-    if(pad_pressing(PAD_LEFT)) {
-        cam_pos.vx -= SPD;
-    }
+/*     if(pad_pressing(PAD_LEFT)) { */
+/*         cam_pos.vx -= SPD; */
+/*     } */
 
-    if(pad_pressing(PAD_UP)) {
-        cam_pos.vy -= SPD;
-    }
+/*     if(pad_pressing(PAD_UP)) { */
+/*         cam_pos.vy -= SPD; */
+/*     } */
 
-    if(pad_pressing(PAD_DOWN)) {
-        cam_pos.vy += SPD;
-    }
+/*     if(pad_pressing(PAD_DOWN)) { */
+/*         cam_pos.vy += SPD; */
+/*     } */
 
-    //player_update(&player);
+    cam_pos = player.pos;
+
+    player_update(&player);
+
+    ev = linecast(&leveldata, &map128, &map16,
+                  player.pos.vx >> 12, (player.pos.vy >> 12) + 8,
+                  1, 16); // 16px vertical downwards
 }
 
 void
 engine_draw()
 {
     //chara_render_test(&player.chara);
-    player_draw(&player);
+    player_draw(&player, &(VECTOR){CENTERX << 12, CENTERY << 12, 0});
 
     render_lvl(&leveldata, &map128, &map16, cam_pos.vx, cam_pos.vy);
 
@@ -242,19 +250,40 @@ engine_draw()
     uint32_t elapsed_sectors;
     sound_xa_get_elapsed_sectors(&elapsed_sectors);
 
-    // Sound debug
+    // Text
     char buffer[255] = { 0 };
+    
+    // Sound debug
     snprintf(buffer, 255,
-             "VMD %4s\n"
+             "%4s %3d\n"
+             /* "FPS %4d\n" */
+             /* "VMD %4s\n" */
              "MUS %2u/2\n"
              "CHN  %1u/%1u\n"
              "%08u",
              GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
+             get_frame_rate(),
              cur_bgm + 1,
              music_channel + 1,
              music_num_channels,
              elapsed_sectors);
-             draw_text(240, 12, 0, buffer);
+    draw_text(248, 12, 0, buffer);
+
+    // Player debug
+    snprintf(buffer, 255,
+             "CAM %08x %08x\n"
+             "POS %08x %08x\n"
+             "VEL %08x %08x\n"
+             "GSP %08x\n"
+             "DIR %c\n"
+             "COL %1x %2d\n",
+             cam_pos.vx, cam_pos.vy,
+             player.pos.vx, player.pos.vy,
+             player.vel.vx, player.vel.vy,
+             player.vel.vz,
+             player.anim_dir >= 0 ? 'R' : 'L',
+             ev.collided, ev.pushback);
+    draw_text(8, 12, 0, buffer);
 }
 
 int
@@ -265,6 +294,7 @@ main(void)
     while(1) {
         engine_update();
         engine_draw();
+        timer_update();
         swap_buffers();
     }
 

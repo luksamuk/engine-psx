@@ -73,7 +73,7 @@ load_map(TileMapping *mapping, const char *filename, const char *collision_filen
     }
 
     // Load collision data
-    mapping->collision = malloc(mapping->num_tiles * sizeof(Collision *));
+    mapping->collision = malloc((mapping->num_tiles + 1) * sizeof(Collision *));
     for(uint16_t i = 0; i < mapping->num_tiles; i++) {
         mapping->collision[i] = NULL;
     }
@@ -175,12 +175,11 @@ _render_16(
     // Frames per tile: 2 * 2 = 4
     uint16_t *tileframes = &map16->frames[frame << 2];
     for(int16_t idx = 0; idx < 4; idx++) {
-
         if(tileframes[idx] == 0) continue;
 
-
         int16_t
-            deltax = (idx % 2),
+            //deltax = (idx % 2),
+            deltax = (idx & 0x01),
             deltay = (idx >> 1);
 
         _render_8(
@@ -220,7 +219,8 @@ _render_128(
         if(tileframes[idx] == 0) continue;
 
         int16_t
-            deltax = (idx % 8),
+            //deltax = (idx % 8),
+            deltax = (idx & 0x07),
             deltay = (idx >> 3);
         _render_16(lvl, map16,
                    vx + (deltax << 4),
@@ -285,12 +285,11 @@ _render_layer(
     max_tile_y = CLAMP_SUM(tiley, num_tiles_y, (int16_t)l->height);
 
     // Now iterate over tiles and render them.
-    uint16_t a = 0;
     for(int16_t iy = tiley; iy <= max_tile_y; iy++) {
         for(int16_t ix = tilex; ix <= max_tile_x; ix++) {
-            a++;
             int16_t frame_idx = (iy * l->width) + ix;
-            //printf("Chunk: %d @ %u (%u)\n", a, frame_idx, l->tiles[frame_idx]);
+            if(l->tiles[frame_idx] == 0) continue;
+
             _render_128(lvl, map128, map16,
                         ((ix - tilex) << 7) - deltax,
                         ((iy - tiley) << 7) - deltay,
@@ -305,7 +304,8 @@ render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     int32_t cam_x, int32_t cam_y)
 {
-    int16_t cx = (cam_x >> 12),
+    int16_t
+        cx = (cam_x >> 12),
         cy = (cam_y >> 12);
     _render_layer(lvl, map128, map16, cx, cy, 4, 0);
     _render_layer(lvl, map128, map16, cx, cy, 2, 1);
@@ -315,3 +315,225 @@ render_lvl(
     setDrawTPage(tpage, 0, 1, getTPage(0, 1, lvl->prectx, lvl->precty));
     sort_prim(tpage, OT_LENGTH - 1);
 }
+
+CollisionEvent
+linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
+         int32_t vx, int32_t vy, uint8_t direction, int32_t magnitude)
+{
+    // First of all, let's simplify this.
+    // Do not tolerate linecasts with a magnitude greater than 16.
+    // This way, we will always compare a maximum of two 128x128 tiles,
+    // and also, a maximum of two 16x16 tiles.
+    // We NEED to have this kind of constraint for performance reasons and,
+    // let's be perfectly honest, it will not be missed.
+    if(magnitude > 16 || magnitude < -16) return (CollisionEvent){ 0 };
+
+    // From this point forward, for ease of definition, I'm gonna call
+    // 128x128 tiles as chunks, and 16x16 tiles as pieces. 8x8 tiles will remain
+    // just tiles.
+
+
+    // 1. Calculate the X and Y of chunks on the map, for the start of
+    // the linecast.
+    int32_t
+        tstartx = vx >> 7,
+        tstarty = vy >> 7,
+        lvlwidth = lvl->layers[0].width,
+        lvlheight = lvl->layers[0].height;
+
+    // 2. Calculate the X and Y of chunks on the map, for the end of
+    // the linecast.
+    int32_t tendx = vx, tendy = vy;
+    if(direction == 0) tendx += magnitude; // horizontal
+    else               tendy += magnitude; // vertical
+
+    tendx = tendx >> 7;
+    tendy = tendy >> 7;
+
+    // End detection HERE if start AND end on any direction are out of bounds.
+    if((tstartx < 0 && tendx < 0) ||
+       (tstartx >= lvlwidth && tendx >= lvlwidth) ||
+       (tstarty < 0 && tendy < 0) ||
+       (tstarty >= lvlheight && tendy >= lvlheight))
+        return (CollisionEvent){ 0 };
+
+    // 3. We need to make sure both our chunks tiles are valid, and we have to
+    // decide whether we are going to get pieces from one, two or none of them.
+    // And while we're at it, let's also calculate the X and Y coordinates within
+    // each chunk.
+    
+    uint8_t num_chunks = 0;
+    int16_t chunks[2] = { -1, -1 };
+    int32_t vchunkx[2];
+    int32_t vchunky[2];
+
+    if((tstartx >= 0) && (tstartx < lvlwidth) &&
+       (tstarty >= 0) && (tstarty < lvlheight)) {
+        chunks[0] = (tstarty * lvlwidth) + tstartx;
+        vchunkx[0] = vx & 0x7f;
+        vchunky[0] = vy & 0x7f;
+        num_chunks++;
+    }
+
+    if((tendx >= 0) && (tendx < lvl->layers[0].width) &&
+       (tendy >= 0) && (tendy < lvl->layers[0].height)) {
+        chunks[1] = (tendy * lvlwidth) + tendx;
+        if(direction == 0) {
+            vchunkx[1] = vx + magnitude;
+            vchunky[1] = vy;
+        } else {
+            vchunkx[1] = vx;
+            vchunky[1] = vy + magnitude;
+        }
+        vchunkx[1] = vchunkx[1] & 0x7f;
+        vchunky[1] = vchunky[1] & 0x7f;
+        num_chunks++;
+    }
+
+    if(chunks[0] < 0 && chunks[1] < 0) return (CollisionEvent){ 0 };
+    else if(chunks[0] == chunks[1])    num_chunks = 1;
+    else if(chunks[0] < 0) {
+        chunks[0]  = chunks[1];
+        vchunkx[0] = vchunkx[1];
+        vchunky[0] = vchunky[1];
+        num_chunks = 1;
+    }
+
+    if(num_chunks > 1) {
+        printf("chunks: %d+(%d,%d)=%d %d+(%d,%d)=%d\n",
+               chunks[0],
+               vchunkx[0], vchunky[0],
+               lvl->layers[0].tiles[chunks[0]],
+               chunks[1],
+               vchunkx[1], vchunky[1],
+               lvl->layers[0].tiles[chunks[1]]);
+    } else {
+        printf("chunk: %d+(%d,%d)=%d\n",
+               chunks[0], vchunkx[0], vchunky[0],
+               lvl->layers[0].tiles[chunks[0]]);
+    }
+
+    // 4. Per definition, our linecast can at most intersect two chunks, and
+    // will affect exactly ONE or TWO pieces. So since we know the chunk or
+    // chunks are decided right now, let's figure the pieces out.
+    // I know a few things:
+    //   a. I am ALWAYS picking up a piece at the first chunk.
+    //   b. If there is more than one chunk, this means that I am DEFINITELY
+    //      picking up the second piece from the second chunk.
+    // So we know for a fact where the first piece is, and the second piece can
+    // either be at the first or the second chunk, depending on whether there
+    // is a second chunk or not. Well, this should be easy enough!
+
+    // Further, if these pieces are the same, I only need to look at one of
+    // them.
+    uint8_t num_pieces = 2;
+    int16_t pieces[2];
+    int32_t vpiecex[2];
+    int32_t vpiecey[2];
+    pieces[0]  = ((vchunky[0] >> 4) << 3) + (vchunkx[0] >> 4);
+    pieces[1]  = ((vchunky[1] >> 4) << 3) + (vchunkx[1] >> 4);
+    
+    // mod 16 => AND with four least-significant bits
+    //vpiecex[0] = vchunkx[0] % 16;
+    //vpiecey[0] = vchunky[0] % 16;
+    vpiecex[0] = vchunkx[0] & 0x0f;
+    vpiecey[0] = vchunky[0] & 0x0f;
+
+    //if(pieces[0] != pieces[1]) {
+    //vpiecex[1] = vchunkx[1] % 16;
+    vpiecex[1] = vchunkx[1] & 0x0f;
+    //vpiecey[1] = vchunky[1] % 16;
+    vpiecey[1] = vchunky[1] & 0x0f;
+    //} else num_pieces = 1;
+
+    // Get chunk address from level map
+    chunks[0] = lvl->layers[0].tiles[chunks[0]];
+    if(num_chunks > 1) chunks[1] = lvl->layers[0].tiles[chunks[1]];
+
+    // Get piece address from chunk mapping
+    pieces[0] = map128->frames[(chunks[0] << 6) + pieces[0]];
+    pieces[1] = map128->frames[(chunks[(num_chunks > 1) ? 1 : 0] << 6) + pieces[1]];
+
+    // Get actual piece collision data
+    Collision *piece0 = map16->collision[pieces[0]];
+    Collision *piece1 = map16->collision[pieces[1]];
+
+    // Should both be null, there is no collision to check.
+    if(!piece0 && !piece1) return (CollisionEvent){ 0 };
+
+    // Now we need to use the direction and the signal of the magnitude
+    // to determine which height mask we are supposed to use.
+    uint8_t *mask0 = NULL, *mask1 = NULL;
+    uint8_t index = 0;
+    if(direction == 0) { // horizontal
+        // index is related to y
+        if(magnitude < 0) {
+            mask0 = piece0 ? piece0->lwall : NULL;
+            mask1 = piece1 ? piece1->lwall : NULL;
+            // index starts at 0 from uppermost
+            index = vpiecey[0]; // piece 1 or 0, doesn't matter
+        } else {
+            mask0 = piece0 ? piece0->rwall : NULL;
+            mask1 = piece1 ? piece1->rwall : NULL;
+            // index starts at 15 from uppermost
+            index = 15 - vpiecey[0];
+        }
+    } else { // vertical
+        // index is related to x
+        if(magnitude >= 0) {
+            mask0 = piece0 ? piece0->floor : NULL;
+            mask1 = piece1 ? piece1->floor : NULL;
+            // index starts at 0 from leftmost
+            index = vpiecex[0];
+        } else {
+            mask0 = piece0 ? piece0->ceiling : NULL;
+            mask1 = piece1 ? piece1->ceiling : NULL;
+            // index starts at 15 from rightmost
+            index = 15 - vpiecey[0];
+        }
+    }
+
+    // These pieces are supposed to be verified linearly. If piece 0 has
+    // collision, identify the height on height mask and return the desired
+    // x or y pushbacks.
+    // But, if our height on heightmask has a 0 height, then we proceed.
+    uint8_t mask_byte = 0;
+    if(mask0) {
+        mask_byte = mask0[index >> 1];
+        mask_byte = mask_byte >> (((index & 0x1) ^ 0x1) << 2);
+        mask_byte = mask_byte & 0xf;
+    }
+
+    // Piece 1 is verified if and only if last piece had no collision or
+    // if there was no collision on that spot.
+    if((mask_byte == 0) && mask1) {
+        mask_byte = mask1[index >> 1];
+        mask_byte = mask_byte >> (((index & 0x1) ^ 0x1) << 2);
+        mask_byte = mask_byte & 0xf;
+    }
+
+    // Now mask_byte holds a number [0-15] telling the height on that tile.
+    // Regardless, we need to calculate the proper X or Y value and leverage the
+    // value of mask_byte to ensure we have our proper pushback value.
+    CollisionEvent ev = { 0 };
+    ev.collided = (mask_byte > 0);
+
+    // The pushback is, with respect to the linecast's start X or Y position
+    // (deducible by the direction), the amount that should be added or
+    // subtracted to that coordinate so our collision object is properly
+    // pushed out of the colliding object.
+    
+    if(ev.collided) {
+        ev.direction = direction;
+        if(ev.direction == 0) { // horizontal
+            // TODO
+            ev.pushback = mask_byte;
+        } else { // vertical
+            // TODO
+            ev.pushback = mask_byte;
+        }
+    }
+    
+    return ev;
+}
+

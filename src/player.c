@@ -10,7 +10,7 @@
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
-#define DUMMY_GROUND        (200 * ONE)
+#define DUMMY_GROUND        ((432 - 64 - 8) << 12)
 
 // Adler32 sums of animation names for ease of use
 #define ANIM_STOPPED    0x08cd0220
@@ -192,25 +192,14 @@ player_update(Player *player)
 }
 
 void
-player_draw(Player *player)
+player_draw(Player *player, VECTOR *pos)
 {
     if(player->cur_anim)
         chara_render_frame(&player->chara,
                            player->anim_frame,
-                           (int16_t)(player->pos.vx >> 12),
-                           (int16_t)(player->pos.vy >> 12),
+                           (int16_t)(pos->vx >> 12),
+                           (int16_t)(pos->vy >> 12),
+                           /* (int16_t)(player->pos.vx >> 12), */
+                           /* (int16_t)(player->pos.vy >> 12), */
                            player->anim_dir < 0);
-
-    // Debug
-    static char buffer[255];
-    snprintf(buffer, 255,
-             "POS.VX %08x\n"
-             "POS.VY %08x\n"
-             "VEL.VX %08x\n"
-             "VEL.VY %08x\n"
-             "DIR    %c\n",
-             player->pos.vx, player->pos.vy,
-             player->vel.vx, player->vel.vy,
-             player->anim_dir >= 0 ? 'R' : 'L');
-    draw_text(8, 12, 0, buffer);
 }
