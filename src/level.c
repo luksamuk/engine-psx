@@ -399,19 +399,19 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
         num_chunks = 1;
     }
 
-    if(num_chunks > 1) {
-        printf("chunks: %d+(%d,%d)=%d %d+(%d,%d)=%d\n",
-               chunks[0],
-               vchunkx[0], vchunky[0],
-               lvl->layers[0].tiles[chunks[0]],
-               chunks[1],
-               vchunkx[1], vchunky[1],
-               lvl->layers[0].tiles[chunks[1]]);
-    } else {
-        printf("chunk: %d+(%d,%d)=%d\n",
-               chunks[0], vchunkx[0], vchunky[0],
-               lvl->layers[0].tiles[chunks[0]]);
-    }
+    /* if(num_chunks > 1) { */
+    /*     printf("chunks: %d+(%d,%d)=%d %d+(%d,%d)=%d\n", */
+    /*            chunks[0], */
+    /*            vchunkx[0], vchunky[0], */
+    /*            lvl->layers[0].tiles[chunks[0]], */
+    /*            chunks[1], */
+    /*            vchunkx[1], vchunky[1], */
+    /*            lvl->layers[0].tiles[chunks[1]]); */
+    /* } else { */
+    /*     printf("chunk: %d+(%d,%d)=%d\n", */
+    /*            chunks[0], vchunkx[0], vchunky[0], */
+    /*            lvl->layers[0].tiles[chunks[0]]); */
+    /* } */
 
     // 4. Per definition, our linecast can at most intersect two chunks, and
     // will affect exactly ONE or TWO pieces. So since we know the chunk or
@@ -426,7 +426,6 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
 
     // Further, if these pieces are the same, I only need to look at one of
     // them.
-    uint8_t num_pieces = 2;
     int16_t pieces[2];
     int32_t vpiecex[2];
     int32_t vpiecey[2];
@@ -434,17 +433,10 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     pieces[1]  = ((vchunky[1] >> 4) << 3) + (vchunkx[1] >> 4);
     
     // mod 16 => AND with four least-significant bits
-    //vpiecex[0] = vchunkx[0] % 16;
-    //vpiecey[0] = vchunky[0] % 16;
     vpiecex[0] = vchunkx[0] & 0x0f;
     vpiecey[0] = vchunky[0] & 0x0f;
-
-    //if(pieces[0] != pieces[1]) {
-    //vpiecex[1] = vchunkx[1] % 16;
     vpiecex[1] = vchunkx[1] & 0x0f;
-    //vpiecey[1] = vchunky[1] % 16;
     vpiecey[1] = vchunky[1] & 0x0f;
-    //} else num_pieces = 1;
 
     // Get chunk address from level map
     chunks[0] = lvl->layers[0].tiles[chunks[0]];
@@ -492,6 +484,8 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
             index = 15 - vpiecey[0];
         }
     }
+
+    /* printf("piece: %u=(%d,%d)\n", pieces[0], vpiecex[0], vpiecey[0]); */
 
     // These pieces are supposed to be verified linearly. If piece 0 has
     // collision, identify the height on height mask and return the desired

@@ -68,7 +68,12 @@ static uint8_t music_channel = 1;
 
 static VECTOR cam_pos = { 0 };
 
-static CollisionEvent ev = { 0 };
+static CollisionEvent ev_grnd1 = { 0 };
+static CollisionEvent ev_grnd2 = { 0 };
+static CollisionEvent ev_left  = { 0 };
+static CollisionEvent ev_right = { 0 };
+static CollisionEvent ev_ceil1 = { 0 };
+static CollisionEvent ev_ceil2 = { 0 };
 
 void
 engine_init()
@@ -184,12 +189,119 @@ engine_update()
 
     cam_pos = player.pos;
 
-    player_update(&player);
+    
 
-    ev = linecast(&leveldata, &map128, &map16,
-                  player.pos.vx >> 12, (player.pos.vy >> 12) + 8,
-                  1, 16); // 16px vertical downwards
+    /* Collider linecasts */
+    uint16_t
+        anchorx = (player.pos.vx >> 12),
+        anchory = (player.pos.vy >> 12) + 4;
+
+    uint16_t grn_ceil_dist = 8;
+    uint16_t grn_mag   = 12;
+    uint16_t ceil_mag  = 12;
+    uint16_t left_mag  = 12;
+    uint16_t right_mag = 12;
+    
+    ev_grnd1 = linecast(&leveldata, &map128, &map16,
+                        anchorx - grn_ceil_dist, anchory + 8,
+                        1, grn_mag);
+    ev_grnd2 = linecast(&leveldata, &map128, &map16,
+                        anchorx + grn_ceil_dist, anchory + 8,
+                        1, grn_mag);
+
+    ev_ceil1 = linecast(&leveldata, &map128, &map16,
+                        anchorx - grn_ceil_dist, anchory - 8,
+                        1, -ceil_mag);
+    ev_ceil2 = linecast(&leveldata, &map128, &map16,
+                        anchorx + grn_ceil_dist, anchory - 8,
+                        1, -ceil_mag);
+
+    // 16px horizontal to the left or to the right
+    ev_left = linecast(&leveldata, &map128, &map16,
+                       anchorx, anchory,
+                       0, -left_mag);
+    ev_right = linecast(&leveldata, &map128, &map16,
+                        anchorx, anchory,
+                        0, right_mag);
+
+    /* Draw Colliders */
+    uint16_t
+        ax = anchorx - (cam_pos.vx >> 12) + CENTERX,
+        ay = anchory - (cam_pos.vy >> 12) + CENTERY;
+    
+    LINE_F2 line;
+    setLineF2(&line);
+
+    // Ground sensor left
+    setRGB0(&line, 0, 93, 0);
+    setXY2(&line, ax - grn_ceil_dist, ay + 8, ax - grn_ceil_dist, ay + 8 + grn_mag);
+    DrawPrim((void *)&line);
+    // (dot)
+    if(ev_grnd1.collided) setRGB0(&line, 255, 0, 0);
+    else                  setRGB0(&line, 255, 255, 255);
+    setXY2(&line, ax - grn_ceil_dist, ay + 8 + grn_mag, ax - grn_ceil_dist, ay + 8 + grn_mag);
+    DrawPrim((void *)&line);
+    
+    // Ground sensor right
+    setRGB0(&line, 23, 99, 63);
+    setXY2(&line, ax + grn_ceil_dist, ay + 8, ax + grn_ceil_dist, ay + 8 + grn_mag);
+    DrawPrim((void *)&line);
+    // (dot)
+    if(ev_grnd2.collided) setRGB0(&line, 255, 0, 0);
+    else                  setRGB0(&line, 255, 255, 255);
+    setXY2(&line, ax + grn_ceil_dist, ay + 8 + grn_mag, ax + grn_ceil_dist, ay + 8 + grn_mag);
+    DrawPrim((void *)&line);
+    
+    // Ceiling sensor left
+    setRGB0(&line, 0, 68, 93);
+    setXY2(&line, ax - grn_ceil_dist, ay - 8, ax - grn_ceil_dist, ay - 8 - ceil_mag);
+    DrawPrim((void *)&line);
+    // (dot)
+    if(ev_ceil1.collided) setRGB0(&line, 255, 0, 0);
+    else                  setRGB0(&line, 255, 255, 255);
+    setXY2(&line, ax - grn_ceil_dist, ay - 8 - ceil_mag, ax - grn_ceil_dist, ay - 8 - ceil_mag);
+    DrawPrim((void *)&line);
+    
+    // Ceiling sensor right
+    setRGB0(&line, 99, 94, 23);
+    setXY2(&line, ax + grn_ceil_dist, ay - 8, ax + grn_ceil_dist, ay - 8 - ceil_mag);
+    DrawPrim((void *)&line);
+    // (dot)
+    if(ev_ceil2.collided) setRGB0(&line, 255, 0, 0);
+    else                  setRGB0(&line, 255, 255, 255);
+    setXY2(&line, ax + grn_ceil_dist, ay - 8 - ceil_mag, ax + grn_ceil_dist, ay - 8 - ceil_mag);
+    DrawPrim((void *)&line);
+    
+    // Left sensor
+    setRGB0(&line, 99, 23, 99);
+    setXY2(&line, ax, ay, ax - left_mag, ay);
+    DrawPrim((void *)&line);
+    // (dot)
+    if(ev_left.collided) setRGB0(&line, 255, 0, 0);
+    else                 setRGB0(&line, 255, 255, 255);
+    setXY2(&line, ax - left_mag, ay, ax - left_mag, ay);
+    DrawPrim((void *)&line);
+    
+    // Right sensor
+    setRGB0(&line, 99, 23, 99);
+    setXY2(&line, ax, ay, ax + right_mag, ay);
+    DrawPrim((void *)&line);
+    // (dot)
+    if(ev_right.collided) setRGB0(&line, 255, 0, 0);
+    else                  setRGB0(&line, 255, 255, 255);
+    setXY2(&line, ax + right_mag, ay, ax + right_mag, ay);
+    DrawPrim((void *)&line);
+
+    // Player center (dot)
+    setRGB0(&line, 255, 255, 255);
+    setXY2(&line, ax, ay, ax, ay);
+    DrawPrim((void *)&line);
+
+    player_update(&player);
 }
+
+// Text
+static char buffer[255] = { 0 };
 
 void
 engine_draw()
@@ -225,10 +337,10 @@ engine_draw()
         int nclip, otz;
         POLY_G4 *poly = (POLY_G4 *) get_next_prim();
         setPolyG4(poly);
-        setRGB0(poly, 128,   0,   0);
-        setRGB1(poly,   0, 128,   0);
-        setRGB2(poly,   0,   0, 128);
-        setRGB3(poly, 128, 128,   0);
+        setRGB0(poly, 96,   0,   0);
+        setRGB1(poly,   0, 96,   0);
+        setRGB2(poly,   0,   0, 96);
+        setRGB3(poly, 96, 96,   0);
 
         nclip = RotAverageNclip4(
             &vertices[faces[i]],
@@ -250,8 +362,7 @@ engine_draw()
     uint32_t elapsed_sectors;
     sound_xa_get_elapsed_sectors(&elapsed_sectors);
 
-    // Text
-    char buffer[255] = { 0 };
+    
     
     // Sound debug
     snprintf(buffer, 255,
@@ -271,18 +382,26 @@ engine_draw()
 
     // Player debug
     snprintf(buffer, 255,
-             "CAM %08x %08x\n"
+             /* "CAM %08x %08x\n" */
              "POS %08x %08x\n"
              "VEL %08x %08x\n"
              "GSP %08x\n"
              "DIR %c\n"
-             "COL %1x %2d\n",
-             cam_pos.vx, cam_pos.vy,
+             "GRN %1x %2d // %1x %2d\n"
+             "CEI %1x %2d // %1x %2d\n"
+             "LEF %1x %2d\n"
+             "RIG %1x %2d\n",
+             /* cam_pos.vx, cam_pos.vy, */
              player.pos.vx, player.pos.vy,
              player.vel.vx, player.vel.vy,
              player.vel.vz,
              player.anim_dir >= 0 ? 'R' : 'L',
-             ev.collided, ev.pushback);
+             ev_grnd1.collided, ev_grnd1.pushback,
+             ev_grnd2.collided, ev_grnd2.pushback,
+             ev_ceil1.collided, ev_ceil1.pushback,
+             ev_ceil2.collided, ev_ceil2.pushback,
+             ev_left.collided, ev_left.pushback,
+             ev_right.collided, ev_right.pushback);
     draw_text(8, 12, 0, buffer);
 }
 
