@@ -28,6 +28,12 @@ extern int debug_mode;
 
 SoundEffect sfx_jump = { 0 };
 
+// TODO: Maybe shouldn't be extern?
+extern TileMap16  map16;
+extern TileMap128 map128;
+extern LevelData  leveldata;
+extern VECTOR     cam_pos;
+
 void
 load_player(Player *player,
             const char *chara_filename,
@@ -42,6 +48,13 @@ load_player(Player *player,
     player->anim_dir = 1;
     player->idle_timer = ANIM_IDLE_TIMER_MAX;
     player->grnd = player->jmp = 0;
+
+    player->ev_grnd1 = (CollisionEvent){ 0 };
+    player->ev_grnd2 = (CollisionEvent){ 0 };
+    player->ev_left  = (CollisionEvent){ 0 };
+    player->ev_right = (CollisionEvent){ 0 };
+    player->ev_ceil1 = (CollisionEvent){ 0 };
+    player->ev_ceil2 = (CollisionEvent){ 0 };
 
     if(sfx_jump.addr == 0) sfx_jump = sound_load_vag("\\SFX\\JUMP.VAG;1");
 }
@@ -103,8 +116,152 @@ player_set_animation_direct(Player *player, uint32_t sum)
 }
 
 void
+_player_collision_linecast(Player *player)
+{
+    /* Collider linecasts */
+    uint16_t
+        anchorx = (player->pos.vx >> 12),
+        anchory = (player->pos.vy >> 12) + 4;
+
+    uint16_t grn_ceil_dist = 8;
+    uint16_t grn_mag   = 14;
+    uint16_t ceil_mag  = 14;
+    uint16_t left_mag  = 12;
+    uint16_t right_mag = 12;
+    
+    player->ev_grnd1 = linecast(&leveldata, &map128, &map16,
+                                anchorx - grn_ceil_dist, anchory + 8,
+                                1, grn_mag);
+    player->ev_grnd2 = linecast(&leveldata, &map128, &map16,
+                                anchorx + grn_ceil_dist, anchory + 8,
+                                1, grn_mag);
+
+    player->ev_ceil1 = linecast(&leveldata, &map128, &map16,
+                                anchorx - grn_ceil_dist, anchory - 8,
+                                1, -ceil_mag);
+    player->ev_ceil2 = linecast(&leveldata, &map128, &map16,
+                                anchorx + grn_ceil_dist, anchory - 8,
+                                1, -ceil_mag);
+
+    // 16px horizontal to the left or to the right
+    player->ev_left = linecast(&leveldata, &map128, &map16,
+                               anchorx, anchory,
+                               0, -left_mag);
+    player->ev_right = linecast(&leveldata, &map128, &map16,
+                                anchorx, anchory,
+                                0, right_mag);
+
+    /* Draw Colliders */
+    uint16_t
+        ax = anchorx - (cam_pos.vx >> 12) + CENTERX,
+        ay = anchory - (cam_pos.vy >> 12) + CENTERY;
+
+    if(debug_mode) {
+        LINE_F2 *line;
+
+        // Ground sensor left
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(player->ev_grnd1.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0(line, 0, 93, 0);
+        setXY2(line, ax - grn_ceil_dist, ay + 8, ax - grn_ceil_dist, ay + 8 + grn_mag);
+        sort_prim(line, 0);
+    
+        // Ground sensor right
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(player->ev_grnd2.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0(line, 23, 99, 63);
+        setXY2(line, ax + grn_ceil_dist, ay + 8, ax + grn_ceil_dist, ay + 8 + grn_mag);
+        sort_prim(line, 0);
+    
+        // Ceiling sensor left
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(player->ev_ceil1.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0(line, 0, 68, 93);
+        setXY2(line, ax - grn_ceil_dist, ay - 8, ax - grn_ceil_dist, ay - 8 - ceil_mag);
+        sort_prim(line, 0);
+    
+        // Ceiling sensor right
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(player->ev_ceil2.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0( line, 99, 94, 23);
+        setXY2( line, ax + grn_ceil_dist, ay - 8, ax + grn_ceil_dist, ay - 8 - ceil_mag);
+        sort_prim(line, 0);
+    
+        // Left sensor
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(player->ev_left.collided) setRGB0(line, 255, 0, 0);
+        else                 setRGB0(line, 99, 23, 99);
+        setXY2(line, ax, ay, ax - left_mag, ay);
+        sort_prim(line, 0);
+    
+        // Right sensor
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(player->ev_right.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0(line, 99, 23, 99);
+        setXY2(line, ax, ay, ax + right_mag, ay);
+        sort_prim(line, 0);
+    }
+}
+
+void
+_player_collision_detection(Player *player)
+{
+    _player_collision_linecast(player);
+
+    if(player->ev_right.collided && player->vel.vx > 0) {
+        player->vel.vx = 0;
+        player->pos.vx = ((player->pos.vx >> 12) - (int32_t)(player->ev_right.pushback)) << 12;
+    }
+
+    if(player->ev_left.collided && player->vel.vx < 0) {
+        player->vel.vx = 0;
+        player->pos.vx = ((player->pos.vx >> 12) + (int32_t)(player->ev_left.pushback) - 4 - 1) << 12;
+    }
+
+    if(!player->grnd) {
+        if((player->ev_grnd1.collided || player->ev_grnd2.collided) && (player->vel.vy >= 0)) {
+            player->vel.vy = 0;
+            int32_t pushback =
+                (player->ev_grnd1.pushback > player->ev_grnd2.pushback)
+                ? player->ev_grnd1.pushback
+                : player->ev_grnd2.pushback;
+            player->pos.vy = ((player->pos.vy >> 12) - pushback) << 12;
+            player->grnd = 1;
+            player->jmp = 0;
+        }
+
+        if((player->ev_ceil1.collided || player->ev_ceil2.collided) && (player->vel.vy < 0)) {
+            player->vel.vy = 0;
+            int32_t pushback =
+                (player->ev_ceil1.pushback > player->ev_ceil2.pushback)
+                ? player->ev_ceil1.pushback
+                : player->ev_ceil2.pushback;
+            player->pos.vy = ((player->pos.vy >> 12) + pushback) << 12;
+        }
+    } else {
+        if(!player->ev_grnd1.collided && !player->ev_grnd2.collided) {
+            player->grnd = 0;
+        }
+    }
+}
+
+void
 player_update(Player *player)
 {
+    _player_collision_detection(player);
+    
     if(player->cur_anim) {
         if(player->cur_anim->start == player->cur_anim->end)
             player->anim_frame = player->cur_anim->start;
