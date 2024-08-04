@@ -4,13 +4,15 @@
 #include "chara.h"
 #include <psxgte.h>
 
-#define X_ACCEL            192
-#define X_FRICTION         192
-#define X_DECEL           2048
-#define X_TOP_SPD        24576
-#define Y_GRAVITY          896
-#define Y_MIN_JUMP       16384
-#define Y_JUMP_STRENGTH  26624
+// Constants for running the game at a fixed 60 FPS.
+// These constants are also in a 12-scale format for fixed point math.
+#define X_ACCEL          0x0081
+#define X_FRICTION       0x0018
+#define X_DECEL          0x0800
+#define X_TOP_SPD        0x6000
+#define Y_GRAVITY        0x0380
+#define Y_MIN_JUMP       0x4000
+#define Y_JUMP_STRENGTH  0x6800
 
 typedef struct {
     Chara     chara;
