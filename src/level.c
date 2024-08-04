@@ -4,6 +4,12 @@
 #include "util.h"
 #include "render.h"
 
+#define TILECLIP(sz) \
+    { \
+        if(vx <= -sz || vy <= -sz || vx >= SCREEN_XRES + sz || vy >= SCREEN_YRES + sz) \
+            return;\
+    }
+
 void
 _load_collision(TileMap16 *mapping, const char *filename)
 {
@@ -149,6 +155,9 @@ _render_8(
     int16_t vx, int16_t vy, int16_t otz,
     uint16_t frame)
 {
+    // Clipping
+    TILECLIP(8);
+
     uint16_t
         v0_idx = frame >> 5,
         u0_idx = frame - (v0_idx << 5);
@@ -172,6 +181,9 @@ _render_16(
     int16_t vx, int16_t vy, int16_t otz,
     uint16_t frame)
 {
+    // Clipping
+    TILECLIP(16);
+
     // Frames per tile: 2 * 2 = 4
     uint16_t *tileframes = &map16->frames[frame << 2];
     for(int16_t idx = 0; idx < 4; idx++) {
@@ -210,6 +222,9 @@ _render_128(
     int16_t vx, int16_t vy, int16_t otz,
     uint16_t frame)
 {
+    // Clipping
+    TILECLIP(128);
+
     // 128x128 has 8x8 tiles of 16x16.
     // Since this is a constant, we will then write the optimized code
     // just like _render_16.
