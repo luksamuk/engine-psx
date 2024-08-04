@@ -202,7 +202,7 @@ _xacd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
         }
         break;
     case CdlDiskError:
-        printf("Caught error\n");
+        printf("Caught CD error\n");
         _cd_err_threshold++;
         if(_cd_err_threshold > CD_MAX_ERR_THRESHOLD) {
             // Reset music if too many errs

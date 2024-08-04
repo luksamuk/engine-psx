@@ -515,7 +515,7 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
 
         if(mask_byte > 0) {
             h = (direction == 0) ? vx : vy;
-            h = ((magnitude < 0) ? 0 : 16) - (h & 0x0f);
+            h = ((magnitude < 0) ? 0 : 16) - (h & 0x0f) - 16;
         }
     }
     

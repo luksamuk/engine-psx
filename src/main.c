@@ -66,7 +66,7 @@ static LevelData  leveldata;
 
 static uint8_t cur_bgm = 0;
 static uint8_t music_num_channels = BGM001_NUM_CHANNELS;
-static uint8_t music_channel = 1;
+static uint8_t music_channel = 0;
 
 static VECTOR cam_pos = { 0 };
 
@@ -124,7 +124,7 @@ engine_init()
     // Start playback after we don't need the CD anymore.
     sound_stop_xa();
     music_num_channels = BGM001_NUM_CHANNELS;
-    music_channel = 0;
+    music_channel = 1;
     cur_bgm = 0;
     sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, BGM001_LOOP_SECTOR);
 }
@@ -145,31 +145,31 @@ engine_update()
     rotation.vy -= 8;
     rotation.vz -= 12;
 
-    // Change music
-    if(pad_pressed(PAD_L2) && cur_bgm != 0) {
-        sound_stop_xa();
-        music_num_channels = BGM001_NUM_CHANNELS;
-        music_channel = 0;
-        cur_bgm = 0;
-        sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, BGM001_LOOP_SECTOR);
-    } else if(pad_pressed(PAD_R2) && cur_bgm != 1) {
-        sound_stop_xa();
-        music_num_channels = BGM002_NUM_CHANNELS;
-        music_channel = 0;
-        cur_bgm = 1;
-        sound_play_xa("\\BGM\\BGM002.XA;1", 1, music_channel, BGM002_LOOP_SECTOR);
-    }
+    /* // Change music */
+    /* if(pad_pressed(PAD_L2) && cur_bgm != 0) { */
+    /*     sound_stop_xa(); */
+    /*     music_num_channels = BGM001_NUM_CHANNELS; */
+    /*     music_channel = 0; */
+    /*     cur_bgm = 0; */
+    /*     sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, BGM001_LOOP_SECTOR); */
+    /* } else if(pad_pressed(PAD_R2) && cur_bgm != 1) { */
+    /*     sound_stop_xa(); */
+    /*     music_num_channels = BGM002_NUM_CHANNELS; */
+    /*     music_channel = 0; */
+    /*     cur_bgm = 1; */
+    /*     sound_play_xa("\\BGM\\BGM002.XA;1", 1, music_channel, BGM002_LOOP_SECTOR); */
+    /* } */
     
-    // Change music channel
-    if(pad_pressed(PAD_R1) && (music_channel < music_num_channels - 1)) {
-        music_channel++;
-        sound_xa_set_channel(music_channel);
-    }
+    /* // Change music channel */
+    /* if(pad_pressed(PAD_R1) && (music_channel < music_num_channels - 1)) { */
+    /*     music_channel++; */
+    /*     sound_xa_set_channel(music_channel); */
+    /* } */
 
-    if(pad_pressed(PAD_L1) && (music_channel > 0)) {
-        music_channel--;
-        sound_xa_set_channel(music_channel);
-    }
+    /* if(pad_pressed(PAD_L1) && (music_channel > 0)) { */
+    /*     music_channel--; */
+    /*     sound_xa_set_channel(music_channel); */
+    /* } */
 
     if(pad_pressed(PAD_SELECT)) {
         debug_mode = !debug_mode;
@@ -236,73 +236,123 @@ engine_update()
         ay = anchory - (cam_pos.vy >> 12) + CENTERY;
 
     if(debug_mode) {
-        LINE_F2 line;
-        setLineF2(&line);
+        LINE_F2 *line;
 
         // Ground sensor left
-        setRGB0(&line, 0, 93, 0);
-        setXY2(&line, ax - grn_ceil_dist, ay + 8, ax - grn_ceil_dist, ay + 8 + grn_mag);
-        DrawPrim((void *)&line);
-        // (dot)
-        if(ev_grnd1.collided) setRGB0(&line, 255, 0, 0);
-        else                  setRGB0(&line, 255, 255, 255);
-        setXY2(&line, ax - grn_ceil_dist, ay + 8 + grn_mag, ax - grn_ceil_dist, ay + 8 + grn_mag);
-        DrawPrim((void *)&line);
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(ev_grnd1.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0(line, 0, 93, 0);
+        setXY2(line, ax - grn_ceil_dist, ay + 8, ax - grn_ceil_dist, ay + 8 + grn_mag);
+        sort_prim(line, 0);
+
+        /* // (dot) */
+        /* line = get_next_prim(); */
+        /* increment_prim(sizeof(LINE_F2)); */
+        /* setLineF2(line); */
+        /* if(ev_grnd1.collided) setRGB0(line, 255, 0, 0); */
+        /* else                  setRGB0(line, 255, 255, 255); */
+        /* setXY2(line, ax - grn_ceil_dist, ay + 8 + grn_mag, ax - grn_ceil_dist, ay + 8 + grn_mag); */
+        /* sort_prim(line, 0); */
     
         // Ground sensor right
-        setRGB0(&line, 23, 99, 63);
-        setXY2(&line, ax + grn_ceil_dist, ay + 8, ax + grn_ceil_dist, ay + 8 + grn_mag);
-        DrawPrim((void *)&line);
-        // (dot)
-        if(ev_grnd2.collided) setRGB0(&line, 255, 0, 0);
-        else                  setRGB0(&line, 255, 255, 255);
-        setXY2(&line, ax + grn_ceil_dist, ay + 8 + grn_mag, ax + grn_ceil_dist, ay + 8 + grn_mag);
-        DrawPrim((void *)&line);
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(ev_grnd2.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0(line, 23, 99, 63);
+        setXY2(line, ax + grn_ceil_dist, ay + 8, ax + grn_ceil_dist, ay + 8 + grn_mag);
+        sort_prim(line, 0);
+
+        /* // (dot) */
+        /* line = get_next_prim(); */
+        /* increment_prim(sizeof(LINE_F2)); */
+        /* setLineF2(line); */
+        /* if(ev_grnd2.collided) setRGB0(line, 255, 0, 0); */
+        /* else                  setRGB0(line, 255, 255, 255); */
+        /* setXY2(line, ax + grn_ceil_dist, ay + 8 + grn_mag, ax + grn_ceil_dist, ay + 8 + grn_mag); */
+        /* sort_prim(line, 0); */
     
         // Ceiling sensor left
-        setRGB0(&line, 0, 68, 93);
-        setXY2(&line, ax - grn_ceil_dist, ay - 8, ax - grn_ceil_dist, ay - 8 - ceil_mag);
-        DrawPrim((void *)&line);
-        // (dot)
-        if(ev_ceil1.collided) setRGB0(&line, 255, 0, 0);
-        else                  setRGB0(&line, 255, 255, 255);
-        setXY2(&line, ax - grn_ceil_dist, ay - 8 - ceil_mag, ax - grn_ceil_dist, ay - 8 - ceil_mag);
-        DrawPrim((void *)&line);
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(ev_ceil1.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0(line, 0, 68, 93);
+        setXY2(line, ax - grn_ceil_dist, ay - 8, ax - grn_ceil_dist, ay - 8 - ceil_mag);
+        sort_prim(line, 0);
+
+        /* // (dot) */
+        /* line = get_next_prim(); */
+        /* increment_prim(sizeof(LINE_F2)); */
+        /* setLineF2(line); */
+        /* if(ev_ceil1.collided) setRGB0(line, 255, 0, 0); */
+        /* else                  setRGB0(line, 255, 255, 255); */
+        /* setXY2(line, ax - grn_ceil_dist, ay - 8 - ceil_mag, ax - grn_ceil_dist, ay - 8 - ceil_mag); */
+        /* sort_prim(line, 0); */
     
         // Ceiling sensor right
-        setRGB0(&line, 99, 94, 23);
-        setXY2(&line, ax + grn_ceil_dist, ay - 8, ax + grn_ceil_dist, ay - 8 - ceil_mag);
-        DrawPrim((void *)&line);
-        // (dot)
-        if(ev_ceil2.collided) setRGB0(&line, 255, 0, 0);
-        else                  setRGB0(&line, 255, 255, 255);
-        setXY2(&line, ax + grn_ceil_dist, ay - 8 - ceil_mag, ax + grn_ceil_dist, ay - 8 - ceil_mag);
-        DrawPrim((void *)&line);
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(ev_ceil2.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0( line, 99, 94, 23);
+        setXY2( line, ax + grn_ceil_dist, ay - 8, ax + grn_ceil_dist, ay - 8 - ceil_mag);
+        sort_prim(line, 0);
+
+        /* // (dot) */
+        /* line = get_next_prim(); */
+        /* increment_prim(sizeof(LINE_F2)); */
+        /* setLineF2(line); */
+        /* if(ev_ceil2.collided) setRGB0(line, 255, 0, 0); */
+        /* else                  setRGB0(line, 255, 255, 255); */
+        /* setXY2(line, ax + grn_ceil_dist, ay - 8 - ceil_mag, ax + grn_ceil_dist, ay - 8 - ceil_mag); */
+        /* sort_prim(line, 0); */
     
         // Left sensor
-        setRGB0(&line, 99, 23, 99);
-        setXY2(&line, ax, ay, ax - left_mag, ay);
-        DrawPrim((void *)&line);
-        // (dot)
-        if(ev_left.collided) setRGB0(&line, 255, 0, 0);
-        else                 setRGB0(&line, 255, 255, 255);
-        setXY2(&line, ax - left_mag, ay, ax - left_mag, ay);
-        DrawPrim((void *)&line);
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(ev_left.collided) setRGB0(line, 255, 0, 0);
+        else                 setRGB0(line, 99, 23, 99);
+        setXY2(line, ax, ay, ax - left_mag, ay);
+        sort_prim(line, 0);
+
+        /* // (dot) */
+        /* line = get_next_prim(); */
+        /* increment_prim(sizeof(LINE_F2)); */
+        /* setLineF2(line); */
+        /* if(ev_left.collided) setRGB0(line, 255, 0, 0); */
+        /* else                 setRGB0(line, 255, 255, 255); */
+        /* setXY2(line, ax - left_mag, ay, ax - left_mag, ay); */
+        /* sort_prim(line, 0); */
     
         // Right sensor
-        setRGB0(&line, 99, 23, 99);
-        setXY2(&line, ax, ay, ax + right_mag, ay);
-        DrawPrim((void *)&line);
-        // (dot)
-        if(ev_right.collided) setRGB0(&line, 255, 0, 0);
-        else                  setRGB0(&line, 255, 255, 255);
-        setXY2(&line, ax + right_mag, ay, ax + right_mag, ay);
-        DrawPrim((void *)&line);
+        line = get_next_prim();
+        increment_prim(sizeof(LINE_F2));
+        setLineF2(line);
+        if(ev_right.collided) setRGB0(line, 255, 0, 0);
+        else                  setRGB0(line, 99, 23, 99);
+        setXY2(line, ax, ay, ax + right_mag, ay);
+        sort_prim(line, 0);
 
-        // Player center (dot)
-        setRGB0(&line, 255, 255, 255);
-        setXY2(&line, ax, ay, ax, ay);
-        DrawPrim((void *)&line);
+        /* // (dot) */
+        /* line = get_next_prim(); */
+        /* increment_prim(sizeof(LINE_F2)); */
+        /* setLineF2(line); */
+        /* if(ev_right.collided) setRGB0(line, 255, 0, 0); */
+        /* else                  setRGB0(line, 255, 255, 255); */
+        /* setXY2(line, ax + right_mag, ay, ax + right_mag, ay); */
+        /* sort_prim(line, 0); */
+
+        /* // Player center (dot) */
+        /* line = get_next_prim(); */
+        /* increment_prim(sizeof(LINE_F2)); */
+        /* setLineF2(line); */
+        /* setRGB0(line, 255, 255, 255); */
+        /* setXY2(line, ax, ay, ax, ay); */
+        /* sort_prim(line, 0); */
     }
 
     /* Player collision detection */
@@ -313,11 +363,11 @@ engine_update()
 
     if(ev_left.collided && player.vel.vx < 0) {
         player.vel.vx = 0;
-        player.pos.vx = ((player.pos.vx >> 12) + (int32_t)(ev_left.pushback) - 4) << 12;
+        player.pos.vx = ((player.pos.vx >> 12) + (int32_t)(ev_left.pushback) - 4 - 1) << 12;
     }
 
     if(!player.grnd) {
-        if((ev_grnd1.collided || ev_grnd2.collided) && (player.vel.vy > 0)) {
+        if((ev_grnd1.collided || ev_grnd2.collided) && (player.vel.vy >= 0)) {
             player.vel.vy = 0;
             int32_t pushback =
                 (ev_grnd1.pushback > ev_grnd2.pushback)
@@ -327,12 +377,21 @@ engine_update()
             player.grnd = 1;
             player.jmp = 0;
         }
+
+        if((ev_ceil1.collided || ev_ceil2.collided) && (player.vel.vy < 0)) {
+            player.vel.vy = 0;
+            int32_t pushback =
+                (ev_ceil1.pushback > ev_ceil2.pushback)
+                ? ev_ceil1.pushback
+                : ev_ceil2.pushback;
+            player.pos.vy = ((player.pos.vy >> 12) + pushback) << 12;
+        }
     } else {
         if(!ev_grnd1.collided && !ev_grnd2.collided) {
             player.grnd = 0;
         }
     }
-    
+
     player_update(&player);
 }
 
@@ -400,20 +459,21 @@ engine_draw()
 
     
     
-    // Sound debug
+    // Sound and video debug
     snprintf(buffer, 255,
-             "%4s %3d\n"
+             "%4s %3d\n",
              /* "FPS %4d\n" */
              /* "VMD %4s\n" */
-             "MUS %2u/2\n"
-             "CHN  %1u/%1u\n"
-             "%08u",
+             /* "MUS %2u/2\n" */
+             /* "CHN  %1u/%1u\n" */
+             /* "%08u", */
              GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
-             get_frame_rate(),
-             cur_bgm + 1,
-             music_channel + 1,
-             music_num_channels,
-             elapsed_sectors);
+             get_frame_rate()
+             /* cur_bgm + 1, */
+             /* music_channel + 1, */
+             /* music_num_channels, */
+             /* elapsed_sectors */
+             );
     draw_text(248, 12, 0, buffer);
 
     // Player debug
@@ -423,21 +483,21 @@ engine_draw()
              "VEL %08x %08x\n"
              "GSP %08x\n"
              "DIR %c\n"
-             "GRN %1x %2d // %1x %2d\n"
-             "CEI %1x %2d // %1x %2d\n"
-             "LEF %1x %2d\n"
-             "RIG %1x %2d\n",
+             "GRN %c(%2d) // %c(%2d)\n"
+             "CEI %c(%2d) // %c(%2d)\n"
+             "LEF %c(%2d)\n"
+             "RIG %c(%2d)\n",
              /* cam_pos.vx, cam_pos.vy, */
              player.pos.vx, player.pos.vy,
              player.vel.vx, player.vel.vy,
              player.vel.vz,
              player.anim_dir >= 0 ? 'R' : 'L',
-             ev_grnd1.collided, ev_grnd1.pushback,
-             ev_grnd2.collided, ev_grnd2.pushback,
-             ev_ceil1.collided, ev_ceil1.pushback,
-             ev_ceil2.collided, ev_ceil2.pushback,
-             ev_left.collided, ev_left.pushback,
-             ev_right.collided, ev_right.pushback);
+             ev_grnd1.collided ? 'Y' : 'N', ev_grnd1.pushback,
+             ev_grnd2.collided ? 'Y' : 'N', ev_grnd2.pushback,
+             ev_ceil1.collided ? 'Y' : 'N', ev_ceil1.pushback,
+             ev_ceil2.collided ? 'Y' : 'N', ev_ceil2.pushback,
+             ev_left.collided ? 'Y' : 'N', ev_left.pushback,
+             ev_right.collided ? 'Y' : 'N', ev_right.pushback);
     draw_text(8, 12, 0, buffer);
 }
 
