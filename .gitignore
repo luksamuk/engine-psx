@@ -8,3 +8,4 @@ build/
 /*.lua
 /*.mcd
 /*.chd
+*.tiled-session

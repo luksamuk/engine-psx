@@ -3,9 +3,9 @@
 #include <psxetc.h>
 #include <stdio.h>
 
-extern volatile int timer_counter;
-extern volatile int frame_counter;
-extern volatile int frame_rate;
+volatile int timer_counter = 0;
+volatile int frame_counter = 0;
+volatile int frame_rate = 0;
 
 void
 timer_tick()

@@ -21,12 +21,14 @@ typedef struct {
     CharaAnim *cur_anim;
     VECTOR    pos;
     VECTOR    vel; // vel.vz = ground speed
+    int32_t   angle;
     uint8_t   anim_frame;
     uint8_t   anim_timer;
     int8_t    anim_dir;
     uint8_t   idle_timer;
     uint8_t   grnd;
     uint8_t   jmp;
+    uint8_t   push;
 
     CollisionEvent ev_grnd1;
     CollisionEvent ev_grnd2;

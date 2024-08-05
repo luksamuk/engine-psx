@@ -16,18 +16,11 @@
 #include "player.h"
 #include "level.h"
 #include "timer.h"
-
-// Timer-related
-volatile int timer_counter = 0;
-volatile int frame_counter = 0;
-volatile int frame_rate = 0;
+#include "camera.h"
 
 int debug_mode = 0;
 
-/* #define SPRTSZ 56 */
-
-/* static int  x = (SPRTSZ >> 1),  y = (SPRTSZ >> 1); */
-/* static int dx = 1,  dy = 1; */
+static int dx = 1,  dy = 1;
 
 static SVECTOR vertices[] = {
     { -64, -64, -64, 0 },
@@ -51,7 +44,7 @@ static short faces[] = {
 
 static SVECTOR rotation = { 0 };
 static VECTOR  pos      = { 0, 0, 450 };
-static VECTOR  scale    = { ONE, ONE, ONE };
+static VECTOR  scale    = { ONE >> 1, ONE >> 1, ONE >> 1 };
 static MATRIX  world    = { 0 };
 
 static Player     player;
@@ -68,7 +61,7 @@ static uint8_t cur_bgm = 0;
 static uint8_t music_num_channels = BGM001_NUM_CHANNELS;
 static uint8_t music_channel = 0;
 
-VECTOR cam_pos = { 0 };
+Camera camera;
 
 void
 engine_init()
@@ -111,8 +104,10 @@ engine_init()
 
     //cam_pos.vx = 1216 * ONE;
     //cam_pos.vy = 448 * ONE;
-    cam_pos.vx = CENTERX * ONE;
-    cam_pos.vy = CENTERY * ONE;
+    //cam_pos.vx = CENTERX * ONE;
+    //cam_pos.vy = CENTERY * ONE;
+
+    camera_init(&camera);
 
     // Start playback after we don't need the CD anymore.
     sound_stop_xa();
@@ -128,11 +123,10 @@ engine_update()
     sound_update();
     pad_update();
 
-    /* if(x < (SPRTSZ >> 1) || x > (SCREEN_XRES - 32)) dx = -dx; */
-    /* if(y < (SPRTSZ >> 1) || y > (SCREEN_YRES - 32)) dy = -dy; */
-
-    /* x += dx; */
-    /* y += dy; */
+    if(pos.vx < -CENTERX || pos.vx > CENTERX) dx = -dx;
+    if(pos.vy < -CENTERY || pos.vy > CENTERY) dy = -dy;
+    pos.vx += dx;
+    pos.vy += dy;
 
     rotation.vx += 6;
     rotation.vy -= 8;
@@ -168,25 +162,13 @@ engine_update()
         debug_mode = !debug_mode;
     }
 
-/* #define SPD (8 * ONE) */
+    if(pad_pressed(PAD_START)) {
+        player.pos = (VECTOR){ CENTERX << 12, CENTERY << 12, 0 };
+        player.grnd = 0;
+        player.vel.vx = player.vel.vy = player.vel.vz = 0;
+    }
 
-/*     if(pad_pressing(PAD_RIGHT)) { */
-/*         cam_pos.vx += SPD; */
-/*     } */
-
-/*     if(pad_pressing(PAD_LEFT)) { */
-/*         cam_pos.vx -= SPD; */
-/*     } */
-
-/*     if(pad_pressing(PAD_UP)) { */
-/*         cam_pos.vy -= SPD; */
-/*     } */
-
-/*     if(pad_pressing(PAD_DOWN)) { */
-/*         cam_pos.vy += SPD; */
-/*     } */
-
-    cam_pos = player.pos;
+    camera_update(&camera, &player);
 
     player_update(&player);
 }
@@ -197,25 +179,13 @@ static char buffer[255] = { 0 };
 void
 engine_draw()
 {
-    //chara_render_test(&player.chara);
-    player_draw(&player, &(VECTOR){CENTERX << 12, CENTERY << 12, 0});
-
-    render_lvl(&leveldata, &map128, &map16, cam_pos.vx, cam_pos.vy);
-
-    // Gouraud-shaded SQUARE
-    /* POLY_G4 *poly = (POLY_G4 *) get_next_prim(); */
-    /* setPolyG4(poly); */
-    /* setXY4(poly, */
-    /*        x - (SPRTSZ >> 1), y - (SPRTSZ >> 1), */
-    /*        x + (SPRTSZ >> 1), y - (SPRTSZ >> 1), */
-    /*        x - (SPRTSZ >> 1), y + (SPRTSZ >> 1), */
-    /*        x + (SPRTSZ >> 1), y + (SPRTSZ >> 1)); */
-    /* setRGB0(poly, 255, 0, 0); */
-    /* setRGB1(poly, 0, 255, 0); */
-    /* setRGB2(poly, 0, 0, 255); */
-    /* setRGB3(poly, 255, 255, 0); */
-    /* sort_prim(poly, 1); */
-    /* increment_prim(sizeof(POLY_G4)); */
+    VECTOR player_canvas_pos = {
+        player.pos.vx - camera.pos.vx + (CENTERX << 12),
+        player.pos.vy - camera.pos.vy + (CENTERY << 12),
+        0
+    };
+    player_draw(&player, &player_canvas_pos);
+    render_lvl(&leveldata, &map128, &map16, camera.pos.vx, camera.pos.vy);
 
     // Gouraud-shaded cube
     RotMatrix(&rotation, &world);
@@ -273,28 +243,30 @@ engine_draw()
     draw_text(248, 12, 0, buffer);
 
     // Player debug
-    snprintf(buffer, 255,
-             /* "CAM %08x %08x\n" */
-             "POS %08x %08x\n"
-             "VEL %08x %08x\n"
-             "GSP %08x\n"
-             "DIR %c\n"
-             "GRN %c(%2d) // %c(%2d)\n"
-             "CEI %c(%2d) // %c(%2d)\n"
-             "LEF %c(%2d)\n"
-             "RIG %c(%2d)\n",
-             /* cam_pos.vx, cam_pos.vy, */
-             player.pos.vx, player.pos.vy,
-             player.vel.vx, player.vel.vy,
-             player.vel.vz,
-             player.anim_dir >= 0 ? 'R' : 'L',
-             player.ev_grnd1.collided ? 'Y' : 'N', player.ev_grnd1.pushback,
-             player.ev_grnd2.collided ? 'Y' : 'N', player.ev_grnd2.pushback,
-             player.ev_ceil1.collided ? 'Y' : 'N', player.ev_ceil1.pushback,
-             player.ev_ceil2.collided ? 'Y' : 'N', player.ev_ceil2.pushback,
-             player.ev_left.collided ? 'Y' : 'N', player.ev_left.pushback,
-             player.ev_right.collided ? 'Y' : 'N', player.ev_right.pushback);
-    draw_text(8, 12, 0, buffer);
+    if(debug_mode) {
+        snprintf(buffer, 255,
+                 /* "CAM %08x %08x\n" */
+                 "POS %08x %08x\n"
+                 "VEL %08x %08x\n"
+                 "GSP %08x\n"
+                 "DIR %c\n"
+                 "GRN %c(%2d) // %c(%2d)\n"
+                 "CEI %c(%2d) // %c(%2d)\n"
+                 "LEF %c(%2d)\n"
+                 "RIG %c(%2d)\n",
+                 /* cam_pos.vx, cam_pos.vy, */
+                 player.pos.vx, player.pos.vy,
+                 player.vel.vx, player.vel.vy,
+                 player.vel.vz,
+                 player.anim_dir >= 0 ? 'R' : 'L',
+                 player.ev_grnd1.collided ? 'Y' : 'N', player.ev_grnd1.pushback,
+                 player.ev_grnd2.collided ? 'Y' : 'N', player.ev_grnd2.pushback,
+                 player.ev_ceil1.collided ? 'Y' : 'N', player.ev_ceil1.pushback,
+                 player.ev_ceil2.collided ? 'Y' : 'N', player.ev_ceil2.pushback,
+                 player.ev_left.collided ? 'Y' : 'N', player.ev_left.pushback,
+                 player.ev_right.collided ? 'Y' : 'N', player.ev_right.pushback);
+        draw_text(8, 12, 0, buffer);
+    }
 }
 
 int

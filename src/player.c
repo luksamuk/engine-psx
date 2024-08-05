@@ -7,6 +7,7 @@
 #include "input.h"
 #include "render.h"
 #include "sound.h"
+#include "camera.h"
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
@@ -32,7 +33,7 @@ SoundEffect sfx_jump = { 0 };
 extern TileMap16  map16;
 extern TileMap128 map128;
 extern LevelData  leveldata;
-extern VECTOR     cam_pos;
+extern Camera     camera;
 
 void
 load_player(Player *player,
@@ -41,13 +42,15 @@ load_player(Player *player,
 {
     load_chara(&player->chara, chara_filename, sprites);
     player->cur_anim = NULL;
-    player->pos = (VECTOR){ 0 };
-    player->vel = (VECTOR){ 0 };
+    player->pos   = (VECTOR){ 0 };
+    player->vel   = (VECTOR){ 0 };
+    player->angle = 0;
+
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
     player->anim_dir = 1;
     player->idle_timer = ANIM_IDLE_TIMER_MAX;
-    player->grnd = player->jmp = 0;
+    player->grnd = player->jmp = player->push = 0;
 
     player->ev_grnd1 = (CollisionEvent){ 0 };
     player->ev_grnd2 = (CollisionEvent){ 0 };
@@ -152,11 +155,15 @@ _player_collision_linecast(Player *player)
                                 0, right_mag);
 
     /* Draw Colliders */
-    uint16_t
-        ax = anchorx - (cam_pos.vx >> 12) + CENTERX,
-        ay = anchory - (cam_pos.vy >> 12) + CENTERY;
-
     if(debug_mode) {
+        VECTOR player_canvas_pos = {
+            player->pos.vx - camera.pos.vx + (CENTERX << 12),
+            player->pos.vy - camera.pos.vy + (CENTERY << 12),
+            0
+        };
+        uint16_t ax = (player_canvas_pos.vx >> 12),
+            ay = (player_canvas_pos.vy >> 12) + 4;
+
         LINE_F2 *line;
 
         // Ground sensor left
@@ -218,16 +225,19 @@ _player_collision_linecast(Player *player)
 void
 _player_collision_detection(Player *player)
 {
+    player->push = 0;
     _player_collision_linecast(player);
 
     if(player->ev_right.collided && player->vel.vx > 0) {
         player->vel.vx = 0;
         player->pos.vx = ((player->pos.vx >> 12) - (int32_t)(player->ev_right.pushback)) << 12;
+        player->push = 1;
     }
 
     if(player->ev_left.collided && player->vel.vx < 0) {
         player->vel.vx = 0;
         player->pos.vx = ((player->pos.vx >> 12) + (int32_t)(player->ev_left.pushback) - 4 - 1) << 12;
+        player->push = 1;
     }
 
     if(!player->grnd) {
@@ -300,13 +310,6 @@ player_update(Player *player)
     if(!player->grnd) {
         player->vel.vy += Y_GRAVITY;
 
-        /* if(player->pos.vy >= DUMMY_GROUND) { */
-        /*     player->vel.vy = 0; */
-        /*     player->pos.vy = DUMMY_GROUND; */
-        /*     player->grnd = 1; */
-        /*     player->jmp = 0; */
-        /* } */
-
         if(player->jmp
            && !pad_pressing(PAD_CROSS)
            && player->vel.vy < -Y_MIN_JUMP) {
@@ -324,7 +327,10 @@ player_update(Player *player)
 
     // Animation
     if(player->grnd) {
-        if(player->vel.vx == 0) {
+        if(player->push) {
+            player_set_animation_direct(player, ANIM_PUSHING);
+            player->idle_timer = ANIM_IDLE_TIMER_MAX;
+        } else if(player->vel.vx == 0) {
             if(pad_pressing(PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;

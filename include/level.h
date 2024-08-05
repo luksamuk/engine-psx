@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <psxgpu.h>
 
+#define LEVEL_MAX_X_CHUNKS 255
+#define LEVEL_MAX_Y_CHUNKS 31
+
 /* TODO: ALL LEVEL DATA SHOULD PROBABLY BE USING A LEVEL-WIDE ARENA ALLOCATOR. */
 
 typedef struct {
