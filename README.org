@@ -103,10 +103,10 @@ tochd -d . -- ./build/engine.cue
 
 | Screenshot                                            | Description                                                                                       |
 |-------------------------------------------------------+---------------------------------------------------------------------------------------------------|
-| [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine ([2024-08-05]). Same as screenshot below, but on a physical PlayStation (SCPH-5501). |
-| [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine ([2024-08-05]). First implementation of collision, camera and level data.            |
-| [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine ([2024-07-22]). Running on DuckStation.                                              |
-| [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine ([2024-07-21]). Running on a physical PlayStation (SCPH-5501).                       |
+| [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine [2024-08-05]. Same as screenshot below, but on a physical PlayStation (SCPH-5501).  |
+| [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine [2024-08-05]. First implementation of collision, camera and level data.             |
+| [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine [2024-07-22]. Running on DuckStation.                                               |
+| [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine [2024-07-21]. Running on a physical PlayStation (SCPH-5501).                        |
 
 
 * License
