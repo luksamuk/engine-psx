@@ -3,6 +3,37 @@
 #include <stdio.h>
 #include "util.h"
 #include "render.h"
+#include "memalloc.h"
+
+static ArenaAllocator _level_arena = { 0 };
+static uint8_t _arena_mem[LEVEL_ARENA_SIZE];
+
+void
+level_init()
+{
+    alloc_arena_init(&_level_arena, &_arena_mem, LEVEL_ARENA_SIZE);
+}
+
+void
+level_reset()
+{
+    alloc_arena_free(&_level_arena);
+}
+
+void
+level_debrief()
+{
+    printf("Arena start address: 0x%08x\n"
+           "Arena end address:   0x%08x\n"
+           "Arena bytes size:    %lu\n"
+           "Arena bytes used:    %lu\n"
+           "Arena bytes free:    %lu\n",
+           _level_arena.start,
+           _level_arena.start + _level_arena.size,
+           _level_arena.size,
+           alloc_arena_bytes_used(&_level_arena),
+           alloc_arena_bytes_free(&_level_arena));
+}
 
 #define TILECLIP(sz) \
     { \
@@ -28,7 +59,7 @@ _load_collision(TileMap16 *mapping, const char *filename)
 
     for(uint16_t i = 0; i < num_tiles; i++) {
         uint16_t tile_id = get_short_be(bytes, &b);
-        mapping->collision[tile_id] = malloc(sizeof(Collision));
+        mapping->collision[tile_id] = alloc_arena_malloc(&_level_arena, sizeof(Collision));
         Collision *collision = mapping->collision[tile_id];
 
         for(int j = 0; j < 8; j++)
@@ -65,8 +96,7 @@ load_map(TileMapping *mapping, const char *filename, const char *collision_filen
     uint32_t frames_per_tile = mapping->frame_side * mapping->frame_side;
     uint32_t total_frames = frames_per_tile * mapping->num_tiles;
 
-    mapping->frames = malloc(total_frames * sizeof(uint16_t));
-    printf("Total allocated frames: %lu B\n", total_frames * sizeof(uint16_t));
+    mapping->frames = alloc_arena_malloc(&_level_arena, total_frames * sizeof(uint16_t));
     for(uint32_t i = 0; i < total_frames; i++) {
         mapping->frames[i] = get_short_be(bytes, &b);
     }
@@ -79,23 +109,11 @@ load_map(TileMapping *mapping, const char *filename, const char *collision_filen
     }
 
     // Load collision data
-    mapping->collision = malloc((mapping->num_tiles + 1) * sizeof(Collision *));
+    mapping->collision = alloc_arena_malloc(&_level_arena, (mapping->num_tiles + 1) * sizeof(Collision *));
     for(uint16_t i = 0; i < mapping->num_tiles; i++) {
         mapping->collision[i] = NULL;
     }
     _load_collision(mapping, collision_filename);
-}
-
-void
-free_map(TileMapping *mapping)
-{
-    free(mapping->frames);
-    for(uint16_t i = 0; i < mapping->num_tiles; i++) {
-        if(mapping->collision[i] != NULL) {
-            free(mapping->collision[i]);
-        }
-    }
-    free(mapping->collision);
 }
 
 void
@@ -106,7 +124,6 @@ load_lvl(LevelData *lvl, const char *filename)
 
     bytes = file_read(filename, &length);
     if(bytes == NULL) {
-        printf("Error reading LVL file %s from the CD.\n", filename);
         return;
     }
 
@@ -115,15 +132,13 @@ load_lvl(LevelData *lvl, const char *filename)
     lvl->num_layers = get_byte(bytes, &b);
     lvl->_unused0 = 0; b += 1;
 
-    lvl->layers = malloc(lvl->num_layers * sizeof(LevelLayerData));
-    printf("Allocated layers table: %lu B\n", lvl->num_layers * sizeof(LevelLayerData));
+    lvl->layers = alloc_arena_malloc(&_level_arena, lvl->num_layers * sizeof(LevelLayerData));
     for(uint8_t n_layer = 0; n_layer < lvl->num_layers; n_layer++) {
         LevelLayerData *layer = &lvl->layers[n_layer];
         layer->width = get_byte(bytes, &b);
         layer->height = get_byte(bytes, &b);
         uint16_t num_tiles = (uint16_t)layer->width * (uint16_t)layer->height;
-        layer->tiles = malloc(num_tiles * sizeof(uint16_t));
-        printf("Allocated tiles for layer: %lu B\n", num_tiles * sizeof(uint16_t));
+        layer->tiles = alloc_arena_malloc(&_level_arena, num_tiles * sizeof(uint16_t));
         for(uint16_t i = 0; i < num_tiles; i++) {
             layer->tiles[i] = get_short_be(bytes, &b);
         }
@@ -137,15 +152,6 @@ load_lvl(LevelData *lvl, const char *filename)
     lvl->_unused1 = 0;
 
     free(bytes);
-}
-
-void
-free_lvl(LevelData *lvl)
-{
-    for(uint8_t i = 0; i < lvl->num_layers; i++) {
-        free(lvl->layers[i].tiles);
-    }
-    free(lvl->layers);
 }
 
 

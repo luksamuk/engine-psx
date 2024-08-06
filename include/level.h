@@ -4,10 +4,9 @@
 #include <stdint.h>
 #include <psxgpu.h>
 
-#define LEVEL_MAX_X_CHUNKS 255
-#define LEVEL_MAX_Y_CHUNKS 31
-
-/* TODO: ALL LEVEL DATA SHOULD PROBABLY BE USING A LEVEL-WIDE ARENA ALLOCATOR. */
+#define LEVEL_MAX_X_CHUNKS   255
+#define LEVEL_MAX_Y_CHUNKS    31
+#define LEVEL_ARENA_SIZE   65536
 
 typedef struct {
     uint8_t floor[8];
@@ -51,11 +50,12 @@ typedef struct {
 } CollisionEvent;
 
 
-void load_map(TileMapping *mapping, const char *filename, const char *collision_filename);
-void free_map(TileMapping *mapping);
+void level_init();
+void level_reset();
+void level_debrief();
 
+void load_map(TileMapping *mapping, const char *filename, const char *collision_filename);
 void load_lvl(LevelData *lvl, const char *filename);
-void free_lvl(LevelData *lvl);
 
 void render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,

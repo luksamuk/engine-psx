@@ -71,6 +71,7 @@ engine_init()
     CdInit();
     pad_init();
     timer_init();
+    level_init();
 
     // Present a "Now Loading..." text
     swap_buffers();
@@ -101,6 +102,7 @@ engine_init()
     load_map(&map16, "\\LEVELS\\R0\\MAP16.MAP;1", "\\LEVELS\\R0\\R0.COLLISION;1");
     load_map(&map128, "\\LEVELS\\R0\\MAP128.MAP;1", NULL);
     load_lvl(&leveldata, "\\LEVELS\\R0\\Z1.LVL;1");
+    level_debrief();
 
     //cam_pos.vx = 1216 * ONE;
     //cam_pos.vy = 448 * ONE;
