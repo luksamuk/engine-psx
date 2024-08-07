@@ -46,4 +46,6 @@ void     sort_prim(void *prim, uint32_t otz);
 
 void draw_text(int x, int y, int z, const char *text);
 
+void render_loading_text();
+
 #endif

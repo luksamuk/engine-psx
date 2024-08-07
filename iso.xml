@@ -29,6 +29,9 @@
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z1.LVL" />
+	  <file name="Z2.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z2.LVL" />
 	  <file name="MAP128.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/MAP128.MAP" />

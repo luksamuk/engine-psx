@@ -108,3 +108,12 @@ get_ot_at(uint32_t otz)
     RenderBuffer *buffer = &ctx.buffers[ctx.active_buffer];
     return &buffer->ot[otz];
 }
+
+void
+render_loading_text()
+{
+    swap_buffers();
+    draw_text(CENTERX - 52, CENTERY - 4, 0, "Now Loading...");
+    swap_buffers();
+    swap_buffers();
+}
