@@ -16,10 +16,9 @@ import json
 import sys
 from pprint import pp as pprint
 from ctypes import c_ushort, c_ubyte
-import ctypes
 
 # Set endianness of some types to big endian
-c_ushort = ctypes.c_ushort.__ctype_be__
+c_ushort = c_ushort.__ctype_be__
 
 
 # Global variables

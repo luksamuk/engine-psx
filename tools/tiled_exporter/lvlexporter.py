@@ -9,11 +9,11 @@ import json
 class PSXPreLevel(Plugin):
     @classmethod
     def nameFilter(cls):
-        return "PlayStation pre-cooked map (*.lvl)"
+        return "PlayStation proto map (*.json)"
 
     @classmethod
     def shortName(cls):
-        return "lvl"
+        return "json"
 
     @classmethod
     def write(cls, tileMap, fileName):

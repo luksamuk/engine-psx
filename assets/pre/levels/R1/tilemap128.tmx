@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="16" tileheight="16" infinite="1" nextlayerid="2" nextobjectid="1">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="32" height="48" tilewidth="16" tileheight="16" infinite="1" nextlayerid="2" nextobjectid="1">
  <editorsettings>
-  <export target="tilemap128.csv" format="csv"/>
+  <export target="map128.csv" format="csv"/>
  </editorsettings>
  <tileset firstgid="1" source="tiles16.tsx"/>
- <layer id="1" name="Camada de Blocos 1" width="255" height="31">
+ <layer id="1" name="Camada de Blocos 1" width="32" height="48">
   <data encoding="csv">
    <chunk x="0" y="0" width="16" height="16">
 0,0,0,0,0,0,0,0,5,3,3,3,3,3,3,6,

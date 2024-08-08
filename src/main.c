@@ -53,7 +53,7 @@ TileMap16  map16;
 TileMap128 map128;
 LevelData  leveldata;
 
-#define BGM001_NUM_CHANNELS 2
+#define BGM001_NUM_CHANNELS 3
 #define BGM001_LOOP_SECTOR  7100
 
 static uint8_t cur_bgm = 0;
@@ -85,20 +85,31 @@ engine_load_level(uint8_t level)
 {
     set_clear_color(63, 0, 127);
 
+    char basepath[255];
+    char filename0[255], filename1[255];
+
+    uint8_t round = level >> 1;
+
+    snprintf(basepath, 255, "\\LEVELS\\R%1u", round);
+
     TIM_IMAGE tim;
     uint32_t filelength;
-    uint8_t *timfile = file_read("\\LEVELS\\R0\\TILES.TIM;1", &filelength);
+
+    snprintf(filename0, 255, "%s\\TILES.TIM;1", basepath);
+    uint8_t *timfile = file_read(filename0, &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
         free(timfile);
     }
 
-    load_map(&map16, "\\LEVELS\\R0\\MAP16.MAP;1", "\\LEVELS\\R0\\MAP16.COL;1");
-    load_map(&map128, "\\LEVELS\\R0\\MAP128.MAP;1", NULL);
+    snprintf(filename0, 255, "%s\\MAP16.MAP;1", basepath);
+    snprintf(filename1, 255, "%s\\MAP16.COL;1", basepath);
+    load_map(&map16, filename0, filename1);
+    snprintf(filename0, 255, "%s\\MAP128.MAP;1", basepath);
+    load_map(&map128, filename0, NULL);
 
-    if(level == 0)
-        load_lvl(&leveldata, "\\LEVELS\\R0\\Z1.LVL;1");
-    else load_lvl(&leveldata, "\\LEVELS\\R0\\Z2.LVL;1");
+    snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, (level & 0x01) + 1);
+    load_lvl(&leveldata, filename0);
 
     level_debrief();
 
@@ -107,7 +118,7 @@ engine_load_level(uint8_t level)
     // Start playback after we don't need the CD anymore.
     sound_stop_xa();
     music_num_channels = BGM001_NUM_CHANNELS;
-    music_channel = (level == 0) ? 0 : 1;
+    music_channel = level % BGM001_NUM_CHANNELS;
     cur_bgm = 0;
     sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, BGM001_LOOP_SECTOR);
 }
@@ -152,15 +163,17 @@ engine_update()
     sound_update();
     pad_update();
 
+#define MAX_LEVELS 3
+
     if(current_scene == 0) {
         if(pad_pressed(PAD_DOWN))
             menu_choice++;
         else if(pad_pressed(PAD_UP)) {
-            if(menu_choice == 0) menu_choice = 1;
+            if(menu_choice == 0) menu_choice = MAX_LEVELS - 1;
             else menu_choice--;
         }
 
-        menu_choice = (menu_choice % 2);
+        menu_choice = (menu_choice % MAX_LEVELS);
 
         if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
             set_clear_color(0, 0, 0);
@@ -209,15 +222,17 @@ engine_draw()
         draw_text(x, 12, 0, title);
 
         snprintf(buffer, 255, "%s %s", __DATE__, __TIME__);
-        x = CENTERX - (strlen(buffer) * 4);
-        draw_text(x, 24, 0, buffer);
+        x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
+        draw_text(x, SCREEN_YRES - 12, 0, buffer);
 
-        snprintf(buffer, 255,
-                 "%c Round 0 Zone 1\n"
-                 "%c Round 0 Zone 2\n",
-                 (menu_choice == 0) ? '>' : ' ',
-                 (menu_choice == 1) ? '>' : ' '
-            );
+        snprintf(
+            buffer, 255,
+            "%c Round 0 Zone 1\n"
+            "%c Round 0 Zone 2\n"
+            "%c Round 1 Zone 1\n",
+            (menu_choice == 0) ? '>' : ' ',
+            (menu_choice == 1) ? '>' : ' ',
+            (menu_choice == 2) ? '>' : ' ');
         draw_text(8, 60, 0, buffer);
     } else if(current_scene == 1) {
         VECTOR player_canvas_pos = {
