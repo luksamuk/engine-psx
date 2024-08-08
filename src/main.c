@@ -56,6 +56,8 @@ LevelData  leveldata;
 #define BGM001_NUM_CHANNELS 3
 #define BGM001_LOOP_SECTOR  7100
 
+static uint32_t bgm001_loop_sectors[] = { 7100, 7100, 3230 };
+
 static uint8_t cur_bgm = 0;
 static uint8_t music_num_channels = BGM001_NUM_CHANNELS;
 static uint8_t music_channel = 0;
@@ -120,7 +122,7 @@ engine_load_level(uint8_t level)
     music_num_channels = BGM001_NUM_CHANNELS;
     music_channel = level % BGM001_NUM_CHANNELS;
     cur_bgm = 0;
-    sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, BGM001_LOOP_SECTOR);
+    sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, bgm001_loop_sectors[music_channel]);
 }
 
 void
@@ -277,19 +279,21 @@ engine_draw()
         }
 
         // Sound and video debug
+        uint32_t elapsed_sectors;
+        sound_xa_get_elapsed_sectors(&elapsed_sectors);
         snprintf(buffer, 255,
-                 "%4s %3d\n",
+                 "%4s %3d\n"
                  /* "FPS %4d\n" */
                  /* "VMD %4s\n" */
                  /* "MUS %2u/2\n" */
                  /* "CHN  %1u/%1u\n" */
-                 /* "%08u", */
+                 "%08u",
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
-                 get_frame_rate()
+                 get_frame_rate(),
                  /* cur_bgm + 1, */
                  /* music_channel + 1, */
                  /* music_num_channels, */
-                 /* elapsed_sectors */
+                 elapsed_sectors
             );
         draw_text(248, 12, 0, buffer);
 
