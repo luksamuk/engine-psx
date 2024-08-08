@@ -92,12 +92,9 @@ engine_load_level(uint8_t level)
         load_texture(timfile, &tim);
         free(timfile);
     }
-    load_map(&map16,
-             "\\LEVELS\\R0\\MAP16.MAP;1",
-             "\\LEVELS\\R0\\R0.COLLISION;1");
-    load_map(&map128,
-             "\\LEVELS\\R0\\MAP128.MAP;1",
-             NULL);
+
+    load_map(&map16, "\\LEVELS\\R0\\MAP16.MAP;1", "\\LEVELS\\R0\\MAP16.COL;1");
+    load_map(&map128, "\\LEVELS\\R0\\MAP128.MAP;1", NULL);
 
     if(level == 0)
         load_lvl(&leveldata, "\\LEVELS\\R0\\Z1.LVL;1");
@@ -211,7 +208,7 @@ engine_draw()
         x = CENTERX - (strlen(title) * 4);
         draw_text(x, 12, 0, title);
 
-        snprintf(buffer, 255, "Built %s %s", __DATE__, __TIME__);
+        snprintf(buffer, 255, "%s %s", __DATE__, __TIME__);
         x = CENTERX - (strlen(buffer) * 4);
         draw_text(x, 24, 0, buffer);
 

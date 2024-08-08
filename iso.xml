@@ -38,12 +38,24 @@
 	  <file name="MAP16.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/MAP16.MAP" />
-	  <file name="R0.COLLISION"
+	  <file name="MAP16.COL"
 		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/R0.COLLISION" />
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/MAP16.COL" />
 	  <file name="TILES.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/TILES.TIM" />
+	</dir>
+
+	<dir name="R1">
+	  <file name="MAP16.COL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/MAP16.COL" />
+	  <file name="MAP16.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/MAP16.MAP" />
+	  <file name="TILES.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/TILES.TIM" />
 	</dir>
       </dir>
 

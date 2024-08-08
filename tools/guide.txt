@@ -1,0 +1,47 @@
+* Startup
+
+Everything starts with generating 16x16 tiles. You are welcome to start with 128x128 tiles if you find it easier,
+but you'll have to control well your tiles so they don't add up much. Remember that VRAM is limited on the
+PlayStation, so your art is going to have to be cut into 8x8 pieces, and these pieces should fill a 256x256
+texture at max, at the end of these steps, and shouldn't have too many colors, so let's say you're constrained to
+1023 tiles of 8x8 pixels (tile 0 is always a blank tile).
+
+Your first step is creating a 16x16.png file with your 16x16 tiles. If you started working with 128x128, you could probably cut them up into a single sprite sheet with the aid of Aseprite.
+
+* Generating 8x8 tiles and their 16x16 mappings
+
+The following steps will allow you to create intermediate files 'tiles.png', 'map16.json' and 'collision16.json'.
+
+You will also be able to cook these files into PlayStation-only engine files 'TILES.TIM', 'MAP16.MAP' and
+'MAP16.COL'. These are binary equivalents to the files above, with only relevant information.
+
+Extra files such as 'tiles16.tsx' will also be generated.
+
+ 1. Create 16x16.png tiles.
+ 2. Import 16x16.png tiles into a tiles16.tsx.
+ 3. Export tiles16.tsx from Tiled as collision16.json.
+ 4. Copy 16x16.png to 8x8.png.
+ 5. Open 8x8.png (still 16x16 tiles) on Aseprite.
+ 6. File > Import > Import Sprite Sheet. The single image will be used as one. Make it a 16x16 grid.
+ 7. Right click layer > Convert to > tilemap. Make it a 8x8 grid.
+ 8. File > Scripts > export_tilemap_psx. This will create a 8x8.json file. Rename it to map16.json.
+ 9. File > Scripts > export_tileset_psx. Use a 8x8 grid. This will overwrite 8x8.png. Rename it to tiles.png.
+10. Open tiles.png with your favorite editor and make sure that all transparent pixels are set to color
+    #000000 (black).
+11. Use TIMTOOL.EXE (preferably) from Psy-Q library to generate a .TIM for your tiles. This will generate a
+    TILES.TIM file on the same directory of the texture.
+    12.1 Make sure you un-mark the "Set for Black" option in Semi Transparent Information.
+    13.2 Make sure your tileset is at 448x0 and that the CLUT information is 4-bit depth and at 448x256.
+         Notice that texture pages 8 and 24 are for level tiles and CLUT information, respectively.
+12. Use the tool 'framepacker.py' to turn 'map16.json' into a 'MAP16.MAP' file.
+13. Use the tool 'cookcollision.py' to turn 'collision16.json' into a 'MAP16.COL' file.
+
+* Generating 128x128 tiles and mappings
+
+The following steps will 
+
+First of all, decide how you want to create these tiles. You *MUST* use the same tiles from your 16x16.png file.
+
+I created my 128x128 tiles by creating a new infinite tilemap on Tiled and using 16x16.png as my tileset. Then
+I just exported the tilemap as a .PNG file.
+
