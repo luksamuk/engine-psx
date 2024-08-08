@@ -33,8 +33,10 @@ Extra files such as 'tiles16.tsx' will also be generated.
     12.1 Make sure you un-mark the "Set for Black" option in Semi Transparent Information.
     13.2 Make sure your tileset is at 448x0 and that the CLUT information is 4-bit depth and at 448x256.
          Notice that texture pages 8 and 24 are for level tiles and CLUT information, respectively.
-12. Use the tool 'framepacker.py' to turn 'map16.json' into a 'MAP16.MAP' file.
-13. Use the tool 'cookcollision.py' to turn 'collision16.json' into a 'MAP16.COL' file.
+12. Use the tool 'framepacker.py' to turn 'map16.json' into a 'MAP16.MAP' file:
+    `framepacker.py --tilemap map16.json MAP16.MAP`
+13. Use the tool 'cookcollision.py' to turn 'collision16.json' into a 'MAP16.COL' file:
+    `cookcollision.py collision16.json MAP16.COL`
 
 * Generating 128x128 tiles and mappings
 
