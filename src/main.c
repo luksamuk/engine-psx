@@ -66,6 +66,7 @@ Camera camera;
 
 static uint8_t current_scene = 0;
 static uint8_t menu_choice = 0;
+static uint8_t paused = 0;
 
 void
 engine_load_player()
@@ -86,6 +87,7 @@ void
 engine_load_level(uint8_t level)
 {
     set_clear_color(63, 0, 127);
+    paused = 0;
 
     char basepath[255];
     char filename0[255], filename1[255];
@@ -183,9 +185,23 @@ engine_update()
 
             engine_load_player();
             engine_load_level(menu_choice);
+            menu_choice = 0;
             current_scene = 1;
         }
     } else if(current_scene == 1) {
+        if(pad_pressed(PAD_START)) paused = !paused;
+ 
+        if(paused) {
+            if(pad_pressed(PAD_SELECT)) {
+                set_clear_color(0, 0, 0);
+                render_loading_text();
+
+                engine_unload_level();
+                engine_load_menu();
+            }
+            return;
+        }
+        
         if(pos.vx < -CENTERX || pos.vx > CENTERX) dx = -dx;
         if(pos.vy < -CENTERY || pos.vy > CENTERY) dy = -dy;
         pos.vx += dx;
@@ -195,11 +211,12 @@ engine_update()
         rotation.vy -= 8;
         rotation.vz -= 12;
 
-        if(pad_pressed(PAD_SELECT)) {
+        if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
+           (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
             debug_mode = !debug_mode;
         }
 
-        if(pad_pressed(PAD_START)) {
+        if(pad_pressed(PAD_SELECT)) {
             player.pos = (VECTOR){ CENTERX << 12, CENTERY << 12, 0 };
             player.grnd = 0;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
@@ -276,6 +293,15 @@ engine_draw()
                 sort_prim(poly, otz);
                 increment_prim(sizeof(POLY_G4));
             }
+        }
+
+        // Pause text
+        if(paused) {
+            const char *line1 = "           Paused";
+            const char *line2 = "Press Select for Level Select";
+            snprintf(buffer, 255, "%s\n%s", line1, line2);
+            int16_t x = CENTERX - (strlen(line2) * 4);
+            draw_text(x, CENTERY - 12, 0, buffer);
         }
 
         // Sound and video debug
