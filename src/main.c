@@ -53,13 +53,16 @@ TileMap16  map16;
 TileMap128 map128;
 LevelData  leveldata;
 
-#define BGM001_NUM_CHANNELS 3
-#define BGM001_LOOP_SECTOR  7100
+#define CHANNELS_PER_BGM    3
 
-static uint32_t bgm001_loop_sectors[] = { 7100, 7100, 3230 };
+static uint32_t bgm_loop_sectors[] = {
+    4000,
+    4800,
+    3230,
 
-static uint8_t cur_bgm = 0;
-static uint8_t music_num_channels = BGM001_NUM_CHANNELS;
+    11000,
+};
+
 static uint8_t music_channel = 0;
 
 Camera camera;
@@ -121,10 +124,11 @@ engine_load_level(uint8_t level)
 
     // Start playback after we don't need the CD anymore.
     sound_stop_xa();
-    music_num_channels = BGM001_NUM_CHANNELS;
-    music_channel = level % BGM001_NUM_CHANNELS;
-    cur_bgm = 0;
-    sound_play_xa("\\BGM\\BGM001.XA;1", 0, music_channel, bgm001_loop_sectors[music_channel]);
+
+    snprintf(filename0, 255, "\\BGM\\BGM%03u.XA;1", (level / CHANNELS_PER_BGM) + 1);
+    music_channel = level % CHANNELS_PER_BGM;
+
+    sound_play_xa(filename0, 0, music_channel, bgm_loop_sectors[level]);
 }
 
 void
@@ -167,7 +171,7 @@ engine_update()
     sound_update();
     pad_update();
 
-#define MAX_LEVELS 3
+#define MAX_LEVELS 4
 
     if(current_scene == 0) {
         if(pad_pressed(PAD_DOWN))
@@ -248,10 +252,12 @@ engine_draw()
             buffer, 255,
             "%c Round 0 Zone 1\n"
             "%c Round 0 Zone 2\n"
-            "%c Round 1 Zone 1\n",
+            "%c Round 1 Zone 1\n"
+            "%c Round 1 Zone 2\n",
             (menu_choice == 0) ? '>' : ' ',
             (menu_choice == 1) ? '>' : ' ',
-            (menu_choice == 2) ? '>' : ' ');
+            (menu_choice == 2) ? '>' : ' ',
+            (menu_choice == 3) ? '>' : ' ');
         draw_text(8, 60, 0, buffer);
     } else if(current_scene == 1) {
         VECTOR player_canvas_pos = {
@@ -309,16 +315,9 @@ engine_draw()
         sound_xa_get_elapsed_sectors(&elapsed_sectors);
         snprintf(buffer, 255,
                  "%4s %3d\n"
-                 /* "FPS %4d\n" */
-                 /* "VMD %4s\n" */
-                 /* "MUS %2u/2\n" */
-                 /* "CHN  %1u/%1u\n" */
                  "%08u",
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
                  get_frame_rate(),
-                 /* cur_bgm + 1, */
-                 /* music_channel + 1, */
-                 /* music_num_channels, */
                  elapsed_sectors
             );
         draw_text(248, 12, 0, buffer);

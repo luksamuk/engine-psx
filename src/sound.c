@@ -214,7 +214,9 @@ _xacd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
             CdControlF(CdlReadS, &_xa_loc);
         }
         break;
-    default: break;
+    default:
+        printf("Event: %d\n", event);
+        break;
     };
 }
 
