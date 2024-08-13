@@ -16,4 +16,8 @@ void *alloc_arena_malloc(ArenaAllocator *arena, uint32_t size);
 uint32_t alloc_arena_bytes_used(ArenaAllocator *arena);
 uint32_t alloc_arena_bytes_free(ArenaAllocator *arena);
 
+void fastalloc_init();
+void fastalloc_free();
+void *fastalloc_malloc(uint32_t size);
+
 #endif

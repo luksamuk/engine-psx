@@ -18,6 +18,7 @@
 #include "level.h"
 #include "timer.h"
 #include "camera.h"
+#include "memalloc.h"
 
 int debug_mode = 0;
 
@@ -156,8 +157,9 @@ engine_init()
     CdInit();
     pad_init();
     timer_init();
-    level_init();
+    fastalloc_init();
 
+    level_init();
     set_clear_color(0, 0, 0);
     render_loading_text();
     set_clear_color(63, 0, 127);
