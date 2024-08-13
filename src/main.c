@@ -330,8 +330,8 @@ engine_draw()
                      "VEL %08x %08x\n"
                      "GSP %08x\n"
                      "DIR %c\n"
-                     "GR1 %c(%2d %5d)\n"
-                     "GR2 %c(%2d %5d)\n"
+                     "GR1 %c(%2d) @ %3ddeg\n"
+                     "GR2 %c(%2d) @ %3ddeg\n"
                      /* "CEI %c(%2d) // %c(%2d)\n" */
                      /* "LEF %c(%2d)\n" */
                      /* "RIG %c(%2d)\n" */
@@ -341,8 +341,12 @@ engine_draw()
                      player.vel.vx, player.vel.vy,
                      player.vel.vz,
                      player.anim_dir >= 0 ? 'R' : 'L',
-                     player.ev_grnd1.collided ? 'Y' : 'N', player.ev_grnd1.pushback,
-                     player.ev_grnd2.collided ? 'Y' : 'N', player.ev_grnd2.pushback
+                     player.ev_grnd1.collided ? 'Y' : 'N',
+                     player.ev_grnd1.pushback,
+                     (player.ev_grnd1.angle * (360 << 12)) >> 24,
+                     player.ev_grnd2.collided ? 'Y' : 'N',
+                     player.ev_grnd2.pushback,
+                     (player.ev_grnd2.angle * (360 << 12)) >> 24
                      /* player.ev_ceil1.collided ? 'Y' : 'N', player.ev_ceil1.pushback, */
                      /* player.ev_ceil2.collided ? 'Y' : 'N', player.ev_ceil2.pushback, */
                      /* player.ev_left.collided ? 'Y' : 'N', player.ev_left.pushback, */

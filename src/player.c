@@ -127,8 +127,8 @@ _player_collision_linecast(Player *player)
         anchory = (player->pos.vy >> 12) + 4;
 
     uint16_t grn_ceil_dist = 8;
-    uint16_t grn_mag   = 14;
-    uint16_t ceil_mag  = 14;
+    uint16_t grn_mag   = 16;
+    uint16_t ceil_mag  = 16;
     uint16_t left_mag  = 12;
     uint16_t right_mag = 12;
     
@@ -253,8 +253,21 @@ _player_collision_detection(Player *player)
             // like this for now
             else player->angle = player->ev_grnd1.angle;
 
-            // TODO: Set ground speed according to X and Y velocity
-            player->vel.vz = player->vel.vx;
+            int32_t deg = (player->angle * (360 << 12) >> 24);
+
+            // Set ground speed according to X and Y velocity,
+            // and plaform angle
+            if((deg <= 23) || (deg >= 339))
+                // Landed on very flat ground, conserve X
+                player->vel.vz = player->vel.vx;
+            else if((deg <= 45) || (deg >= 316))
+                // Slope ground, set to half vy
+                player->vel.vz =
+                    ((player->vel.vy * 2048) >> 12) * -SIGNUM(rsin(player->angle));
+            else
+                // Steep ground, set to full vy
+                player->vel.vz =
+                    player->vel.vy * -SIGNUM(rsin(player->angle));
 
             int32_t pushback =
                 (player->ev_grnd1.pushback > player->ev_grnd2.pushback)

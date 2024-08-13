@@ -6,7 +6,9 @@ project(PSXEngine
   DESCRIPTION  "Platformer Engine for PSX"
   HOMEPAGE_URL "https://luksamuk.codes")
 
-file(GLOB ENGINE_SRC ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
+file(GLOB ENGINE_SRC
+  ${CMAKE_CURRENT_LIST_DIR}/src/*.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/*.s)
 
 psn00bsdk_add_executable(engine
   GPREL

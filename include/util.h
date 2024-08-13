@@ -5,6 +5,7 @@
 #include <psxgte.h>
 
 #define BCD_TO_DEC(x) (((x & 0xF0) >> 4) * 10 + (x & 0x0F))
+#define SIGNUM(x) (x < 0 ? -1 : 1)
 
 int RotTransPers(SVECTOR *v, uint32_t *xy0);
 int RotAverageNclip4(SVECTOR *a, SVECTOR *b, SVECTOR *c, SVECTOR *d,
