@@ -42,6 +42,24 @@ RotTransPers(SVECTOR *v, uint32_t *xy0)
     return otz;
 }
 
+void
+CrossProduct0(VECTOR *v0, VECTOR *v1, VECTOR *out)
+{
+    gte_ldopv1(v0);
+    gte_ldopv2(v1);
+    gte_op0();
+    gte_stlvnl(out);
+}
+
+void
+CrossProduct12(VECTOR *v0, VECTOR *v1, VECTOR *out)
+{
+    gte_ldopv1(v0);
+    gte_ldopv2(v1);
+    gte_op12();
+    gte_stlvnl(out);
+}
+
 uint8_t *
 file_read(const char *filename, uint32_t *length)
 {
@@ -102,6 +120,17 @@ get_short_le(uint8_t *bytes, uint32_t *b)
     uint16_t value = 0;
     value |= bytes[(*b)++];
     value |= bytes[(*b)++] << 8;
+    return value;
+}
+
+uint32_t
+get_long_be(uint8_t *bytes, uint32_t *b)
+{
+    uint32_t value = 0;
+    value |= bytes[(*b)++] << 24;
+    value |= bytes[(*b)++] << 16;
+    value |= bytes[(*b)++] << 8;
+    value |= bytes[(*b)++];
     return value;
 }
 

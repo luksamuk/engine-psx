@@ -62,12 +62,19 @@ _load_collision(TileMap16 *mapping, const char *filename)
         mapping->collision[tile_id] = alloc_arena_malloc(&_level_arena, sizeof(Collision));
         Collision *collision = mapping->collision[tile_id];
 
+        collision->floor_angle = (int32_t)get_long_be(bytes, &b);
         for(int j = 0; j < 8; j++)
             collision->floor[j] = get_byte(bytes, &b);
+
+        collision->rwall_angle = (int32_t)get_long_be(bytes, &b);
         for(int j = 0; j < 8; j++)
             collision->rwall[j] = get_byte(bytes, &b);
+
+        collision->ceiling_angle = (int32_t)get_long_be(bytes, &b);
         for(int j = 0; j < 8; j++)
             collision->ceiling[j] = get_byte(bytes, &b);
+
+        collision->lwall_angle = (int32_t)get_long_be(bytes, &b);
         for(int j = 0; j < 8; j++)
             collision->lwall[j] = get_byte(bytes, &b);
     }
@@ -478,29 +485,38 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     // to determine which height mask we are supposed to use.
     uint8_t *mask0 = NULL, *mask1 = NULL;
     uint8_t index = 0;
+    int32_t angle0, angle1;
     if(direction == 0) { // horizontal
         // index is related to y
         if(magnitude < 0) {
-            mask0 = piece0 ? piece0->lwall : NULL;
-            mask1 = piece1 ? piece1->lwall : NULL;
+            mask0  = piece0 ? piece0->lwall : NULL;
+            angle0 = piece0 ? piece0->lwall_angle : 0;
+            mask1  = piece1 ? piece1->lwall : NULL;
+            angle1 = piece1 ? piece1->lwall_angle : 0;
             // index starts at 0 from uppermost
             index = vpiecey[0]; // piece 1 or 0, doesn't matter
         } else {
-            mask0 = piece0 ? piece0->rwall : NULL;
-            mask1 = piece1 ? piece1->rwall : NULL;
+            mask0  = piece0 ? piece0->rwall : NULL;
+            angle0 = piece0 ? piece0->rwall_angle : 0;
+            mask1  = piece1 ? piece1->rwall : NULL;
+            angle1 = piece1 ? piece1->rwall_angle : 0;
             // index starts at 15 from uppermost
             index = 15 - vpiecey[0];
         }
     } else { // vertical
         // index is related to x
         if(magnitude >= 0) {
-            mask0 = piece0 ? piece0->floor : NULL;
-            mask1 = piece1 ? piece1->floor : NULL;
+            mask0  = piece0 ? piece0->floor : NULL;
+            angle0 = piece0 ? piece0->floor_angle : 0;
+            mask1  = piece1 ? piece1->floor : NULL;
+            angle1 = piece1 ? piece1->floor_angle : 0;
             // index starts at 0 from leftmost
             index = vpiecex[0];
         } else {
-            mask0 = piece0 ? piece0->ceiling : NULL;
-            mask1 = piece1 ? piece1->ceiling : NULL;
+            mask0  = piece0 ? piece0->ceiling : NULL;
+            angle0 = piece0 ? piece0->ceiling_angle : 0;
+            mask1  = piece1 ? piece1->ceiling : NULL;
+            angle1 = piece1 ? piece1->ceiling_angle : 0;
             // index starts at 15 from rightmost
             index = 15 - vpiecey[0];
         }
@@ -514,8 +530,10 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     // But, if our height on heightmask has a 0 height, then we proceed.
     uint8_t mask_byte = 0;
     int16_t h;
+    int32_t angle = 0;
     if(mask0) {
         mask_byte = mask0[index >> 1];
+        angle = angle0;
         mask_byte = mask_byte >> (((index & 0x1) ^ 0x1) << 2);
         mask_byte = mask_byte & 0xf;
 
@@ -529,6 +547,7 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     // if there was no collision on that spot.
     if((mask_byte == 0) && mask1) {
         mask_byte = mask1[index >> 1];
+        angle = angle1;
         mask_byte = mask_byte >> (((index & 0x1) ^ 0x1) << 2);
         mask_byte = mask_byte & 0xf;
 
@@ -578,6 +597,7 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     if(ev.collided) {
         ev.direction = direction;
         ev.pushback = (int16_t)mask_byte - h - (magnitude < 0 ? 16 : 0);
+        ev.angle = angle;
         /* if(ev.direction == 0) { // horizontal */
         /*     // TODO */
         /*     ev.pushback = (int16_t)mask_byte - h - (magnitude < 0 ? 16 : 0); */

@@ -9,9 +9,13 @@
 #define LEVEL_ARENA_SIZE   65536
 
 typedef struct {
+    int32_t floor_angle;
     uint8_t floor[8];
+    int32_t rwall_angle;
     uint8_t rwall[8];
+    int32_t ceiling_angle;
     uint8_t ceiling[8];
+    int32_t lwall_angle;
     uint8_t lwall[8];
 } Collision;
 
@@ -47,6 +51,7 @@ typedef struct {
     uint8_t collided;
     uint8_t direction; // horizontal/vertical
     int16_t pushback;
+    int32_t angle;
 } CollisionEvent;
 
 

@@ -1,6 +1,6 @@
 // -*- mode: c; -*-
 
-bitfield HeightMask {
+bitfield HeightMaskData {
     unsigned c0 : 4;
     unsigned c1 : 4;
     unsigned c2 : 4;
@@ -19,16 +19,21 @@ bitfield HeightMask {
     unsigned cF : 4;
 };
 
+struct HeightMask {
+    be s32 angle;
+    be HeightMaskData data;
+};
+
 struct Collision {
     be u16 tile_id;
     // Height mask downwards (left to right)
-    be HeightMask floor;
+    HeightMask floor;
     // Height mask to right (bottom to top)
-    be HeightMask rwall;
+    HeightMask rwall;
     // Height mask upwards (right to left)
-    be HeightMask ceiling;
+    HeightMask ceiling;
     // Height mask to left (top to bottom)
-    be HeightMask lwall;
+    HeightMask lwall;
 };
 
 struct TileData {

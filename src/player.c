@@ -241,8 +241,21 @@ _player_collision_detection(Player *player)
     }
 
     if(!player->grnd) {
+        player->angle = 0;
         if((player->ev_grnd1.collided || player->ev_grnd2.collided) && (player->vel.vy >= 0)) {
-            player->vel.vy = 0;
+            // Set angle according to movement
+            if(player->ev_grnd1.collided && !player->ev_grnd2.collided)
+                player->angle = player->ev_grnd1.angle;
+            else if(!player->ev_grnd1.collided && player->ev_grnd2.collided)
+                player->angle = player->ev_grnd2.angle;
+            // In case both are available, get the angle on the left.
+            // This introduces certain collision bugs but let's leave it
+            // like this for now
+            else player->angle = player->ev_grnd1.angle;
+
+            // TODO: Set ground speed according to X and Y velocity
+            player->vel.vz = player->vel.vx;
+
             int32_t pushback =
                 (player->ev_grnd1.pushback > player->ev_grnd2.pushback)
                 ? player->ev_grnd1.pushback
@@ -284,27 +297,43 @@ player_update(Player *player)
     }
 
     // X movement
-    if(pad_pressing(PAD_RIGHT)) {
-        if(player->grnd && (player->vel.vx < 0)) {
-            player->vel.vx += X_DECEL;
+    /* Ground movement */
+    if(player->grnd) {
+        if(pad_pressing(PAD_RIGHT)) {
+            if(player->vel.vz < 0) {
+                player->vel.vz += X_DECEL;
+            } else {
+                player->vel.vz += X_ACCEL;
+                player->anim_dir = 1;
+            }
+        } else if(pad_pressing(PAD_LEFT)) {
+            if(player->vel.vz > 0) {
+                player->vel.vz -= X_DECEL;
+            } else {
+                player->vel.vz -= X_ACCEL;
+                player->anim_dir = -1;
+            }
         } else {
+            player->vel.vz -= (player->vel.vz > 0 ? X_FRICTION : -X_FRICTION);
+            if(abs(player->vel.vz) <= X_FRICTION) player->vel.vz = 0;
+        }
+
+        if(player->vel.vz > X_TOP_SPD) player->vel.vz = X_TOP_SPD;
+        else if(player->vel.vz < -X_TOP_SPD) player->vel.vz = -X_TOP_SPD;
+
+        // Distribute ground speed onto X and Y components
+        player->vel.vx = (player->vel.vz * rcos(player->angle)) >> 12;
+        player->vel.vy = (player->vel.vz * -rsin(player->angle)) >> 12;
+    } else {
+        // Air X movement
+        if(pad_pressing(PAD_RIGHT)) {
             player->vel.vx += X_ACCEL;
             player->anim_dir = 1;
-        }
-    } else if(pad_pressing(PAD_LEFT)) {
-        if(player->grnd && (player->vel.vx > 0)) {
-            player->vel.vx -= X_DECEL;
-        } else {
+        } else if(pad_pressing(PAD_LEFT)) {
             player->vel.vx -= X_ACCEL;
             player->anim_dir = -1;
         }
-    } else {
-        player->vel.vx -= (player->vel.vx > 0 ? X_FRICTION : -X_FRICTION);
-        if(abs(player->vel.vx) <= X_FRICTION) player->vel.vx = 0;
     }
-
-    if(player->vel.vx > X_TOP_SPD) player->vel.vx = X_TOP_SPD;
-    else if(player->vel.vx < -X_TOP_SPD) player->vel.vx = -X_TOP_SPD;
 
     // Y movement
     if(!player->grnd) {

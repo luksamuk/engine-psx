@@ -330,21 +330,24 @@ engine_draw()
                      "VEL %08x %08x\n"
                      "GSP %08x\n"
                      "DIR %c\n"
-                     "GRN %c(%2d) // %c(%2d)\n"
-                     "CEI %c(%2d) // %c(%2d)\n"
-                     "LEF %c(%2d)\n"
-                     "RIG %c(%2d)\n",
+                     "GR1 %c(%2d %5d)\n"
+                     "GR2 %c(%2d %5d)\n"
+                     /* "CEI %c(%2d) // %c(%2d)\n" */
+                     /* "LEF %c(%2d)\n" */
+                     /* "RIG %c(%2d)\n" */
+                     ,
                      /* cam_pos.vx, cam_pos.vy, */
                      player.pos.vx, player.pos.vy,
                      player.vel.vx, player.vel.vy,
                      player.vel.vz,
                      player.anim_dir >= 0 ? 'R' : 'L',
                      player.ev_grnd1.collided ? 'Y' : 'N', player.ev_grnd1.pushback,
-                     player.ev_grnd2.collided ? 'Y' : 'N', player.ev_grnd2.pushback,
-                     player.ev_ceil1.collided ? 'Y' : 'N', player.ev_ceil1.pushback,
-                     player.ev_ceil2.collided ? 'Y' : 'N', player.ev_ceil2.pushback,
-                     player.ev_left.collided ? 'Y' : 'N', player.ev_left.pushback,
-                     player.ev_right.collided ? 'Y' : 'N', player.ev_right.pushback);
+                     player.ev_grnd2.collided ? 'Y' : 'N', player.ev_grnd2.pushback
+                     /* player.ev_ceil1.collided ? 'Y' : 'N', player.ev_ceil1.pushback, */
+                     /* player.ev_ceil2.collided ? 'Y' : 'N', player.ev_ceil2.pushback, */
+                     /* player.ev_left.collided ? 'Y' : 'N', player.ev_left.pushback, */
+                     /* player.ev_right.collided ? 'Y' : 'N', player.ev_right.pushback */
+                );
             draw_text(8, 12, 0, buffer);
         }
     }
