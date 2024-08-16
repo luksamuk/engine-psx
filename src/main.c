@@ -344,10 +344,10 @@ engine_draw()
                      player.vel.vz,
                      player.anim_dir >= 0 ? 'R' : 'L',
                      player.ev_grnd1.collided ? 'Y' : 'N',
-                     player.ev_grnd1.pushback,
+                     player.ev_grnd1.coord,
                      (player.ev_grnd1.angle * (360 << 12)) >> 24,
                      player.ev_grnd2.collided ? 'Y' : 'N',
-                     player.ev_grnd2.pushback,
+                     player.ev_grnd2.coord,
                      (player.ev_grnd2.angle * (360 << 12)) >> 24
                      /* player.ev_ceil1.collided ? 'Y' : 'N', player.ev_ceil1.pushback, */
                      /* player.ev_ceil2.collided ? 'Y' : 'N', player.ev_ceil2.pushback, */

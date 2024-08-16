@@ -124,35 +124,35 @@ _player_collision_linecast(Player *player)
     /* Collider linecasts */
     uint16_t
         anchorx = (player->pos.vx >> 12),
-        anchory = (player->pos.vy >> 12) + 4;
+        anchory = (player->pos.vy >> 12);
 
-    uint16_t grn_ceil_dist = 8;
-    uint16_t grn_mag   = 16;
-    uint16_t ceil_mag  = 16;
-    uint16_t left_mag  = 12;
-    uint16_t right_mag = 12;
-    
+    uint16_t grn_ceil_dist = 4;
+    uint16_t grn_grnd_dist = 4;
+    uint16_t grn_mag   = 20;
+    uint16_t ceil_mag  = 20;
+    uint16_t left_mag  = 10;
+    uint16_t right_mag = 10;
+
     player->ev_grnd1 = linecast(&leveldata, &map128, &map16,
-                                anchorx - grn_ceil_dist, anchory + 8,
-                                1, grn_mag);
+                                anchorx - grn_grnd_dist, anchory,
+                                CDIR_FLOOR, grn_mag);
     player->ev_grnd2 = linecast(&leveldata, &map128, &map16,
-                                anchorx + grn_ceil_dist, anchory + 8,
-                                1, grn_mag);
+                                anchorx + grn_grnd_dist, anchory,
+                                CDIR_FLOOR, grn_mag);
 
     player->ev_ceil1 = linecast(&leveldata, &map128, &map16,
-                                anchorx - grn_ceil_dist, anchory - 8,
-                                1, -ceil_mag);
+                                anchorx - grn_ceil_dist, anchory,
+                                CDIR_CEILING, ceil_mag);
     player->ev_ceil2 = linecast(&leveldata, &map128, &map16,
-                                anchorx + grn_ceil_dist, anchory - 8,
-                                1, -ceil_mag);
+                                anchorx + grn_ceil_dist, anchory,
+                                CDIR_CEILING, ceil_mag);
 
-    // 16px horizontal to the left or to the right
     player->ev_left = linecast(&leveldata, &map128, &map16,
-                               anchorx, anchory,
-                               0, -left_mag);
+                               anchorx, anchory - 8,
+                               CDIR_RWALL, left_mag);
     player->ev_right = linecast(&leveldata, &map128, &map16,
-                                anchorx, anchory,
-                                0, right_mag);
+                                anchorx, anchory - 8,
+                                CDIR_LWALL, right_mag);
 
     /* Draw Colliders */
     if(debug_mode) {
@@ -162,7 +162,7 @@ _player_collision_linecast(Player *player)
             0
         };
         uint16_t ax = (player_canvas_pos.vx >> 12),
-            ay = (player_canvas_pos.vy >> 12) + 4;
+            ay = (player_canvas_pos.vy >> 12);
 
         LINE_F2 *line;
 
@@ -208,7 +208,7 @@ _player_collision_linecast(Player *player)
         setLineF2(line);
         if(player->ev_left.collided) setRGB0(line, 255, 0, 0);
         else                 setRGB0(line, 99, 23, 99);
-        setXY2(line, ax, ay, ax - left_mag, ay);
+        setXY2(line, ax, ay - 8, ax - left_mag, ay - 8);
         sort_prim(line, 0);
     
         // Right sensor
@@ -217,7 +217,7 @@ _player_collision_linecast(Player *player)
         setLineF2(line);
         if(player->ev_right.collided) setRGB0(line, 255, 0, 0);
         else                  setRGB0(line, 99, 23, 99);
-        setXY2(line, ax, ay, ax + right_mag, ay);
+        setXY2(line, ax, ay - 8, ax + right_mag, ay - 8);
         sort_prim(line, 0);
     }
 }
@@ -229,14 +229,16 @@ _player_collision_detection(Player *player)
     _player_collision_linecast(player);
 
     if(player->ev_right.collided && player->vel.vx > 0) {
-        player->vel.vx = 0;
-        player->pos.vx = ((player->pos.vx >> 12) - (int32_t)(player->ev_right.pushback)) << 12;
+        if(player->grnd) player->vel.vz = 0;
+        else player->vel.vx = 0;
+        player->pos.vx = (player->ev_right.coord - 10) << 12;
         player->push = 1;
     }
 
     if(player->ev_left.collided && player->vel.vx < 0) {
-        player->vel.vx = 0;
-        player->pos.vx = ((player->pos.vx >> 12) + (int32_t)(player->ev_left.pushback) - 4 - 1) << 12;
+        if(player->grnd) player->vel.vz = 0;
+        else player->vel.vx = 0;
+        player->pos.vx = (player->ev_left.coord + 25) << 12;
         player->push = 1;
     }
 
@@ -269,26 +271,38 @@ _player_collision_detection(Player *player)
                 player->vel.vz =
                     player->vel.vy * -SIGNUM(rsin(player->angle));
 
-            int32_t pushback =
-                (player->ev_grnd1.pushback > player->ev_grnd2.pushback)
-                ? player->ev_grnd1.pushback
-                : player->ev_grnd2.pushback;
-            player->pos.vy = ((player->pos.vy >> 12) - pushback) << 12;
+            int32_t new_coord = 0;
+            if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
+            if((player->ev_grnd2.collided && (player->ev_grnd2.coord < new_coord))
+               || (new_coord == 0))
+                new_coord = player->ev_grnd2.coord;
+
+            player->pos.vy = ((new_coord - 16) << 12);
             player->grnd = 1;
             player->jmp = 0;
         }
 
         if((player->ev_ceil1.collided || player->ev_ceil2.collided) && (player->vel.vy < 0)) {
             player->vel.vy = 0;
-            int32_t pushback =
-                (player->ev_ceil1.pushback > player->ev_ceil2.pushback)
-                ? player->ev_ceil1.pushback
-                : player->ev_ceil2.pushback;
-            player->pos.vy = ((player->pos.vy >> 12) + pushback) << 12;
+            int32_t new_coord = 0;
+            if(player->ev_ceil1.collided) new_coord = player->ev_ceil1.coord;
+            if((player->ev_ceil2.collided && (player->ev_ceil2.coord < new_coord))
+               || (new_coord == 0))
+                new_coord = player->ev_ceil2.coord;
+            
+            player->pos.vy = (new_coord + 32) << 12;
         }
     } else {
         if(!player->ev_grnd1.collided && !player->ev_grnd2.collided) {
             player->grnd = 0;
+        } else {
+            int32_t new_coord = 0;
+            if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
+            if((player->ev_grnd2.collided && (player->ev_grnd2.coord < new_coord))
+               || (new_coord == 0))
+                new_coord = player->ev_grnd2.coord;
+
+            player->pos.vy = (new_coord - 16) << 12;
         }
     }
 }
@@ -363,7 +377,7 @@ player_update(Player *player)
             player->grnd = 0;
             player->jmp = 1;
             player_set_animation_direct(player, ANIM_ROLLING);
-            sound_play_vag(sfx_jump);
+            sound_play_vag(sfx_jump, 0);
         }
     }
 
@@ -405,8 +419,6 @@ player_draw(Player *player, VECTOR *pos)
         chara_render_frame(&player->chara,
                            player->anim_frame,
                            (int16_t)(pos->vx >> 12),
-                           (int16_t)(pos->vy >> 12),
-                           /* (int16_t)(player->pos.vx >> 12), */
-                           /* (int16_t)(player->pos.vy >> 12), */
+                           (int16_t)(pos->vy >> 12) - 8,
                            player->anim_dir < 0);
 }

@@ -9,14 +9,15 @@
 #define LEVEL_ARENA_SIZE   65536
 
 typedef struct {
-    int32_t floor_angle;
     uint8_t floor[8];
-    int32_t rwall_angle;
     uint8_t rwall[8];
-    int32_t ceiling_angle;
     uint8_t ceiling[8];
-    int32_t lwall_angle;
     uint8_t lwall[8];
+
+    int32_t floor_angle;
+    int32_t rwall_angle;
+    int32_t ceiling_angle;
+    int32_t lwall_angle;
 } Collision;
 
 typedef struct {
@@ -49,10 +50,16 @@ typedef struct {
 
 typedef struct {
     uint8_t collided;
-    uint8_t direction; // horizontal/vertical
-    int16_t pushback;
+    int32_t coord;
     int32_t angle;
 } CollisionEvent;
+
+typedef enum {
+    CDIR_FLOOR   = 0,
+    CDIR_RWALL   = 1,
+    CDIR_CEILING = 2,
+    CDIR_LWALL   = 3,
+} LinecastDirection;
 
 
 void level_init();
@@ -67,8 +74,13 @@ void render_lvl(
     int32_t cam_x, int32_t cam_y);
 
 
+/* CollisionEvent linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16, */
+/*                         int32_t vx, int32_t vy, uint8_t direction, */
+/*                         int32_t magnitude); */
+
 CollisionEvent linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
-                        int32_t vx, int32_t vy, uint8_t direction,
-                        int32_t magnitude);
+                        int32_t vx, int32_t vy, LinecastDirection direction,
+                        uint8_t magnitude);
+                        
 
 #endif
