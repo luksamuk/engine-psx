@@ -28,6 +28,7 @@
 extern int debug_mode;
 
 SoundEffect sfx_jump = { 0 };
+SoundEffect sfx_skid = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -60,6 +61,7 @@ load_player(Player *player,
     player->ev_ceil2 = (CollisionEvent){ 0 };
 
     if(sfx_jump.addr == 0) sfx_jump = sound_load_vag("\\SFX\\JUMP.VAG;1");
+    if(sfx_skid.addr == 0) sfx_skid = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
 }
 
 void
@@ -333,11 +335,14 @@ player_update(Player *player)
         } else player->anim_timer--;
     }
 
+    uint8_t action_skidding = 0;
+
     // X movement
     /* Ground movement */
     if(player->grnd) {
         if(pad_pressing(PAD_RIGHT)) {
             if(player->vel.vz < 0) {
+                action_skidding = 1;
                 player->vel.vz += X_DECEL;
             } else {
                 player->vel.vz += X_ACCEL;
@@ -345,6 +350,7 @@ player_update(Player *player)
             }
         } else if(pad_pressing(PAD_LEFT)) {
             if(player->vel.vz > 0) {
+                action_skidding = 1;
                 player->vel.vz -= X_DECEL;
             } else {
                 player->vel.vz -= X_ACCEL;
@@ -411,7 +417,14 @@ player_update(Player *player)
             }
         } else {
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
-            if(abs(player->vel.vz) >= (6 << 12))
+            if(action_skidding) {
+                if(abs(player->vel.vz) >= (4 << 12)) {
+                    if(player->cur_anim != player_get_animation(player, ANIM_SKIDDING)) {
+                        sound_play_vag(sfx_skid, 0);
+                    }
+                    player_set_animation_direct(player, ANIM_SKIDDING);
+                }
+            } else if(abs(player->vel.vz) >= (6 << 12))
                 player_set_animation_direct(player, ANIM_RUNNING);
             else player_set_animation_direct(player, ANIM_WALKING);
         }
