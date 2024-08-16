@@ -252,6 +252,10 @@ engine_draw()
         x = CENTERX - (strlen(title) * 4);
         draw_text(x, 12, 0, title);
 
+        const char *subtitle = "https://luksamuk.codes/";
+        x = CENTERX - (strlen(subtitle) * 4);
+        draw_text(x, 24, 0, subtitle);
+
         snprintf(buffer, 255, "%s %s", __DATE__, __TIME__);
         x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
         draw_text(x, SCREEN_YRES - 12, 0, buffer);
@@ -333,32 +337,14 @@ engine_draw()
         // Player debug
         if(debug_mode) {
             snprintf(buffer, 255,
-                     /* "CAM %08x %08x\n" */
                      "POS %08x %08x\n"
-                     "VEL %08x %08x\n"
                      "GSP %08x\n"
-                     "DIR %c\n"
-                     "GR1 %c(%2d) @ %3ddeg\n"
-                     "GR2 %c(%2d) @ %3ddeg\n"
-                     /* "CEI %c(%2d) // %c(%2d)\n" */
-                     /* "LEF %c(%2d)\n" */
-                     /* "RIG %c(%2d)\n" */
-                     ,
-                     /* cam_pos.vx, cam_pos.vy, */
+                     "SPD %08x %08x\n"
+                     "ANG %04x\n",
                      player.pos.vx, player.pos.vy,
-                     player.vel.vx, player.vel.vy,
                      player.vel.vz,
-                     player.anim_dir >= 0 ? 'R' : 'L',
-                     player.ev_grnd1.collided ? 'Y' : 'N',
-                     player.ev_grnd1.coord,
-                     (player.ev_grnd1.angle * (360 << 12)) >> 24,
-                     player.ev_grnd2.collided ? 'Y' : 'N',
-                     player.ev_grnd2.coord,
-                     (player.ev_grnd2.angle * (360 << 12)) >> 24
-                     /* player.ev_ceil1.collided ? 'Y' : 'N', player.ev_ceil1.pushback, */
-                     /* player.ev_ceil2.collided ? 'Y' : 'N', player.ev_ceil2.pushback, */
-                     /* player.ev_left.collided ? 'Y' : 'N', player.ev_left.pushback, */
-                     /* player.ev_right.collided ? 'Y' : 'N', player.ev_right.pushback */
+                     player.vel.vx, player.vel.vy,
+                     player.angle
                 );
             draw_text(8, 12, 0, buffer);
         }

@@ -48,20 +48,6 @@ typedef struct {
     uint16_t clutmode, _unused1;
 } LevelData;
 
-typedef struct {
-    uint8_t collided;
-    int32_t coord;
-    int32_t angle;
-} CollisionEvent;
-
-typedef enum {
-    CDIR_FLOOR   = 0,
-    CDIR_RWALL   = 1,
-    CDIR_CEILING = 2,
-    CDIR_LWALL   = 3,
-} LinecastDirection;
-
-
 void level_init();
 void level_reset();
 void level_debrief();
@@ -73,14 +59,5 @@ void render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     int32_t cam_x, int32_t cam_y);
 
-
-/* CollisionEvent linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16, */
-/*                         int32_t vx, int32_t vy, uint8_t direction, */
-/*                         int32_t magnitude); */
-
-CollisionEvent linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
-                        int32_t vx, int32_t vy, LinecastDirection direction,
-                        uint8_t magnitude);
-                        
 
 #endif

@@ -8,10 +8,10 @@
 #include "render.h"
 #include "sound.h"
 #include "camera.h"
+#include "collision.h"
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
-//#define DUMMY_GROUND        ((432 - 64 - 8) << 12)
 
 // Adler32 sums of animation names for ease of use
 #define ANIM_STOPPED    0x08cd0220
@@ -396,7 +396,7 @@ player_update(Player *player)
         if(player->push) {
             player_set_animation_direct(player, ANIM_PUSHING);
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
-        } else if(player->vel.vx == 0) {
+        } else if(player->vel.vz == 0) {
             if(pad_pressing(PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
@@ -411,7 +411,7 @@ player_update(Player *player)
             }
         } else {
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
-            if(abs(player->vel.vx) > (5 * ONE))
+            if(abs(player->vel.vz) >= (6 << 12))
                 player_set_animation_direct(player, ANIM_RUNNING);
             else player_set_animation_direct(player, ANIM_WALKING);
         }

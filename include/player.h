@@ -4,6 +4,7 @@
 #include "chara.h"
 #include <psxgte.h>
 #include "level.h"
+#include "collision.h"
 
 // Constants for running the game at a fixed 60 FPS.
 // These constants are also in a 12-scale format for fixed point math.
