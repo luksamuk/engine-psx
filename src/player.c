@@ -296,6 +296,16 @@ _player_collision_detection(Player *player)
         if(!player->ev_grnd1.collided && !player->ev_grnd2.collided) {
             player->grnd = 0;
         } else {
+            // Set angle according to movement
+            if(player->ev_grnd1.collided && !player->ev_grnd2.collided)
+                player->angle = player->ev_grnd1.angle;
+            else if(!player->ev_grnd1.collided && player->ev_grnd2.collided)
+                player->angle = player->ev_grnd2.angle;
+            // In case both are available, get the angle on the left.
+            // This introduces certain collision bugs but let's leave it
+            // like this for now
+            else player->angle = player->ev_grnd1.angle;
+
             int32_t new_coord = 0;
             if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
             if((player->ev_grnd2.collided && (player->ev_grnd2.coord < new_coord))
