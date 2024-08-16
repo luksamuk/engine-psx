@@ -118,7 +118,7 @@ _get_next_channel()
 }
 
 void
-sound_play_vag(SoundEffect sfx)
+sound_play_vag(SoundEffect sfx, uint8_t loops)
 {
     int ch = _get_next_channel();
     SpuSetKey(0, 1 << ch);
@@ -135,6 +135,9 @@ sound_play_vag(SoundEffect sfx)
     SPU_CH_VOL_R(ch) = 0x3fff;
     SPU_CH_ADSR1(ch) = 0x00ff;
     SPU_CH_ADSR2(ch) = 0x0000;
+
+    // Looping threshold
+    if(loops) SPU_CH_LOOP_ADDR(ch) = getSPUAddr(sfx.addr);
 
     // Start playback
     SpuSetKey(1, 1 << ch);

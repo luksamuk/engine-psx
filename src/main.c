@@ -123,6 +123,12 @@ engine_load_level(uint8_t level)
 
     camera_init(&camera);
 
+    // Level 0 Zone 2 actually has background sound effects
+    /* if(level == 1) { */
+    /*     SoundEffect sfx_rain = sound_load_vag("\\SFX\\RAIN.VAG;1"); */
+    /*     sound_play_vag(sfx_rain, 1); */
+    /* } */
+
     // Start playback after we don't need the CD anymore.
     sound_stop_xa();
 
