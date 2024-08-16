@@ -735,18 +735,8 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
                 _get_height_and_angle_from_mask(
                     map16, piece, direction, hpos, &h, &angle);
 
-                if((h > 0) /*&& (16 - h) <= lm*/) {
+                if(h > 0) {
                     int32_t coord = _get_new_position(direction, cx, cy, px, py, h);
-                    /* printf("Max checks: %d\n", n_max); */
-                    /* printf("-----------\n"); */
-                    /* printf("pivot %d -> (%d %d)\n", n, lx, ly); */
-                    /* printf("Chunk:(%d x %d) -> [%d] = %d\n", cx, cy, chunk_pos, chunk); */
-                    /* printf("Magnitude: %d\n", lm); */
-                    /* printf("Piece within chunk: (%d, %d) -> (%d x %d) -> [%d] = %d\n", */
-                    /*        rx, ry, px, py, piece_pos, piece); */
-                    /* printf("hpos: %d\n", hpos); */
-                    /* printf("Height and angle: %d, %d\n", h, angle); */
-                    /* printf("COLLIDED!!! NEW COORD:: %d\n", coord); */
                     ev = (CollisionEvent) {
                         .collided = 1,
                         .coord = coord,
@@ -760,8 +750,5 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
         _move_point_linecast(direction, vx, vy, &lx, &ly, &lm);
     }
 
-    /* if(ev.collided) */
-    /*     printf("COORD: %d\n", ev.coord); */
-    /* printf("========================\n"); */
     return ev;
 }
