@@ -103,6 +103,7 @@ _set_animation_underlying(Player *player, CharaAnim *anim)
     player->cur_anim = anim;
     player->anim_frame = player->anim_timer = 0;
     player->frame_duration = 7; // Default
+    player->loopback_frame = 0;
     if(anim) {
         player->anim_frame = anim->start;
         player->anim_timer = player->frame_duration;
@@ -415,6 +416,7 @@ player_update(Player *player)
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
             } else if(player->idle_timer == 0) {
                 player_set_animation_direct(player, ANIM_IDLE);
+                player->loopback_frame = 2;
             } else if (!pad_pressing(PAD_LEFT) && !pad_pressing(PAD_RIGHT)) {
                 player_set_animation_direct(player, ANIM_STOPPED);
                 if(player->idle_timer > 0) player->idle_timer--;
@@ -432,7 +434,7 @@ player_update(Player *player)
                 player_set_animation_direct(player, ANIM_RUNNING);
             else player_set_animation_direct(player, ANIM_WALKING);
         }
-    }
+    } else player->idle_timer = ANIM_IDLE_TIMER_MAX;
 
     // Animation speed correction
     if(player->anim_timer == 0) {
@@ -471,7 +473,7 @@ player_update(Player *player)
             player->anim_timer = player->frame_duration;
             player->anim_frame++;
             if(player->anim_frame > player->cur_anim->end)
-                player->anim_frame = player->cur_anim->start;
+                player->anim_frame = player->cur_anim->start + player->loopback_frame;
         } else player->anim_timer--;
     }
 

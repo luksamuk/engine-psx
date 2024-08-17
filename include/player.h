@@ -26,6 +26,7 @@ typedef struct {
     uint8_t   anim_frame;
     uint8_t   anim_timer;
     uint8_t   frame_duration;
+    uint8_t   loopback_frame;
     int8_t    anim_dir;
     uint8_t   idle_timer;
     uint8_t   grnd;
