@@ -84,7 +84,7 @@ engine_load_player()
     }
 
     load_player(&player, "\\SPRITES\\SONIC.CHARA;1", &tim);
-    player.pos = (VECTOR){ CENTERX << 12, CENTERY << 12, 0 };
+    player.pos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
 }
 
 void
@@ -197,6 +197,7 @@ engine_update()
 
             engine_load_player();
             engine_load_level(menu_choice);
+            camera.pos = player.pos;
             menu_choice = 0;
             current_scene = 1;
         }
@@ -225,11 +226,11 @@ engine_update()
 
         if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
            (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
-            debug_mode = !debug_mode;
+            debug_mode = (debug_mode + 1) % 3;
         }
 
         if(pad_pressed(PAD_SELECT)) {
-            player.pos = (VECTOR){ CENTERX << 12, CENTERY << 12, 0 };
+            player.pos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
             player.grnd = 0;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
         }
@@ -315,36 +316,36 @@ engine_draw()
 
         // Pause text
         if(paused) {
-            const char *line1 = "           Paused";
-            const char *line2 = "Press Select for Level Select";
-            snprintf(buffer, 255, "%s\n%s", line1, line2);
-            int16_t x = CENTERX - (strlen(line2) * 4);
-            draw_text(x, CENTERY - 12, 0, buffer);
+            const char *line1 = "Paused";
+            int16_t x = CENTERX - (strlen(line1) * 4);
+            draw_text(x, CENTERY - 12, 0, line1);
         }
 
         // Sound and video debug
-        uint32_t elapsed_sectors;
-        sound_xa_get_elapsed_sectors(&elapsed_sectors);
+        //uint32_t elapsed_sectors;
+        //sound_xa_get_elapsed_sectors(&elapsed_sectors);
         snprintf(buffer, 255,
                  "%4s %3d\n"
-                 "%08u",
+                 //"%08u"
+                 ,
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
-                 get_frame_rate(),
-                 elapsed_sectors
+                 get_frame_rate()
+                 //elapsed_sectors
             );
         draw_text(248, 12, 0, buffer);
 
         // Player debug
         if(debug_mode) {
             snprintf(buffer, 255,
-                     "POS %08x %08x\n"
                      "GSP %08x\n"
                      "SPD %08x %08x\n"
-                     "ANG %04x\n",
-                     player.pos.vx, player.pos.vy,
+                     "ANG %04x\n"
+                     "POS %08x %08x\n"
+                     ,
                      player.vel.vz,
                      player.vel.vx, player.vel.vy,
-                     player.angle
+                     player.angle,
+                     player.pos.vx, player.pos.vy
                 );
             draw_text(8, 12, 0, buffer);
         }

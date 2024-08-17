@@ -102,9 +102,10 @@ _set_animation_underlying(Player *player, CharaAnim *anim)
     if(player->cur_anim == anim) return;
     player->cur_anim = anim;
     player->anim_frame = player->anim_timer = 0;
+    player->frame_duration = 7; // Default
     if(anim) {
         player->anim_frame = anim->start;
-        player->anim_timer = TMP_ANIM_SPD; // TODO: Use actual animation fps
+        player->anim_timer = player->frame_duration;
     }
 }
 
@@ -124,6 +125,14 @@ void
 player_set_animation_direct(Player *player, uint32_t sum)
 {
     _set_animation_underlying(player, player_get_animation(player, sum));
+}
+
+void
+player_set_frame_duration(Player *player, uint8_t duration)
+{
+    player->frame_duration = duration;
+    if(player->anim_timer > duration)
+        player->anim_timer = duration;
 }
 
 void
@@ -163,7 +172,7 @@ _player_collision_linecast(Player *player)
                                 CDIR_LWALL, right_mag);
 
     /* Draw Colliders */
-    if(debug_mode) {
+    if(debug_mode > 1) {
         VECTOR player_canvas_pos = {
             player->pos.vx - camera.pos.vx + (CENTERX << 12),
             player->pos.vy - camera.pos.vy + (CENTERY << 12),
@@ -329,17 +338,6 @@ void
 player_update(Player *player)
 {
     _player_collision_detection(player);
-    
-    if(player->cur_anim) {
-        if(player->cur_anim->start == player->cur_anim->end)
-            player->anim_frame = player->cur_anim->start;
-        else if(player->anim_timer == 0) {
-            player->anim_timer = TMP_ANIM_SPD; // TODO: Use actual animation fps
-            player->anim_frame++;
-            if(player->anim_frame > player->cur_anim->end)
-                player->anim_frame = player->cur_anim->start;
-        } else player->anim_timer--;
-    }
 
     uint8_t action_skidding = 0;
 
@@ -429,11 +427,52 @@ player_update(Player *player)
                         sound_play_vag(sfx_skid, 0);
                     }
                     player_set_animation_direct(player, ANIM_SKIDDING);
-                }
+                } else player_set_animation_direct(player, ANIM_WALKING);
             } else if(abs(player->vel.vz) >= (6 << 12))
                 player_set_animation_direct(player, ANIM_RUNNING);
             else player_set_animation_direct(player, ANIM_WALKING);
         }
+    }
+
+    // Animation speed correction
+    if(player->anim_timer == 0) {
+        switch(player_get_current_animation_hash(player)) {
+        case ANIM_IDLE:    break;
+
+        case ANIM_WALKING:
+        case ANIM_RUNNING:
+            player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
+            break;
+
+        case ANIM_ROLLING:
+            player_set_frame_duration(player, MAX(0, 4 - abs(player->vel.vz >> 12)));
+            break;
+        case ANIM_PEELOUT: break;
+
+        case ANIM_PUSHING:
+            player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)) << 2);
+            break;
+
+            // Single-frame animations
+        case ANIM_STOPPED:
+        case ANIM_SKIDDING:
+        case ANIM_CROUCHDOWN:
+        case ANIM_LOOKUP:
+        default:
+            break;
+        };
+    }
+
+    // Animation update
+    if(player->cur_anim) {
+        if(player->cur_anim->start == player->cur_anim->end)
+            player->anim_frame = player->cur_anim->start;
+        else if(player->anim_timer == 0) {
+            player->anim_timer = player->frame_duration;
+            player->anim_frame++;
+            if(player->anim_frame > player->cur_anim->end)
+                player->anim_frame = player->cur_anim->start;
+        } else player->anim_timer--;
     }
 
     // Screen transform
