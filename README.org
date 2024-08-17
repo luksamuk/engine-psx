@@ -5,10 +5,10 @@ Open source platformer engine built for the Original PlayStation.
 Uses [[https://github.com/Lameguy64/PSn00bSDK/tree/master][PSn00bSDK]].
 
 #+html: <center>
-[[file:./screenshots/engine-psx-080524.gif]]
+[[file:./screenshots/engine-psx-081624.gif]]
 #+html: </center>
 
-/Engine short video running on DuckStation, dated [2024-08-05]./
+/Engine short video running on DuckStation, dated [2024-08-16]./
 
 * About
 
@@ -53,10 +53,10 @@ PSn00bSDK. Just follow [[https://github.com/Lameguy64/PSn00bSDK/blob/master/doc/
 * Running on real hardware
 
 #+html: <center>
-[[file:./screenshots/engine-psx-080524-realhardware.gif]]
+[[file:./screenshots/engine-psx-081624-realhardware.gif]]
 #+html: </center>
 
-/Engine short video running on a PlayStation SCPH-5501, dated [2024-08-05]./
+/Engine short video running on a PlayStation SCPH-5501, dated [2024-08-16]./
 
 In theory,  to burn the  disc, you  would need a  Sony license file  which comes
 bundled with the Psy-Q SDK (which *I  AM NOT* using). I *WILL NOT* provide these
@@ -101,12 +101,14 @@ tochd -d . -- ./build/engine.cue
 
 * Gallery
 
-| Screenshot                                            | Description                                                                                       |
-|-------------------------------------------------------+---------------------------------------------------------------------------------------------------|
-| [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine [2024-08-05]. Same as screenshot below, but on a physical PlayStation (SCPH-5501).  |
-| [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine [2024-08-05]. First implementation of collision, camera and level data.             |
-| [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine [2024-07-22]. Running on DuckStation.                                               |
-| [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine [2024-07-21]. Running on a physical PlayStation (SCPH-5501).                        |
+| Screenshot                                            | Description                                                                                     |
+|-------------------------------------------------------+-------------------------------------------------------------------------------------------------|
+| [[file:./screenshots/engine-psx-081624-realhardware.gif]] | Alpha engine [2024-08-16]. Same as below, on a physical SCPH-5501.                              |
+| [[file:./screenshots/engine-psx-081624.gif]]              | Alpha engine [2024-08-16]. First working implementation of slope collision.                     |
+| [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine [2024-08-05]. Same as screenshot below, but on a physical PlayStation (SCPH-5501). |
+| [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine [2024-08-05]. First implementation of collision, camera and level data.            |
+| [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine [2024-07-22]. Running on DuckStation.                                              |
+| [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine [2024-07-21]. Running on a physical PlayStation (SCPH-5501).                       |
 
 
 * License
