@@ -102,7 +102,7 @@ _set_animation_underlying(Player *player, CharaAnim *anim)
     if(player->cur_anim == anim) return;
     player->cur_anim = anim;
     player->anim_frame = player->anim_timer = 0;
-    player->frame_duration = 7; // Default
+    player->frame_duration = 1; // Default
     player->loopback_frame = 0;
     if(anim) {
         player->anim_frame = anim->start;
@@ -439,8 +439,6 @@ player_update(Player *player)
     // Animation speed correction
     if(player->anim_timer == 0) {
         switch(player_get_current_animation_hash(player)) {
-        case ANIM_IDLE:    break;
-
         case ANIM_WALKING:
         case ANIM_RUNNING:
             player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
@@ -457,10 +455,12 @@ player_update(Player *player)
 
             // Single-frame animations
         case ANIM_STOPPED:
+        case ANIM_IDLE:
         case ANIM_SKIDDING:
         case ANIM_CROUCHDOWN:
         case ANIM_LOOKUP:
         default:
+            player_set_frame_duration(player, 6);
             break;
         };
     }
