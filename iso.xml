@@ -3,16 +3,14 @@
   <track type="data">
     <identifiers
 	system		= "PLAYSTATION"
+	application	= "PLAYSTATION"
 	volume		= "SCUS-00001"
-	volume_set	= "SONICENGINE"
+	volume_set	= "SCUS-00001"
 	publisher	= "luksamuk"
 	data_preparer	= "PSN00BSDK ${PSN00BSDK_VERSION}"
-	application	= "PLAYSTATION"
-	copyright	= "README.TXT;1" />
-    <!-- <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEA.DAT" /> -->
+	copyright	= "COPYLEFT" />
     <directory_tree>
       <file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
-
       <file name="ENGINE.EXE" type="data" source="engine.exe" />
 
       <dir name="SPRITES">
@@ -78,15 +76,15 @@
 	<file name="SKIDDING.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SKIDDING.VAG" />
-	<file name="RAIN.VAG"
-	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/sfx/RAIN.VAG" />
-	<file name="THUNDER1.VAG"
-	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/sfx/THUNDER1.VAG" />
-	<file name="THUNDER2.VAG"
-	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/sfx/THUNDER2.VAG" />
+	<!-- <file name="RAIN.VAG" -->
+	<!--       type="data" -->
+	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/RAIN.VAG" /> -->
+	<!-- <file name="THUNDER1.VAG" -->
+	<!--       type="data" -->
+	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/THUNDER1.VAG" /> -->
+	<!-- <file name="THUNDER2.VAG" -->
+	<!--       type="data" -->
+	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/THUNDER2.VAG" /> -->
       </dir>
 
       <dir name="BGM">
