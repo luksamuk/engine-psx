@@ -45,6 +45,7 @@ void free_player(Player *player);
 void      player_set_animation(Player *player, const char *name);
 void      player_set_animation_precise(Player *player, const char *name);
 void      player_set_animation_direct(Player *player, uint32_t sum);
+uint32_t  player_get_current_animation_hash(Player *player);
 CharaAnim *player_get_animation(Player *player, uint32_t sum);
 CharaAnim *player_get_animation_by_name(Player *player, const char *name);
 

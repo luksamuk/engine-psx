@@ -70,6 +70,12 @@ free_player(Player *player)
     free_chara(&player->chara);
 }
 
+uint32_t
+player_get_current_animation_hash(Player *player)
+{
+    return player->cur_anim->hname;
+}
+
 CharaAnim *
 player_get_animation(Player *player, uint32_t sum)
 {
@@ -419,7 +425,7 @@ player_update(Player *player)
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
             if(action_skidding) {
                 if(abs(player->vel.vz) >= (4 << 12)) {
-                    if(player->cur_anim != player_get_animation(player, ANIM_SKIDDING)) {
+                    if(player_get_current_animation_hash(player) != ANIM_SKIDDING) {
                         sound_play_vag(sfx_skid, 0);
                     }
                     player_set_animation_direct(player, ANIM_SKIDDING);
