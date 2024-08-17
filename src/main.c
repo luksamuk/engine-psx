@@ -273,12 +273,16 @@ engine_draw()
             (menu_choice == 3) ? '>' : ' ');
         draw_text(8, 60, 0, buffer);
     } else if(current_scene == 1) {
-        VECTOR player_canvas_pos = {
-            player.pos.vx - camera.pos.vx + (CENTERX << 12),
-            player.pos.vy - camera.pos.vy + (CENTERY << 12),
-            0
-        };
-        player_draw(&player, &player_canvas_pos);
+        if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
+           && abs((player.pos.vy - camera.pos.vy) >> 12) <= SCREEN_YRES) {
+            VECTOR player_canvas_pos = {
+                player.pos.vx - camera.pos.vx + (CENTERX << 12),
+                player.pos.vy - camera.pos.vy + (CENTERY << 12),
+                0
+            };
+            player_draw(&player, &player_canvas_pos);
+        }
+
         render_lvl(&leveldata, &map128, &map16, camera.pos.vx, camera.pos.vy);
 
         // Gouraud-shaded cube
