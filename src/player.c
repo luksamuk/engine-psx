@@ -429,7 +429,9 @@ player_update(Player *player)
                         sound_play_vag(sfx_skid, 0);
                     }
                     player_set_animation_direct(player, ANIM_SKIDDING);
-                } else player_set_animation_direct(player, ANIM_WALKING);
+                } if(player_get_current_animation_hash(player) != ANIM_SKIDDING) {
+                      player_set_animation_direct(player, ANIM_WALKING);
+                }
             } else if(abs(player->vel.vz) >= (6 << 12))
                 player_set_animation_direct(player, ANIM_RUNNING);
             else player_set_animation_direct(player, ANIM_WALKING);
