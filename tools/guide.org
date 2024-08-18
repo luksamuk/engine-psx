@@ -59,7 +59,7 @@ Extra files such as 'tiles16.tsx' will also be generated.
     - Make  sure you  un-mark the  "Set for  Black" option  in Semi  Transparent
       Information.
     - Make sure your tileset is at 448x0  and that the CLUT information is 4-bit
-      depth and at  448x256.  Notice that texture  pages 8 and 24  are for level
+      depth and at  320x257.  Notice that texture  pages 8 and 24  are for level
       tiles and CLUT information, respectively.
     - *NOTE:* If you use another tool such  as TIMEDIT, just make sure the black
       color   is  accurately   picked  as   transparent  color,   and  that   no

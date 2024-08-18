@@ -153,8 +153,8 @@ load_lvl(LevelData *lvl, const char *filename)
 
     lvl->prectx   = 448;
     lvl->precty   = 0;
-    lvl->crectx   = 448;
-    lvl->crecty   = 256;
+    lvl->crectx   = 320;
+    lvl->crecty   = 257;
     lvl->clutmode = 0; // 4-bit CLUT
     lvl->_unused1 = 0;
 
