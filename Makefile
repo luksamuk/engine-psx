@@ -7,7 +7,7 @@ all: ./build/engine.cue
 dir: ./build
 chd: engine.chd
 
-run: ./build/engine.cue
+run:
 	pcsx-redux-appimage -gdb -run -interpreter -fastboot -stdout -iso ./build/engine.cue
 
 ./build/engine.cue: cook ./build
@@ -28,9 +28,9 @@ cook:
 # Don't do this for now because we don't generate R0 the same way yet
 clean:
 	rm -rf ./build \
-	       assets/levels/R1/*.COL \
-	       assets/levels/R1/*.MAP \
-	       assets/levels/R1/*.LVL \
-	       assets/levels/R1/collision16.json \
-	       assets/levels/R1/tilemap128.csv
+	       assets/levels/**/*.COL \
+	       assets/levels/**/*.MAP \
+	       assets/levels/**/*.LVL \
+	       assets/levels/**/collision16.json \
+	       assets/levels/**/tilemap128.csv
 
