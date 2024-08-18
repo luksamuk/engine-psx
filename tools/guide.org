@@ -119,9 +119,10 @@ The following  steps will allow  you to create level  maps such as  'Z1.tmx' and
 'Z2.tmx',  and generate  levels such  as 'Z1.LVL'  and 'Z1.LVL',  in PlayStation
 format.
 
-This will also  create intermediate files such as 'Z1.json'  and 'Z1.json'. This
-intermediate  representation is  necessary  because Tiled  is  unable to  export
-levels in binary format in one go, due to scripting limitations.
+This   will   also  create   intermediate   files   such  as   'Z1.psxlvl'   and
+'Z2.psxlvl'.  This intermediate  representation  is necessary  because Tiled  is
+unable  to  export  levels  in  binary  format  in  one  go,  due  to  scripting
+limitations.
 
 You'll need to have  Python scripting enabled in Tiled, and  you'll also need to
 have `lvlexporter.py` on  your Tiled scripts directory  (generally `~/.tiled` on
@@ -137,8 +138,8 @@ Linux).
    draw tiles  that should go on  front of your  character (this part is  also a
    work-in-progress).
 4.  Once you're  done  with  your map,  go  to File  >  Export  as..., pick  the
-   "PlayStation proto map" format, and save it as 'Z1.json' or 'Z2.json'.
+   "PlayStation proto map" format, and save it as 'Z1.psxlvl' or 'Z2.psxlvl'.
 5. Use  the tool 'cooklvl.py'  to turn 'Z1.json'  or 'Z2.json' into  'Z1.LVL' or
    'Z2.LVL':\
-   ~cooklvl.py Z1.json Z1.LVL~
+   ~cooklvl.py Z1.psxlvl Z1.LVL~
 
