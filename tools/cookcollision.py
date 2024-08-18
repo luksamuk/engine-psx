@@ -206,7 +206,7 @@ def parse_json(j):
                             "points": points,
                         }
                     )
-    print(f"Number of collidable tiles: {len(res)}")
+    # print(f"Number of collidable tiles: {len(res)}")
     return res
 
 

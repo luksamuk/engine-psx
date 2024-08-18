@@ -1,0 +1,6 @@
+*.MAP
+*.LVL
+*.COL
+*.psxlvl
+**/collision16.json
+**/tilemap128.csv

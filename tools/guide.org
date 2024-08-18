@@ -76,9 +76,9 @@ Extra files such as 'tiles16.tsx' will also be generated.
 * Generating 128x128 tiles and mappings
 
 The  following steps  will allow  you  to generate  a 'MAP128.MAP'  file from  a
-'map128.tmx'.
-This 'map128.tmx' tile is supposed to be a map comprised of 16x16 tiles, created
-from the same '16x16.png' file we addressed earlier.
+'tilemap128.tmx'.
+This 'tilemap128.tmx'  tile is supposed  to be a  map comprised of  16x16 tiles,
+created from the same '16x16.png' file we addressed earlier.
 Each 128x128 tile is  supposed to be equivalent to every  eight rows and columns
 on the .tmx map.
 
@@ -86,8 +86,8 @@ Please make  sure that  the first  tile is  COMPLETELY BLANK  and mind  the tile
 sequence (tiles are counted first from left to right, then up to down).
 
 1. Create a 'tileset16.tsx' map from '16x16.png', if you haven't already.
-2. Create a  'map128.tmx' map and use 'tileset16.tsx' as  tileset. This map must
-   have infinite dimensions.
+2. Create  a 'tilemap128.tmx' map and  use 'tileset16.tsx' as tileset.  This map
+   must have infinite dimensions.
 3. Create your tiles from left to right, and if you must, up to down. Be mindful
    of  tile order,  and make  sure that  the first  tile (first  eight rows  and
    columns) are completely blank.
