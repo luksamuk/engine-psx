@@ -69,7 +69,7 @@ def export_binary(f, df):
         for cx in range(0, grid[0]):
             chunk = get_chunk(df, cx, cy)
             chunk_id = (cy * grid[0]) + cx
-            print(f"Exporting tile {chunk_id}...")
+            # print(f"Exporting tile {chunk_id}...")
             # Loop for each piece within chunk
             for py in range(0, 8):
                 for px in range(0, 8):

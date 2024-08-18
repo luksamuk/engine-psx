@@ -14,7 +14,6 @@
 # texture with 4bpp.
 import json
 import sys
-from pprint import pp as pprint
 from ctypes import c_ushort, c_ubyte
 
 # Set endianness of some types to big endian
