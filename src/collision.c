@@ -52,6 +52,13 @@ _get_height_and_angle_from_mask(
     uint8_t *out_h, int32_t *out_angle)
 {
     Collision *collision = map16->collision[piece];
+
+    if(collision == NULL) {
+        *out_h = 0;
+        *out_angle = 0;
+        return;
+    }
+
     uint8_t *mask;
 
     switch(direction) {
