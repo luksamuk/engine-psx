@@ -11,7 +11,7 @@ COL16OUT  := $(addsuffix MAP16.COL,$(dir $(COL16SRC)))
 MAP128OUT := $(addsuffix MAP128.MAP,$(dir $(COL16SRC)))
 LVLOUT    := $(addsuffix .LVL,$(basename $(LVLSRC)))
 
-.PHONY: clean ./build/engine.cue run configure chd cook cooktest
+.PHONY: clean ./build/engine.cue run configure chd cook cooktest purge
 
 all: ./build/engine.cue
 dir: ./build
@@ -33,6 +33,8 @@ configure:
 
 clean:
 	rm -rf ./build
+
+purge: clean cleancook
 
 # =======================================
 #         ASSET COOKING TARGETS
