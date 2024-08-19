@@ -202,7 +202,7 @@ engine_update()
     sound_update();
     pad_update();
 
-#define MAX_LEVELS 5
+#define MAX_LEVELS 4
 
     if(current_scene == 0) {
         if(pad_pressed(PAD_DOWN))
@@ -289,13 +289,11 @@ engine_draw()
             "%c Round 0 Zone 1\n"
             "%c Round 0 Zone 2\n"
             "%c Round 1 Zone 1\n"
-            "%c Round 1 Zone 2\n"
-            "%c Round 2 Zone 1\n",
+            "%c Round 1 Zone 2\n",
             (menu_choice == 0) ? '>' : ' ',
             (menu_choice == 1) ? '>' : ' ',
             (menu_choice == 2) ? '>' : ' ',
-            (menu_choice == 3) ? '>' : ' ',
-            (menu_choice == 4) ? '>' : ' ');
+            (menu_choice == 3) ? '>' : ' ');
         draw_text(8, 60, 0, buffer);
     } else if(current_scene == 1) {
         if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
