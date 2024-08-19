@@ -60,6 +60,8 @@ load_player(Player *player,
     player->ev_ceil1 = (CollisionEvent){ 0 };
     player->ev_ceil2 = (CollisionEvent){ 0 };
 
+    player->action = ACTION_NONE;
+
     if(sfx_jump.addr == 0) sfx_jump = sound_load_vag("\\SFX\\JUMP.VAG;1");
     if(sfx_skid.addr == 0) sfx_skid = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
 }
@@ -340,14 +342,14 @@ player_update(Player *player)
 {
     _player_collision_detection(player);
 
-    uint8_t action_skidding = 0;
+    player->action = ACTION_NONE;
 
     // X movement
     /* Ground movement */
     if(player->grnd) {
         if(pad_pressing(PAD_RIGHT)) {
             if(player->vel.vz < 0) {
-                action_skidding = 1;
+                player->action = ACTION_SKIDDING;
                 player->vel.vz += X_DECEL;
             } else {
                 player->vel.vz += X_ACCEL;
@@ -355,7 +357,7 @@ player_update(Player *player)
             }
         } else if(pad_pressing(PAD_LEFT)) {
             if(player->vel.vz > 0) {
-                action_skidding = 1;
+                player->action = ACTION_SKIDDING;
                 player->vel.vz -= X_DECEL;
             } else {
                 player->vel.vz -= X_ACCEL;
@@ -424,9 +426,11 @@ player_update(Player *player)
             if(pad_pressing(PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
+                player->action = ACTION_LOOKUP;
             } else if(pad_pressing(PAD_DOWN)) {
                 player_set_animation_direct(player, ANIM_CROUCHDOWN);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
+                player->action = ACTION_CROUCHDOWN;
             } else if(player->idle_timer == 0) {
                 player_set_animation_direct(player, ANIM_IDLE);
                 player->loopback_frame = 2;
@@ -436,7 +440,7 @@ player_update(Player *player)
             }
         } else {
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
-            if(action_skidding) {
+            if(player->action == ACTION_SKIDDING) {
                 if(abs(player->vel.vz) >= (4 << 12)) {
                     if(player_get_current_animation_hash(player) != ANIM_SKIDDING) {
                         sound_play_vag(sfx_skid, 0);

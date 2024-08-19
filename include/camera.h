@@ -10,6 +10,7 @@ typedef struct {
     VECTOR realpos;
     int32_t extension_x;
     int32_t extension_y;
+    uint8_t delay;
 } Camera;
 
 void camera_init(Camera *);

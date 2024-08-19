@@ -13,6 +13,10 @@
 #define CAMERAX_MAX           ((LEVEL_MAX_X_CHUNKS << 19) - CENTERX_FIXP)
 #define CAMERAY_MAX           ((LEVEL_MAX_Y_CHUNKS << 19) - CENTERY_FIXP)
 #define CAMERA_EXTEND_X_MAX   (64 << 12)
+#define CAMERA_STEP           (2 << 12)
+#define CAMERA_EXTEND_Y_UP    (104 << 12)
+#define CAMERA_EXTEND_Y_DOWN  (88 << 12)
+#define CAMERA_MOVE_DELAY     120
 
 void
 camera_init(Camera *c)
@@ -20,6 +24,7 @@ camera_init(Camera *c)
     camera_set(c, CENTERX_FIXP, CENTERY_FIXP);
     c->pos.vz = c->realpos.vz = 0;
     c->extension_x = c->extension_y = 0;
+    c->delay = 0;
 }
 
 void
@@ -70,21 +75,48 @@ camera_update(Camera *c, Player *player)
         // Extended camera
         if(abs(player->vel.vz) >= 0x6000) {
             if(abs(c->extension_x) < CAMERA_EXTEND_X_MAX)
-                c->extension_x += SIGNUM(player->vel.vz) * 0x2000;
+                c->extension_x += SIGNUM(player->vel.vz) * CAMERA_STEP;
             else c->extension_x = SIGNUM(player->vel.vz) * CAMERA_EXTEND_X_MAX;
         } else if(abs(c->extension_x) > 0) {
-            c->extension_x -= SIGNUM(c->extension_x) * 0x2000;
+            c->extension_x -= SIGNUM(c->extension_x) * CAMERA_STEP;
+        }
+
+        // Crouch down / Look up
+        if(player->action == ACTION_LOOKUP || player->action == ACTION_CROUCHDOWN) {
+            if(c->delay < CAMERA_MOVE_DELAY) c->delay++;
+            else {
+                switch(player->action) {
+                default: break;
+                case ACTION_LOOKUP:
+                    if(c->extension_y > -CAMERA_EXTEND_Y_UP) {
+                        c->extension_y -= CAMERA_STEP;
+                    } else c->extension_y = -CAMERA_EXTEND_Y_UP;
+                    break;
+                case ACTION_CROUCHDOWN:
+                    if(c->extension_y < CAMERA_EXTEND_Y_DOWN) {
+                        c->extension_y += CAMERA_STEP;
+                    } else c->extension_y = CAMERA_EXTEND_Y_DOWN;
+                    break;
+                }
+            }
+        } else c->delay = 0;
+
+        // Return camera to normal
+        if(c->delay < CAMERA_MOVE_DELAY) {
+            if(abs(c->extension_y) > 0) {
+                c->extension_y -= SIGNUM(c->extension_y) * CAMERA_STEP;
+            }
         }
     }
 
-    if(c->realpos.vx < CENTERX_FIXP) c->realpos.vx = CENTERX_FIXP;
-    else if(c->realpos.vx > CAMERAX_MAX) c->realpos.vx = CAMERAX_MAX;
-
-    if(c->realpos.vy < CENTERY_FIXP) c->realpos.vy = CENTERY_FIXP;
-    else if(c->realpos.vy > CAMERAY_MAX) c->realpos.vy = CAMERAY_MAX;
-
     c->pos.vx = c->realpos.vx + c->extension_x;
     c->pos.vy = c->realpos.vy + c->extension_y;
+
+    if(c->pos.vx < CENTERX_FIXP) c->pos.vx = CENTERX_FIXP;
+    else if(c->pos.vx > CAMERAX_MAX) c->pos.vx = CAMERAX_MAX;
+
+    if(c->pos.vy < CENTERY_FIXP) c->pos.vy = CENTERY_FIXP;
+    else if(c->pos.vy > CAMERAY_MAX) c->pos.vy = CAMERAY_MAX;
 }
 
 void

@@ -368,11 +368,13 @@ engine_draw()
                      "SPD %08x %08x\n"
                      "ANG %04x\n"
                      "POS %08x %08x\n"
+                     "ACT %02u\n"
                      ,
                      player.vel.vz,
                      player.vel.vx, player.vel.vy,
                      player.angle,
-                     player.pos.vx, player.pos.vy
+                     player.pos.vx, player.pos.vy,
+                     player.action
                 );
             draw_text(8, 12, 0, buffer);
         }

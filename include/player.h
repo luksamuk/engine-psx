@@ -17,6 +17,13 @@
 #define Y_MIN_JUMP       0x4000
 #define Y_JUMP_STRENGTH  0x6800
 
+typedef enum {
+    ACTION_NONE,
+    ACTION_SKIDDING,
+    ACTION_LOOKUP,
+    ACTION_CROUCHDOWN
+} PlayerAction;
+
 typedef struct {
     Chara     chara;
 
@@ -33,6 +40,8 @@ typedef struct {
     uint8_t   grnd;
     uint8_t   jmp;
     uint8_t   push;
+
+    PlayerAction action;
 
     CollisionEvent ev_grnd1;
     CollisionEvent ev_grnd2;
