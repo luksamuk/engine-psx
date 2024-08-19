@@ -1,14 +1,14 @@
 #+title: engine-psx
 
-Open source platformer engine built for the Original PlayStation.
+Open source platformer engine built for the PlayStation 1.
 
-Uses [[https://github.com/Lameguy64/PSn00bSDK/tree/master][PSn00bSDK]].
+Heavily inspired by Sonic The Hedgehog. Uses [[https://github.com/Lameguy64/PSn00bSDK/tree/master][PSn00bSDK]].
 
 #+html: <center>
-[[file:./screenshots/engine-psx-081624.gif]]
+[[file:./screenshots/engine-psx-081924.gif]]
 #+html: </center>
 
-/Engine short video running on DuckStation, dated [2024-08-16]./
+/Engine short video running on DuckStation, dated [2024-08-19]./
 
 * About
 
@@ -30,13 +30,14 @@ tested on real hardware (a PlayStation model SCPH-5501).
 
 * Recommended tools
 
-Here are some tools I've been using:
+Here  are  some  tools  I've  been using.  Please  notice  that  this  project's
+development has been targeted for Linux environments.
 
 - GIMP  with G'Mic  plugin (to  reduce  image colormaps  to 256  colors with  no
   dithering);
-- Aseprite (for handling sprite sheets and tilemaps), plus some useful [[https://github.com/Gabinou/tilemap_scripts_aseprite][script files]] (tweak
-  =export_tileset.lua= so  it only exports with  a =row_len= of =32=,  since all
-  tiles are 8x8);
+- Aseprite (for  handling sprite sheets  and tilemaps), plus some  useful [[https://github.com/Gabinou/tilemap_scripts_aseprite][script
+  files]] (tweak =export_tileset.lua= so it only exports with a =row_len= of =32=,
+  since all tiles are 8x8);
 - =mkpsxiso=, to build the ISO files;
 - =gcc-mipsel= compiler toolchain;
 - =timedit=, to import images and convert them to .TIM format;
@@ -45,7 +46,8 @@ Here are some tools I've been using:
 - =xainterleave=, to  interleave .XA  files into a  single, ready-for-production
   .XA file;
 - =cdrdao=, if you intend on burning your ISO on a CD-R;
-- =CMake= and =GNU Make=, for build scripts.
+- =CMake= and =GNU Make=, for build scripts;
+- =GNU Make= and =Python 3.12= for running extra build scripts.
 
 Some  of   these  tools  are   already  available  when  you   properly  install
 PSn00bSDK. Just follow [[https://github.com/Lameguy64/PSn00bSDK/blob/master/doc/installation.md][this guide]].
@@ -86,14 +88,11 @@ cdrdao write --speed 1 --driver generic-mmc-raw --swap -n --eject "engine.cue"
 If you're on  Windows or you need  more information on other  methods, check out
 [[https://alex-free.github.io/psx-cdr/][this awesome guide]].
 
-* Running on your browser
+* Generating a single file
 
-*NOTE:* /As of  now, for some reason,  EmulatorJS won't load the  game.  You can
-still play it on an offline emulator such as DuckStation or ~pcsx-redux~./
-
-If you're using a  browser emulator such as [[https://emulatorjs.org/][EmulatorJS]] and you  need your .ISO +
-.CUE to be a single file, you might  want to use something to convert it to .CHD
-format. You can do this by using a tool called [[https://github.com/thingsiplay/tochd][tochd]]:
+If  you need  your .ISO  + .CUE  to  be a  single file,  you might  want to  use
+something to convert it  to .CHD format. You can do this by  using a tool called
+[[https://github.com/thingsiplay/tochd][tochd]]:
 
 #+begin_src bash
 tochd -d . -- ./build/engine.cue
@@ -103,6 +102,7 @@ tochd -d . -- ./build/engine.cue
 
 | Screenshot                                            | Description                                                                                     |
 |-------------------------------------------------------+-------------------------------------------------------------------------------------------------|
+| [[file:./screenshots/engine-psx-081924.gif]]              | Alpha engine [2024-08-19]. New tilesets, animation with variable speed, extended camera.        |
 | [[file:./screenshots/engine-psx-081624-realhardware.gif]] | Alpha engine [2024-08-16]. Same as below, on a physical SCPH-5501.                              |
 | [[file:./screenshots/engine-psx-081624.gif]]              | Alpha engine [2024-08-16]. First working implementation of slope collision.                     |
 | [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine [2024-08-05]. Same as screenshot below, but on a physical PlayStation (SCPH-5501). |
