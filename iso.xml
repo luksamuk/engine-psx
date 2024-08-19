@@ -64,7 +64,29 @@
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/TILES.TIM" />
 	</dir>
-      </dir>
+
+	<dir name="R2">
+	  <file name="Z1.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/Z1.LVL" />
+	  <file name="MAP128.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/MAP128.MAP" />
+	  <file name="MAP16.COL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/MAP16.COL" />
+	  <file name="MAP16.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/MAP16.MAP" />
+	  <file name="TILES0.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/TILES0.TIM" />
+	  <file name="TILES1.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/TILES1.TIM" />
+	</dir>
+
+      </dir> <!-- LEVELS -->
 
       <dir name="SFX">
 	<file name="JUMP.VAG"

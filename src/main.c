@@ -104,19 +104,42 @@ engine_load_level(uint8_t level)
     uint32_t filelength;
 
     snprintf(filename0, 255, "%s\\TILES.TIM;1", basepath);
+
+    printf("Loading %s...\n", filename0);
     uint8_t *timfile = file_read(filename0, &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
         free(timfile);
+    } else {
+        // If not single "TILES.TIM" was found, then perharps try a
+        // "TILES0.TIM" and a "TILES1.TIM".
+        snprintf(filename0, 255, "%s\\TILES0.TIM;1", basepath);
+        printf("Loading %s...\n", filename0);
+        timfile = file_read(filename0, &filelength);
+        if(timfile) {
+            load_texture(timfile, &tim);
+            free(timfile);
+        }
+
+        snprintf(filename0, 255, "%s\\TILES1.TIM;1", basepath);
+        printf("Loading %s...\n", filename0);
+        timfile = file_read(filename0, &filelength);
+        if(timfile) {
+            load_texture(timfile, &tim);
+            free(timfile);
+        }
     }
 
     snprintf(filename0, 255, "%s\\MAP16.MAP;1", basepath);
     snprintf(filename1, 255, "%s\\MAP16.COL;1", basepath);
+    printf("Loading %s and %s...\n", filename0, filename1);
     load_map(&map16, filename0, filename1);
     snprintf(filename0, 255, "%s\\MAP128.MAP;1", basepath);
+    printf("Loading %s...\n", filename0);
     load_map(&map128, filename0, NULL);
 
     snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, (level & 0x01) + 1);
+    printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
 
     level_debrief();
@@ -179,7 +202,7 @@ engine_update()
     sound_update();
     pad_update();
 
-#define MAX_LEVELS 4
+#define MAX_LEVELS 5
 
     if(current_scene == 0) {
         if(pad_pressed(PAD_DOWN))
@@ -266,11 +289,13 @@ engine_draw()
             "%c Round 0 Zone 1\n"
             "%c Round 0 Zone 2\n"
             "%c Round 1 Zone 1\n"
-            "%c Round 1 Zone 2\n",
+            "%c Round 1 Zone 2\n"
+            "%c Round 2 Zone 1\n",
             (menu_choice == 0) ? '>' : ' ',
             (menu_choice == 1) ? '>' : ' ',
             (menu_choice == 2) ? '>' : ' ',
-            (menu_choice == 3) ? '>' : ' ');
+            (menu_choice == 3) ? '>' : ' ',
+            (menu_choice == 4) ? '>' : ' ');
         draw_text(8, 60, 0, buffer);
     } else if(current_scene == 1) {
         if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
