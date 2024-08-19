@@ -394,7 +394,8 @@ player_update(Player *player)
         }
     } else {
         if(pad_pressed(PAD_CROSS)) {
-            player->vel.vy = -Y_JUMP_STRENGTH;
+            player->vel.vx -= (Y_JUMP_STRENGTH * rsin(player->angle)) >> 12;
+            player->vel.vy -= (Y_JUMP_STRENGTH * rcos(player->angle)) >> 12;
             player->grnd = 0;
             player->jmp = 1;
             player_set_animation_direct(player, ANIM_ROLLING);
