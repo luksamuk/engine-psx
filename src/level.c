@@ -176,8 +176,8 @@ _render_8(
 
     // Calculate whether we want to use upper or lower texture page.
     // First page goes 0 ~ 1023. Anything above that is on page 1
-    uint16_t page = frame >> 10;
-    frame &= 0x3ff;
+    /* uint16_t page = frame >> 10; */
+    /* frame &= 0x3ff; */
 
     uint16_t
         v0_idx = frame >> 5,
@@ -186,25 +186,25 @@ _render_8(
         u0 = (u0_idx << 3),
         v0 = (v0_idx << 3);
 
-    //SPRT_8 *sprt = get_next_prim();
-    //increment_prim(sizeof(SPRT_8));
-    //setSprt8(sprt);
-    //setXY0(sprt, vx, vy);
-    //setRGB0(sprt, 128, 128, 128);
-    //setUV0(sprt, u0, v0);
-    //setClut(sprt, lvl->crectx, lvl->crecty);
-    //sort_prim(sprt, otz);
+    SPRT_8 *sprt = get_next_prim();
+    increment_prim(sizeof(SPRT_8));
+    setSprt8(sprt);
+    setXY0(sprt, vx, vy);
+    setRGB0(sprt, 128, 128, 128);
+    setUV0(sprt, u0, v0);
+    setClut(sprt, lvl->crectx, lvl->crecty);
+    sort_prim(sprt, otz);
 
-    POLY_FT4 *poly = get_next_prim();
-    increment_prim(sizeof(POLY_FT4));
-    setPolyFT4(poly);
-    setXYWH(poly, vx, vy, 8, 8);
-    setRGB0(poly, 128, 128, 128);
-    setUVWH(poly, u0, v0, 8, 8);
-    // tpage and clut are calculated wrt. first texture page
-    setTPage(poly, 0, 1, lvl->prectx, lvl->precty + (page << 8));
-    setClut(poly, lvl->crectx, lvl->crecty + page);
-    sort_prim(poly, otz);
+    /* POLY_FT4 *poly = get_next_prim(); */
+    /* increment_prim(sizeof(POLY_FT4)); */
+    /* setPolyFT4(poly); */
+    /* setXYWH(poly, vx, vy, 8, 8); */
+    /* setRGB0(poly, 128, 128, 128); */
+    /* setUVWH(poly, u0, v0, 8, 8); */
+    /* // tpage and clut are calculated wrt. first texture page */
+    /* setTPage(poly, 0, 1, lvl->prectx, lvl->precty + (page << 8)); */
+    /* setClut(poly, lvl->crectx, lvl->crecty + page); */
+    /* sort_prim(poly, otz); */
 }
 
 void
@@ -357,9 +357,9 @@ render_lvl(
     _render_layer(lvl, map128, map16, cx, cy, 4, 0);
     _render_layer(lvl, map128, map16, cx, cy, 2, 1);
 
-    //DR_TPAGE *tpage = get_next_prim();
-    //increment_prim(sizeof(DR_TPAGE));
-    //setDrawTPage(tpage, 0, 1, getTPage(0, 1, lvl->prectx, lvl->precty));
-    //sort_prim(tpage, OT_LENGTH - 1);
+    DR_TPAGE *tpage = get_next_prim();
+    increment_prim(sizeof(DR_TPAGE));
+    setDrawTPage(tpage, 0, 1, getTPage(0, 1, lvl->prectx, lvl->precty));
+    sort_prim(tpage, OT_LENGTH - 1);
 }
 
