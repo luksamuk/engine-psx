@@ -17,9 +17,9 @@
 // Size of the buffer GPU commands and primitives are written to. If the program
 // crashes due to too many primitives being drawn, increase this value.
 //#define BUFFER_LENGTH 8192
-#define BUFFER_LENGTH 24576
+//#define BUFFER_LENGTH 24576
 //#define BUFFER_LENGTH 40960
-//#define BUFFER_LENGTH 65532
+#define BUFFER_LENGTH 65532
 
 /* Framebuffer/display list class */
 
