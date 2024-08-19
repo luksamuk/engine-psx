@@ -1,6 +1,8 @@
 #include "camera.h"
 #include "render.h"
 #include "level.h"
+#include "util.h"
+#include <stdlib.h>
 
 #define CENTERX_FIXP          (CENTERX << 12)
 #define CENTERY_FIXP          (CENTERY << 12)
@@ -10,6 +12,7 @@
 #define SPEEDY_CAP            (24 << 12)
 #define CAMERAX_MAX           ((LEVEL_MAX_X_CHUNKS << 19) - CENTERX_FIXP)
 #define CAMERAY_MAX           ((LEVEL_MAX_Y_CHUNKS << 19) - CENTERY_FIXP)
+#define CAMERA_EXTEND_X_MAX   (64 << 12)
 
 void
 camera_init(Camera *c)
@@ -63,6 +66,15 @@ camera_update(Camera *c, Player *player)
 
         c->realpos.vx += deltax;
         c->realpos.vy += deltay;
+
+        // Extended camera
+        if(abs(player->vel.vz) >= 0x6000) {
+            if(abs(c->extension_x) < CAMERA_EXTEND_X_MAX)
+                c->extension_x += SIGNUM(player->vel.vz) * 0x2000;
+            else c->extension_x = SIGNUM(player->vel.vz) * CAMERA_EXTEND_X_MAX;
+        } else if(abs(c->extension_x) > 0) {
+            c->extension_x -= SIGNUM(c->extension_x) * 0x2000;
+        }
     }
 
     if(c->realpos.vx < CENTERX_FIXP) c->realpos.vx = CENTERX_FIXP;
