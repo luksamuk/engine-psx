@@ -55,10 +55,10 @@ PSn00bSDK. Just follow [[https://github.com/Lameguy64/PSn00bSDK/blob/master/doc/
 * Running on real hardware
 
 #+html: <center>
-[[file:./screenshots/engine-psx-081624-realhardware.gif]]
+[[file:./screenshots/engine-psx-081924-realhardware.gif]]
 #+html: </center>
 
-/Engine short video running on a PlayStation SCPH-5501, dated [2024-08-16]./
+/Engine short video running on a PlayStation SCPH-5501, dated [2024-08-19]./
 
 In theory,  to burn the  disc, you  would need a  Sony license file  which comes
 bundled with the Psy-Q SDK (which *I  AM NOT* using). I *WILL NOT* provide these
@@ -102,6 +102,7 @@ tochd -d . -- ./build/engine.cue
 
 | Screenshot                                            | Description                                                                                     |
 |-------------------------------------------------------+-------------------------------------------------------------------------------------------------|
+| [[file:./screenshots/engine-psx-081924-realhardware.gif]] | Alpha engine [2024-08-19]. Same as below, on a physical SCPH-5501.                              |
 | [[file:./screenshots/engine-psx-081924.gif]]              | Alpha engine [2024-08-19]. New tilesets, animation with variable speed, extended camera.        |
 | [[file:./screenshots/engine-psx-081624-realhardware.gif]] | Alpha engine [2024-08-16]. Same as below, on a physical SCPH-5501.                              |
 | [[file:./screenshots/engine-psx-081624.gif]]              | Alpha engine [2024-08-16]. First working implementation of slope collision.                     |
