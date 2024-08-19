@@ -14,9 +14,9 @@
 void
 camera_init(Camera *c)
 {
-    c->pos.vx = CENTERX_FIXP;
-    c->pos.vy = CENTERY_FIXP;
-    c->pos.vz = 0;
+    camera_set(c, CENTERX_FIXP, CENTERY_FIXP);
+    c->pos.vz = c->realpos.vz = 0;
+    c->extension_x = c->extension_y = 0;
 }
 
 void
@@ -26,8 +26,8 @@ camera_update(Camera *c, Player *player)
         VECTOR *center = &player->pos;
 
         // X movement
-        int32_t left_border  = c->pos.vx - SCREENX_BORDER_RADIUS;
-        int32_t right_border = c->pos.vx + SCREENX_BORDER_RADIUS;
+        int32_t left_border  = c->realpos.vx - SCREENX_BORDER_RADIUS;
+        int32_t right_border = c->realpos.vx + SCREENX_BORDER_RADIUS;
         int32_t deltax = 0;
 
         if(right_border < center->vx) {
@@ -41,8 +41,8 @@ camera_update(Camera *c, Player *player)
         // Y movement
         int32_t deltay = 0;
         if(!player->grnd) {
-            int32_t top_border = c->pos.vy - SCREENY_BORDER_RADIUS;
-            int32_t bottom_border = c->pos.vy + SCREENY_BORDER_RADIUS;
+            int32_t top_border = c->realpos.vy - SCREENY_BORDER_RADIUS;
+            int32_t bottom_border = c->realpos.vy + SCREENY_BORDER_RADIUS;
 
             if(top_border > center->vy) {
                 deltay = center->vy - top_border;
@@ -52,7 +52,7 @@ camera_update(Camera *c, Player *player)
                 deltay = deltay > SPEEDY_CAP ? SPEEDY_CAP : deltay;
             }
         } else {
-            deltay = center->vy - c->pos.vy;
+            deltay = center->vy - c->realpos.vy;
             int32_t cap = (6 << 12);
             deltay = (deltay > cap)
                 ? cap
@@ -61,14 +61,23 @@ camera_update(Camera *c, Player *player)
                 : deltay;
         }
 
-        c->pos.vx += deltax;
-        c->pos.vy += deltay;
+        c->realpos.vx += deltax;
+        c->realpos.vy += deltay;
     }
 
-    if(c->pos.vx < CENTERX_FIXP) c->pos.vx = CENTERX_FIXP;
-    else if(c->pos.vx > CAMERAX_MAX) c->pos.vx = CAMERAX_MAX;
+    if(c->realpos.vx < CENTERX_FIXP) c->realpos.vx = CENTERX_FIXP;
+    else if(c->realpos.vx > CAMERAX_MAX) c->realpos.vx = CAMERAX_MAX;
 
-    if(c->pos.vy < CENTERY_FIXP) c->pos.vy = CENTERY_FIXP;
-    else if(c->pos.vy > CAMERAY_MAX) c->pos.vy = CAMERAY_MAX;
+    if(c->realpos.vy < CENTERY_FIXP) c->realpos.vy = CENTERY_FIXP;
+    else if(c->realpos.vy > CAMERAY_MAX) c->realpos.vy = CAMERAY_MAX;
+
+    c->pos.vx = c->realpos.vx + c->extension_x;
+    c->pos.vy = c->realpos.vy + c->extension_y;
 }
 
+void
+camera_set(Camera *c, int32_t vx, int32_t vy)
+{
+    c->pos.vx = c->realpos.vx = vx;
+    c->pos.vy = c->realpos.vy = vy;
+}

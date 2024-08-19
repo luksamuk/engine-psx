@@ -220,7 +220,7 @@ engine_update()
 
             engine_load_player();
             engine_load_level(menu_choice);
-            camera.pos = player.pos;
+            camera_set(&camera, player.pos.vx, player.pos.vy);
             menu_choice = 0;
             current_scene = 1;
         }
