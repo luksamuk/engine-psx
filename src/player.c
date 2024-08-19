@@ -375,12 +375,23 @@ player_update(Player *player)
     } else {
         // Air X movement
         if(pad_pressing(PAD_RIGHT)) {
-            player->vel.vx += X_ACCEL;
+            player->vel.vx += X_AIR_ACCEL;
             player->anim_dir = 1;
         } else if(pad_pressing(PAD_LEFT)) {
-            player->vel.vx -= X_ACCEL;
+            player->vel.vx -= X_AIR_ACCEL;
             player->anim_dir = -1;
         }
+
+        // Air drag. Calculated before applying gravity.
+        if(player->vel.vy < 0 && player->vel.vy > -Y_MIN_JUMP) {
+            // 0.125 = 512 in 20.12 format => mod 2^9 => & 0x1ff
+            // 256 = 1048576 in 20.12 format
+            // xsp -= (xsp % 0.125) / 256
+            player->vel.vx -= ((player->vel.vx & 0x1ff) << 12) / 0x100000;
+        }
+
+        if(player->vel.vx > X_TOP_SPD) player->vel.vx = X_TOP_SPD;
+        else if(player->vel.vx < -X_TOP_SPD) player->vel.vx = -X_TOP_SPD;
     }
 
     // Y movement

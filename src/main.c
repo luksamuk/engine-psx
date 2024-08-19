@@ -282,7 +282,7 @@ engine_draw()
 
         snprintf(buffer, 255, "%s %s", __DATE__, __TIME__);
         x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
-        draw_text(x, SCREEN_YRES - 12, 0, buffer);
+        draw_text(x, SCREEN_YRES - 24, 0, buffer);
 
         snprintf(
             buffer, 255,
