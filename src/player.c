@@ -387,7 +387,8 @@ player_update(Player *player)
             // 0.125 = 512 in 20.12 format => mod 2^9 => & 0x1ff
             // 256 = 1048576 in 20.12 format
             // xsp -= (xsp % 0.125) / 256
-            player->vel.vx -= ((player->vel.vx & 0x1ff) << 12) / 0x100000;
+            int32_t drag_factor = ((player->vel.vx & 0x1ff) << 12 / (256 << 12));
+            player->vel.vx -= drag_factor;
         }
 
         if(player->vel.vx > X_TOP_SPD) player->vel.vx = X_TOP_SPD;
