@@ -8,9 +8,9 @@
 
 // Constants for running the game at a fixed 60 FPS.
 // These constants are also in a 12-scale format for fixed point math.
-#define X_ACCEL          0x0081
-#define X_AIR_ACCEL      0x0102
-#define X_FRICTION       0x0081
+#define X_ACCEL          0x00c0
+#define X_AIR_ACCEL      0x0180
+#define X_FRICTION       0x00c0
 #define X_DECEL          0x0800
 #define X_TOP_SPD        0x6000
 #define Y_GRAVITY        0x0380
