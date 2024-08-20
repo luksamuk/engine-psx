@@ -146,12 +146,17 @@ _player_collision_linecast(Player *player)
         anchorx = (player->pos.vx >> 12),
         anchory = (player->pos.vy >> 12);
 
-    uint16_t grn_ceil_dist = 4;
-    uint16_t grn_grnd_dist = 4;
-    uint16_t grn_mag   = 20;
-    uint16_t ceil_mag  = 20;
-    uint16_t left_mag  = 10;
-    uint16_t right_mag = 10;
+    uint16_t grn_ceil_dist = WIDTH_RADIUS_NORMAL;
+    uint16_t grn_grnd_dist = WIDTH_RADIUS_NORMAL;
+    uint16_t grn_mag   = HEIGHT_RADIUS_NORMAL;
+    uint16_t ceil_mag  = HEIGHT_RADIUS_NORMAL;
+    uint16_t left_mag  = PUSH_RADIUS;
+    uint16_t right_mag = PUSH_RADIUS;
+
+    if(player->action == ACTION_ROLLING) {
+        grn_ceil_dist = grn_grnd_dist = WIDTH_RADIUS_ROLLING;
+        grn_mag = ceil_mag = HEIGHT_RADIUS_ROLLING;
+    }
 
     player->ev_grnd1 = linecast(&leveldata, &map128, &map16,
                                 anchorx - grn_grnd_dist, anchory,
@@ -192,7 +197,7 @@ _player_collision_linecast(Player *player)
         setLineF2(line);
         if(player->ev_grnd1.collided) setRGB0(line, 255, 0, 0);
         else                  setRGB0(line, 0, 93, 0);
-        setXY2(line, ax - grn_ceil_dist, ay + 8, ax - grn_ceil_dist, ay + 8 + grn_mag);
+        setXY2(line, ax - grn_ceil_dist, ay, ax - grn_ceil_dist, ay + grn_mag);
         sort_prim(line, 0);
     
         // Ground sensor right
@@ -201,7 +206,7 @@ _player_collision_linecast(Player *player)
         setLineF2(line);
         if(player->ev_grnd2.collided) setRGB0(line, 255, 0, 0);
         else                  setRGB0(line, 23, 99, 63);
-        setXY2(line, ax + grn_ceil_dist, ay + 8, ax + grn_ceil_dist, ay + 8 + grn_mag);
+        setXY2(line, ax + grn_ceil_dist, ay, ax + grn_ceil_dist, ay + grn_mag);
         sort_prim(line, 0);
     
         // Ceiling sensor left
@@ -252,18 +257,20 @@ _player_collision_detection(Player *player)
         if(player->grnd) player->vel.vz = 0;
         else player->vel.vx = 0;
         player->pos.vx = (player->ev_right.coord - 10) << 12;
-        player->push = 1;
+        if(player->grnd) player->push = 1;
     }
 
     if(player->ev_left.collided && player->vel.vx < 0) {
         if(player->grnd) player->vel.vz = 0;
         else player->vel.vx = 0;
         player->pos.vx = (player->ev_left.coord + 25) << 12;
-        player->push = 1;
+        if(player->grnd) player->push = 1;
     }
 
     if(!player->grnd) {
         player->angle = 0;
+
+        // Landing on solid ground
         if((player->ev_grnd1.collided || player->ev_grnd2.collided) && (player->vel.vy >= 0)) {
             // Set angle according to movement
             if(player->ev_grnd1.collided && !player->ev_grnd2.collided)
@@ -300,6 +307,9 @@ _player_collision_detection(Player *player)
             player->pos.vy = ((new_coord - 16) << 12);
             player->grnd = 1;
             player->jmp = 0;
+
+            if(player->action == ACTION_ROLLING)
+                player->action = ACTION_NONE;
         }
 
         if((player->ev_ceil1.collided || player->ev_ceil2.collided) && (player->vel.vy < 0)) {
@@ -342,11 +352,11 @@ player_update(Player *player)
 {
     _player_collision_detection(player);
 
-    player->action = ACTION_NONE;
-
     // X movement
     /* Ground movement */
     if(player->grnd) {
+        player->action = ACTION_NONE;
+
         if(pad_pressing(PAD_RIGHT)) {
             if(player->vel.vz < 0) {
                 player->action = ACTION_SKIDDING;
@@ -386,8 +396,6 @@ player_update(Player *player)
 
         // Air drag. Calculated before applying gravity.
         if(player->vel.vy < 0 && player->vel.vy > -Y_MIN_JUMP) {
-            // 0.125 = 512 in 20.12 format => mod 2^9 => & 0x1ff
-            // 256 = 1048576 in 20.12 format
             // xsp -= (xsp % 0.125) / 256
             int32_t air_drag = ((abs(player->vel.vx) & 0x1ff) << 12 / (256 << 12));
             if(player->vel.vx > 0)
@@ -402,13 +410,13 @@ player_update(Player *player)
 
     // Y movement
     if(!player->grnd) {
-        player->vel.vy += Y_GRAVITY;
-
         if(player->jmp
            && !pad_pressing(PAD_CROSS)
            && player->vel.vy < -Y_MIN_JUMP) {
             player->vel.vy = -Y_MIN_JUMP;
         }
+
+        player->vel.vy += Y_GRAVITY;
     } else {
         if(pad_pressed(PAD_CROSS)) {
             player->vel.vx -= (Y_JUMP_STRENGTH * rsin(player->angle)) >> 12;
@@ -417,6 +425,7 @@ player_update(Player *player)
             player->jmp = 1;
             player_set_animation_direct(player, ANIM_ROLLING);
             sound_play_vag(sfx_jump, 0);
+            player->action = ACTION_ROLLING;
         }
     }
 

@@ -17,11 +17,18 @@
 #define Y_MIN_JUMP       0x4000
 #define Y_JUMP_STRENGTH  0x6800
 
+#define WIDTH_RADIUS_NORMAL      8
+#define HEIGHT_RADIUS_NORMAL    19
+#define WIDTH_RADIUS_ROLLING     7
+#define HEIGHT_RADIUS_ROLLING   14
+#define PUSH_RADIUS             14
+
 typedef enum {
     ACTION_NONE,
     ACTION_SKIDDING,
     ACTION_LOOKUP,
-    ACTION_CROUCHDOWN
+    ACTION_CROUCHDOWN,
+    ACTION_ROLLING
 } PlayerAction;
 
 typedef struct {
