@@ -68,6 +68,12 @@
 
       </dir> <!-- LEVELS -->
 
+      <dir name="MISC">
+	<file name="DISK.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/DISK.TIM" />
+      </dir>
+
       <dir name="SFX">
 	<file name="JUMP.VAG"
 	      type="data"

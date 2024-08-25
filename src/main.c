@@ -72,6 +72,18 @@ static uint8_t current_scene = 0;
 static uint8_t menu_choice = 0;
 static uint8_t paused = 0;
 
+// Disclaimer
+static uint8_t *disclaimer_bg = NULL;
+static uint16_t disclaimer_timer = 0;
+
+void
+engine_load_disclaimer()
+{
+    current_scene = 0;
+    uint32_t length;
+    disclaimer_bg = file_read("\\MISC\\DISK.TIM;1", &length);
+}
+
 void
 engine_load_player()
 {
@@ -174,7 +186,7 @@ engine_load_menu()
 {
     set_clear_color(0, 0, 0);
     render_loading_text();
-    current_scene = 0;
+    current_scene = 1;
     menu_choice = 0;
 }
 
@@ -193,7 +205,7 @@ engine_init()
     render_loading_text();
     set_clear_color(63, 0, 127);
 
-    engine_load_menu();
+    engine_load_disclaimer();
 }
 
 void
@@ -204,7 +216,21 @@ engine_update()
 
 #define MAX_LEVELS 4
 
-    if(current_scene == 0) {
+    if(current_scene == 0) { // Disclaimer
+        disclaimer_timer++;
+        if(disclaimer_timer > 1200
+           || pad_pressed(PAD_START)
+           || pad_pressed(PAD_CROSS)) {
+            free(disclaimer_bg);
+            disclaimer_bg = NULL;
+            disclaimer_timer = 0;
+            current_scene = 1;
+
+            set_clear_color(0, 0, 0);
+            render_loading_text();
+            engine_load_menu();
+        }
+    } else if(current_scene == 1) { // Menu
         if(pad_pressed(PAD_DOWN))
             menu_choice++;
         else if(pad_pressed(PAD_UP)) {
@@ -222,9 +248,9 @@ engine_update()
             engine_load_level(menu_choice);
             camera_set(&camera, player.pos.vx, player.pos.vy);
             menu_choice = 0;
-            current_scene = 1;
+            current_scene = 2;
         }
-    } else if(current_scene == 1) {
+    } else if(current_scene == 2) { // Level
         if(pad_pressed(PAD_START)) paused = !paused;
  
         if(paused) {
@@ -271,6 +297,14 @@ void
 engine_draw()
 {
     if(current_scene == 0) {
+        TIM_IMAGE tim;
+        GetTimInfo((const uint32_t *)disclaimer_bg, &tim);
+        RECT r2 = *tim.prect;
+        r2.y += 240;
+        set_clear_color(0, 0, 0);
+        LoadImage(tim.prect, tim.paddr);
+        LoadImage(&r2, tim.paddr);
+    } else if(current_scene == 1) {
         int16_t x;
         const char *title = "*** engine-psx ***";
         x = CENTERX - (strlen(title) * 4);
@@ -295,7 +329,7 @@ engine_draw()
             (menu_choice == 2) ? '>' : ' ',
             (menu_choice == 3) ? '>' : ' ');
         draw_text(8, 60, 0, buffer);
-    } else if(current_scene == 1) {
+    } else if(current_scene == 2) {
         if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
            && abs((player.pos.vy - camera.pos.vy) >> 12) <= SCREEN_YRES) {
             VECTOR player_canvas_pos = {
