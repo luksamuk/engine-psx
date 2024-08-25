@@ -16,7 +16,10 @@
 #define Y_GRAVITY        0x0380
 #define Y_MIN_JUMP       0x4000
 #define Y_JUMP_STRENGTH  0x6800
+#define X_ROLL_FRICTION  0x0060
+#define X_ROLL_DECEL     0x0200
 
+// Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      8
 #define HEIGHT_RADIUS_NORMAL    19
 #define WIDTH_RADIUS_ROLLING     7

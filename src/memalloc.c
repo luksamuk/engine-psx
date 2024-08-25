@@ -56,5 +56,5 @@ fastalloc_free()
 void *
 fastalloc_malloc(uint32_t size)
 {
-    alloc_arena_malloc(&scratchpad_arena, size);
+    return alloc_arena_malloc(&scratchpad_arena, size);
 }

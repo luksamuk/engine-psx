@@ -7,22 +7,24 @@ _move_point_linecast(uint8_t direction, int32_t vx, int32_t vy,
                      int32_t *lx, int32_t *ly,
                      uint8_t *lm)
 {
+    const int32_t step = 16;
+    //const int32_t step = 1;
     // Move simulated sensor position backwards within range
     switch(direction) {
     case CDIR_FLOOR: // Directed down
-        (*ly) -= 16;
+        (*ly) -= step;
         if(*ly < vy) *ly = vy;
         goto adjusty;
     case CDIR_RWALL: // Directed left
-        (*lx) += 16;
+        (*lx) -= step; // TODO
         if(*lx > vx) *lx = vx;
         goto adjustx;
     case CDIR_CEILING: // Directed up
-        (*ly) += 16;
+        (*ly) += step;
         if(*ly > vy) *ly = vy;
         goto adjusty;
     case CDIR_LWALL: // Directed right
-        (*lx) -= 16;
+        (*lx) += step; // TODO
         if(*lx < vx) *lx = vx;
         goto adjustx;
     }
@@ -54,6 +56,7 @@ _get_height_and_angle_from_mask(
     Collision *collision = map16->collision[piece];
 
     if(collision == NULL) {
+    abort_retrieve:
         *out_h = 0;
         *out_angle = 0;
         return;
@@ -78,6 +81,7 @@ _get_height_and_angle_from_mask(
         *out_angle = collision->lwall_angle;
         mask = collision->lwall;
         break;
+    default: goto abort_retrieve;
     }
 
     *out_h = (mask[hpos >> 1] >> ((1 - (hpos & 0x1)) << 2)) & 0x0f;
@@ -100,6 +104,27 @@ _get_new_position(uint8_t direction,
     return 0;
 }
 
+int32_t
+_get_tip_height(LinecastDirection direction,
+                int32_t lx, int32_t ly)
+{
+    switch(direction) {
+    case CDIR_FLOOR:
+        return 15 - (ly & 0x0f);
+        break;
+    case CDIR_CEILING:
+        return ly & 0x0f;
+        break;
+    case CDIR_LWALL:
+        return (lx & 0x0f);
+        break;
+    case CDIR_RWALL:
+        return 15 - (lx & 0x0f);
+        break;
+    };
+    return 0;
+}
+
 CollisionEvent
 linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
          int32_t vx, int32_t vy, LinecastDirection direction, uint8_t magnitude)
@@ -118,8 +143,8 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     switch(direction) {
     case CDIR_FLOOR:   ly += magnitude; break; // Directed downwards, collides with top of tile
     case CDIR_CEILING: ly -= magnitude; break; // Directed upwards, collides with bottom of tile
-    case CDIR_RWALL:   lx -= magnitude; break; // Directed left, collides with right of tile
-    case CDIR_LWALL:   lx += magnitude; break; // Directed right, collides with left of tile
+    case CDIR_RWALL:   lx += magnitude; break; // Directed right, collides with left of tile
+    case CDIR_LWALL:   lx -= magnitude; break; // Directed left, collides with right of tile
     }
 
     uint8_t n_max = (magnitude >> 4) + 1;
@@ -149,18 +174,21 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
                 uint8_t h;
                 int32_t angle;
 
-                hpos = _get_height_position(lx, ly, direction);
+                hpos = _get_height_position(lx, ly, direction) & 0x0f;
 
                 _get_height_and_angle_from_mask(
                     map16, piece, direction, hpos, &h, &angle);
 
                 if(h > 0) {
-                    int32_t coord = _get_new_position(direction, cx, cy, px, py, h);
-                    ev = (CollisionEvent) {
-                        .collided = 1,
-                        .coord = coord,
-                        .angle = angle,
-                    };
+                    int32_t tip_height = _get_tip_height(direction, lx, ly);
+                    if(direction == CDIR_FLOOR || (h >= tip_height)) {
+                        int32_t coord = _get_new_position(direction, cx, cy, px, py, h);
+                        ev = (CollisionEvent) {
+                            .collided = 1,
+                            .coord = coord,
+                            .angle = angle,
+                        };
+                    }
                 }
             }
         }
@@ -168,6 +196,5 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
         // If continuing, move linecast point forward
         _move_point_linecast(direction, vx, vy, &lx, &ly, &lm);
     }
-
     return ev;
 }
