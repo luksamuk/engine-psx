@@ -52,6 +52,45 @@ development has been targeted for Linux environments.
 Some  of   these  tools  are   already  available  when  you   properly  install
 PSn00bSDK. Just follow [[https://github.com/Lameguy64/PSn00bSDK/blob/master/doc/installation.md][this guide]].
 
+* Debugging
+
+First of all,  generate a disk image  (that will be used as  filesystem) and the
+executable ELF  file. This can  be consolidated individually with  the following
+commands:
+
+#+begin_src bash
+make elf
+make iso
+#+end_src
+
+Note that, if  you're not generating new  assets, you won't need  to rebuild the
+disk  image  (here  named  as  the   =iso=  target,  even  though  it  generates
+BIN+CUE). Just rebuild your ELF file and reload it.
+
+Now open your  Linux environment's =~/.gdbinit= file and mark  the project's own
+~.gdbinit~ as safe:
+
+#+begin_example
+add-auto-load-safe-path /path/to/engine-psx/.gdbinit
+#+end_example
+
+Then, open PCSX-Redux. Go to Configuration  > Emulation. Mark the option "Enable
+GDB Server", and make sure that the GDB Server Port is 3333.
+
+Still on  PCSX-Redux, go to  File > Open Disk  Image and open  ~engine.cue~, but
+don't start running the emulation yet; the program won't be run from the disk.
+
+Now go to the project's root directory and run:
+
+#+begin_src bash
+gdb-multiarch
+#+end_src
+
+This will fire  up a GDB debug  session that interacts with  PCSX-Redux. It will
+even load the ELF file with proper debug symbols.
+
+Have fun.
+
 * Running on real hardware
 
 #+html: <center>
@@ -110,7 +149,6 @@ tochd -d . -- ./build/engine.cue
 | [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine [2024-08-05]. First implementation of collision, camera and level data.            |
 | [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine [2024-07-22]. Running on DuckStation.                                              |
 | [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine [2024-07-21]. Running on a physical PlayStation (SCPH-5501).                       |
-
 
 * License
 

@@ -10,6 +10,8 @@ file(GLOB ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/src/*.c
   ${CMAKE_CURRENT_LIST_DIR}/src/*.s)
 
+set(CMAKE_C_FLAGS "-Wall")
+
 psn00bsdk_add_executable(engine
   GPREL
   ${ENGINE_SRC})

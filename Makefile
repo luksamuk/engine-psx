@@ -11,29 +11,64 @@ COL16OUT  := $(addsuffix MAP16.COL,$(dir $(COL16SRC)))
 MAP128OUT := $(addsuffix MAP128.MAP,$(dir $(COL16SRC)))
 LVLOUT    := $(addsuffix .LVL,$(basename $(LVLSRC)))
 
-.PHONY: clean ./build/engine.cue run configure chd cook cooktest purge
+.PHONY: clean ./build/engine.cue run configure chd cook iso elf debug cooktest purge
 
-all: ./build/engine.cue
-dir: ./build
+# Final product is CUE+BIN files
+all: iso
+
+# Targets for producing ELF, CUE+BIN and CHD files
+elf: ./build/engine.elf
+iso: ./build/engine.cue
 chd: engine.chd
 
+# Target for running the image
 run: ./build/engine.cue
-	pcsx-redux-appimage -gdb -run -interpreter -fastboot -stdout -iso ./build/engine.cue
+	pcsx-redux-appimage \
+		-run -interpreter -fastboot -stdout \
+		-iso ./build/engine.cue
 
-./build/engine.cue: cook ./build
-	cmake --build ./build
+# Run PCSX-Redux emulator
+emu:
+	2>/dev/null 1>&2 pcsx-redux -gdb -gdb-port 3333 -run -interpreter -fastboot &
 
+# Run debugger
+debug:
+	gdb-multiarch
+
+
+# =======================================
+#  Targets for executable building
+# =======================================
+
+# Target directory
+./build: configure
+
+# ELF PSX executable
+./build/engine.elf: ./build
+	cd build && make engine
+
+# .CUE + .BIN (needs ELF and cooked assets)
+./build/engine.cue: cook ./build/engine.elf
+	cd build && make iso
+
+# .CHD file (single-file CD image)
 engine.chd: ./build/engine.cue
 	tochd -d . -- $<
 
-./build: configure
 
+# =======================================
+#   Utilitary targets
+# =======================================
+
+# Create build directory and generate CMake config from preset
 configure:
 	cmake --preset default .
 
+# Clean build directory
 clean:
 	rm -rf ./build
 
+# Clean build directory and purge cooked assets
 purge: clean cleancook
 
 # =======================================
