@@ -8,16 +8,23 @@
 
 // Constants for running the game at a fixed 60 FPS.
 // These constants are also in a 12-scale format for fixed point math.
-#define X_ACCEL          0x00c0
-#define X_AIR_ACCEL      0x0180
-#define X_FRICTION       0x00c0
-#define X_DECEL          0x0800
-#define X_TOP_SPD        0x6000
-#define Y_GRAVITY        0x0380
-#define Y_MIN_JUMP       0x4000
-#define Y_JUMP_STRENGTH  0x6800
-#define X_ROLL_FRICTION  0x0060
-#define X_ROLL_DECEL     0x0200
+#define X_ACCEL          0x000c0
+#define X_AIR_ACCEL      0x00180
+#define X_FRICTION       0x000c0
+#define X_DECEL          0x00800
+#define X_TOP_SPD        0x06000
+#define Y_GRAVITY        0x00380
+#define Y_MIN_JUMP       0x04000
+#define Y_JUMP_STRENGTH  0x06800
+#define X_MIN_ROLL_SPD   0x01000
+#define X_MIN_UNCURL_SPD 0x00800
+#define X_ROLL_FRICTION  0x00060
+#define X_ROLL_DECEL     0x00200
+#define X_SLOPE_MIN_SPD  0x000d0
+#define X_SLOPE_NORMAL   0x00200
+#define X_SLOPE_ROLLUP   0x00140
+#define X_SLOPE_ROLLDOWN 0x00500
+#define X_MAX_SPD        0x10000
 
 // Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      8

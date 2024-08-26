@@ -78,6 +78,9 @@
 	<file name="JUMP.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/JUMP.VAG" />
+	<file name="ROLL.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/ROLL.VAG" />
 	<file name="RING.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/RING.VAG" />

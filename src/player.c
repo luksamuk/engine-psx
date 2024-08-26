@@ -29,6 +29,7 @@ extern int debug_mode;
 
 SoundEffect sfx_jump = { 0 };
 SoundEffect sfx_skid = { 0 };
+SoundEffect sfx_roll = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -64,6 +65,7 @@ load_player(Player *player,
 
     if(sfx_jump.addr == 0) sfx_jump = sound_load_vag("\\SFX\\JUMP.VAG;1");
     if(sfx_skid.addr == 0) sfx_skid = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
+    if(sfx_roll.addr == 0) sfx_roll = sound_load_vag("\\SFX\\ROLL.VAG;1");
 }
 
 void
@@ -157,7 +159,7 @@ _player_collision_linecast(Player *player)
     uint16_t left_mag  = PUSH_RADIUS;
     uint16_t right_mag = PUSH_RADIUS - 1;
 
-    if(player->action == ACTION_JUMPING || player->action == ACTION_ROLLING) {
+    if(player->action == ACTION_JUMPING) {
         grn_ceil_dist = grn_grnd_dist = WIDTH_RADIUS_ROLLING;
         grn_mag = ceil_mag = HEIGHT_RADIUS_ROLLING;
     }
@@ -396,31 +398,72 @@ player_update(Player *player)
     // X movement
     /* Ground movement */
     if(player->grnd) {
-        player->action = ACTION_NONE;
 
-        if(pad_pressing(PAD_RIGHT)) {
-            if(player->vel.vz < 0) {
-                player->action = ACTION_SKIDDING;
-                player->vel.vz += X_DECEL;
+        // Non-rolling physics
+        if(player->action != ACTION_ROLLING) {
+            player->action = ACTION_NONE;
+
+            if(pad_pressing(PAD_RIGHT)) {
+                if(player->vel.vz < 0) {
+                    player->action = ACTION_SKIDDING;
+                    player->vel.vz += X_DECEL;
+                } else {
+                    if(player->vel.vz < X_TOP_SPD)
+                        player->vel.vz += X_ACCEL;
+                    player->anim_dir = 1;
+                }
+            } else if(pad_pressing(PAD_LEFT)) {
+                if(player->vel.vz > 0) {
+                    player->action = ACTION_SKIDDING;
+                    player->vel.vz -= X_DECEL;
+                } else {
+                    if(player->vel.vz > -X_TOP_SPD)
+                        player->vel.vz -= X_ACCEL;
+                    player->anim_dir = -1;
+                }
             } else {
-                player->vel.vz += X_ACCEL;
-                player->anim_dir = 1;
+                // Apply friction
+                player->vel.vz -= (player->vel.vz > 0 ? X_FRICTION : -X_FRICTION);
+                if(abs(player->vel.vz) <= X_FRICTION) player->vel.vz = 0;
             }
-        } else if(pad_pressing(PAD_LEFT)) {
-            if(player->vel.vz > 0) {
-                player->action = ACTION_SKIDDING;
-                player->vel.vz -= X_DECEL;
-            } else {
-                player->vel.vz -= X_ACCEL;
-                player->anim_dir = -1;
+
+            // Slope factor application. Should only not work when in ceiling
+            if(abs(player->vel.vz) >= X_SLOPE_MIN_SPD)
+                player->vel.vz -= (X_SLOPE_NORMAL * rsin(player->angle)) >> 12;
+
+            if(pad_pressed(PAD_DOWN) && abs(player->vel.vz) >= X_MIN_ROLL_SPD) {
+                player->action = ACTION_ROLLING;
+                player_set_animation_direct(player, ANIM_ROLLING);
+                sound_play_vag(sfx_roll, 0);
             }
         } else {
-            player->vel.vz -= (player->vel.vz > 0 ? X_FRICTION : -X_FRICTION);
-            if(abs(player->vel.vz) <= X_FRICTION) player->vel.vz = 0;
+            // Rolling physics.
+            // Slope factor
+            int32_t angle_sin = rsin(player->angle);
+            player->vel.vz -= (
+                (SIGNUM(player->vel.vz) == SIGNUM(angle_sin)
+                 ? X_SLOPE_ROLLUP
+                 : X_SLOPE_ROLLDOWN)
+                * angle_sin) >> 12;
+
+            // Deceleration on input
+            if(player->vel.vz > 0 && pad_pressing(PAD_LEFT))
+                player->vel.vz -= X_ROLL_DECEL + X_ROLL_FRICTION;
+            else if(player->vel.vz < 0 && pad_pressing(PAD_RIGHT))
+                player->vel.vz += X_ROLL_DECEL + X_ROLL_FRICTION;
+            else {
+                // Apply roll friction
+                player->vel.vz -= (player->vel.vz > 0 ? X_ROLL_FRICTION : -X_ROLL_FRICTION);
+            }
+
+            // Uncurl if too slow
+            if(abs(player->vel.vz) < X_MIN_UNCURL_SPD)
+                player->action = ACTION_NONE;
         }
 
-        if(player->vel.vz > X_TOP_SPD) player->vel.vz = X_TOP_SPD;
-        else if(player->vel.vz < -X_TOP_SPD) player->vel.vz = -X_TOP_SPD;
+        // Ground speed cap
+        if(player->vel.vz > X_MAX_SPD) player->vel.vz = X_MAX_SPD;
+        else if(player->vel.vz < -X_MAX_SPD) player->vel.vz = -X_MAX_SPD;
 
         // Distribute ground speed onto X and Y components
         player->vel.vx = (player->vel.vz * rcos(player->angle)) >> 12;
@@ -428,10 +471,12 @@ player_update(Player *player)
     } else {
         // Air X movement
         if(pad_pressing(PAD_RIGHT)) {
-            player->vel.vx += X_AIR_ACCEL;
+            if(player->vel.vx < X_TOP_SPD)
+                player->vel.vx += X_AIR_ACCEL;
             player->anim_dir = 1;
         } else if(pad_pressing(PAD_LEFT)) {
-            player->vel.vx -= X_AIR_ACCEL;
+            if(player->vel.vx > -X_TOP_SPD)
+                player->vel.vx -= X_AIR_ACCEL;
             player->anim_dir = -1;
         }
 
@@ -445,8 +490,9 @@ player_update(Player *player)
                 player->vel.vx += air_drag;
         }
 
-        if(player->vel.vx > X_TOP_SPD) player->vel.vx = X_TOP_SPD;
-        else if(player->vel.vx < -X_TOP_SPD) player->vel.vx = -X_TOP_SPD;
+        // Air speed cap
+        if(player->vel.vx > X_MAX_SPD) player->vel.vx = X_MAX_SPD;
+        else if(player->vel.vx < -X_MAX_SPD) player->vel.vx = -X_MAX_SPD;
     }
 
     // Y movement
@@ -501,9 +547,13 @@ player_update(Player *player)
                 } if(player_get_current_animation_hash(player) != ANIM_SKIDDING) {
                       player_set_animation_direct(player, ANIM_WALKING);
                 }
-            } else if(abs(player->vel.vz) >= (6 << 12))
+            } else if(player->action == ACTION_ROLLING) {
+                 player_set_animation_direct(player, ANIM_ROLLING);
+            } else if(abs(player->vel.vz) >= (10 << 12)) {
+                player_set_animation_direct(player, ANIM_PEELOUT);
+            } else if(abs(player->vel.vz) >= (6 << 12)) {
                 player_set_animation_direct(player, ANIM_RUNNING);
-            else player_set_animation_direct(player, ANIM_WALKING);
+            } else player_set_animation_direct(player, ANIM_WALKING);
         }
     } else player->idle_timer = ANIM_IDLE_TIMER_MAX;
 
