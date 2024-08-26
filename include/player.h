@@ -31,6 +31,7 @@ typedef enum {
     ACTION_SKIDDING,
     ACTION_LOOKUP,
     ACTION_CROUCHDOWN,
+    ACTION_JUMPING,
     ACTION_ROLLING
 } PlayerAction;
 
@@ -48,7 +49,6 @@ typedef struct {
     int8_t    anim_dir;
     uint8_t   idle_timer;
     uint8_t   grnd;
-    uint8_t   jmp;
     uint8_t   push;
 
     PlayerAction action;

@@ -51,7 +51,7 @@ load_player(Player *player,
     player->anim_frame = player->anim_timer = 0;
     player->anim_dir = 1;
     player->idle_timer = ANIM_IDLE_TIMER_MAX;
-    player->grnd = player->jmp = player->push = 0;
+    player->grnd = player->push = 0;
 
     player->ev_grnd1 = (CollisionEvent){ 0 };
     player->ev_grnd2 = (CollisionEvent){ 0 };
@@ -157,7 +157,7 @@ _player_collision_linecast(Player *player)
     uint16_t left_mag  = PUSH_RADIUS;
     uint16_t right_mag = PUSH_RADIUS - 1;
 
-    if(player->action == ACTION_ROLLING) {
+    if(player->action == ACTION_JUMPING || player->action == ACTION_ROLLING) {
         grn_ceil_dist = grn_grnd_dist = WIDTH_RADIUS_ROLLING;
         grn_mag = ceil_mag = HEIGHT_RADIUS_ROLLING;
     }
@@ -348,9 +348,8 @@ _player_collision_detection(Player *player)
 
             player->pos.vy = ((new_coord - 16) << 12);
             player->grnd = 1;
-            player->jmp = 0;
 
-            if(player->action == ACTION_ROLLING)
+            if(player->action == ACTION_JUMPING)
                 player->action = ACTION_NONE;
         }
 
@@ -452,7 +451,7 @@ player_update(Player *player)
 
     // Y movement
     if(!player->grnd) {
-        if(player->jmp
+        if(player->action == ACTION_JUMPING
            && !pad_pressing(PAD_CROSS)
            && player->vel.vy < -Y_MIN_JUMP) {
             player->vel.vy = -Y_MIN_JUMP;
@@ -464,10 +463,9 @@ player_update(Player *player)
             player->vel.vx -= (Y_JUMP_STRENGTH * rsin(player->angle)) >> 12;
             player->vel.vy -= (Y_JUMP_STRENGTH * rcos(player->angle)) >> 12;
             player->grnd = 0;
-            player->jmp = 1;
             player_set_animation_direct(player, ANIM_ROLLING);
             sound_play_vag(sfx_jump, 0);
-            player->action = ACTION_ROLLING;
+            player->action = ACTION_JUMPING;
         }
     }
 
