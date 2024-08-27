@@ -278,20 +278,20 @@ _render_128(
                    tileframes[idx]);
     }
 
-    // Draw debug lines
-    if(debug_mode > 1) {
-        LINE_F2 line;
-        setLineF2(&line);
-        setRGB0(&line, 255, 255, 0);
-        setXY2(&line, vx, vy, vx, vy + 128);
-        DrawPrim((void *)&line);
-        setXY2(&line, vx, vy, vx + 128, vy);
-        DrawPrim((void *)&line);
-        setXY2(&line, vx + 128, vy, vx + 128, vy + 128);
-        DrawPrim((void *)&line);
-        setXY2(&line, vx, vy + 128, vx + 128, vy + 128);
-        DrawPrim((void *)&line);
-    }
+    /* // Draw debug lines */
+    /* if(debug_mode > 1) { */
+    /*     LINE_F2 line; */
+    /*     setLineF2(&line); */
+    /*     setRGB0(&line, 255, 255, 0); */
+    /*     setXY2(&line, vx, vy, vx, vy + 128); */
+    /*     DrawPrim((void *)&line); */
+    /*     setXY2(&line, vx, vy, vx + 128, vy); */
+    /*     DrawPrim((void *)&line); */
+    /*     setXY2(&line, vx + 128, vy, vx + 128, vy + 128); */
+    /*     DrawPrim((void *)&line); */
+    /*     setXY2(&line, vx, vy + 128, vx + 128, vy + 128); */
+    /*     DrawPrim((void *)&line); */
+    /* } */
 }
 
 #define CLAMP_SUM(X, N, MAX) ((X + N) > MAX ? MAX : (X + N))
