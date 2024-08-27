@@ -356,7 +356,7 @@ _player_collision_detection(Player *player)
             player->pos.vy = ((new_coord - 16) << 12);
             player->grnd = 1;
 
-            if(player->action == ACTION_JUMPING)
+            if(player->action == ACTION_JUMPING || player->action == ACTION_ROLLING)
                 player->action = ACTION_NONE;
         }
 
