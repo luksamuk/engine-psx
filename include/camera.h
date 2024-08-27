@@ -11,6 +11,7 @@ typedef struct {
     int32_t extension_x;
     int32_t extension_y;
     uint8_t delay;
+    uint8_t lag;
 } Camera;
 
 void camera_init(Camera *);

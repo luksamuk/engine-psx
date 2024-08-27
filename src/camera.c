@@ -25,6 +25,7 @@ camera_init(Camera *c)
     c->pos.vz = c->realpos.vz = 0;
     c->extension_x = c->extension_y = 0;
     c->delay = 0;
+    c->lag = 0;
 }
 
 void
@@ -32,53 +33,59 @@ camera_update(Camera *c, Player *player)
 {   
     if(player) {
         VECTOR *center = &player->pos;
-
-        // X movement
-        int32_t left_border  = c->realpos.vx - SCREENX_BORDER_RADIUS;
-        int32_t right_border = c->realpos.vx + SCREENX_BORDER_RADIUS;
         int32_t deltax = 0;
-
-        if(right_border < center->vx) {
-            deltax = center->vx - right_border;
-            deltax = deltax > SPEEDX_CAP ? SPEEDX_CAP : deltax;
-        } else if(left_border > center->vx) {
-            deltax = center->vx - left_border;
-            deltax = deltax < -SPEEDX_CAP ? -SPEEDX_CAP : deltax;
-        }
-
-        // Y movement
         int32_t deltay = 0;
-        if(!player->grnd) {
-            int32_t top_border = c->realpos.vy - SCREENY_BORDER_RADIUS;
-            int32_t bottom_border = c->realpos.vy + SCREENY_BORDER_RADIUS;
 
-            if(top_border > center->vy) {
-                deltay = center->vy - top_border;
-                deltay = deltay < -SPEEDY_CAP ? -SPEEDY_CAP : deltay;
-            } else if(bottom_border < center->vy) {
-                deltay = center->vy - bottom_border;
-                deltay = deltay > SPEEDY_CAP ? SPEEDY_CAP : deltay;
+        if(c->lag > 0)
+            c->lag--;
+        else {
+            // X movement
+            int32_t left_border  = c->realpos.vx - SCREENX_BORDER_RADIUS;
+            int32_t right_border = c->realpos.vx + SCREENX_BORDER_RADIUS;
+
+            if(right_border < center->vx) {
+                deltax = center->vx - right_border;
+                deltax = deltax > SPEEDX_CAP ? SPEEDX_CAP : deltax;
+            } else if(left_border > center->vx) {
+                deltax = center->vx - left_border;
+                deltax = deltax < -SPEEDX_CAP ? -SPEEDX_CAP : deltax;
             }
-        } else {
-            deltay = center->vy - c->realpos.vy;
-            int32_t cap = (6 << 12);
-            deltay = (deltay > cap)
-                ? cap
-                : (deltay < -cap)
-                ? -cap
-                : deltay;
+
+            // Y movement
+            if(!player->grnd) {
+                int32_t top_border = c->realpos.vy - SCREENY_BORDER_RADIUS;
+                int32_t bottom_border = c->realpos.vy + SCREENY_BORDER_RADIUS;
+
+                if(top_border > center->vy) {
+                    deltay = center->vy - top_border;
+                    deltay = deltay < -SPEEDY_CAP ? -SPEEDY_CAP : deltay;
+                } else if(bottom_border < center->vy) {
+                    deltay = center->vy - bottom_border;
+                    deltay = deltay > SPEEDY_CAP ? SPEEDY_CAP : deltay;
+                }
+            } else {
+                deltay = center->vy - c->realpos.vy;
+                int32_t cap = (6 << 12);
+                deltay = (deltay > cap)
+                    ? cap
+                    : (deltay < -cap)
+                    ? -cap
+                    : deltay;
+            }
         }
 
         c->realpos.vx += deltax;
         c->realpos.vy += deltay;
 
-        // Extended camera
-        if(abs(player->vel.vz) >= 0x6000) {
-            if(abs(c->extension_x) < CAMERA_EXTEND_X_MAX)
-                c->extension_x += SIGNUM(player->vel.vz) * CAMERA_STEP;
-            else c->extension_x = SIGNUM(player->vel.vz) * CAMERA_EXTEND_X_MAX;
-        } else if(abs(c->extension_x) > 0) {
-            c->extension_x -= SIGNUM(c->extension_x) * CAMERA_STEP;
+        if(c->lag == 0) {
+            // Extended camera
+            if(abs(player->vel.vz) >= 0x6000) {
+                if(abs(c->extension_x) < CAMERA_EXTEND_X_MAX)
+                    c->extension_x += SIGNUM(player->vel.vz) * CAMERA_STEP;
+                else c->extension_x = SIGNUM(c->extension_x) * CAMERA_EXTEND_X_MAX;
+            } else if(abs(c->extension_x) > 0) {
+                c->extension_x -= SIGNUM(c->extension_x) * CAMERA_STEP;
+            }
         }
 
         // Crouch down / Look up
