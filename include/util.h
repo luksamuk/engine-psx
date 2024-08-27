@@ -25,5 +25,7 @@ uint16_t get_short_le(uint8_t *bytes, uint32_t *b);
 uint32_t get_long_be(uint8_t *bytes, uint32_t *b);
 
 uint32_t adler32(const char *s);
+int32_t  div12(int32_t a, int32_t b); // Division ignoring remainder
+int32_t  floor12(int32_t a);
 
 #endif

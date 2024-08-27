@@ -147,3 +147,15 @@ adler32(const char *s)
     }
     return (b << 16) | a;
 }
+
+int32_t
+div12(int32_t a, int32_t b)
+{
+    return ((a << 12) / b) & ~(uint32_t)0xfff;
+}
+
+int32_t
+floor12(int32_t a)
+{
+    return a & ~(uint32_t)0xfff;
+}
