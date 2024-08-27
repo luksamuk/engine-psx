@@ -25,6 +25,7 @@
 #define X_SLOPE_ROLLUP   0x00140
 #define X_SLOPE_ROLLDOWN 0x00500
 #define X_MAX_SPD        0x10000
+#define X_MAX_SLIP_SPD   0x02800
 
 // Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      8
@@ -59,6 +60,7 @@ typedef struct {
     uint8_t   grnd;
     uint8_t   push;
     uint32_t  spinrev;
+    uint8_t   ctrllock;
 
     PlayerAction action;
 

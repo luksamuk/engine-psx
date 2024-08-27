@@ -50,6 +50,7 @@ load_player(Player *player,
     player->vel   = (VECTOR){ 0 };
     player->angle = 0;
     player->spinrev = 0;
+    player->ctrllock = 0;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -403,6 +404,7 @@ player_update(Player *player)
     // X movement
     /* Ground movement */
     if(player->grnd) {
+        if(player->ctrllock > 0) player->ctrllock--;
 
         if(player->action == ACTION_ROLLING) {
             // Rolling physics.
@@ -449,7 +451,7 @@ player_update(Player *player)
             // Default physics
             player->action = ACTION_NONE;
 
-            if(pad_pressing(PAD_RIGHT)) {
+            if(pad_pressing(PAD_RIGHT) && (player->ctrllock == 0)) {
                 if(player->vel.vz < 0) {
                     player->action = ACTION_SKIDDING;
                     player->vel.vz += X_DECEL;
@@ -458,7 +460,7 @@ player_update(Player *player)
                         player->vel.vz += X_ACCEL;
                     player->anim_dir = 1;
                 }
-            } else if(pad_pressing(PAD_LEFT)) {
+            } else if(pad_pressing(PAD_LEFT) && (player->ctrllock == 0)) {
                 if(player->vel.vz > 0) {
                     player->action = ACTION_SKIDDING;
                     player->vel.vz -= X_DECEL;
@@ -476,6 +478,14 @@ player_update(Player *player)
             // Slope factor application. Should only not work when in ceiling
             if(abs(player->vel.vz) >= X_SLOPE_MIN_SPD)
                 player->vel.vz -= (X_SLOPE_NORMAL * rsin(player->angle)) >> 12;
+
+            // Slip down slopes if they are too steep
+            if(abs(player->vel.vz < X_MAX_SLIP_SPD)
+               && (player->angle > 0x19A && player->angle < 0xE3D)
+                && player->ctrllock == 0) {
+                player->ctrllock = 30;
+                player->grnd = 0;
+            }
 
             /* Action changers */
             if(pad_pressing(PAD_DOWN)) {
