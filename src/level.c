@@ -8,6 +8,8 @@
 static ArenaAllocator _level_arena = { 0 };
 static uint8_t _arena_mem[LEVEL_ARENA_SIZE];
 
+extern int debug_mode;
+
 void
 level_init()
 {
@@ -25,9 +27,9 @@ level_debrief()
 {
     printf("Arena start address: 0x%08x\n"
            "Arena end address:   0x%08x\n"
-           "Arena bytes size:    %lu\n"
-           "Arena bytes used:    %lu\n"
-           "Arena bytes free:    %lu\n",
+           "Arena bytes size:    %u\n"
+           "Arena bytes used:    %u\n"
+           "Arena bytes free:    %u\n",
            _level_arena.start,
            _level_arena.start + _level_arena.size,
            _level_arena.size,
@@ -277,17 +279,19 @@ _render_128(
     }
 
     // Draw debug lines
-    /* LINE_F2 line; */
-    /* setLineF2(&line); */
-    /* setRGB0(&line, 0, 255, 255); */
-    /* setXY2(&line, vx, vy, vx, vy + 128); */
-    /* DrawPrim((void *)&line); */
-    /* setXY2(&line, vx, vy, vx + 128, vy); */
-    /* DrawPrim((void *)&line); */
-    /* setXY2(&line, vx + 128, vy, vx + 128, vy + 128); */
-    /* DrawPrim((void *)&line); */
-    /* setXY2(&line, vx, vy + 128, vx + 128, vy + 128); */
-    /* DrawPrim((void *)&line); */
+    if(debug_mode > 1) {
+        LINE_F2 line;
+        setLineF2(&line);
+        setRGB0(&line, 255, 255, 0);
+        setXY2(&line, vx, vy, vx, vy + 128);
+        DrawPrim((void *)&line);
+        setXY2(&line, vx, vy, vx + 128, vy);
+        DrawPrim((void *)&line);
+        setXY2(&line, vx + 128, vy, vx + 128, vy + 128);
+        DrawPrim((void *)&line);
+        setXY2(&line, vx, vy + 128, vx + 128, vy + 128);
+        DrawPrim((void *)&line);
+    }
 }
 
 #define CLAMP_SUM(X, N, MAX) ((X + N) > MAX ? MAX : (X + N))
