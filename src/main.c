@@ -281,6 +281,7 @@ engine_update()
         if(pad_pressed(PAD_SELECT)) {
             player.pos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
             player.grnd = 0;
+            player.anim_dir = 1;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
         }
 
