@@ -480,11 +480,12 @@ player_update(Player *player)
                 player->vel.vz -= (X_SLOPE_NORMAL * rsin(player->angle)) >> 12;
 
             // Slip down slopes if they are too steep
-            if(abs(player->vel.vz < X_MAX_SLIP_SPD)
-               && (player->angle > 0x19A && player->angle < 0xE3D)
-                && player->ctrllock == 0) {
+            if((abs(player->vel.vz) < X_MAX_SLIP_SPD)
+               && (player->angle > 0x1ec && player->angle < 0xe16)
+               && player->ctrllock == 0) {
                 player->ctrllock = 30;
-                player->grnd = 0;
+                // if mode is not floor:
+                //player->grnd = 0;
             }
 
             /* Action changers */
