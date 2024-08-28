@@ -1,5 +1,6 @@
 #include "sound.h"
 #include "util.h"
+#include "cd_callback.h"
 
 #include <psxspu.h>
 #include <psxapi.h>
@@ -170,9 +171,7 @@ sound_play_xa(const char *filename, int double_speed,
     _xa_loc = file.pos;
 
     // Hook .XA callback for auto stop/loop
-    EnterCriticalSection();
-    CdReadyCallback(_xacd_event_callback);
-    ExitCriticalSection();
+    cd_set_callbacks(PLAYBACK_XA);
 
     // Set read mode for XA streaming (send XA to SPU, enable filter)
     uint32_t mode = CdlModeRT | CdlModeSF;
@@ -190,8 +189,9 @@ sound_play_xa(const char *filename, int double_speed,
 }
 
 // Callback for XA audio playback.
+// NOTE: This is leveraged from cd_callback.h, but is declared here
 void
-_xacd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
+_xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
 {   
     switch(event) {
     case CdlDataReady:

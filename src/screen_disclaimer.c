@@ -6,6 +6,7 @@
 #include "input.h"
 #include "screen.h"
 #include "render.h"
+#include "screens/fmv.h"
 
 static uint8_t *disclaimer_bg = NULL;
 static uint16_t disclaimer_timer = 0;
@@ -27,7 +28,10 @@ void screen_disclaimer_update()
 {
     disclaimer_timer++;
     if((disclaimer_timer > 1200) || pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
-        scene_change(SCREEN_LEVELSELECT);
+
+        screen_fmv_set_next(SCREEN_LEVELSELECT);
+        screen_fmv_set_path("\\FMV\\INTRO.STR;1");
+        scene_change(SCREEN_FMV);
     }
 }
 

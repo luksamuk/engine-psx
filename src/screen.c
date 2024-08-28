@@ -7,6 +7,7 @@
 #include "screens/disclaimer.h"
 #include "screens/levelselect.h"
 #include "screens/level.h"
+#include "screens/fmv.h"
 
 int8_t current_scene = -1;
 
@@ -32,6 +33,7 @@ scene_load()
     case SCREEN_DISCLAIMER:  screen_disclaimer_load();  break;
     case SCREEN_LEVELSELECT: screen_levelselect_load(); break;
     case SCREEN_LEVEL:       screen_level_load();       break;
+    case SCREEN_FMV:         screen_fmv_load();         break;
     default: break; // Unknown scene???
     }
 }
@@ -43,6 +45,7 @@ scene_unload()
     case SCREEN_DISCLAIMER:  screen_disclaimer_unload();  break;
     case SCREEN_LEVELSELECT: screen_levelselect_unload(); break;
     case SCREEN_LEVEL:       screen_level_unload();       break;
+    case SCREEN_FMV:         screen_fmv_unload();         break;
     default: break; // Unknown scene???
     }
 }
@@ -54,6 +57,7 @@ scene_update()
     case SCREEN_DISCLAIMER:  screen_disclaimer_update();  break;
     case SCREEN_LEVELSELECT: screen_levelselect_update(); break;
     case SCREEN_LEVEL:       screen_level_update();       break;
+    case SCREEN_FMV:         screen_fmv_update();         break;
     default: break; // Unknown scene???
     }
 }
@@ -66,6 +70,7 @@ scene_draw()
     case SCREEN_DISCLAIMER:  screen_disclaimer_draw();  break;
     case SCREEN_LEVELSELECT: screen_levelselect_draw(); break;
     case SCREEN_LEVEL:       screen_level_draw();       break;
+    case SCREEN_FMV:         screen_fmv_draw();         break;
     default: break; // Unknown scene???
     }
 }
