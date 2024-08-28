@@ -19,6 +19,7 @@
 static StreamContext *str_ctx = NULL;
 
 // MDEC lookup table, generally lives on the scratchpad
+// Using v2 because it looks much better after AVI conversion!
 static VLC_TableV2   *lookup_table;
 
 // Temporary area for CD sectors read from CD.
