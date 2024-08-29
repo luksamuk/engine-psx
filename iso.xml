@@ -114,9 +114,9 @@
       </dir>
 
       <dir name="FMV">
-	<file name="SEGA.STR"
+	<file name="INTRO.STR"
 	      type="mixed"
-	      source="${PROJECT_SOURCE_DIR}/assets/fmv/SEGA.STR" />
+	      source="${PROJECT_SOURCE_DIR}/assets/fmv/INTRO.STR" />
       </dir>
 
       <dummy sectors="1024"/>

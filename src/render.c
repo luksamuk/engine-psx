@@ -3,7 +3,8 @@
 #include <psxgte.h>
 #include <inline_c.h>
 
-static RenderContext ctx;
+RenderContext ctx;
+static int using_mdec = 0;
 
 void
 setup_context()
@@ -20,9 +21,12 @@ setup_context()
     SetDefDispEnv(&ctx.buffers[1].disp_env, 0, SCREEN_YRES, SCREEN_XRES, SCREEN_YRES);
 
     // Set the default background color and enable auto-clearing.
+    using_mdec = 0;
     set_clear_color(0, 0, 0);
     ctx.buffers[0].draw_env.isbg = 1;
     ctx.buffers[1].draw_env.isbg = 1;
+    ctx.buffers[0].draw_env.dtd = 0;
+    ctx.buffers[1].draw_env.dtd = 0;
 
     // Initialize the first buffer and clear its OT so that it can be used for
     // drawing.
@@ -52,7 +56,10 @@ swap_buffers()
     // Wait for the GPU to finish drawing, then wait for vblank in order to
     // prevent screen tearing.
     DrawSync(0);
-    VSync(0);
+
+    // Don't use vsync here on MDEC since MDEC playback handles it
+    // accordingly
+    if(!using_mdec) VSync(0);
 
     RenderBuffer *draw_buffer = &ctx.buffers[ctx.active_buffer];
     RenderBuffer *disp_buffer = &ctx.buffers[ctx.active_buffer ^ 1];
@@ -60,13 +67,17 @@ swap_buffers()
     // Display the framebuffer the GPU has just finished drawing and start
     // rendering the display list that was filled up in the main loop.
     PutDispEnv(&disp_buffer->disp_env);
-    DrawOTagEnv(&draw_buffer->ot[OT_LENGTH - 1], &draw_buffer->draw_env);
+    if(!using_mdec)
+        DrawOTagEnv(&draw_buffer->ot[OT_LENGTH - 1], &draw_buffer->draw_env);
 
     // Switch over to the next buffer, clear it and reset the packet allocation
     // pointer.
     ctx.active_buffer ^= 1;
     ctx.next_packet    = disp_buffer->buffer;
-    ClearOTagR(disp_buffer->ot, OT_LENGTH);
+
+    // No need if not using MDEC. Save those CPU cycles. :)
+    if(!using_mdec)
+        ClearOTagR(disp_buffer->ot, OT_LENGTH);
 }
 
 void *
@@ -116,4 +127,47 @@ render_loading_text()
     draw_text(CENTERX - 52, CENTERY - 4, 0, "Now Loading...");
     swap_buffers();
     swap_buffers();
+}
+
+RECT *
+render_get_buffer_clip(void)
+{
+    return &ctx.buffers[ctx.active_buffer].draw_env.clip;
+}
+
+
+void
+render_mdec_prepare(void)
+{
+    using_mdec = 1;
+
+    // Enable dithering processing
+    ctx.buffers[0].draw_env.dtd  = 1;
+    ctx.buffers[1].draw_env.dtd  = 1;
+
+    // Disable buffer clearing to prevent flickering
+    ctx.buffers[0].draw_env.isbg = 0;
+    ctx.buffers[1].draw_env.isbg = 0;
+
+    // Set color mode to 24bpp
+    //ctx.buffers[0].disp_env.isrgb24 = 1;
+    //ctx.buffers[1].disp_env.isrgb24 = 1;
+}
+
+void
+render_mdec_dispose(void)
+{
+    using_mdec = 0;
+
+    // Disable dithering processing
+    ctx.buffers[0].draw_env.dtd  = 0;
+    ctx.buffers[1].draw_env.dtd  = 0;
+
+    // Enable buffer clearing
+    ctx.buffers[0].draw_env.isbg = 1;
+    ctx.buffers[1].draw_env.isbg = 1;
+
+    // Set color mode to 16bpp
+    //ctx.buffers[0].disp_env.isrgb24 = 0;
+    //ctx.buffers[1].disp_env.isrgb24 = 0;
 }
