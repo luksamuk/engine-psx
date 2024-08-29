@@ -44,7 +44,7 @@ void screen_disclaimer_update()
             // Prepare intro, but also prepare level
             screen_level_setlevel(0);
             screen_fmv_set_next(SCREEN_LEVEL);
-            screen_fmv_set_path("\\FMV\\INTRO.STR;1");
+            screen_fmv_set_path("\\SONICT.STR;1");
             scene_change(SCREEN_FMV);
         }
     }

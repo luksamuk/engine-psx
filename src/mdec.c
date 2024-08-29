@@ -132,30 +132,21 @@ mdec_loop()
     while(1) {
         if(debug_mode) frame_start = TIMER_VALUE(1);
 
-        if(_mdec_should_abort()) {
+        // Wait for a full frame read from disc
+        StreamBuffer *frame = _mdec_get_next_frame();
+        if(!frame) {
             printf("MDEC playback ended\n");
+            return;
+        }
+
+        if(_mdec_should_abort()) {
+            printf("MDEC playback aborted\n");
             return;
         }
 
         if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
            (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
             debug_mode = (debug_mode + 1) % 3;
-        }
-
-        // Wait for a full frame read from disc
-        StreamBuffer *frame = _mdec_get_next_frame();
-        if(!frame) {
-            if(debug_mode) {
-                VSync(0);
-                // Draw overlay
-                FntPrint(-1, "FRAME:%6d      READ ERRORS:  %6d\n",
-                         str_ctx->frame_id, str_ctx->dropped_frames);
-                FntPrint(-1, "CPU:  %6d%%     DECODE ERRORS:%6d\n",
-                         cpu_usage, decode_errors);
-                FntFlush(-1);
-                _mdec_swap_buffers();
-            }
-            continue;
         }
 
         if(debug_mode) decode_time = TIMER_VALUE(1);
@@ -328,8 +319,10 @@ _mdec_cd_sector_handler(void)
 StreamBuffer *
 _mdec_get_next_frame(void)
 {
-    if(!str_ctx->frame_ready) {
-        return NULL;
+    while(!str_ctx->frame_ready) {
+        __asm__ volatile("");
+        if(_mdec_should_abort())
+            return NULL;
     }
 
     if(str_ctx->frame_ready < 0) {
