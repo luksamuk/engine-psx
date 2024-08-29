@@ -43,7 +43,8 @@ void         _mdec_dma_callback(void);
 void         _mdec_cd_event_callback(CdlIntrResult, uint8_t *);
 void         _mdec_cd_sector_handler(void);
 StreamBuffer *_mdec_get_next_frame(void);
-int          should_abort();
+int          _mdec_should_abort();
+void         _mdec_swap_buffers();
 
 void
 mdec_play(const char *filepath)
@@ -125,16 +126,36 @@ void
 mdec_loop()
 {
     int frame_start, decode_time, cpu_usage;
+    frame_start = decode_time = cpu_usage = 0;
 
     printf("Starting MDEC playback.\n");
     while(1) {
         if(debug_mode) frame_start = TIMER_VALUE(1);
 
-        // Wait for a full frame read from disc
-        StreamBuffer *frame = _mdec_get_next_frame();
-        if(!frame || should_abort()) {
+        if(_mdec_should_abort()) {
             printf("MDEC playback ended\n");
             return;
+        }
+
+        if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
+           (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
+            debug_mode = (debug_mode + 1) % 3;
+        }
+
+        // Wait for a full frame read from disc
+        StreamBuffer *frame = _mdec_get_next_frame();
+        if(!frame) {
+            if(debug_mode) {
+                VSync(0);
+                // Draw overlay
+                FntPrint(-1, "FRAME:%6d      READ ERRORS:  %6d\n",
+                         str_ctx->frame_id, str_ctx->dropped_frames);
+                FntPrint(-1, "CPU:  %6d%%     DECODE ERRORS:%6d\n",
+                         cpu_usage, decode_errors);
+                FntFlush(-1);
+                _mdec_swap_buffers();
+            }
+            continue;
         }
 
         if(debug_mode) decode_time = TIMER_VALUE(1);
@@ -173,11 +194,7 @@ mdec_loop()
         }
 
         // Manual buffer swap
-        ctx.active_buffer ^= 1;
-        DrawSync(0);
-        PutDrawEnv(&ctx.buffers[ctx.active_buffer].draw_env);
-        PutDispEnv(&ctx.buffers[ctx.active_buffer ^ 1].disp_env);
-        SetDispMask(1);
+        _mdec_swap_buffers();
 
         // Feed newly compressed frame to the MDEC.
         // The MDEC will not actually start decoding it until an output
@@ -311,16 +328,8 @@ _mdec_cd_sector_handler(void)
 StreamBuffer *
 _mdec_get_next_frame(void)
 {
-    uint32_t cycles = 0;
-    while(!str_ctx->frame_ready) {
-        if(should_abort()) return NULL;
-        cycles++;
-
-        if(cycles > 3000000) {
-            printf("MDEC sync failed (%d spinlocks), ignoring\n", cycles);
-            str_ctx->frame_ready = 0;
-            return NULL;
-        }
+    if(!str_ctx->frame_ready) {
+        return NULL;
     }
 
     if(str_ctx->frame_ready < 0) {
@@ -333,10 +342,20 @@ _mdec_get_next_frame(void)
 
 
 int
-should_abort()
+_mdec_should_abort()
 {
     // Call this when the CPU isn't doing anything or
     // should check for user input.
     pad_update();
     return pad_pressed(PAD_CROSS) || pad_pressed(PAD_START);
+}
+
+void
+_mdec_swap_buffers()
+{
+    ctx.active_buffer ^= 1;
+    DrawSync(0);
+    PutDrawEnv(&ctx.buffers[ctx.active_buffer].draw_env);
+    PutDispEnv(&ctx.buffers[ctx.active_buffer ^ 1].disp_env);
+    SetDispMask(1);
 }
