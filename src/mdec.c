@@ -30,9 +30,11 @@ static STR_Header    sector_header;
 static CdlFILE       file;
 
 static int decode_errors;
+static int frame_time;
 
 // Extern structure and functions related to render buffers
 extern RenderContext ctx;
+extern int debug_mode;
 extern void render_mdec_prepare(void);
 extern void render_mdec_dispose(void);
 
@@ -72,6 +74,7 @@ mdec_start(const char *filepath)
     str_ctx->cur_slice = 0;
 
     decode_errors = 0;
+    frame_time    = 1;
     
     // Find file on CD.
     // We won't be using the util.h library since we need to find
@@ -121,10 +124,11 @@ mdec_stop()
 void
 mdec_loop()
 {
+    int frame_start, decode_time, cpu_usage;
+
     printf("Starting MDEC playback.\n");
     while(1) {
-        // Update pad input for interrupting stream
-        pad_update();
+        if(debug_mode) frame_start = TIMER_VALUE(1);
 
         // Wait for a full frame read from disc
         StreamBuffer *frame = _mdec_get_next_frame();
@@ -132,6 +136,8 @@ mdec_loop()
             printf("MDEC playback ended\n");
             return;
         }
+
+        if(debug_mode) decode_time = TIMER_VALUE(1);
 
         // Decompress bitstream into a format expected by the MDEC
         VLC_Context vlc_ctx;
@@ -146,11 +152,25 @@ mdec_loop()
             continue;
         }
 
+        if(debug_mode) {
+            decode_time = (TIMER_VALUE(1) - decode_time) & 0xffff;
+            cpu_usage   = decode_time * 100 / frame_time;
+        }
+
         // Wait for MDEC to finish decoding the previous frame
         // and manually flip the framebuffers
         VSync(0);
         DecDCTinSync(0);
         DecDCToutSync(0);
+
+        if(debug_mode) {
+            // Draw overlay
+            FntPrint(-1, "FRAME:%6d      READ ERRORS:  %6d\n",
+                     str_ctx->frame_id, str_ctx->dropped_frames);
+            FntPrint(-1, "CPU:  %6d%%     DECODE ERRORS:%6d\n",
+                     cpu_usage, decode_errors);
+            FntFlush(-1);
+        }
 
         // Manual buffer swap
         ctx.active_buffer ^= 1;
@@ -182,6 +202,8 @@ mdec_loop()
         DecDCTout(
             str_ctx->slices[str_ctx->cur_slice],
             BLOCK_SIZE * str_ctx->slice_pos.h / 2);
+
+        if(debug_mode) frame_time = (TIMER_VALUE(1) - frame_start) & 0xffff;
     }
 }
 

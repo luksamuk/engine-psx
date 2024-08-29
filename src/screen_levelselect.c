@@ -14,6 +14,8 @@
 
 static uint8_t menu_choice = 0;
 
+extern int debug_mode;
+
 void screen_levelselect_load()
 {
     menu_choice = 0;
@@ -23,6 +25,11 @@ void screen_levelselect_unload() {}
 
 void screen_levelselect_update()
 {
+    if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
+       (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
+        debug_mode = (debug_mode + 1) % 3;
+    }
+
     if(pad_pressed(PAD_DOWN))
             menu_choice++;
         else if(pad_pressed(PAD_UP)) {

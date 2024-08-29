@@ -13,6 +13,8 @@
 static uint8_t *disclaimer_bg = NULL;
 static uint16_t disclaimer_timer = 0;
 
+extern int debug_mode;
+
 void screen_disclaimer_load()
 {
     uint32_t length;
@@ -28,6 +30,11 @@ void screen_disclaimer_unload()
 
 void screen_disclaimer_update()
 {
+    if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
+       (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
+        debug_mode = (debug_mode + 1) % 3;
+    }
+
     disclaimer_timer++;
     if((disclaimer_timer > 1200) || pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
         if(pad_pressing(PAD_SQUARE)) {

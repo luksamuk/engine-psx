@@ -13,6 +13,7 @@ setup_context()
     // PSn00bSDK at (960, 0) in VRAM.
     ResetGraph(0);
     FntLoad(960, 0);
+    FntOpen(4, 12, 312, 16, 2, 256);
 
     // Place the two framebuffers vertically in VRAM.
     SetDefDrawEnv(&ctx.buffers[0].draw_env, 0, 0,           SCREEN_XRES, SCREEN_YRES);
