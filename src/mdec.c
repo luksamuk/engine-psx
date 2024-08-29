@@ -31,7 +31,8 @@ static CdlFILE       file;
 
 static int decode_errors;
 
-// Extern functions related to render buffers
+// Extern structure and functions related to render buffers
+extern RenderContext ctx;
 extern void render_mdec_prepare(void);
 extern void render_mdec_dispose(void);
 
@@ -40,6 +41,7 @@ void         _mdec_dma_callback(void);
 void         _mdec_cd_event_callback(CdlIntrResult, uint8_t *);
 void         _mdec_cd_sector_handler(void);
 StreamBuffer *_mdec_get_next_frame(void);
+int          should_abort();
 
 void
 mdec_play(const char *filepath)
@@ -90,13 +92,13 @@ mdec_start(const char *filepath)
 
     // Read at 2x speed to play any XA-ADPCM sectors that could be
     // interleaved with the data
-    uint8_t mode = CdlModeRT | CdlModeSpeed;
-    CdControl(CdlSetmode, (const uint8_t *)&mode, 0);
-
     // Start reading in real-time mode (doesn't retry in case of errors).
-    // Wait for first frame to be buffered.
+    //uint8_t mode = CdlModeRT | CdlModeSpeed;
+    uint8_t mode = CdlModeRT;
+    CdControl(CdlSetmode, (const uint8_t *)&mode, 0);
     CdControl(CdlReadS, &file.pos, 0);
 
+    // Wait for first frame to be buffered.
     _mdec_get_next_frame();
 }
 
@@ -106,7 +108,6 @@ mdec_stop()
     // Force playback end on context
     cd_detach_callbacks();
     str_ctx->frame_ready = -1;
-    _mdec_get_next_frame();
     CdControlB(CdlPause, 0, 0);
 
     if(str_ctx) {
@@ -127,7 +128,7 @@ mdec_loop()
 
         // Wait for a full frame read from disc
         StreamBuffer *frame = _mdec_get_next_frame();
-        if(!frame || pad_pressed(PAD_CROSS) || pad_pressed(PAD_START)) {
+        if(!frame || should_abort()) {
             printf("MDEC playback ended\n");
             return;
         }
@@ -150,7 +151,13 @@ mdec_loop()
         VSync(0);
         DecDCTinSync(0);
         DecDCToutSync(0);
-        swap_buffers();
+
+        // Manual buffer swap
+        ctx.active_buffer ^= 1;
+        DrawSync(0);
+        PutDrawEnv(&ctx.buffers[ctx.active_buffer].draw_env);
+        PutDispEnv(&ctx.buffers[ctx.active_buffer ^ 1].disp_env);
+        SetDispMask(1);
 
         // Feed newly compressed frame to the MDEC.
         // The MDEC will not actually start decoding it until an output
@@ -282,8 +289,16 @@ _mdec_cd_sector_handler(void)
 StreamBuffer *
 _mdec_get_next_frame(void)
 {
+    uint32_t cycles = 0;
     while(!str_ctx->frame_ready) {
-        __asm__ volatile("");
+        if(should_abort()) return NULL;
+        cycles++;
+
+        if(cycles > 3000000) {
+            printf("MDEC sync failed (%d spinlocks), ignoring\n", cycles);
+            str_ctx->frame_ready = 0;
+            return NULL;
+        }
     }
 
     if(str_ctx->frame_ready < 0) {
@@ -292,4 +307,14 @@ _mdec_get_next_frame(void)
 
     str_ctx->frame_ready = 0;
     return &str_ctx->frames[str_ctx->cur_frame ^ 0x1];
+}
+
+
+int
+should_abort()
+{
+    // Call this when the CPU isn't doing anything or
+    // should check for user input.
+    pad_update();
+    return pad_pressed(PAD_CROSS) || pad_pressed(PAD_START);
 }

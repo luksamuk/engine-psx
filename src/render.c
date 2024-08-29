@@ -3,7 +3,7 @@
 #include <psxgte.h>
 #include <inline_c.h>
 
-static RenderContext ctx;
+RenderContext ctx;
 static int using_mdec = 0;
 
 void
