@@ -7,8 +7,10 @@
 #include "screen.h"
 #include "render.h"
 #include "screens/level.h"
+#include "screens/fmv.h"
 
-#define MAX_LEVELS 4
+#define CHOICE_INTRO 4
+#define MAX_LEVELS   (CHOICE_INTRO + 1)
 
 static uint8_t menu_choice = 0;
 
@@ -31,8 +33,14 @@ void screen_levelselect_update()
         menu_choice = (menu_choice % MAX_LEVELS);
 
         if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
-            screen_level_setlevel(menu_choice);
-            scene_change(SCREEN_LEVEL);
+            if(menu_choice == CHOICE_INTRO) {
+                screen_fmv_set_next(SCREEN_LEVELSELECT);
+                screen_fmv_set_path("\\FMV\\INTRO.STR;1");
+                scene_change(SCREEN_FMV);
+            } else {
+                screen_level_setlevel(menu_choice);
+                scene_change(SCREEN_LEVEL);
+            }
         }
 }
 
@@ -58,11 +66,25 @@ void screen_levelselect_draw()
         "%c Round 0 Zone 1\n"
         "%c Round 0 Zone 2\n"
         "%c Round 1 Zone 1\n"
-        "%c Round 1 Zone 2\n",
+        "%c Round 1 Zone 2\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "%c Intro",
         (menu_choice == 0) ? '>' : ' ',
         (menu_choice == 1) ? '>' : ' ',
         (menu_choice == 2) ? '>' : ' ',
-        (menu_choice == 3) ? '>' : ' ');
+        (menu_choice == 3) ? '>' : ' ',
+        (menu_choice == CHOICE_INTRO) ? '>' : ' ');
     draw_text(8, 60, 0, buffer);
 }
 
