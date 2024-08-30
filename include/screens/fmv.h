@@ -9,6 +9,6 @@ void screen_fmv_update();
 void screen_fmv_draw();
 
 void screen_fmv_set_next(ScreenIndex next);
-void screen_fmv_set_path(const char *filepath);
+void screen_fmv_enqueue(const char *filepath);
 
 #endif

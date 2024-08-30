@@ -31,12 +31,6 @@ run: ./build/engine.cue
 emu:
 	2>/dev/null 1>&2 pcsx-redux -gdb -gdb-port 3333 -run -interpreter -fastboot &
 
-# Build as release target
-release: purge cook
-	cmake --preset release .
-	cd build && make iso
-	tochd -d . -- ./build/engine.cue
-
 # Run debugger
 debug:
 	gdb-multiarch

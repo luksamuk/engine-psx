@@ -5,32 +5,46 @@
 #include "screen.h"
 #include "mdec.h"
 
+#define FMV_QUEUE_MAX 3
+
 // Default screen to level select.
 // Can't wait for hackers using ACE to manipulate this someday :)
 static ScreenIndex next_screen = SCREEN_LEVELSELECT;
-static const char *fmv_path = NULL;
+
+static const char *fmv_queue[FMV_QUEUE_MAX];
+static uint8_t fmv_count = 0;
 
 void screen_fmv_load() {}
 
-void screen_fmv_unload() {}
-
-void screen_fmv_update()
+void
+screen_fmv_unload()
 {
-    mdec_play(fmv_path); // TODO: Interrupt playback?
+    fmv_count = 0;
+}
+
+void
+screen_fmv_update()
+{
+    for(uint8_t i = 0; i < fmv_count; i++)
+        mdec_play(fmv_queue[i]);
     scene_change(next_screen);
 }
 
 void screen_fmv_draw() {}
 
 
-void screen_fmv_set_next(ScreenIndex next)
+void
+screen_fmv_set_next(ScreenIndex next)
 {
     next_screen = next;
 }
 
-void screen_fmv_set_path(const char *filepath)
+void
+screen_fmv_enqueue(const char *filepath)
 {
-    fmv_path = filepath;
+    if(fmv_count < FMV_QUEUE_MAX) {
+        fmv_queue[fmv_count] = filepath;
+        fmv_count++;
+    }
 }
-
 

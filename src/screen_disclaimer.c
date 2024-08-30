@@ -15,20 +15,23 @@ static uint16_t disclaimer_timer = 0;
 
 extern int debug_mode;
 
-void screen_disclaimer_load()
+void
+screen_disclaimer_load()
 {
     uint32_t length;
     disclaimer_bg = file_read("\\MISC\\DISK.TIM;1", &length);
 }
 
-void screen_disclaimer_unload()
+void
+screen_disclaimer_unload()
 {
     free(disclaimer_bg);
     disclaimer_bg = NULL;
     disclaimer_timer = 0;
 }
 
-void screen_disclaimer_update()
+void
+screen_disclaimer_update()
 {
     if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
        (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
@@ -44,13 +47,15 @@ void screen_disclaimer_update()
             // Prepare intro, but also prepare level
             screen_level_setlevel(0);
             screen_fmv_set_next(SCREEN_LEVEL);
-            screen_fmv_set_path("\\SONICT.STR;1");
+            screen_fmv_enqueue("\\SONICT.STR;1");
+            screen_fmv_enqueue("\\INTRO.STR;1");
             scene_change(SCREEN_FMV);
         }
     }
 }
 
-void screen_disclaimer_draw()
+void
+screen_disclaimer_draw()
 {
     TIM_IMAGE tim;
     GetTimInfo((const uint32_t *)disclaimer_bg, &tim);

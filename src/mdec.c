@@ -97,8 +97,7 @@ mdec_start(const char *filepath)
     // Read at 2x speed to play any XA-ADPCM sectors that could be
     // interleaved with the data
     // Start reading in real-time mode (doesn't retry in case of errors).
-    //uint8_t mode = CdlModeRT | CdlModeSpeed;
-    uint8_t mode = CdlModeRT;
+    uint8_t mode = CdlModeRT | CdlModeSpeed;
     CdControl(CdlSetmode, (const uint8_t *)&mode, 0);
     CdControl(CdlReadS, &file.pos, 0);
 

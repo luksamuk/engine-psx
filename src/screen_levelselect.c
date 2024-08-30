@@ -8,6 +8,7 @@
 #include "render.h"
 #include "screens/level.h"
 #include "screens/fmv.h"
+#include "sound.h"
 
 #define CHOICE_SONICT 4
 #define CHOICE_INTRO  5
@@ -17,14 +18,22 @@ static uint8_t menu_choice = 0;
 
 extern int debug_mode;
 
-void screen_levelselect_load()
+void
+screen_levelselect_load()
 {
     menu_choice = 0;
+    sound_stop_xa();
+    sound_play_xa("\\BGM\\BGM003.XA;1", 0, 0, 0);
 }
 
-void screen_levelselect_unload() {}
+void
+screen_levelselect_unload()
+{
+    sound_stop_xa();
+}
 
-void screen_levelselect_update()
+void
+screen_levelselect_update()
 {
     if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
        (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
@@ -43,11 +52,11 @@ void screen_levelselect_update()
         if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
             if(menu_choice == CHOICE_INTRO) {
                 screen_fmv_set_next(SCREEN_LEVELSELECT);
-                screen_fmv_set_path("\\INTRO.STR;1");
+                screen_fmv_enqueue("\\INTRO.STR;1");
                 scene_change(SCREEN_FMV);
             } else if(menu_choice == CHOICE_SONICT) {
                 screen_fmv_set_next(SCREEN_LEVELSELECT);
-                screen_fmv_set_path("\\SONICT.STR;1");
+                screen_fmv_enqueue("\\SONICT.STR;1");
                 scene_change(SCREEN_FMV);
             } else {
                 screen_level_setlevel(menu_choice);
@@ -56,7 +65,8 @@ void screen_levelselect_update()
         }
 }
 
-void screen_levelselect_draw()
+void
+screen_levelselect_draw()
 {
     char buffer[255] = { 0 };
     
@@ -65,20 +75,20 @@ void screen_levelselect_draw()
     x = CENTERX - (strlen(title) * 4);
     draw_text(x, 12, 0, title);
 
-    const char *subtitle = "https://luksamuk.codes/";
-    x = CENTERX - (strlen(subtitle) * 4);
-    draw_text(x, 24, 0, subtitle);
-
     snprintf(buffer, 255, "%s %s", __DATE__, __TIME__);
-    x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
-    draw_text(x, SCREEN_YRES - 24, 0, buffer);
+    x = CENTERX - (strlen(buffer) * 4);
+    draw_text(x, 24, 0, buffer);
+
+    const char *subtitle = "https://luksamuk.codes/";
+    x = SCREEN_XRES - (strlen(subtitle) * 8) - 8;
+    draw_text(x, SCREEN_YRES - 24, 0, subtitle);
 
     snprintf(
         buffer, 255,
-        "%c Round 0 Zone 1\n"
-        "%c Round 0 Zone 2\n"
-        "%c Round 1 Zone 1\n"
-        "%c Round 1 Zone 2\n"
+        "%c R0Z1\n"
+        "%c R0Z2\n"
+        "%c R1Z1\n"
+        "%c R1Z2\n"
         "\n"
         "\n"
         "\n"
@@ -90,8 +100,8 @@ void screen_levelselect_draw()
         "\n"
         "\n"
         "\n"
-        "%c SonicT\n"
-        "%c Intro",
+        "%c FMV:SONICT\n"
+        "%c FMV:INTRO",
         (menu_choice == 0) ? '>' : ' ',
         (menu_choice == 1) ? '>' : ' ',
         (menu_choice == 2) ? '>' : ' ',

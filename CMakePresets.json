@@ -21,22 +21,6 @@
 	    "warnings": {
 		"dev": false
 	    }
-	},
-        {
-	    "name":          "release",
-	    "displayName":   "Release configuration",
-	    "description":   "Build the project using PSn00bSDK on Release target",
-	    "generator":     "Unix Makefiles",
-	    "toolchainFile": "$env{PSN00BSDK_LIBS}/cmake/sdk.cmake",
-	    "binaryDir":     "${sourceDir}/build",
-	    "cacheVariables": {
-		"CMAKE_BUILD_TYPE": "Release",
-		"PSN00BSDK_TC":     "",
-		"PSN00BSDK_TARGET": "mipsel-none-elf"
-	    },
-	    "warnings": {
-		"dev": false
-	    }
 	}
     ]
 }
