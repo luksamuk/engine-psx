@@ -26,6 +26,8 @@
 #define X_SLOPE_ROLLDOWN 0x00500
 #define X_MAX_SPD        0x10000
 #define X_MAX_SLIP_SPD   0x02800
+#define X_DRPSPD         0x08000
+#define X_DRPMAX         0x0c000
 
 // Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      8
@@ -41,7 +43,8 @@ typedef enum {
     ACTION_CROUCHDOWN,
     ACTION_JUMPING,
     ACTION_ROLLING,
-    ACTION_SPINDASH
+    ACTION_SPINDASH,
+    ACTION_DROPDASH
 } PlayerAction;
 
 typedef struct {
@@ -61,6 +64,8 @@ typedef struct {
     uint8_t   push;
     uint32_t  spinrev;
     uint8_t   ctrllock;
+    uint8_t   framecount;
+    uint8_t   holding_jump;
 
     PlayerAction action;
 

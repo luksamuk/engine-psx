@@ -32,6 +32,7 @@ SoundEffect sfx_skid  = { 0 };
 SoundEffect sfx_roll  = { 0 };
 SoundEffect sfx_dash  = { 0 };
 SoundEffect sfx_relea = { 0 };
+SoundEffect sfx_dropd = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -51,6 +52,7 @@ load_player(Player *player,
     player->angle = 0;
     player->spinrev = 0;
     player->ctrllock = 0;
+    player->framecount = 0;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -67,11 +69,12 @@ load_player(Player *player,
 
     player->action = ACTION_NONE;
 
-    if(sfx_jump.addr == 0)  sfx_jump = sound_load_vag("\\SFX\\JUMP.VAG;1");
-    if(sfx_skid.addr == 0)  sfx_skid = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
-    if(sfx_roll.addr == 0)  sfx_roll = sound_load_vag("\\SFX\\ROLL.VAG;1");
-    if(sfx_dash.addr == 0)  sfx_dash = sound_load_vag("\\SFX\\DASH.VAG;1");
+    if(sfx_jump.addr == 0)  sfx_jump  = sound_load_vag("\\SFX\\JUMP.VAG;1");
+    if(sfx_skid.addr == 0)  sfx_skid  = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
+    if(sfx_roll.addr == 0)  sfx_roll  = sound_load_vag("\\SFX\\ROLL.VAG;1");
+    if(sfx_dash.addr == 0)  sfx_dash  = sound_load_vag("\\SFX\\DASH.VAG;1");
     if(sfx_relea.addr == 0) sfx_relea = sound_load_vag("\\SFX\\RELEA.VAG;1");
+    if(sfx_dropd.addr == 0) sfx_dropd = sound_load_vag("\\SFX\\DROPD.VAG;1");
 }
 
 void
@@ -359,6 +362,36 @@ _player_collision_detection(Player *player)
 
             if(player->action == ACTION_JUMPING || player->action == ACTION_ROLLING)
                 player->action = ACTION_NONE;
+            else if(player->action == ACTION_DROPDASH) {
+                // Perform drop dash
+                player->framecount   = 0;
+                player->holding_jump = 0;
+                player->action = ACTION_ROLLING;
+                // We're going to need the previous vel.vx as usual,
+                // but we're going to manipulate gsp AFTER it has been calculated,
+                // so this code MUST come after landing speed calculation
+                uint8_t moving_backwards =
+                    (player->vel.vx > 0 && player->anim_dir == -1)
+                    || (player->vel.vx < 0 && player->anim_dir == 1);
+                if(!moving_backwards) {
+                    // gsp = (gsp / 4) + (drpspd * dir)
+                    player->vel.vz = (player->vel.vz >> 2) + (X_DRPSPD * player->anim_dir);
+                    if(player->vel.vz > 0)
+                        player->vel.vz = (player->vel.vz > X_DRPMAX) ? X_DRPMAX : player->vel.vz;
+                    else player->vel.vz = (player->vel.vz < X_DRPMAX) ? -X_DRPMAX : player->vel.vz;
+                } else {
+                    if(player->angle == 0) player->vel.vz = X_DRPSPD * player->anim_dir;
+                    else {
+                        // gsp = (gsp / 2) + (drpspd * dir)
+                        player->vel.vz = (player->vel.vz >> 1) + (X_DRPSPD * player->anim_dir);
+                        if(player->vel.vz > 0)
+                            player->vel.vz = (player->vel.vz > X_DRPMAX) ? X_DRPMAX : player->vel.vz;
+                        else player->vel.vz = (player->vel.vz < X_DRPMAX) ? -X_DRPMAX : player->vel.vz;
+                    }
+                }
+                sound_play_vag(sfx_relea, 0);
+                camera.lag = 0x8000 >> 12;
+            }
         }
 
         if((player->ev_ceil1.collided || player->ev_ceil2.collided) && (player->vel.vy < 0)) {
@@ -540,12 +573,24 @@ player_update(Player *player)
 
     // Y movement
     if(!player->grnd) {
-        if(player->action == ACTION_JUMPING
-           && !pad_pressing(PAD_CROSS)
-           && player->vel.vy < -Y_MIN_JUMP) {
-            player->vel.vy = -Y_MIN_JUMP;
+        if(player->action == ACTION_JUMPING) {
+            if(!pad_pressing(PAD_CROSS)) {
+                // Short jump
+                if(player->vel.vy < -Y_MIN_JUMP)
+                    player->vel.vy = -Y_MIN_JUMP;
+                player->holding_jump = 0;
+            } else {
+                // Drop dash charge wait
+                if(!player->holding_jump) {
+                    if(player->framecount < 20) {
+                        player->framecount++;
+                    } else {
+                        sound_play_vag(sfx_dropd, 0);
+                        player->action = ACTION_DROPDASH;
+                    }
+                }
+            }
         }
-
         player->vel.vy += Y_GRAVITY;
     } else {
         if(pad_pressed(PAD_CROSS) && player->action != ACTION_SPINDASH) {
@@ -555,6 +600,7 @@ player_update(Player *player)
             player_set_animation_direct(player, ANIM_ROLLING);
             sound_play_vag(sfx_jump, 0);
             player->action = ACTION_JUMPING;
+            player->holding_jump = 1;
         }
     }
 
@@ -592,7 +638,9 @@ player_update(Player *player)
                 } if(player_get_current_animation_hash(player) != ANIM_SKIDDING) {
                       player_set_animation_direct(player, ANIM_WALKING);
                 }
-            } else if(player->action == ACTION_ROLLING || player->action == ACTION_SPINDASH) {
+            } else if(player->action == ACTION_ROLLING
+                      || player->action == ACTION_SPINDASH
+                      || player->action == ACTION_DROPDASH) {
                  player_set_animation_direct(player, ANIM_ROLLING);
             } else if(abs(player->vel.vz) >= (10 << 12)) {
                 player_set_animation_direct(player, ANIM_PEELOUT);
@@ -611,7 +659,7 @@ player_update(Player *player)
             break;
 
         case ANIM_ROLLING:
-            if(player->action == ACTION_SPINDASH)
+            if(player->action == ACTION_SPINDASH || player->action == ACTION_DROPDASH)
                 player_set_frame_duration(player, 0);
             else
                 player_set_frame_duration(player, MAX(0, 4 - abs(player->vel.vz >> 12)));
