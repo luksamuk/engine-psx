@@ -102,7 +102,7 @@ screen_levelselect_draw()
         "\n"
         "\n"
         "\n"
-        "%c TITLESCREEN\n"
+        "%c TITLE\n"
         "%c FMV:SONICT\n"
         "%c FMV:INTRO",
         (menu_choice == 0) ? '>' : ' ',
