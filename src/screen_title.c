@@ -21,8 +21,8 @@ uint8_t next_scene;
 
 static const char *menu_text[] = {
     "Press Start",
-    "New Game >",
-    "< Level Select",
+    "  New Game >",
+    "< Level Select  ",
 };
 
 #define MENU_MAX_OPTION 2
@@ -43,11 +43,15 @@ screen_title_load()
     menu_option = 0;
     selected = 0;
     next_scene = 0;
+
+    sound_stop_xa();
+    sound_play_xa("\\BGM\\BGM003.XA;1", 0, 1, 0);
 }
 
 void
 screen_title_unload()
 {
+    sound_stop_xa();
 }
 
 void
@@ -95,7 +99,7 @@ screen_title_draw()
     SPRT *sprite = (SPRT *)get_next_prim();
     increment_prim(sizeof(SPRT));
     setSprt(sprite);
-    setXY0(sprite, 32, 32);
+    setXY0(sprite, 32, 24);
     setWH(sprite, 256, 175);
     setUV0(sprite, 0, 0);
     setRGB0(sprite, rgb_count, rgb_count, rgb_count);
@@ -109,6 +113,6 @@ screen_title_draw()
 
     if(rgb_count >= 128) {
         const char *text = menu_text[menu_option];
-        draw_text(CENTERX - (strlen(text) << 2), 223, 0, text);
+        draw_text(CENTERX - (strlen(text) << 2), 207, 0, text);
     }
 }
