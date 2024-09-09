@@ -117,6 +117,7 @@
 	<file name="BGM002.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM002.XA" />
+	<!-- Amen Break Remixed Loop 1 by u_ul6ysm8501, found on pixabay.com -->
 	<file name="BGM003.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM003.XA" />

@@ -1,6 +1,7 @@
 #include "screens/title.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "util.h"
 #include "render.h"
@@ -21,11 +22,12 @@ uint8_t next_scene;
 
 static const char *menu_text[] = {
     "Press Start",
-    "  New Game >",
-    "< Level Select  ",
+    "     Continue   >",
+    "<    New Game   >",
+    "<  Level Select  ",
 };
 
-#define MENU_MAX_OPTION 2
+#define MENU_MAX_OPTION 3
 
 void
 screen_title_load()
@@ -62,7 +64,7 @@ screen_title_update()
             rgb_count += 4;
         else {
             if(menu_option == 0 && pad_pressed(PAD_START)) {
-                menu_option = 1;
+                menu_option = 2;
             } else if(menu_option > 0) {
                 if(pad_pressed(PAD_LEFT) && (menu_option > 1)) menu_option--;
                 if(pad_pressed(PAD_RIGHT) && (menu_option < MENU_MAX_OPTION)) menu_option++;
@@ -70,13 +72,13 @@ screen_title_update()
                 if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
                     selected = 1;
                     switch(menu_option) {
-                    case 1: // New Game
+                    case 2: // New Game
                         screen_level_setlevel(0);
                         screen_fmv_set_next(SCREEN_LEVEL);
                         screen_fmv_enqueue("\\INTRO.STR;1");
                         next_scene = SCREEN_FMV;
                         break;
-                    case 2: // Level Select
+                    case 3: // Level Select
                         next_scene = SCREEN_LEVELSELECT;
                         break;
                     default: selected = 0; break;
@@ -113,6 +115,11 @@ screen_title_draw()
 
     if(rgb_count >= 128) {
         const char *text = menu_text[menu_option];
-        draw_text(CENTERX - (strlen(text) << 2), 207, 0, text);
+        draw_text(CENTERX - (strlen(text) << 2), 199, 0, text);
+
+        char buffer[255] = { 0 };
+        snprintf(buffer, 255, "%s %s", __DATE__, __TIME__);
+        int16_t x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
+        draw_text(x, SCREEN_YRES - 16, 0, buffer);
     }
 }
