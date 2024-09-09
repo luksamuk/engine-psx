@@ -10,8 +10,9 @@
 #include "screens/fmv.h"
 #include "sound.h"
 
-#define CHOICE_SONICT 4
-#define CHOICE_INTRO  5
+#define CHOICE_TITLE  4
+#define CHOICE_SONICT 5
+#define CHOICE_INTRO  6
 #define MAX_LEVELS   (CHOICE_INTRO + 1)
 
 static uint8_t menu_choice = 0;
@@ -50,7 +51,9 @@ screen_levelselect_update()
         menu_choice = (menu_choice % MAX_LEVELS);
 
         if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
-            if(menu_choice == CHOICE_INTRO) {
+            if(menu_choice == CHOICE_TITLE) {
+                scene_change(SCREEN_TITLE);
+            } else if(menu_choice == CHOICE_INTRO) {
                 screen_fmv_set_next(SCREEN_LEVELSELECT);
                 screen_fmv_enqueue("\\INTRO.STR;1");
                 scene_change(SCREEN_FMV);
@@ -99,13 +102,14 @@ screen_levelselect_draw()
         "\n"
         "\n"
         "\n"
-        "\n"
+        "%c TITLESCREEN\n"
         "%c FMV:SONICT\n"
         "%c FMV:INTRO",
         (menu_choice == 0) ? '>' : ' ',
         (menu_choice == 1) ? '>' : ' ',
         (menu_choice == 2) ? '>' : ' ',
         (menu_choice == 3) ? '>' : ' ',
+        (menu_choice == CHOICE_TITLE) ? '>' : ' ',
         (menu_choice == CHOICE_SONICT) ? '>' : ' ',
         (menu_choice == CHOICE_INTRO) ? '>' : ' ');
     draw_text(8, 60, 0, buffer);

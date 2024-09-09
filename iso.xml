@@ -21,6 +21,9 @@
 	<file name="SONIC.CHARA"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/SONIC.CHARA" />
+	<file name="TITLE.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/TITLE.TIM" />
       </dir>
 
       <dir name="LEVELS">

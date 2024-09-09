@@ -45,10 +45,8 @@ screen_disclaimer_update()
             scene_change(SCREEN_LEVELSELECT);
         } else {
             // Prepare intro, but also prepare level
-            screen_level_setlevel(0);
-            screen_fmv_set_next(SCREEN_LEVEL);
+            screen_fmv_set_next(SCREEN_TITLE);
             screen_fmv_enqueue("\\SONICT.STR;1");
-            screen_fmv_enqueue("\\INTRO.STR;1");
             scene_change(SCREEN_FMV);
         }
     }

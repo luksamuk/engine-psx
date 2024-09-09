@@ -6,6 +6,7 @@ typedef enum {
     SCREEN_LEVELSELECT,
     SCREEN_LEVEL,
     SCREEN_FMV,
+    SCREEN_TITLE,
 } ScreenIndex;
 
 void scene_change(ScreenIndex scr);
