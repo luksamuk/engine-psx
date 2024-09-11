@@ -17,20 +17,20 @@ static uint8_t fmv_count = 0;
 void screen_fmv_load() {}
 
 void
-screen_fmv_unload()
+screen_fmv_unload(void *)
 {
     fmv_count = 0;
 }
 
 void
-screen_fmv_update()
+screen_fmv_update(void *)
 {
     for(uint8_t i = 0; i < fmv_count; i++)
         mdec_play(fmv_queue[i]);
     scene_change(next_screen);
 }
 
-void screen_fmv_draw() {}
+void screen_fmv_draw(void *) {}
 
 
 void

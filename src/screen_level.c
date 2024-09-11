@@ -72,21 +72,24 @@ static MATRIX  world    = { 0 };
 static void level_load_player();
 static void level_load_level();
 
-void screen_level_load()
+void
+screen_level_load()
 {
     level_load_player();
     level_load_level();
     camera_set(&camera, player.pos.vx, player.pos.vy);
 }
 
-void screen_level_unload()
+void
+screen_level_unload(void *)
 {
     sound_stop_xa();
     level_reset();
     sound_reset_mem();
 }
 
-void screen_level_update()
+void
+screen_level_update(void *)
 {
     if(pad_pressed(PAD_START)) paused = !paused;
  
@@ -125,7 +128,8 @@ void screen_level_update()
     player_update(&player);
 }
 
-void screen_level_draw()
+void
+screen_level_draw(void *)
 {
     char buffer[255] = { 0 };
 

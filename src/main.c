@@ -36,6 +36,7 @@ main(void)
     level_init();
 
     // Set first scene
+    scene_init();
     scene_change(SCREEN_DISCLAIMER);
 
     while(1) {

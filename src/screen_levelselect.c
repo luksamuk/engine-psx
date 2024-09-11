@@ -1,7 +1,8 @@
 #include "screens/levelselect.h"
 #include <stdint.h>
-#include <string.h>
+#include <strings.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "input.h"
 #include "screen.h"
@@ -15,79 +16,87 @@
 #define CHOICE_INTRO  6
 #define MAX_LEVELS   (CHOICE_INTRO + 1)
 
-static uint8_t menu_choice = 0;
+typedef struct {
+    uint8_t menu_choice;
+    char buffer[255];
+} screen_levelselect_data;
 
 extern int debug_mode;
 
 void
 screen_levelselect_load()
 {
-    menu_choice = 0;
+    screen_levelselect_data *data = screen_alloc(sizeof(screen_levelselect_data));
+    data->menu_choice = 0;
+    bzero(data->buffer, 255);
     sound_stop_xa();
     sound_play_xa("\\BGM\\BGM003.XA;1", 0, 0, 0);
 }
 
 void
-screen_levelselect_unload()
+screen_levelselect_unload(void *)
 {
     sound_stop_xa();
+    screen_free();
 }
 
 void
-screen_levelselect_update()
+screen_levelselect_update(void *d)
 {
     if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
        (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
         debug_mode = (debug_mode + 1) % 3;
     }
 
+    screen_levelselect_data *data = (screen_levelselect_data *)d;
+
     if(pad_pressed(PAD_DOWN))
-            menu_choice++;
+            data->menu_choice++;
         else if(pad_pressed(PAD_UP)) {
-            if(menu_choice == 0) menu_choice = MAX_LEVELS - 1;
-            else menu_choice--;
+            if(data->menu_choice == 0) data->menu_choice = MAX_LEVELS - 1;
+            else data->menu_choice--;
         }
 
-        menu_choice = (menu_choice % MAX_LEVELS);
+        data->menu_choice = (data->menu_choice % MAX_LEVELS);
 
         if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
-            if(menu_choice == CHOICE_TITLE) {
+            if(data->menu_choice == CHOICE_TITLE) {
                 scene_change(SCREEN_TITLE);
-            } else if(menu_choice == CHOICE_INTRO) {
+            } else if(data->menu_choice == CHOICE_INTRO) {
                 screen_fmv_set_next(SCREEN_LEVELSELECT);
                 screen_fmv_enqueue("\\INTRO.STR;1");
                 scene_change(SCREEN_FMV);
-            } else if(menu_choice == CHOICE_SONICT) {
+            } else if(data->menu_choice == CHOICE_SONICT) {
                 screen_fmv_set_next(SCREEN_LEVELSELECT);
                 screen_fmv_enqueue("\\SONICT.STR;1");
                 scene_change(SCREEN_FMV);
             } else {
-                screen_level_setlevel(menu_choice);
+                screen_level_setlevel(data->menu_choice);
                 scene_change(SCREEN_LEVEL);
             }
         }
 }
 
 void
-screen_levelselect_draw()
+screen_levelselect_draw(void *d)
 {
-    char buffer[255] = { 0 };
+    screen_levelselect_data *data = (screen_levelselect_data *)d;
     
     int16_t x;
     const char *title = "*** engine-psx ***";
     x = CENTERX - (strlen(title) * 4);
     draw_text(x, 12, 0, title);
 
-    snprintf(buffer, 255, "%s %s", __DATE__, __TIME__);
-    x = CENTERX - (strlen(buffer) * 4);
-    draw_text(x, 24, 0, buffer);
+    snprintf(data->buffer, 255, "%s %s", __DATE__, __TIME__);
+    x = CENTERX - (strlen(data->buffer) * 4);
+    draw_text(x, 24, 0, data->buffer);
 
     const char *subtitle = "https://luksamuk.codes/";
     x = SCREEN_XRES - (strlen(subtitle) * 8) - 8;
     draw_text(x, SCREEN_YRES - 24, 0, subtitle);
 
     snprintf(
-        buffer, 255,
+        data->buffer, 255,
         "%c R0Z1\n"
         "%c R0Z2\n"
         "%c R1Z1\n"
@@ -105,13 +114,13 @@ screen_levelselect_draw()
         "%c TITLE\n"
         "%c FMV:SONICT\n"
         "%c FMV:INTRO",
-        (menu_choice == 0) ? '>' : ' ',
-        (menu_choice == 1) ? '>' : ' ',
-        (menu_choice == 2) ? '>' : ' ',
-        (menu_choice == 3) ? '>' : ' ',
-        (menu_choice == CHOICE_TITLE) ? '>' : ' ',
-        (menu_choice == CHOICE_SONICT) ? '>' : ' ',
-        (menu_choice == CHOICE_INTRO) ? '>' : ' ');
-    draw_text(8, 60, 0, buffer);
+        (data->menu_choice == 0) ? '>' : ' ',
+        (data->menu_choice == 1) ? '>' : ' ',
+        (data->menu_choice == 2) ? '>' : ' ',
+        (data->menu_choice == 3) ? '>' : ' ',
+        (data->menu_choice == CHOICE_TITLE) ? '>' : ' ',
+        (data->menu_choice == CHOICE_SONICT) ? '>' : ' ',
+        (data->menu_choice == CHOICE_INTRO) ? '>' : ' ');
+    draw_text(8, 60, 0, data->buffer);
 }
 
