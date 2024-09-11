@@ -25,21 +25,9 @@
 	  <file name="TITLE.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/sprites/TITLE.TIM" />
-	  <file name="WA0.TIM"
+	  <file name="PRL.TIM"
 		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA0.TIM" />
-	  <file name="WA1.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA2.TIM" />
-	  <file name="WA2.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA2.TIM" />
-	  <file name="WA3.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA3.TIM" />
-	  <file name="WA4.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA4.TIM" />
+		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/PRL.TIM" />
 	</dir>
       </dir>
 
