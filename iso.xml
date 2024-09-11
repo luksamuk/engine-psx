@@ -21,9 +21,26 @@
 	<file name="SONIC.CHARA"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/SONIC.CHARA" />
-	<file name="TITLE.TIM"
-	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/sprites/TITLE.TIM" />
+	<dir name="TITLE">
+	  <file name="TITLE.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/sprites/TITLE.TIM" />
+	  <file name="WA0.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA0.TIM" />
+	  <file name="WA1.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA2.TIM" />
+	  <file name="WA2.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA2.TIM" />
+	  <file name="WA3.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA3.TIM" />
+	  <file name="WA4.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/WA4.TIM" />
+	</dir>
       </dir>
 
       <dir name="LEVELS">
