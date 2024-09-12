@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <stdio.h>
+#include <inline_c.h>
 
 #include "util.h"
 #include "render.h"
@@ -24,7 +25,7 @@ typedef struct {
 static const int16_t prl_data[] = {
     //  W    H  v0  spd      ypos  single
     // Island, immovable
-    256, 47, 62, 0x0000,  170,  1,
+    256, 48, 62, 0x0000,  170,  1,
     // Cloud data
     256, 37, 25, 0x019a,  181,  0,
     // Water data
@@ -38,11 +39,17 @@ static const int16_t prl_data[] = {
 typedef struct {
     texture_props props_title;
     texture_props props_prl;
+    texture_props props_cld;
     uint8_t rgb_count;
     uint8_t menu_option;
     uint8_t selected;
     uint8_t next_scene;
     int32_t prl_pos[PRL_NUM_PIECES];
+
+    SVECTOR rot;
+    VECTOR  pos;
+    VECTOR  scale;
+    MATRIX  world;
 } screen_title_data;
 
 
@@ -75,6 +82,16 @@ screen_title_load()
 
     title_load_texture("\\SPRITES\\TITLE\\TITLE.TIM;1", &data->props_title);
     title_load_texture("\\SPRITES\\TITLE\\PRL.TIM;1", &data->props_prl);
+    title_load_texture("\\SPRITES\\TITLE\\CLD.TIM;1", &data->props_cld);
+
+    data->rot   = (SVECTOR) { 0 };
+    data->pos   = (VECTOR)  { 0, 0, 450 };
+    data->scale = (VECTOR)  { ONE, ONE, ONE };
+    data->world = (MATRIX)  { 0 };
+
+    data->pos.vx = 0xfffffe7a;
+    data->pos.vy = 0xffffffb6;
+    data->rot.vx = 0x00000320;
 
     data->rgb_count = 0;
     data->menu_option = 0;
@@ -101,6 +118,11 @@ void
 screen_title_update(void *d)
 {
     screen_title_data *data = (screen_title_data *)d;
+
+    data->pos.vx -= 1;
+    if(data->pos.vx < -646) {
+        data->pos.vx = -390;
+    }
 
     for(int wp = 0; wp < PRL_NUM_PIECES; wp++) {
         int32_t wp_spd = prl_data[(wp * PRL_INFO_PER_PIECE) + 3];
@@ -169,7 +191,7 @@ screen_title_drawtitle(screen_title_data *data)
            255, 0,
            0,   174,
            255, 174);
-    sort_prim(poly, OT_LENGTH - 1);
+    sort_prim(poly, 1);
 }
 
 static void
@@ -206,9 +228,61 @@ screen_title_drawprl(screen_title_data *data)
                    w - 1, v0,
                    0, v0 + h,
                    w - 1, v0 + h);
-            sort_prim(poly, OT_LENGTH - 1);
+            sort_prim(poly, 1);
 
             if(s) break;
+        }
+    }
+}
+
+static void
+screen_title_drawcld(screen_title_data *data)
+{
+    VECTOR pos = data->pos;
+    for(; pos.vx < 0x000000c8 + (256 * 2); pos.vx += 256) {
+        TransMatrix(&data->world, &pos);
+        RotMatrix(&data->rot, &data->world);
+        ScaleMatrix(&data->world, &data->scale);
+        gte_SetRotMatrix(&data->world);
+        gte_SetTransMatrix(&data->world);
+
+        POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+        setPolyFT4(poly);
+        setRGB0(poly, 128, 128, 128);
+        poly->tpage = getTPage(
+            data->props_cld.mode & 0x3,
+            0,
+            data->props_cld.prect_x,
+            data->props_cld.prect_y);
+        poly->clut = 0;
+        setUV4(poly,
+               0, 0,
+               255, 0,
+               0, 255,
+               255, 255);
+
+        static const SVECTOR vertices[] = {
+            {-128, -128, 0, 0},
+            { 128, -128, 0, 0},
+            {-128,  128, 0, 0},
+            { 128,  128, 0, 0},
+        };
+
+        int nclip, otz;
+        nclip = RotAverageNclip4(
+            (SVECTOR *)&vertices[0],
+            (SVECTOR *)&vertices[1],
+            (SVECTOR *)&vertices[2],
+            (SVECTOR *)&vertices[3],
+            (uint32_t *)&poly->x0,
+            (uint32_t *)&poly->x1,
+            (uint32_t *)&poly->x2,
+            (uint32_t *)&poly->x3,
+            &otz);
+
+        if((nclip > 0) && (otz > 0) && (otz < OT_LENGTH)) {
+            sort_prim(poly, otz);
+            increment_prim(sizeof(POLY_FT4));
         }
     }
 }
@@ -219,6 +293,7 @@ screen_title_draw(void *d)
     screen_title_data *data = (screen_title_data *)d;
     screen_title_drawtitle(data);
     screen_title_drawprl(data);
+    screen_title_drawcld(data);
 
     if(data->rgb_count >= 128) {
         const char *text = menu_text[data->menu_option];

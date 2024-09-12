@@ -28,6 +28,9 @@
 	  <file name="PRL.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/PRL.TIM" />
+	  <file name="CLD.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/sprites/PRL/CLD.TIM" />
 	</dir>
       </dir>
 
