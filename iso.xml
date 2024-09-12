@@ -9,7 +9,7 @@
 	publisher	= "luksamuk"
 	data_preparer	= "PSN00BSDK ${PSN00BSDK_VERSION}"
 	copyright	= "COPYLEFT" />
-    <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEA.DAT" />
+    <!-- <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEA.DAT" /> -->
     <directory_tree>
       <file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
       <file name="ENGINE.EXE" type="data" source="engine.exe" />
