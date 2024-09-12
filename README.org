@@ -1,14 +1,17 @@
-#+title: engine-psx
+#+title: engine-psx / Sonic The Hedgehog XA
 
 Open source platformer engine built for the PlayStation 1.
+
+This  engine is  focused on  building  the fangame  Sonic The  Hedgehog XA,  and
+therefore is not dissociated with said project.
 
 Heavily inspired by Sonic The Hedgehog. Uses [[https://github.com/Lameguy64/PSn00bSDK/tree/master][PSn00bSDK]].
 
 #+html: <center>
-[[file:./screenshots/engine-psx-081924.gif]]
+[[file:./screenshots/titlescreen-091224.gif]]
 #+html: </center>
 
-/Engine short video running on DuckStation, dated [2024-08-19]./
+/Game title screen running on DuckStation, dated [2024-09-12]./
 
 * About
 
