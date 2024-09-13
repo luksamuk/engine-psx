@@ -85,8 +85,8 @@ on the .tmx map.
 Please make  sure that  the first  tile is  COMPLETELY BLANK  and mind  the tile
 sequence (tiles are counted first from left to right, then up to down).
 
-1. Create a 'tileset16.tsx' map from '16x16.png', if you haven't already.
-2. Create  a 'tilemap128.tmx' map and  use 'tileset16.tsx' as tileset.  This map
+1. Create a 'tiles16.tsx' map from '16x16.png', if you haven't already.
+2. Create  a 'tilemap128.tmx' map and  use 'tiles16.tsx' as tileset.  This map
    must have infinite dimensions.
 3. Create your tiles from left to right, and if you must, up to down. Be mindful
    of  tile order,  and make  sure that  the first  tile (first  eight rows  and
@@ -100,7 +100,7 @@ sequence (tiles are counted first from left to right, then up to down).
 
 Do this in preparation for creating your actual level map:
 
-1. Go back to your 'map128.tmx' and export it to an image called '128x128.png'.
+1. Go back to your 'map128.tmx' and export it to an image called '128.png'.
    - Make  sure you  didn't mess  up  the tile  mapping,  and that  the tile  is
      properly aligned with the upper left  corner of your frame. You'll see that
      by looking at the continuous line in your 128x128 infinite map.

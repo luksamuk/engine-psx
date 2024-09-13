@@ -110,7 +110,7 @@ screen_title_load()
     data->prl_pos[0] = 32 << 12; // Island center
 
     sound_stop_xa();
-    sound_play_xa("\\BGM\\BGM003.XA;1", 0, 1, 0);
+    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 1, 0);
 
     set_clear_color(56, 104, 200);
 }

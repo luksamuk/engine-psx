@@ -34,7 +34,8 @@ static uint32_t bgm_loop_sectors[] = {
     4800,
     3230,
 
-    11000,
+    7300,
+    7300,
 };
 
 
@@ -186,15 +187,15 @@ screen_level_draw(void *)
     }
 
     // Sound and video debug
-    //uint32_t elapsed_sectors;
-    //sound_xa_get_elapsed_sectors(&elapsed_sectors);
+    uint32_t elapsed_sectors;
+    sound_xa_get_elapsed_sectors(&elapsed_sectors);
     snprintf(buffer, 255,
              "%4s %3d\n"
-             //"%08u"
+             "%08u"
              ,
              GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
-             get_frame_rate()
-             //elapsed_sectors
+             get_frame_rate(),
+             elapsed_sectors
         );
     draw_text(248, 12, 0, buffer);
 

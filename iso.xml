@@ -77,6 +77,25 @@
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/TILES.TIM" />
 	</dir>
 
+	<!-- Custom Green Hill by NinjaCakes -->
+	<dir name="R2">
+	  <file name="Z1.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/Z1.LVL" />
+	  <file name="MAP128.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/MAP128.MAP" />
+	  <file name="MAP16.COL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/MAP16.COL" />
+	  <file name="MAP16.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/MAP16.MAP" />
+	  <file name="TILES.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/TILES.TIM" />
+	</dir>
+
       </dir> <!-- LEVELS -->
 
       <dir name="MISC">
@@ -127,9 +146,9 @@
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM002.XA" />
 	<!-- Evening Star Remix by EggWard (CoffeeBean6149) -->
 	<!-- Amen Break Remixed Loop 1 by u_ul6ysm8501, found on pixabay.com -->
-	<file name="BGM003.XA"
+	<file name="MNU001.XA"
 	      type="xa"
-	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM003.XA" />
+	      source="${PROJECT_SOURCE_DIR}/assets/bgm/MNU001.XA" />
       </dir>
 
       <file name="INTRO.STR"

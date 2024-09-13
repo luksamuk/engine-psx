@@ -11,9 +11,9 @@
 #include "screens/fmv.h"
 #include "sound.h"
 
-#define CHOICE_TITLE  4
-#define CHOICE_SONICT 5
-#define CHOICE_INTRO  6
+#define CHOICE_TITLE  5
+#define CHOICE_SONICT 6
+#define CHOICE_INTRO  7
 #define MAX_LEVELS   (CHOICE_INTRO + 1)
 
 typedef struct {
@@ -30,7 +30,7 @@ screen_levelselect_load()
     data->menu_choice = 0;
     bzero(data->buffer, 255);
     sound_stop_xa();
-    sound_play_xa("\\BGM\\BGM003.XA;1", 0, 0, 0);
+    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0);
 }
 
 void
@@ -97,11 +97,11 @@ screen_levelselect_draw(void *d)
 
     snprintf(
         data->buffer, 255,
-        "%c R0Z1\n"
-        "%c R0Z2\n"
-        "%c R1Z1\n"
-        "%c R1Z2\n"
-        "\n"
+        "%c ROUND 0    ZONE 1\n"
+        "%c            ZONE 2\n"
+        "%c ROUND 1    ZONE 1\n"
+        "%c            ZONE 2\n"
+        "%c GREEN HILL ZONE 1\n"
         "\n"
         "\n"
         "\n"
@@ -118,6 +118,7 @@ screen_levelselect_draw(void *d)
         (data->menu_choice == 1) ? '>' : ' ',
         (data->menu_choice == 2) ? '>' : ' ',
         (data->menu_choice == 3) ? '>' : ' ',
+        (data->menu_choice == 4) ? '>' : ' ',
         (data->menu_choice == CHOICE_TITLE) ? '>' : ' ',
         (data->menu_choice == CHOICE_SONICT) ? '>' : ' ',
         (data->menu_choice == CHOICE_INTRO) ? '>' : ' ');
