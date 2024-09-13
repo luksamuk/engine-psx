@@ -83,13 +83,9 @@ screen_levelselect_draw(void *d)
     screen_levelselect_data *data = (screen_levelselect_data *)d;
     
     int16_t x;
-    const char *title = "*** engine-psx ***";
+    const char *title = "Level Select";
     x = CENTERX - (strlen(title) * 4);
     draw_text(x, 12, 0, title);
-
-    snprintf(data->buffer, 255, "%s %s", __DATE__, __TIME__);
-    x = CENTERX - (strlen(data->buffer) * 4);
-    draw_text(x, 24, 0, data->buffer);
 
     const char *subtitle = "https://luksamuk.codes/";
     x = SCREEN_XRES - (strlen(subtitle) * 8) - 8;
@@ -111,6 +107,10 @@ screen_levelselect_draw(void *d)
         "\n"
         "\n"
         "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
         "%c TITLE\n"
         "%c FMV:SONICT\n"
         "%c FMV:INTRO",
@@ -122,6 +122,6 @@ screen_levelselect_draw(void *d)
         (data->menu_choice == CHOICE_TITLE) ? '>' : ' ',
         (data->menu_choice == CHOICE_SONICT) ? '>' : ' ',
         (data->menu_choice == CHOICE_INTRO) ? '>' : ' ');
-    draw_text(8, 60, 0, data->buffer);
+    draw_text(8, 36, 0, data->buffer);
 }
 
