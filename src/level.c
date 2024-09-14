@@ -160,7 +160,7 @@ load_lvl(LevelData *lvl, const char *filename)
     lvl->precty   = 0;
     lvl->crectx   = 320;
     lvl->crecty   = 257;
-    lvl->clutmode = 0; // 4-bit CLUT
+    //lvl->clutmode = 0; // NOTE: This was set to tim->mode previously.
     lvl->_unused1 = 0;
 
     free(bytes);
@@ -367,7 +367,7 @@ render_lvl(
 
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
-    setDrawTPage(tpage, 0, 1, getTPage(0, 1, lvl->prectx, lvl->precty));
+    setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
     sort_prim(tpage, OT_LENGTH - 1);
 }
 

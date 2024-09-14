@@ -268,6 +268,7 @@ level_load_level()
     uint8_t *timfile = file_read(filename0, &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
+        leveldata.clutmode = tim.mode;
         free(timfile);
     } else {
         // If not single "TILES.TIM" was found, then perharps try a
@@ -277,6 +278,7 @@ level_load_level()
         timfile = file_read(filename0, &filelength);
         if(timfile) {
             load_texture(timfile, &tim);
+            leveldata.clutmode = tim.mode; // Use CLUT mode from 1st texture
             free(timfile);
         }
 
