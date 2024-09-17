@@ -93,11 +93,39 @@ void
 screen_level_update(void *)
 {
     if(pad_pressed(PAD_START)) paused = !paused;
- 
+    
     if(paused) {
         if(pad_pressed(PAD_SELECT)) {
             scene_change(SCREEN_LEVELSELECT);
         }
+
+        if(debug_mode) {
+            uint8_t updated = 0;
+            if(pad_pressing(PAD_UP)) {
+                player.pos.vy -= 40960;
+                updated = 1;
+            }
+
+            if(pad_pressing(PAD_DOWN)) {
+                player.pos.vy += 40960;
+                updated = 1;
+            }
+
+            if(pad_pressing(PAD_LEFT)) {
+                player.pos.vx -= 40960;
+                updated = 1;
+            }
+
+            if(pad_pressing(PAD_RIGHT)) {
+                player.pos.vx += 40960;
+                updated = 1;
+            }
+
+            if(updated) {
+                camera_update(&camera, &player);
+            }
+        }
+        
         return;
     }
 
@@ -125,7 +153,6 @@ screen_level_update(void *)
     }
 
     camera_update(&camera, &player);
-
     player_update(&player);
 }
 
@@ -186,21 +213,23 @@ screen_level_draw(void *)
         draw_text(x, CENTERY - 12, 0, line1);
     }
 
-    // Sound and video debug
-    uint32_t elapsed_sectors;
-    sound_xa_get_elapsed_sectors(&elapsed_sectors);
-    snprintf(buffer, 255,
-             "%4s %3d\n"
-             "%08u"
-             ,
-             GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
-             get_frame_rate(),
-             elapsed_sectors
-        );
-    draw_text(248, 12, 0, buffer);
-
-    // Player debug
     if(debug_mode) {
+        // Video debug
+        snprintf(buffer, 255,
+                 "%4s %3d",
+                 GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
+                 get_frame_rate());
+        draw_text(248, 12, 0, buffer);
+
+        // Sound debug
+        if(debug_mode > 1) {
+            uint32_t elapsed_sectors;
+            sound_xa_get_elapsed_sectors(&elapsed_sectors);
+            snprintf(buffer, 255, "%08u", elapsed_sectors);
+            draw_text(248, 20, 0, buffer);
+        }
+
+        // Player debug
         snprintf(buffer, 255,
                  "GSP %08x\n"
                  "SPD %08x %08x\n"

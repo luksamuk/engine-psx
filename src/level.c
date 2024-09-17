@@ -362,8 +362,9 @@ render_lvl(
     if(lvl->num_layers > 0)
         _render_layer(lvl, map128, map16, cx, cy, 4, 0);
 
-    if(lvl->num_layers > 1)
-        _render_layer(lvl, map128, map16, cx, cy, 2, 1);
+    // For some reason this isn't working
+    /* if(lvl->num_layers > 1) */
+    /*     _render_layer(lvl, map128, map16, cx, cy, 2, 1); */
 
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
