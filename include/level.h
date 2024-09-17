@@ -6,7 +6,7 @@
 
 #define LEVEL_MAX_X_CHUNKS   255
 #define LEVEL_MAX_Y_CHUNKS    31
-#define LEVEL_ARENA_SIZE   65536
+#define LEVEL_ARENA_SIZE  131072
 
 typedef struct {
     uint8_t floor[8];
@@ -25,12 +25,25 @@ typedef struct {
     uint16_t num_tiles;
     uint16_t frame_side;
     uint16_t *frames;
-
     Collision **collision;
-} TileMapping;
+} TileMap16;
 
-typedef TileMapping TileMap16;
-typedef TileMapping TileMap128;
+typedef struct {
+    uint16_t index;
+    uint8_t  props;
+    uint8_t  _unused;
+} Frame128;
+
+typedef struct {
+    uint16_t tile_width;
+    uint16_t num_tiles;
+    uint16_t frame_side;
+    Frame128 *frames;
+} TileMap128;
+
+#define MAP128_PROP_SOLID  0
+#define MAP128_PROP_ONEWAY 1
+#define MAP128_PROP_NONE   2
 
 typedef struct {
     uint8_t width;
@@ -52,7 +65,8 @@ void level_init();
 void level_reset();
 void level_debrief();
 
-void load_map(TileMapping *mapping, const char *filename, const char *collision_filename);
+void load_map16(TileMap16 *mapping, const char *filename, const char *collision_filename);
+void load_map128(TileMap128 *mapping, const char *filename);
 void load_lvl(LevelData *lvl, const char *filename);
 
 void render_lvl(

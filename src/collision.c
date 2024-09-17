@@ -167,9 +167,12 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
             int32_t px = (lx & 0x7f) >> 4;
             int32_t py = (ly & 0x7f) >> 4;
             uint16_t piece_pos = ((py << 3) + px) + (chunk << 6);
-            uint16_t piece = map128->frames[piece_pos];
+            uint16_t piece = map128->frames[piece_pos].index;
+            uint8_t piece_props = map128->frames[piece_pos].props;
 
-            if(piece > 0) {
+            if((piece > 0) &&
+               (piece_props != MAP128_PROP_NONE) &&
+               !((direction != CDIR_FLOOR) && (piece_props & MAP128_PROP_ONEWAY))) {
                 uint8_t hpos;
                 uint8_t h;
                 int32_t angle;

@@ -323,10 +323,10 @@ level_load_level()
     snprintf(filename0, 255, "%s\\MAP16.MAP;1", basepath);
     snprintf(filename1, 255, "%s\\MAP16.COL;1", basepath);
     printf("Loading %s and %s...\n", filename0, filename1);
-    load_map(&map16, filename0, filename1);
+    load_map16(&map16, filename0, filename1);
     snprintf(filename0, 255, "%s\\MAP128.MAP;1", basepath);
     printf("Loading %s...\n", filename0);
-    load_map(&map128, filename0, NULL);
+    load_map128(&map128, filename0);
 
     snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, (level & 0x01) + 1);
     printf("Loading %s...\n", filename0);

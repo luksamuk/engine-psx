@@ -87,7 +87,9 @@ cleancook:
 	       assets/levels/**/*.MAP \
 	       assets/levels/**/*.LVL \
 	       assets/levels/**/collision16.json \
-	       assets/levels/**/tilemap128.csv
+	       assets/levels/**/tilemap128.csv \
+	       assets/levels/**/tilemap128_solid.csv \
+	       assets/levels/**/tilemap128_oneway.csv
 
 # 16x16 tile mapping
 # (Depends on mapping generated on Aseprite)
@@ -105,10 +107,13 @@ cleancook:
 # Also generates 128.png to create a 128x128 tileset (should be done manually)
 # (Depends on tilemap128.tmx map generated on Tiled)
 %/MAP128.MAP: %/tilemap128.tmx
-	tiled --export-map $< "$(basename $<).csv"
+	tiled --export-map $< "$(basename $<).psxcsv"
 	tmxrasterizer $< "$(dir $<)128.png"
-	./tools/chunkgen.py "$(basename $<).csv" $@
-	rm "$(basename $<).csv"
+	./tools/chunkgen.py "$(basename $<).psxcsv" $@
+	rm -f "$(basename $<).psxcsv"
+	rm -f "$(basename $<)_solid.psxcsv"
+	rm -f "$(basename $<)_oneway.psxcsv"
+	rm -f "$(basename $<)_none.psxcsv"
 
 # Level maps
 # These maps should use a tileset generated from "128.png".

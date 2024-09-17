@@ -3,9 +3,9 @@
 # chunkgen.py
 # Tool for converting 128x128 chunks generated from a .tmx tilemap in Tiled
 # to a proper .MAP file for the PlayStation engine-psx.
-# Converts map128.csv -> MAP128.MAP
-# Make sure you export your .tmx map to .csv before using this tool.
-
+# Converts map128.psxcsv -> MAP128.MAP
+# Make sure you export your .tmx map to .psxcsv before using this tool.
+import os
 import sys
 import pandas as pd
 import numpy as np
@@ -27,6 +27,7 @@ def load_data(csvfile):
     df = pd.read_csv(csvfile, header=None)
     cols = df.shape[1]
     rows = df.shape[0]
+    # print(f"Old shape: {df.shape}")
     new_cols = reshape_dimension(cols)
     new_rows = reshape_dimension(rows)
     if new_cols:
@@ -58,22 +59,39 @@ def get_max_grid(df):
 # 2. Number of tiles: short (16 bits)
 # 3. Frame rows / columns: short (16 bits)
 # 4. Array of frame data.
-#    4.1. Tiles: Columns * Rows * short (16 bits per tile)
-def export_binary(f, df):
-    grid = get_max_grid(df)
+#    4.1. Frames: Columns * Rows
+#         4.1.1 Tilenum: short (16 bits)
+#         4.1.2 Props:   byte  (8 bits)
+def export_binary(f, solid, oneway, nocol):
+    grid = get_max_grid(solid)
     f.write(c_ushort(128))
     f.write(c_ushort(grid[0] * grid[1]))
     f.write(c_ushort(8))
     # Loop for each chunk
     for cy in range(0, grid[1]):
         for cx in range(0, grid[0]):
-            chunk = get_chunk(df, cx, cy)
-            chunk_id = (cy * grid[0]) + cx
+            chunk_solid = get_chunk(solid, cx, cy)
+            chunk_oneway = None
+            chunk_nocol = None
+            if oneway is not None:
+                chunk_oneway = get_chunk(oneway, cx, cy)
+            if nocol is not None:
+                chunk_nocol = get_chunk(nocol, cx, cy)
+            # chunk_id = (cy * grid[0]) + cx
             # print(f"Exporting tile {chunk_id}...")
             # Loop for each piece within chunk
             for py in range(0, 8):
                 for px in range(0, 8):
-                    f.write(c_ushort(max(chunk.iloc[py, px], 0)))
+                    props = 0
+                    index = chunk_solid.iloc[py, px]
+                    if index <= 0 and chunk_oneway is not None:
+                        index = chunk_oneway.iloc[py, px]
+                        props = 1 if index > 0 else 0
+                    if index <= 0 and chunk_nocol is not None:
+                        index = chunk_nocol.iloc[py, px]
+                        props = 2 if index > 0 else 0
+                    f.write(c_ushort(max(index, 0)))
+                    f.write(c_ubyte(props))
 
 
 # def debug_print(df):
@@ -91,10 +109,19 @@ def export_binary(f, df):
 
 def main():
     out = sys.argv[2]
-    df = load_data(sys.argv[1])
-    # debug_print(df)
+    solid_layer = None
+    oneway_layer = None
+    none_layer = None
+    if os.path.isfile(sys.argv[1]):
+        solid_layer = load_data(sys.argv[1])
+    else:
+        basepath = os.path.splitext(sys.argv[1])[0]
+        solid_layer = load_data(f"{basepath}_solid.psxcsv")
+        oneway_layer = load_data(f"{basepath}_oneway.psxcsv")
+        none_layer = load_data(f"{basepath}_none.psxcsv")
+
     with open(out, "wb") as f:
-        export_binary(f, df)
+        export_binary(f, solid_layer, oneway_layer, none_layer)
 
 
 if __name__ == "__main__":

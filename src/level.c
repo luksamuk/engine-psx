@@ -85,7 +85,7 @@ _load_collision(TileMap16 *mapping, const char *filename)
 }
 
 void
-load_map(TileMapping *mapping, const char *filename, const char *collision_filename)
+load_map16(TileMap16 *mapping, const char *filename, const char *collision_filename)
 {
     uint8_t *bytes;
     uint32_t b, length;
@@ -123,6 +123,37 @@ load_map(TileMapping *mapping, const char *filename, const char *collision_filen
         mapping->collision[i] = NULL;
     }
     _load_collision(mapping, collision_filename);
+}
+
+void
+load_map128(TileMap128 *mapping, const char *filename)
+{
+    uint8_t *bytes;
+    uint32_t b, length;
+
+    bytes = file_read(filename, &length);
+    if(bytes == NULL) {
+        printf("Error reading MAP file %s from the CD.\n", filename);
+        return;
+    }
+
+    b = 0;
+
+    mapping->tile_width = get_short_be(bytes, &b);
+    mapping->num_tiles  = get_short_be(bytes, &b);
+    mapping->frame_side = get_short_be(bytes, &b);
+
+    uint32_t frames_per_tile = mapping->frame_side * mapping->frame_side;
+    uint32_t total_frames = frames_per_tile * mapping->num_tiles;
+
+    mapping->frames = alloc_arena_malloc(&_level_arena, total_frames * sizeof(Frame128));
+    for(uint32_t i = 0; i < total_frames; i++) {
+        mapping->frames[i].index = get_short_be(bytes, &b);
+        mapping->frames[i].props = get_byte(bytes, &b);
+        mapping->frames[i]._unused = 0;
+    }
+
+    free(bytes);
 }
 
 void
@@ -263,9 +294,9 @@ _render_128(
     // Since this is a constant, we will then write the optimized code
     // just like _render_16.
     // Frames per tile: 8 * 8 = 64 => rshift << 6
-    uint16_t *tileframes = &map128->frames[frame << 6];
+    Frame128 *tileframes = &map128->frames[frame << 6];
     for(int16_t idx = 0; idx < 64; idx++) {
-        if(tileframes[idx] == 0) continue;
+        if(tileframes[idx].index == 0) continue;
 
         int16_t
             //deltax = (idx % 8),
@@ -275,7 +306,7 @@ _render_128(
                    vx + (deltax << 4),
                    vy + (deltay << 4),
                    otz,
-                   tileframes[idx]);
+                   tileframes[idx].index);
     }
 
     /* // Draw debug lines */
