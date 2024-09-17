@@ -69,6 +69,7 @@ void load_map16(TileMap16 *mapping, const char *filename, const char *collision_
 void load_map128(TileMap128 *mapping, const char *filename);
 void load_lvl(LevelData *lvl, const char *filename);
 
+void prepare_renderer(LevelData *lvl);
 void render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     int32_t cam_x, int32_t cam_y);

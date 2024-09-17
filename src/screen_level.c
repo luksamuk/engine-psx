@@ -92,6 +92,11 @@ screen_level_unload(void *)
 void
 screen_level_update(void *)
 {
+    if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
+       (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
+        debug_mode = (debug_mode + 1) % 3;
+    }
+
     if(pad_pressed(PAD_START)) paused = !paused;
     
     if(paused) {
@@ -139,11 +144,6 @@ screen_level_update(void *)
     rotation.vy -= 8;
     rotation.vz -= 12;
     /* --------- */
-
-    if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
-       (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
-        debug_mode = (debug_mode + 1) % 3;
-    }
 
     if(pad_pressed(PAD_SELECT)) {
         player.pos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
@@ -331,6 +331,10 @@ level_load_level()
     snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, (level & 0x01) + 1);
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
+
+
+    // Pre-allocate and initialize level primitive buffer
+    prepare_renderer(&leveldata);
 
     level_debrief();
 

@@ -5,6 +5,8 @@
 #include "render.h"
 #include "memalloc.h"
 
+#define MAX_TILES 1400
+
 static ArenaAllocator _level_arena = { 0 };
 static uint8_t _arena_mem[LEVEL_ARENA_SIZE];
 
@@ -197,10 +199,16 @@ load_lvl(LevelData *lvl, const char *filename)
     free(bytes);
 }
 
+// Level sprite buffer.
+// We simply cannot afford to have so much information passing
+// around all the time, so we pre-configure 1300 8x8 sprites to be used
+// as level tiles and that's it.
+static uint16_t _numsprites = 0;
+static uint8_t  _current_spritebuf = 0;
+static SPRT_8   _sprites[2][MAX_TILES];
 
 void
 _render_8(
-    LevelData *lvl,
     int16_t vx, int16_t vy, int16_t otz,
     uint16_t frame)
 {
@@ -219,30 +227,15 @@ _render_8(
         u0 = (u0_idx << 3),
         v0 = (v0_idx << 3);
 
-    SPRT_8 *sprt = get_next_prim();
-    increment_prim(sizeof(SPRT_8));
-    setSprt8(sprt);
+    SPRT_8 *sprt = &_sprites[_current_spritebuf ^ 1][_numsprites++];
     setXY0(sprt, vx, vy);
-    setRGB0(sprt, 128, 128, 128);
     setUV0(sprt, u0, v0);
-    setClut(sprt, lvl->crectx, lvl->crecty);
     sort_prim(sprt, otz);
-
-    /* POLY_FT4 *poly = get_next_prim(); */
-    /* increment_prim(sizeof(POLY_FT4)); */
-    /* setPolyFT4(poly); */
-    /* setXYWH(poly, vx, vy, 8, 8); */
-    /* setRGB0(poly, 128, 128, 128); */
-    /* setUVWH(poly, u0, v0, 8, 8); */
-    /* // tpage and clut are calculated wrt. first texture page */
-    /* setTPage(poly, 0, 1, lvl->prectx, lvl->precty + (page << 8)); */
-    /* setClut(poly, lvl->crectx, lvl->crecty + page); */
-    /* sort_prim(poly, otz); */
 }
 
 void
 _render_16(
-    LevelData *lvl, TileMap16 *map16,
+    TileMap16 *map16,
     int16_t vx, int16_t vy, int16_t otz,
     uint16_t frame)
 {
@@ -260,30 +253,16 @@ _render_16(
             deltay = (idx >> 1);
 
         _render_8(
-            lvl,
             vx + (deltax << 3),
             vy + (deltay << 3),
             otz,
             tileframes[idx]);
     }
-
-    // Draw debug lines
-    /* LINE_F2 line; */
-    /* setLineF2(&line); */
-    /* setXY2(&line, vx, vy, vx, vy + 16); */
-    /* setRGB0(&line, 255, 255, 0); */
-    /* DrawPrim((void *)&line); */
-    /* setXY2(&line, vx, vy, vx + 16, vy); */
-    /* DrawPrim((void *)&line); */
-    /* setXY2(&line, vx + 16, vy, vx + 16, vy + 16); */
-    /* DrawPrim((void *)&line); */
-    /* setXY2(&line, vx, vy + 16, vx + 16, vy + 16); */
-    /* DrawPrim((void *)&line); */
 }
 
 void
 _render_128(
-    LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
+    TileMap128 *map128, TileMap16 *map16,
     int16_t vx, int16_t vy, int16_t otz,
     uint16_t frame)
 {
@@ -302,27 +281,13 @@ _render_128(
             //deltax = (idx % 8),
             deltax = (idx & 0x07),
             deltay = (idx >> 3);
-        _render_16(lvl, map16,
-                   vx + (deltax << 4),
-                   vy + (deltay << 4),
-                   otz,
-                   tileframes[idx].index);
+        _render_16(
+            map16,
+            vx + (deltax << 4),
+            vy + (deltay << 4),
+            otz,
+            tileframes[idx].index);
     }
-
-    /* // Draw debug lines */
-    /* if(debug_mode > 1) { */
-    /*     LINE_F2 line; */
-    /*     setLineF2(&line); */
-    /*     setRGB0(&line, 255, 255, 0); */
-    /*     setXY2(&line, vx, vy, vx, vy + 128); */
-    /*     DrawPrim((void *)&line); */
-    /*     setXY2(&line, vx, vy, vx + 128, vy); */
-    /*     DrawPrim((void *)&line); */
-    /*     setXY2(&line, vx + 128, vy, vx + 128, vy + 128); */
-    /*     DrawPrim((void *)&line); */
-    /*     setXY2(&line, vx, vy + 128, vx + 128, vy + 128); */
-    /*     DrawPrim((void *)&line); */
-    /* } */
 }
 
 #define CLAMP_SUM(X, N, MAX) ((X + N) > MAX ? MAX : (X + N))
@@ -372,7 +337,8 @@ _render_layer(
             int16_t frame_idx = (iy * l->width) + ix;
             if(l->tiles[frame_idx] == 0) continue;
 
-            _render_128(lvl, map128, map16,
+            _render_128(//lvl,
+                        map128, map16,
                         ((ix - tilex) << 7) - deltax,
                         ((iy - tiley) << 7) - deltay,
                         otz,
@@ -382,20 +348,37 @@ _render_layer(
 }
 
 void
+prepare_renderer(LevelData *lvl)
+{
+    for(int i = 0; i < MAX_TILES; i++) {
+        SPRT_8 *sprt = &_sprites[0][i];
+        setSprt8(sprt);
+        setRGB0(sprt, 128, 128, 128);
+        setClut(sprt, lvl->crectx, lvl->crecty);
+    }
+    for(int i = 0; i < MAX_TILES; i++) {
+        SPRT_8 *sprt = &_sprites[1][i];
+        setSprt8(sprt);
+        setRGB0(sprt, 128, 128, 128);
+        setClut(sprt, lvl->crectx, lvl->crecty);
+    }
+    _current_spritebuf = 0;
+}
+
+void
 render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     int32_t cam_x, int32_t cam_y)
 {
+    _numsprites = 0;
+    _current_spritebuf = !_current_spritebuf;
+
     int16_t
         cx = (cam_x >> 12),
         cy = (cam_y >> 12);
 
     if(lvl->num_layers > 0)
         _render_layer(lvl, map128, map16, cx, cy, 4, 0);
-
-    // For some reason this isn't working
-    /* if(lvl->num_layers > 1) */
-    /*     _render_layer(lvl, map128, map16, cx, cy, 2, 1); */
 
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
