@@ -278,13 +278,16 @@ level_load_player()
 static void
 level_load_level()
 {
-    set_clear_color(63, 0, 127);
     paused = 0;
 
     char basepath[255];
     char filename0[255], filename1[255];
 
     uint8_t round = level >> 1;
+
+    if(level == 4 || level == 5)
+        set_clear_color(26, 104, 200); // GHZ placeholder
+    else set_clear_color(63, 0, 127);
 
     snprintf(basepath, 255, "\\LEVELS\\R%1u", round);
 
