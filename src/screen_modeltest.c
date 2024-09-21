@@ -5,8 +5,10 @@
 #include "object.h"
 #include "screen.h"
 #include "input.h"
+#include "render.h"
 
 typedef struct {
+    char buffer[255];
     Model *ring;
 } screen_modeltest_data;
 
@@ -82,5 +84,19 @@ void
 screen_modeltest_draw(void *d)
 {
     screen_modeltest_data *data = (screen_modeltest_data *) d;
+    snprintf(data->buffer, 255,
+             "POS %08x %08x %08x\n"
+             "ROT %08x %08x %08x\n"
+             "SCL %08x %08x %08x\n",
+             data->ring->pos.vx,
+             data->ring->pos.vy,
+             data->ring->pos.vz,
+             data->ring->rot.vx,
+             data->ring->rot.vy,
+             data->ring->rot.vz,
+             data->ring->scl.vx,
+             data->ring->scl.vy,
+             data->ring->scl.vz);
+    draw_text(8, 12, 0, data->buffer);
     render_model(data->ring);
 }
