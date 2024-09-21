@@ -88,7 +88,7 @@ def _parse_face(buffer: str) -> Face:
         v.in0 = c_ushort(int(buffer[5]))
         v.in1 = c_ushort(int(buffer[6]))
         v.in2 = c_ushort(int(buffer[7]))
-        v.iv3 = c_ushort(int(buffer[8]))
+        v.in3 = c_ushort(int(buffer[8]))
         return v
     elif ftype == FaceType.LINE:
         v = LineFace()
@@ -150,7 +150,12 @@ def parse_ply(filename: str) -> PlyData:
             elif step == 1:
                 if vertices > 0:
                     values = buffer.split()
-                    values = [tofixed12(float(x)) for x in values]
+                    # print(f"Buffered values: {values}")
+                    values = [float(x) for x in values]
+                    # print(f"Float values: {values}")
+                    values = [tofixed12(x) for x in values]
+                    # print(f"Fixed values: {values}")
+                    # print("---------------")
                     vertex = VECTOR()
                     vertex.vx = c_int(values[0])
                     vertex.vy = c_int(values[1])

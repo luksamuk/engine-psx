@@ -188,6 +188,7 @@ render_model(Model *m)
         case TYPE_F3: {
             OBJF3 *info = (OBJF3 *)op->info;
             POLY_F3 *poly = (POLY_F3 *)get_next_prim();
+            setPolyF3(poly);
             nclip = RotAverageNclip3(
                 &m->vertices[info->iv0],
                 &m->vertices[info->iv1],
@@ -199,7 +200,6 @@ render_model(Model *m)
             if((nclip < 0) || (otz < 0) || (otz >= OT_LENGTH))
                 continue;
 
-            setPolyF3(poly);
             setRGB0(poly, info->r0, info->g0, info->b0);
             sort_prim(poly, otz);
             increment_prim(sizeof(POLY_F3));
@@ -207,6 +207,7 @@ render_model(Model *m)
         case TYPE_G3: {
             OBJG3 *info = (OBJG3 *)op->info;
             POLY_G3 *poly = (POLY_G3 *)get_next_prim();
+            setPolyG3(poly);
             nclip = RotAverageNclip3(
                 &m->vertices[info->iv0],
                 &m->vertices[info->iv1],
@@ -218,7 +219,6 @@ render_model(Model *m)
             if((nclip < 0) || (otz < 0) || (otz >= OT_LENGTH))
                 continue;
 
-            setPolyG3(poly);
             setRGB0(poly, info->r0, info->g0, info->b0);
             setRGB1(poly, info->r1, info->g1, info->b1);
             setRGB2(poly, info->r2, info->g2, info->b2);
@@ -228,6 +228,7 @@ render_model(Model *m)
         case TYPE_F4: {
             OBJF4 *info = (OBJF4 *)op->info;
             POLY_F4 *poly = (POLY_F4 *)get_next_prim();
+            setPolyF4(poly);
             nclip = RotAverageNclip4(
                 &m->vertices[info->iv0],
                 &m->vertices[info->iv1],
@@ -241,7 +242,6 @@ render_model(Model *m)
             if((nclip < 0) || (otz < 0) || (otz >= OT_LENGTH))
                 continue;
 
-            setPolyF4(poly);
             setRGB0(poly, info->r0, info->g0, info->b0);
             sort_prim(poly, otz);
             increment_prim(sizeof(POLY_F4));
@@ -249,6 +249,7 @@ render_model(Model *m)
         case TYPE_G4: {
             OBJG4 *info = (OBJG4 *)op->info;
             POLY_G4 *poly = (POLY_G4 *)get_next_prim();
+            setPolyG4(poly);
             nclip = RotAverageNclip4(
                 &m->vertices[info->iv0],
                 &m->vertices[info->iv1],
@@ -262,7 +263,6 @@ render_model(Model *m)
             if((nclip < 0) || (otz < 0) || (otz >= OT_LENGTH))
                 continue;
 
-            setPolyG4(poly);
             setRGB0(poly, info->r0, info->g0, info->b0);
             setRGB1(poly, info->r1, info->g1, info->b1);
             setRGB2(poly, info->r2, info->g2, info->b2);

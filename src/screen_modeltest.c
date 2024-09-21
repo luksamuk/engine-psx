@@ -54,11 +54,11 @@ screen_modeltest_update(void *d)
     }
 
     if(pad_pressing(PAD_RIGHT)) {
-        data->ring->rot.vz += 10;
+        data->ring->rot.vz -= 30;
     }
 
     if(pad_pressing(PAD_LEFT)) {
-        data->ring->rot.vz -= 10;
+        data->ring->rot.vz += 30;
     }
 
     if(pad_pressing(PAD_TRIANGLE)) {
@@ -71,6 +71,10 @@ screen_modeltest_update(void *d)
         data->ring->scl.vx -= 10;
         data->ring->scl.vy -= 10;
         data->ring->scl.vz -= 10;
+    }
+
+    if(pad_pressed(PAD_SELECT)) {
+        scene_change(SCREEN_TITLE);
     }
 }
 
