@@ -151,19 +151,19 @@ def parse_ply(filename: str) -> PlyData:
                 if vertices > 0:
                     values = buffer.split()
                     values = [tofixed12(float(x)) for x in values]
-                    vertex = SVECTOR()
-                    vertex.vx = c_short(values[0])
-                    vertex.vy = c_short(values[1])
-                    vertex.vz = c_short(values[2])
+                    vertex = VECTOR()
+                    vertex.vx = c_int(values[0])
+                    vertex.vy = c_int(values[1])
+                    vertex.vz = c_int(values[2])
                     ply.vertices.append(vertex)
                     vertices -= 1
                 elif normals > 0:
                     values = buffer.split()
                     values = [tofixed12(float(x)) for x in values]
-                    normal = SVECTOR()
-                    normal.vx = c_short(values[0])
-                    normal.vy = c_short(values[1])
-                    normal.vz = c_short(values[2])
+                    normal = VECTOR()
+                    normal.vx = c_int(values[0])
+                    normal.vy = c_int(values[1])
+                    normal.vz = c_int(values[2])
                     ply.normals.append(normal)
                     normals -= 1
                 elif faces > 0:

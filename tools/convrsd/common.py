@@ -1,19 +1,19 @@
-from ctypes import c_ubyte, c_short, c_ushort
+from ctypes import c_ubyte, c_short, c_ushort, c_int, c_uint
 from enum import Enum
 
 c_short = c_short.__ctype_be__
 c_ushort = c_ushort.__ctype_be__
-# c_int = c_int.__ctype_be__
-# c_uint = c_uint.__ctype_be__
+c_int = c_int.__ctype_be__
+c_uint = c_uint.__ctype_be__
 
 
-class SVECTOR:
-    vx: c_short
-    vy: c_short
-    vz: c_short
+class VECTOR:
+    vx: c_int
+    vy: c_int
+    vz: c_int
 
     def __repr__(self):
-        return f"{{ {self.vx.value:05X}, {self.vy.value:05X}, {self.vz.value:05X} }}"
+        return f"{{ {self.vx.value:09X}, {self.vy.value:09X}, {self.vz.value:09X} }}"
 
 
 # ------------------------------------------

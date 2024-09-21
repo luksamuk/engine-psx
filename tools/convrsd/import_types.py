@@ -11,8 +11,8 @@ class PlyData:
     num_vertices: c_ushort = c_ushort(0)
     num_normals: c_ushort = c_ushort(0)
     numfaces: c_ushort = c_ushort(0)
-    vertices: [SVECTOR] = field(default_factory=list)
-    normals: [SVECTOR] = field(default_factory=list)
+    vertices: [VECTOR] = field(default_factory=list)
+    normals: [VECTOR] = field(default_factory=list)
     faces: [Face] = field(default_factory=list)
 
     def pair_materials_and_faces(self, materials) -> (Face, Material):

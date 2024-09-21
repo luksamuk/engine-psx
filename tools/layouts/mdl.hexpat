@@ -104,18 +104,18 @@ struct Polygon {
     }
 };
 
-struct SVECTOR {
-    be s16 vx;
-    be s16 vy;
-    be s16 vz;
+struct VECTOR {
+    be s32 vx;
+    be s32 vy;
+    be s32 vz;
 };
 
 struct Model {
     be u16 num_vertices;
     be u16 num_normals;
     be u16 num_polys;
-    SVECTOR vertices[num_vertices];
-    SVECTOR normals[num_normals];
+    VECTOR vertices[num_vertices];
+    VECTOR normals[num_normals];
     Polygon polygons[num_polys];
 };
 

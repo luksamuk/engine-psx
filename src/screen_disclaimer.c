@@ -10,6 +10,9 @@
 #include "screens/fmv.h"
 #include "screens/level.h"
 
+#include "object.h"
+#include <stdio.h>
+
 extern int debug_mode;
 
 typedef struct {
@@ -62,7 +65,8 @@ void
 screen_disclaimer_draw(void *d)
 {
     screen_disclaimer_data *data = (screen_disclaimer_data *) d;
-
+    
+    // Render disclaimer
     TIM_IMAGE tim;
     GetTimInfo((const uint32_t *)data->disclaimer_bg, &tim);
     RECT r2 = *tim.prect;

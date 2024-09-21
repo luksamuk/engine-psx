@@ -7,6 +7,28 @@
 #include <string.h>
 
 int
+RotAverageNclip3(
+    SVECTOR *a, SVECTOR *b, SVECTOR *c,
+    uint32_t *xy0, uint32_t *xy1, uint32_t *xy2,
+    int *otz)
+{
+    int nclip = 0;
+
+    gte_ldv0(a);
+    gte_ldv1(b);
+    gte_ldv2(c);
+    gte_rtpt();
+    gte_nclip();
+    gte_stopz(&nclip);
+    if(nclip <= 0) goto exit;
+    gte_stsxy3(xy0, xy1, xy2);
+    gte_avsz3();
+    gte_stotz(otz);
+exit:
+    return nclip;
+}
+
+int
 RotAverageNclip4(
     SVECTOR *a, SVECTOR *b, SVECTOR *c, SVECTOR *d,
     uint32_t *xy0, uint32_t *xy1, uint32_t *xy2, uint32_t *xy3,

@@ -10,6 +10,9 @@
 #define MIN(x, y) (x < y ? x : y)
 
 int RotTransPers(SVECTOR *v, uint32_t *xy0);
+int RotAverageNclip3(SVECTOR *a, SVECTOR *b, SVECTOR *c,
+                     uint32_t *xy0, uint32_t *xy1, uint32_t *xy2,
+                     int *otz);
 int RotAverageNclip4(SVECTOR *a, SVECTOR *b, SVECTOR *c, SVECTOR *d,
                      uint32_t *xy0, uint32_t *xy1, uint32_t *xy2, uint32_t *xy3,
                      int *otz);

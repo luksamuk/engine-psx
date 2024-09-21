@@ -10,6 +10,7 @@
 #include "screens/level.h"
 #include "screens/fmv.h"
 #include "screens/title.h"
+#include "screens/modeltest.h"
 
 // Start with 64k until we make the actual level scene
 // an object as well
@@ -49,6 +50,7 @@ scene_load()
     case SCREEN_LEVEL:       screen_level_load();       break;
     case SCREEN_FMV:         screen_fmv_load();         break;
     case SCREEN_TITLE:       screen_title_load();       break;
+    case SCREEN_MODELTEST:   screen_modeltest_load();   break;
     default: break; // Unknown scene???
     }
 }
@@ -62,6 +64,7 @@ scene_unload()
     case SCREEN_LEVEL:       screen_level_unload(scene_data);       break;
     case SCREEN_FMV:         screen_fmv_unload(scene_data);         break;
     case SCREEN_TITLE:       screen_title_unload(scene_data);       break;
+    case SCREEN_MODELTEST:   screen_modeltest_unload(scene_data);   break;
     default: break; // Unknown scene???
     }
 }
@@ -75,6 +78,7 @@ scene_update()
     case SCREEN_LEVEL:       screen_level_update(scene_data);       break;
     case SCREEN_FMV:         screen_fmv_update(scene_data);         break;
     case SCREEN_TITLE:       screen_title_update(scene_data);       break;
+    case SCREEN_MODELTEST:   screen_modeltest_update(scene_data);   break;
     default: break; // Unknown scene???
     }
 }
@@ -89,6 +93,7 @@ scene_draw()
     case SCREEN_LEVEL:       screen_level_draw(scene_data);       break;
     case SCREEN_FMV:         screen_fmv_draw(scene_data);         break;
     case SCREEN_TITLE:       screen_title_draw(scene_data);       break;
+    case SCREEN_MODELTEST:   screen_modeltest_draw(scene_data);   break;
     default: break; // Unknown scene???
     }
 }
@@ -103,5 +108,8 @@ screen_alloc(uint32_t size)
 void
 screen_free()
 {
+    printf("Scene: Disposing of %d / %d bytes\n",
+           alloc_arena_bytes_used(&screen_arena),
+           alloc_arena_bytes_free(&screen_arena));
     alloc_arena_free(&screen_arena);
 }

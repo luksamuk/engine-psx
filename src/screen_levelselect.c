@@ -11,9 +11,10 @@
 #include "screens/fmv.h"
 #include "sound.h"
 
-#define CHOICE_TITLE  5
-#define CHOICE_SONICT 6
-#define CHOICE_INTRO  7
+#define CHOICE_MODELTEST 5
+#define CHOICE_TITLE     6
+#define CHOICE_SONICT    7
+#define CHOICE_INTRO     8
 #define MAX_LEVELS   (CHOICE_INTRO + 1)
 
 typedef struct {
@@ -70,6 +71,8 @@ screen_levelselect_update(void *d)
                 screen_fmv_set_next(SCREEN_LEVELSELECT);
                 screen_fmv_enqueue("\\SONICT.STR;1");
                 scene_change(SCREEN_FMV);
+            } else if(data->menu_choice == CHOICE_MODELTEST) {
+                scene_change(SCREEN_MODELTEST);
             } else {
                 screen_level_setlevel(data->menu_choice);
                 scene_change(SCREEN_LEVEL);
@@ -110,7 +113,7 @@ screen_levelselect_draw(void *d)
         "\n"
         "\n"
         "\n"
-        "\n"
+        "%c MODEL TEST\n"
         "%c TITLE\n"
         "%c FMV:SONICT\n"
         "%c FMV:INTRO",
@@ -119,6 +122,7 @@ screen_levelselect_draw(void *d)
         (data->menu_choice == 2) ? '>' : ' ',
         (data->menu_choice == 3) ? '>' : ' ',
         (data->menu_choice == 4) ? '>' : ' ',
+        (data->menu_choice == CHOICE_MODELTEST) ? '>' : ' ',
         (data->menu_choice == CHOICE_TITLE) ? '>' : ' ',
         (data->menu_choice == CHOICE_SONICT) ? '>' : ' ',
         (data->menu_choice == CHOICE_INTRO) ? '>' : ' ');

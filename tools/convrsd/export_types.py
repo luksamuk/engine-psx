@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from common import SVECTOR
+from common import VECTOR
 from enum import Enum
 from face import *
 from material import *
@@ -546,8 +546,8 @@ class MDLModel:
     num_vertices: c_ushort = c_ushort(0)
     num_normals: c_ushort = c_ushort(0)
     num_polys: c_ushort = c_ushort(0)
-    vertices: [SVECTOR] = field(default_factory=list)
-    normals: [SVECTOR] = field(default_factory=list)
+    vertices: [VECTOR] = field(default_factory=list)
+    normals: [VECTOR] = field(default_factory=list)
     polygons: [Polygon] = field(default_factory=list)
 
     def write(self, f):
