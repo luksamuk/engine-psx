@@ -14,7 +14,8 @@
 
 // Start with 64k until we make the actual level scene
 // an object as well
-#define SCREEN_BUFFER_LEN 65536
+//#define SCREEN_BUFFER_LEN 65536
+#define SCREEN_BUFFER_LEN 122880
 
 static int8_t current_scene = -1;
 static uint8_t *scene_data[SCREEN_BUFFER_LEN] = { 0 };

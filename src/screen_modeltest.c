@@ -18,7 +18,7 @@ screen_modeltest_load()
     screen_modeltest_data *data = screen_alloc(sizeof(screen_modeltest_data));
 
     data->ring = screen_alloc(sizeof(Model));
-    load_model(data->ring, "\\OBJS\\COMMON\\RING.MDL");
+    load_model(data->ring, "\\OBJS\\COMMON\\PLANET.MDL");
     data->ring->pos.vz = 4800;
     data->ring->rot.vx = ONE >> 2;
 
@@ -39,20 +39,23 @@ screen_modeltest_update(void *d)
 {
     screen_modeltest_data *data = (screen_modeltest_data *) d;
 
+    int32_t spd = 10;
+    if(pad_pressing(PAD_CIRCLE)) spd = 50;
+
     if(pad_pressing(PAD_L1)) {
-        data->ring->pos.vz += 10;
+        data->ring->pos.vz += spd;
     }
 
     if(pad_pressing(PAD_R1)) {
-        data->ring->pos.vz -= 10;
+        data->ring->pos.vz -= spd;
     }
 
     if(pad_pressing(PAD_UP)) {
-        data->ring->rot.vx += 10;
+        data->ring->rot.vx += spd;
     }
 
     if(pad_pressing(PAD_DOWN)) {
-        data->ring->rot.vx -= 10;
+        data->ring->rot.vx -= spd;
     }
 
     if(pad_pressing(PAD_RIGHT)) {
@@ -64,15 +67,15 @@ screen_modeltest_update(void *d)
     }
 
     if(pad_pressing(PAD_TRIANGLE)) {
-        data->ring->scl.vx += 10;
-        data->ring->scl.vy += 10;
-        data->ring->scl.vz += 10;
+        data->ring->scl.vx += spd;
+        data->ring->scl.vy += spd;
+        data->ring->scl.vz += spd;
     }
 
     if(pad_pressing(PAD_CROSS)) {
-        data->ring->scl.vx -= 10;
-        data->ring->scl.vy -= 10;
-        data->ring->scl.vz -= 10;
+        data->ring->scl.vx -= spd;
+        data->ring->scl.vy -= spd;
+        data->ring->scl.vz -= spd;
     }
 
     if(pad_pressed(PAD_SELECT)) {
@@ -85,11 +88,9 @@ screen_modeltest_draw(void *d)
 {
     screen_modeltest_data *data = (screen_modeltest_data *) d;
     snprintf(data->buffer, 255,
-             "POS %08x %08x %08x\n"
-             "ROT %08x %08x %08x\n"
-             "SCL %08x %08x %08x\n",
-             data->ring->pos.vx,
-             data->ring->pos.vy,
+             "ZPOS %08x\n"
+             "ROT  %08x %08x %08x\n"
+             "SCL  %08x %08x %08x\n",
              data->ring->pos.vz,
              data->ring->rot.vx,
              data->ring->rot.vy,

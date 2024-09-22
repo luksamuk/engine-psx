@@ -8,10 +8,12 @@ therefore is not dissociated with said project.
 Heavily inspired by Sonic The Hedgehog. Uses [[https://github.com/Lameguy64/PSn00bSDK/tree/master][PSn00bSDK]].
 
 #+html: <center>
-[[file:./screenshots/titlescreen-091224.gif]]
+[[file:./screenshots/titlescreen-092224.gif]]
 #+html: </center>
 
-/Game title screen running on DuckStation, dated [2024-09-12]./
+/Game title screen running on PCSX-REdux, dated [2024-09-22]./
+
+*GET THE LATEST BUILD HERE (.CHD FORMAT)*: [[https://luksamuk.codes/static/psx/ENGINEPSX.CHD]]
 
 * About
 
@@ -144,6 +146,8 @@ tochd -d . -- ./build/engine.cue
 
 | Screenshot                                            | Description                                                                                     |
 |-------------------------------------------------------+-------------------------------------------------------------------------------------------------|
+| [[file:./screenshots/engine-psx-092224-gh.gif]]           | Beta engine [2024-09-22]. Same as below, but showcasing an initial Green Hill Zone.             |
+| [[file:./screenshots/engine-psx-092224.gif]]              | Beta engine [2024-09-22]. Modifications of test level, collision layout and much more.          |
 | [[file:./screenshots/engine-psx-081924-realhardware.gif]] | Alpha engine [2024-08-19]. Same as below, on a physical SCPH-5501.                              |
 | [[file:./screenshots/engine-psx-081924.gif]]              | Alpha engine [2024-08-19]. New tilesets, animation with variable speed, extended camera.        |
 | [[file:./screenshots/engine-psx-081624-realhardware.gif]] | Alpha engine [2024-08-16]. Same as below, on a physical SCPH-5501.                              |

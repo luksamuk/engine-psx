@@ -9,6 +9,7 @@
 #include "input.h"
 #include "screen.h"
 #include "sound.h"
+#include "object.h"
 
 #include "screens/fmv.h"
 #include "screens/level.h"
@@ -66,6 +67,8 @@ typedef struct {
     VECTOR  pos;
     VECTOR  scale;
     MATRIX  world;
+
+    Model planet;
 } screen_title_data;
 
 #define MENU_MAX_OPTION 3
@@ -109,6 +112,17 @@ screen_title_load()
     bzero(data->prl_pos, PRL_NUM_PIECES * sizeof(int32_t));
     data->prl_pos[0] = 32 << 12; // Island center
 
+    // Planet model
+    load_model(&data->planet, "\\OBJS\\COMMON\\RING.MDL;1");
+    data->planet.rot.vx = 0x478;
+    data->planet.pos.vz = 4288;
+    data->planet.pos.vx = 2048;
+    data->planet.pos.vy = -1280;
+    data->planet.scl.vx =
+        data->planet.scl.vy =
+        data->planet.scl.vz = 2048;
+
+
     sound_stop_xa();
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 1, 0);
 
@@ -126,6 +140,8 @@ void
 screen_title_update(void *d)
 {
     screen_title_data *data = (screen_title_data *)d;
+
+    data->planet.rot.vz -= 24;
 
     data->pos.vx -= 1;
     if(data->pos.vx < -646) {
@@ -337,6 +353,7 @@ screen_title_draw(void *d)
     screen_title_drawtitle(data);
     screen_title_drawprl(data);
     screen_title_drawcld(data);
+    render_model(&data->planet);
 
     if(data->rgb_count >= 128) {
         screen_title_drawtxt(data, data->menu_option, CENTERX, 208);

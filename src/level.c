@@ -378,7 +378,7 @@ render_lvl(
         cy = (cam_y >> 12);
 
     if(lvl->num_layers > 0)
-        _render_layer(lvl, map128, map16, cx, cy, 4, 0);
+        _render_layer(lvl, map128, map16, cx, cy, OT_LENGTH - 1, 0);
 
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));

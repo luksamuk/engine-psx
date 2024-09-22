@@ -103,6 +103,9 @@
 	  <file name="RING.MDL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/objs/common/ring.mdl" />
+	  <file name="PLANET.MDL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/objs/common/planet.mdl" />
 	</dir> <!-- COMMON -->
       </dir> <!-- OBJS -->
 

@@ -14,6 +14,7 @@
 #include "screen.h"
 #include "level.h"
 #include "timer.h"
+#include "object.h"
 
 extern int debug_mode;
 
@@ -40,32 +41,32 @@ static uint32_t bgm_loop_sectors[] = {
 
 
 /* Related to rotating cube on background */
-static int dx = 1,  dy = 1;
+/* static int dx = 1,  dy = 1; */
 
-static SVECTOR vertices[] = {
-    { -64, -64, -64, 0 },
-    {  64, -64, -64, 0 },
-    {  64, -64,  64, 0 },
-    { -64, -64,  64, 0 },
-    { -64,  64, -64, 0 },
-    {  64,  64, -64, 0 },
-    {  64,  64,  64, 0 },
-    { -64,  64,  64, 0 }
-};
+/* static SVECTOR vertices[] = { */
+/*     { -64, -64, -64, 0 }, */
+/*     {  64, -64, -64, 0 }, */
+/*     {  64, -64,  64, 0 }, */
+/*     { -64, -64,  64, 0 }, */
+/*     { -64,  64, -64, 0 }, */
+/*     {  64,  64, -64, 0 }, */
+/*     {  64,  64,  64, 0 }, */
+/*     { -64,  64,  64, 0 } */
+/* }; */
 
-static short faces[] = {
-    2, 1, 3, 0, // top
-    1, 5, 0, 4, // front
-    5, 6, 4, 7, // bottomn
-    2, 6, 1, 5, // right
-    7, 6, 3, 2, // back
-    7, 3, 4, 0  // left
-};
+/* static short faces[] = { */
+/*     2, 1, 3, 0, // top */
+/*     1, 5, 0, 4, // front */
+/*     5, 6, 4, 7, // bottomn */
+/*     2, 6, 1, 5, // right */
+/*     7, 6, 3, 2, // back */
+/*     7, 3, 4, 0  // left */
+/* }; */
 
-static SVECTOR rotation = { 0 };
-static VECTOR  pos      = { 0, 0, 450 };
-static VECTOR  scale    = { ONE >> 1, ONE >> 1, ONE >> 1 };
-static MATRIX  world    = { 0 };
+/* static SVECTOR rotation = { 0 }; */
+/* static VECTOR  pos      = { 0, 0, 450 }; */
+/* static VECTOR  scale    = { ONE >> 1, ONE >> 1, ONE >> 1 }; */
+/* static MATRIX  world    = { 0 }; */
 /* -------------------------------------- */
 
 
@@ -73,9 +74,21 @@ static MATRIX  world    = { 0 };
 static void level_load_player();
 static void level_load_level();
 
+// TODO!!!
+typedef struct {
+    /* Model ring; */
+} screen_level_data;
+
 void
 screen_level_load()
 {
+    screen_level_data *data = screen_alloc(sizeof(screen_level_data));
+    /* load_model(&data->ring, "\\OBJS\\COMMON\\RING.MDL"); */
+
+    /* data->ring.pos.vz = 0x12c0; */
+    /* data->ring.rot.vx = 0x478; */
+    /* data->ring.scl.vx = data->ring.scl.vy = data->ring.scl.vz = 0x200; */
+
     level_load_player();
     level_load_level();
     camera_set(&camera, player.pos.vx, player.pos.vy);
@@ -87,11 +100,13 @@ screen_level_unload(void *)
     sound_stop_xa();
     level_reset();
     sound_reset_mem();
+    screen_free();
 }
 
 void
-screen_level_update(void *)
+screen_level_update(void *d)
 {
+    screen_level_data *data = (screen_level_data *)d;
     if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
        (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
         debug_mode = (debug_mode + 1) % 3;
@@ -134,15 +149,17 @@ screen_level_update(void *)
         return;
     }
 
+    /* data->ring.rot.vz += 36; */
+    
     /* Rotating cube */
-    if(pos.vx < -CENTERX || pos.vx > CENTERX) dx = -dx;
-    if(pos.vy < -CENTERY || pos.vy > CENTERY) dy = -dy;
-    pos.vx += dx;
-    pos.vy += dy;
+    /* if(pos.vx < -CENTERX || pos.vx > CENTERX) dx = -dx; */
+    /* if(pos.vy < -CENTERY || pos.vy > CENTERY) dy = -dy; */
+    /* pos.vx += dx; */
+    /* pos.vy += dy; */
 
-    rotation.vx += 6;
-    rotation.vy -= 8;
-    rotation.vz -= 12;
+    /* rotation.vx += 6; */
+    /* rotation.vy -= 8; */
+    /* rotation.vz -= 12; */
     /* --------- */
 
     if(pad_pressed(PAD_SELECT)) {
@@ -157,8 +174,9 @@ screen_level_update(void *)
 }
 
 void
-screen_level_draw(void *)
+screen_level_draw(void *d)
 {
+    screen_level_data *data = (screen_level_data *)d;
     char buffer[255] = { 0 };
 
     if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
@@ -171,40 +189,43 @@ screen_level_draw(void *)
         player_draw(&player, &player_canvas_pos);
     }
 
+        
+    /* render_model(&data->ring); */
+
     render_lvl(&leveldata, &map128, &map16, camera.pos.vx, camera.pos.vy);
 
     // Gouraud-shaded cube
-    RotMatrix(&rotation, &world);
-    TransMatrix(&world, &pos);
-    ScaleMatrix(&world, &scale);
-    gte_SetRotMatrix(&world);
-    gte_SetTransMatrix(&world);
+    /* RotMatrix(&rotation, &world); */
+    /* TransMatrix(&world, &pos); */
+    /* ScaleMatrix(&world, &scale); */
+    /* gte_SetRotMatrix(&world); */
+    /* gte_SetTransMatrix(&world); */
 
-    for(int i = 0; i < 24; i += 4) {
-        int nclip, otz;
-        POLY_G4 *poly = (POLY_G4 *) get_next_prim();
-        setPolyG4(poly);
-        setRGB0(poly, 96,   0,   0);
-        setRGB1(poly,   0, 96,   0);
-        setRGB2(poly,   0,   0, 96);
-        setRGB3(poly, 96, 96,   0);
+    /* for(int i = 0; i < 24; i += 4) { */
+    /*     int nclip, otz; */
+    /*     POLY_G4 *poly = (POLY_G4 *) get_next_prim(); */
+    /*     setPolyG4(poly); */
+    /*     setRGB0(poly, 96,   0,   0); */
+    /*     setRGB1(poly,   0, 96,   0); */
+    /*     setRGB2(poly,   0,   0, 96); */
+    /*     setRGB3(poly, 96, 96,   0); */
 
-        nclip = RotAverageNclip4(
-            &vertices[faces[i]],
-            &vertices[faces[i + 1]],
-            &vertices[faces[i + 2]],
-            &vertices[faces[i + 3]],
-            (uint32_t *)&poly->x0,
-            (uint32_t *)&poly->x1,
-            (uint32_t *)&poly->x2,
-            (uint32_t *)&poly->x3,
-            &otz);
+    /*     nclip = RotAverageNclip4( */
+    /*         &vertices[faces[i]], */
+    /*         &vertices[faces[i + 1]], */
+    /*         &vertices[faces[i + 2]], */
+    /*         &vertices[faces[i + 3]], */
+    /*         (uint32_t *)&poly->x0, */
+    /*         (uint32_t *)&poly->x1, */
+    /*         (uint32_t *)&poly->x2, */
+    /*         (uint32_t *)&poly->x3, */
+    /*         &otz); */
 
-        if((nclip > 0) && (otz > 0) && (otz < OT_LENGTH)) {
-            sort_prim(poly, otz);
-            increment_prim(sizeof(POLY_G4));
-        }
-    }
+    /*     if((nclip > 0) && (otz > 0) && (otz < OT_LENGTH)) { */
+    /*         sort_prim(poly, otz); */
+    /*         increment_prim(sizeof(POLY_G4)); */
+    /*     } */
+    /* } */
 
     // Pause text
     if(paused) {
