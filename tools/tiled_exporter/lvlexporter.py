@@ -17,10 +17,13 @@ class PSXPreLevel(Plugin):
 
     @classmethod
     def write(cls, tileMap, fileName):
-        assert tileMap.layerCount() <= 3, f"max number of layers is 3"
+        layer_count = 0
+        for i in range(tileMap.layerCount()):
+            if isTileLayerAt(tileMap, i):
+                layer_count += 1
+
         filedata = {
-            "num_layers": tileMap.layerCount(),
-            "_unused": 0,
+            "num_layers": layer_count,
             "layer_data": [],
         }
         for i in range(tileMap.layerCount()):
@@ -35,9 +38,15 @@ class PSXPreLevel(Plugin):
                 for y in range(tileLayer.height()):
                     for x in range(tileLayer.width()):
                         tile = tileLayer.cellAt(x, y).tile()
-                        # f.write(c_ushort(tile.id() if tile else 0))
                         layer["tiles"].append(tile.id() if tile else 0)
                 filedata["layer_data"].append(layer)
+            # elif isObjectGroupAt(tileMap, i):
+            #     # Unfortunately, the available options for MapObject are
+            #     # VERY LIMITED, so we'll have to figure things out by directly
+            #     # parsing a .tmx file for objects, with an external tool :/
+            #     # For more info on MapObject, see:
+            #     # https://github.com/mapeditor/tiled/blob/06e94bdea0790dceb9c9eb104af9982ce6a0e04e/src/plugins/python/tiledbinding.py#L257
+            #     pass
         with open(fileName, "w") as f:
             print(json.dumps(filedata), file=f)
         return True

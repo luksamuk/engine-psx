@@ -53,7 +53,7 @@ def main():
 
     with open(outfile, "wb") as f:
         f.write(c_ubyte(j.get("num_layers")))
-        f.write(c_ubyte(j.get("_unused")))
+        f.write(c_ubyte(0))  # _unused
         layer_data = j.get("layer_data")
         for layer in layer_data:
             # print(layer.get("width"))
