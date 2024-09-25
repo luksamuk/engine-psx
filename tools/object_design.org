@@ -1,0 +1,111 @@
+#+startup: showall
+
+* Object indices
+
+Object indices are files containing object information.
+
+Common objects are objects  that can be found on any level  and are always ready
+to be loaded.
+
+Level objects are objects that are level-specific.
+
+The only  big difference  between common  and level objects  is the  location of
+their texture and CLUTs on VRAM. Plus,  it could be possible to load new texture
+information atop  other objects; in  this case,  these objects should  be loaded
+atop the level object textures.
+
+For  example, if  a  boss needs  space  in VRAM  to  be drawn  and  we have  the
+opportunity to  load its  data, just  override the level  objects on  VRAM. This
+would in theory  corrupt the graphics of  level objects, but not if  the boss is
+the last "non-common" thing seen in a level. :)
+
+** Object data table
+
+This is  a text file  that should be handwritten  to give information  on object
+animations.
+
+- Object ID
+- Number of animations
+- Array of animations
+  - Number of frames
+  - Loopback frame (0 for infinite loop, -1 for no loop)
+  - Is this the destruction animation?
+  - Destroy at end?
+
+# TODO!!!!!
+
+** Common object index
+
+*REQUIREMENTS:* Object tileset (.tsx); Common object data table (custom!!!)
+
+*OBJECTS SHOULD BE LISTED IN ORDER, STARTING AT INDEX 0.*
+
+
+** Level object index
+
+*REQUIREMENTS:* Object tileset (.tsx); Level object data table (custom!!!)
+
+*OBJECTS SHOULD BE LISTED IN ORDER, STARTING AT INDEX 0.*
+
+* Level object list
+
+*REQUIREMENTS:* Level map (.tmx); Object tileset (.tsx)
+
+- Number of objects (u32)
+- Array of objects
+  - Object list (u8 -- 0 for common, 1 for level...)
+  - ID (u8 -- first index 0)
+  - quadrant_x (u8? u16?)
+  - quadrant_y (u8? u16?)
+  - relative_x (s16)
+  - relative_y (s16)
+  - flip (u8; bitwise)
+    - 0: None
+    - 1: FLIP_X
+    - 2: FLIP_Y
+    - 3: ROTATE_CW (clockwise 90deg rotation)
+    - 4: ROTATE_CCW (counterclockwise 90deg rotation)
+    - (operations are bitwise, e.g. FLIP_X | FLIP_Y is possible)
+  - flags (u32; bitwise -- optional?)
+    - Flag 31 is reserved as a "destroyed?" property
+      
+** Considerations
+- Rotation should be tested before flipping.
+  - ROTATE_CW  is set iff "rotation" = 90.
+  - ROTATE_CCW is set iff "rotation" = -90.
+  - If ROTATE_CW || ROTATE_CCW, FLIP_X and FLIP_Y are ignored.
+- Flipping and rotation should alter object hitboxes.
+  
+** Specialized objects
+
+*** Ring / Ring3h / Ring3v
+- Ring3h and Ring3v are simply object spawners for Ring
+- flip: completely ignored
+- flags: enumeration for state
+  - 0x0: UNTOUCHED
+  - 0x1: COLLECTED
+  
+*** Monitor
+- flip: completely ignored
+- flags: enumeration for monitor kind
+  - 0x0: NONE
+  - 0x1: BROKEN
+  - 0x2: RING
+  - 0x3: 1UP
+  - 0x4: SHIELD
+  - 0x5: SHOES
+  - 0x6: INVINCIBLE
+  - 0x7: SUPER
+    
+*** Spring (horizontal)
+- flip: FLIP_X Is ignored
+  
+*** Spring (diagonal)
+- flip: ROTATE_CW and ROTATE_CCW are ignored
+  
+*** Checkpoint
+- flip: completely ignored
+- flags: enumeration for state
+  - 0x0: UNTOUCHED
+  - 0x1: ACTIVATING
+  - 0x2: ACTIVATED
