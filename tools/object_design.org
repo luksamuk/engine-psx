@@ -31,6 +31,15 @@ animations.
   - Loopback frame (0 for infinite loop, -1 for no loop)
   - Is this the destruction animation?
   - Destroy at end?
+  - Array of frames
+    - u coord (u8)
+    - v coord (u8)
+    - width (u8)
+    - height (u8)
+    - flip (u8, bitwise)
+      - 0x1: FLIP_X
+      - 0x2: FLIP_Y
+    - delay (in frames, 0 is minimum)
 
 # TODO!!!!!
 
@@ -109,3 +118,15 @@ animations.
   - 0x0: UNTOUCHED
   - 0x1: ACTIVATING
   - 0x2: ACTIVATED
+
+* Parsing objects from .TMX on Python
+
+1. First  of all, GIDs are  *VERY IMPORTANT!* GIDs  store FLIP_X on byte  32 and
+   FLIP_Y on byte 31. In the end, we have to clear a GID with:
+   =gid & ~(0b1111 << 29)=.
+   [[https://github.com/mapeditor/tiled/blob/06e94bdea0790dceb9c9eb104af9982ce6a0e04e/docs/reference/global-tile-ids.rst#mapping-a-gid-to-a-local-tile-id][See this link]].
+2. Since PyTMX  does not calculate GIDs with flip  information properly, we have
+   to parse the XML by hand and do all the dirty work.
+3.  We need  to fetch  extra information  on tile  objects by  hand as  well, by
+   opening the associated =.tsx= file, so we need to keep a relative path.
+
