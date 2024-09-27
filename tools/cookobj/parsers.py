@@ -37,13 +37,26 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
 
     tiles = ts.find_all("tile")
     o.num_objs = int(ts["tilecount"])
-    od = ObjectData()
     # "classes" becomes an entry on dict o.object_types.
     # Emplace "od" there under a proper gid
+    obj_id = 0
     for i in range(int(ts["tilecount"])):
         collision = None
         tile = next((x for x in tiles if x["id"] == f"{i}"), None)
         if tile:
+            od = ObjectData()
+            od.id = obj_id
+            od.name = (str(tile["type"]) if tile else "none").lower()
+            extra = extra_data.get(od.name)
+
+            # If this is a dummy object (e.g. rows of rings), we don't
+            # need to register it
+            if extra and extra.get("dummy", False):
+                o.num_objs -= 1
+                continue
+            # If not a dummy, increase sequential id for next object
+            obj_id += 1
+
             # Get tile collision
             # collisions = tile.find("objectgroup")
             # if collisions:
@@ -66,11 +79,10 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
             #         ]
             #         collision["points"] = points
             # Get other tile data
-            od.name = (tile["type"] if tile else "none").lower()
+
             idx = i + firstgid
 
             # Append TOML data
-            extra = extra_data.get(od.name)
             if extra:
                 animations = extra["animations"]
                 animations.sort(key=lambda x: x.get("id"))
@@ -97,6 +109,8 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
 
     o.firstgid = firstgid
     o.out = splitext(set_src)[0] + ".OTD"
+    o.is_level_specific = ts["name"] != "objects_common"
+    o.num_objs = len(o.object_types)
     return (o, ts["name"])
 
 

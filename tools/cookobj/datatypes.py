@@ -10,13 +10,15 @@ c_int = c_int.__ctype_be__
 
 
 # OBJECT TABLE DEFINITION (.OTN) LAYOUT
+# - is_level_specific (u8)
 # - num_classes (u16)
 # - Classes of Objects:
-#   (Note: we don't write the ID since the ID is sequential)
+#   - id (u8)  {types are sequential but id is used for auto-suficient parsing}
+#   - has_fragment (u8)
 #   - num_animations (u16)
 #   - Animations:
 #     - num_frames (u16)
-#     - loopback_frame (u8)
+#     - loopback_frame (s8)
 #     - Frames:
 #       - u0 (u8)
 #       - v0 (u8)
@@ -55,7 +57,7 @@ class ObjectAnimation:
 
     def write_to(self, f):
         f.write(c_ushort(len(self.frames)))
-        f.write(c_ubyte(self.loopback))
+        f.write(c_byte(self.loopback))
         for frame in self.frames:
             frame.write_to(f)
 
@@ -69,7 +71,7 @@ class ObjectFragment:
     def write_to(self, f):
         f.write(c_short(self.offsetx))
         f.write(c_short(self.offsety))
-        f.write(c_ubyte(len(self.animations)))
+        f.write(c_ushort(len(self.animations)))
         for animation in self.animations:
             animation.write_to(f)
 
@@ -79,12 +81,15 @@ MaybeObjectFragment = ObjectFragment | None
 
 @dataclass
 class ObjectData:
+    id: int = -1
     name: str = ""
     animations: [ObjectAnimation] = field(default_factory=list)
     fragment: MaybeObjectFragment = None
 
     def write_to(self, f):
-        f.write(c_ubyte(len(self.animations)))
+        f.write(c_ubyte(self.id))
+        f.write(c_ubyte(int(self.fragment is not None)))
+        f.write(c_ushort(len(self.animations)))
         for animation in self.animations:
             animation.write_to(f)
         if self.fragment:
@@ -94,6 +99,7 @@ class ObjectData:
 # Root for the .OTN data type
 @dataclass
 class ObjectMap:
+    is_level_specific: bool = False
     out: str = ""
     firstgid: int = 0
     num_objs: int = 0
@@ -104,8 +110,10 @@ class ObjectMap:
             self.write_to(f)
 
     def write_to(self, f):
+        f.write(c_ubyte(int(self.is_level_specific)))
         f.write(c_ushort(self.num_objs))
         for key, t in self.object_types.items():
+            print(f"Writing object class id {t.id} ({t.name})...")
             t.write_to(f)
 
 

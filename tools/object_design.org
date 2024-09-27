@@ -133,8 +133,6 @@ Frames are an array with the following arguments in order:
 
 #+begin_src toml :tangle ../assets/levels/COMMON/objects_common.toml
 [ring]
-# .ref = NULL
-# .fragment = NULL
 
 [[ring.animations]]
 name = "idle"
@@ -162,7 +160,6 @@ loopback = -1
 # ============
 
 [monitor]
-# .ref = NULL
 
 [[monitor.animations]]
 name = "normal"
@@ -179,7 +176,7 @@ loopback = 0
 # ------------
 
 [monitor.fragment]
-offset = [8, 6] # from top left of animation
+offset = [0, -10]
 
 [[monitor.fragment.animations]]
 id = 0
@@ -248,8 +245,6 @@ loopback = 0
 # ============
 
 [spikes]
-# .ref = NULL
-# .fragment = NULL
 
 [[spikes.animations]]
 name = "none"
@@ -260,7 +255,6 @@ loopback = 0
 # ============
 
 [checkpoint]
-# .ref = NULL
 
 [[checkpoint.animations]]
 name = "none"
@@ -293,8 +287,6 @@ loopback = 0
 # ============
 
 [spring_yellow]
-# .ref = NULL
-# .fragment = NULL
 
 [[spring_yellow.animations]]
 name = "idle"
@@ -314,8 +306,6 @@ loopback = -1
 # ============
 
 [spring_red]
-# .ref = NULL
-# .fragment = NULL
 
 [[spring_red.animations]]
 name = "idle"
@@ -335,8 +325,6 @@ loopback = -1
 # ============
 
 [spring_yellow_diagonal]
-# .ref = NULL
-# .fragment = NULL
 
 [[spring_yellow_diagonal.animations]]
 name = "idle"
@@ -356,8 +344,6 @@ loopback = -1
 # ============
 
 [spring_red_diagonal]
-# .ref = NULL
-# .fragment = NULL
 
 [[spring_red_diagonal.animations]]
 name = "idle"
@@ -376,19 +362,7 @@ loopback = -1
 
 # ============
 
-#[ring_3h]
-#ref = "ring"
-
-# ============
-
-#[ring_3v]
-#ref = "ring"
-
-# ============
-
 [goal_sign]
-# .ref = NULL
-# .fragment = NULL
 
 [[goal_sign.animations]]
 name = "none"
@@ -421,8 +395,6 @@ loopback = 0
 # ============
 
 [switch]
-# .ref = NULL
-# .fragment = NULL
 
 [[switch.animations]]
 name = "inactive"
@@ -435,6 +407,16 @@ name = "active"
 id = 1
 frames = [[144, 72, 32, 8]]
 loopback = 0
+
+# ============
+# Dummy objects
+# ============
+
+[ring_3h]
+dummy = true
+
+[ring_3v]
+dummy = true
 #+end_src
 
 ** Parse test
@@ -474,7 +456,7 @@ pp(cfg)
                              'id': 1,
                              'frames': [[224, 32, 32, 16]],
                              'loopback': 0}],
-             'fragment': {'offset': [8, 6],
+             'fragment': {'offset': [0, -10],
                           'animations': [{'id': 0,
                                           'name': 'none',
                                           'frames': [[168, 0, 16, 16],
@@ -590,7 +572,9 @@ pp(cfg)
                            {'name': 'active',
                             'id': 1,
                             'frames': [[144, 72, 32, 8]],
-                            'loopback': 0}]}}
+                            'loopback': 0}]},
+ 'ring_3h': {'dummy': True},
+ 'ring_3v': {'dummy': True}}
 #+end_example
 
 

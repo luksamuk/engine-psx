@@ -35,6 +35,15 @@
       </dir>
 
       <dir name="LEVELS">
+	<dir name="COMMON">
+	  <file name="OBJ.OTD"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/COMMON/objects_common.OTD" />
+	  <file name="OBJ.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/COMMON/OBJ.TIM" />
+	</dir>
+
 	<dir name="R0">
 	  <file name="Z1.LVL"
 		type="data"
