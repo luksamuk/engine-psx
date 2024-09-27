@@ -119,10 +119,485 @@ animations.
   - 0x1: ACTIVATING
   - 0x2: ACTIVATED
 
+* Object extra data
+
+Frames are an array with the following arguments in order:
+
+- U coord
+- V coord
+- Width
+- Height
+- [optional, default False] Flip_X
+- [optional, default False] Flip_Y
+  
+
+#+begin_src toml :tangle ../assets/levels/COMMON/objects_common.toml
+[ring]
+# .ref = NULL
+# .fragment = NULL
+
+[[ring.animations]]
+name = "idle"
+id = 0
+# Frames: u, v, w, h
+frames = [
+    [16, 0, 16, 16],
+    [32, 0, 16, 16],
+    [48, 0, 8, 16],
+    [56, 0, 16, 16],
+]
+loopback = 0
+
+[[ring.animations]]
+name = "destroyed"
+id = 1
+frames = [
+    [72, 0, 16, 16],
+    [88, 0, 16, 16],
+    [104, 0, 16, 16],
+    [120, 0, 16, 16],
+]
+loopback = -1
+
+# ============
+
+[monitor]
+# .ref = NULL
+
+[[monitor.animations]]
+name = "normal"
+id = 0
+frames = [[136, 0, 32, 32]]
+loopback = 0
+
+[[monitor.animations]]
+name = "destroyed"
+id = 1
+frames = [[224, 32, 32, 16]]
+loopback = 0
+
+# ------------
+
+[monitor.fragment]
+offset = [8, 6] # from top left of animation
+
+[[monitor.fragment.animations]]
+id = 0
+name = "none"
+frames = [
+    [168, 0, 16, 16],
+    [184, 0, 16, 16],
+    [200, 0, 16, 16],
+]
+loopback = 0
+
+[[monitor.fragment.animations]]
+id = 1
+name = "ring"
+frames = [
+    [168, 0, 16, 16],
+    [216, 0, 16, 16],
+]
+loopback = 0
+
+[[monitor.fragment.animations]]
+id = 2
+name = "speedshoes"
+frames = [
+    [168, 0, 16, 16],
+    [232, 0, 16, 16],
+]
+loopback = 0
+
+[[monitor.fragment.animations]]
+id = 3
+name = "shield"
+frames = [
+    [168, 0, 16, 16],
+    [168, 16, 16, 16],
+]
+loopback = 0
+
+[[monitor.fragment.animations]]
+id = 4
+name = "invincibility"
+frames = [
+    [168, 0, 16, 16],
+    [184, 16, 16, 16],
+]
+loopback = 0
+
+[[monitor.fragment.animations]]
+id = 5
+name = "1up"
+frames = [
+    [168, 0, 16, 16],
+    [200, 16, 16, 16],
+]
+loopback = 0
+
+[[monitor.fragment.animations]]
+id = 6
+name = "super"
+frames = [
+    [168, 0, 16, 16],
+    [216, 16, 16, 16],
+]
+loopback = 0
+
+# ============
+
+[spikes]
+# .ref = NULL
+# .fragment = NULL
+
+[[spikes.animations]]
+name = "none"
+id = 0
+frames = [[0, 16, 32, 32]]
+loopback = 0
+
+# ============
+
+[checkpoint]
+# .ref = NULL
+
+[[checkpoint.animations]]
+name = "none"
+id = 0
+frames = [[32, 32, 16, 48]]
+loopback = 0
+
+# ------------
+
+[checkpoint.fragment]
+offset = [0, -16]
+
+
+[[checkpoint.fragment.animations]]
+name = "inactive"
+id = 0
+frames = [[32, 16, 16, 16]]
+loopback = 0
+
+[[checkpoint.fragment.animations]]
+name = "active"
+id = 1
+frames = [
+    [0, 48, 16, 16],
+    [16, 48, 16, 16],
+]
+loopback = 0
+
+
+# ============
+
+[spring_yellow]
+# .ref = NULL
+# .fragment = NULL
+
+[[spring_yellow.animations]]
+name = "idle"
+id = 0
+frames = [[80, 16, 32, 16]]
+loopback = 0
+
+[[spring_yellow.animations]]
+name = "bounce"
+id = 1
+frames = [
+    [80, 32, 32, 8],
+    [80, 40, 32, 40],
+]
+loopback = -1
+
+# ============
+
+[spring_red]
+# .ref = NULL
+# .fragment = NULL
+
+[[spring_red.animations]]
+name = "idle"
+id = 0
+frames = [[48, 16, 32, 16]]
+loopback = 0
+
+[[spring_red.animations]]
+name = "bounce"
+id = 1
+frames = [
+    [48, 32, 32, 8],
+    [48, 40, 32, 40],
+]
+loopback = -1
+
+# ============
+
+[spring_yellow_diagonal]
+# .ref = NULL
+# .fragment = NULL
+
+[[spring_yellow_diagonal.animations]]
+name = "idle"
+id = 0
+frames = [[112, 80, 32, 32]]
+loopback = 0
+
+[[spring_yellow_diagonal.animations]]
+name = "bounce"
+id = 1
+frames = [
+    [144, 80, 32, 32],
+    [176, 80, 48, 48],
+]
+loopback = -1
+
+# ============
+
+[spring_red_diagonal]
+# .ref = NULL
+# .fragment = NULL
+
+[[spring_red_diagonal.animations]]
+name = "idle"
+id = 0
+frames = [[112, 32, 32, 32]]
+loopback = 0
+
+[[spring_red_diagonal.animations]]
+name = "bounce"
+id = 1
+frames = [
+    [144, 32, 32, 32],
+    [176, 32, 48, 48],
+]
+loopback = -1
+
+# ============
+
+#[ring_3h]
+#ref = "ring"
+
+# ============
+
+#[ring_3v]
+#ref = "ring"
+
+# ============
+
+[goal_sign]
+# .ref = NULL
+# .fragment = NULL
+
+[[goal_sign.animations]]
+name = "none"
+id = 0
+frames = [[0, 80, 48, 56]]
+loopback = 0
+
+[[goal_sign.animations]]
+name = "spin"
+id = 1
+frames = [
+    # x, y, w, h, flip_x, flip_y
+    [0, 80, 48, 56, 0, 0],
+    [48, 80, 32, 56, 0, 0],
+    [80, 80, 32, 56, 0, 0],
+    [48, 80, 32, 56, 1, 0],
+    [0, 136, 48, 56, 0, 0],
+    [48, 80, 32, 56, 0, 0],
+    [80, 80, 32, 56, 0, 0],
+    [48, 80, 32, 56, 1, 0],
+]
+loopback = 0
+
+[[goal_sign.animations]]
+name = "win_sonic"
+id = 2
+frames = [[0, 136, 48, 56]]
+loopback = 0
+
+# ============
+
+[switch]
+# .ref = NULL
+# .fragment = NULL
+
+[[switch.animations]]
+name = "inactive"
+id = 0
+frames = [[112, 64, 32, 16]]
+loopback = 0
+
+[[switch.animations]]
+name = "active"
+id = 1
+frames = [[144, 72, 32, 8]]
+loopback = 0
+#+end_src
+
+** Parse test
+
+#+begin_src python :results output
+import toml
+from pprint import pp
+
+cfg = None
+with open("../assets/levels/COMMON/objects_common.toml") as f:
+    cfg = toml.load(f)
+
+pp(cfg)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+{'ring': {'animations': [{'name': 'idle',
+                          'id': 0,
+                          'frames': [[16, 0, 16, 16],
+                                     [32, 0, 16, 16],
+                                     [48, 0, 8, 16],
+                                     [56, 0, 16, 16]],
+                          'loopback': 0},
+                         {'name': 'destroyed',
+                          'id': 1,
+                          'frames': [[72, 0, 16, 16],
+                                     [88, 0, 16, 16],
+                                     [104, 0, 16, 16],
+                                     [120, 0, 16, 16]],
+                          'loopback': -1}]},
+ 'monitor': {'animations': [{'name': 'normal',
+                             'id': 0,
+                             'frames': [[136, 0, 32, 32]],
+                             'loopback': 0},
+                            {'name': 'destroyed',
+                             'id': 1,
+                             'frames': [[224, 32, 32, 16]],
+                             'loopback': 0}],
+             'fragment': {'offset': [8, 6],
+                          'animations': [{'id': 0,
+                                          'name': 'none',
+                                          'frames': [[168, 0, 16, 16],
+                                                     [184, 0, 16, 16],
+                                                     [200, 0, 16, 16]],
+                                          'loopback': 0},
+                                         {'id': 1,
+                                          'name': 'ring',
+                                          'frames': [[168, 0, 16, 16],
+                                                     [216, 0, 16, 16]],
+                                          'loopback': 0},
+                                         {'id': 2,
+                                          'name': 'speedshoes',
+                                          'frames': [[168, 0, 16, 16],
+                                                     [232, 0, 16, 16]],
+                                          'loopback': 0},
+                                         {'id': 3,
+                                          'name': 'shield',
+                                          'frames': [[168, 0, 16, 16],
+                                                     [168, 16, 16, 16]],
+                                          'loopback': 0},
+                                         {'id': 4,
+                                          'name': 'invincibility',
+                                          'frames': [[168, 0, 16, 16],
+                                                     [184, 16, 16, 16]],
+                                          'loopback': 0},
+                                         {'id': 5,
+                                          'name': '1up',
+                                          'frames': [[168, 0, 16, 16],
+                                                     [200, 16, 16, 16]],
+                                          'loopback': 0},
+                                         {'id': 6,
+                                          'name': 'super',
+                                          'frames': [[168, 0, 16, 16],
+                                                     [216, 16, 16, 16]],
+                                          'loopback': 0}]}},
+ 'spikes': {'animations': [{'name': 'none',
+                            'id': 0,
+                            'frames': [[0, 16, 32, 32]],
+                            'loopback': 0}]},
+ 'checkpoint': {'animations': [{'name': 'none',
+                                'id': 0,
+                                'frames': [[32, 32, 16, 48]],
+                                'loopback': 0}],
+                'fragment': {'offset': [0, -16],
+                             'animations': [{'name': 'inactive',
+                                             'id': 0,
+                                             'frames': [[32, 16, 16, 16]],
+                                             'loopback': 0},
+                                            {'name': 'active',
+                                             'id': 1,
+                                             'frames': [[0, 48, 16, 16],
+                                                        [16, 48, 16, 16]],
+                                             'loopback': 0}]}},
+ 'spring_yellow': {'animations': [{'name': 'idle',
+                                   'id': 0,
+                                   'frames': [[80, 16, 32, 16]],
+                                   'loopback': 0},
+                                  {'name': 'bounce',
+                                   'id': 1,
+                                   'frames': [[80, 32, 32, 8],
+                                              [80, 40, 32, 40]],
+                                   'loopback': -1}]},
+ 'spring_red': {'animations': [{'name': 'idle',
+                                'id': 0,
+                                'frames': [[48, 16, 32, 16]],
+                                'loopback': 0},
+                               {'name': 'bounce',
+                                'id': 1,
+                                'frames': [[48, 32, 32, 8], [48, 40, 32, 40]],
+                                'loopback': -1}]},
+ 'spring_yellow_diagonal': {'animations': [{'name': 'idle',
+                                            'id': 0,
+                                            'frames': [[112, 80, 32, 32]],
+                                            'loopback': 0},
+                                           {'name': 'bounce',
+                                            'id': 1,
+                                            'frames': [[144, 80, 32, 32],
+                                                       [176, 80, 48, 48]],
+                                            'loopback': -1}]},
+ 'spring_red_diagonal': {'animations': [{'name': 'idle',
+                                         'id': 0,
+                                         'frames': [[112, 32, 32, 32]],
+                                         'loopback': 0},
+                                        {'name': 'bounce',
+                                         'id': 1,
+                                         'frames': [[144, 32, 32, 32],
+                                                    [176, 32, 48, 48]],
+                                         'loopback': -1}]},
+ 'goal_sign': {'animations': [{'name': 'none',
+                               'id': 0,
+                               'frames': [[0, 80, 48, 56]],
+                               'loopback': 0},
+                              {'name': 'spin',
+                               'id': 1,
+                               'frames': [[0, 80, 48, 56, 0, 0],
+                                          [48, 80, 32, 56, 0, 0],
+                                          [80, 80, 32, 56, 0, 0],
+                                          [48, 80, 32, 56, 1, 0],
+                                          [0, 136, 48, 56, 0, 0],
+                                          [48, 80, 32, 56, 0, 0],
+                                          [80, 80, 32, 56, 0, 0],
+                                          [48, 80, 32, 56, 1, 0]],
+                               'loopback': 0},
+                              {'name': 'win_sonic',
+                               'id': 2,
+                               'frames': [[0, 136, 48, 56]],
+                               'loopback': 0}]},
+ 'switch': {'animations': [{'name': 'inactive',
+                            'id': 0,
+                            'frames': [[112, 64, 32, 16]],
+                            'loopback': 0},
+                           {'name': 'active',
+                            'id': 1,
+                            'frames': [[144, 72, 32, 8]],
+                            'loopback': 0}]}}
+#+end_example
+
+
 * Parsing objects from .TMX on Python
 
-1. First  of all, GIDs are  *VERY IMPORTANT!* GIDs  store FLIP_X on byte  32 and
-   FLIP_Y on byte 31. In the end, we have to clear a GID with:
+1. First  of all, GIDs are  *VERY IMPORTANT!* GIDs  store FLIP_X on bit  31 and
+   FLIP_Y on bit 30. In the end, we have to clear a GID with:
    =gid & ~(0b1111 << 29)=.
    [[https://github.com/mapeditor/tiled/blob/06e94bdea0790dceb9c9eb104af9982ce6a0e04e/docs/reference/global-tile-ids.rst#mapping-a-gid-to-a-local-tile-id][See this link]].
 2. Since PyTMX  does not calculate GIDs with flip  information properly, we have
@@ -130,3 +605,1203 @@ animations.
 3.  We need  to fetch  extra information  on tile  objects by  hand as  well, by
    opening the associated =.tsx= file, so we need to keep a relative path.
 
+*INFORMATION THAT SHOULD BE LOADED FROM TOML:*
+- num_animations
+- animations (list of Animation)
+  - id
+  - num_frames
+  - frames (x, y, width, height, flip_x, flip_y)
+  - loopback index
+- fragment (if existing)
+  - offset (relative x, relative y)
+  - animations (list of Animation)
+    - id
+    - num_frames
+    - frames (x, y, width, height, flip_x, flip_y)
+    - loopback index
+
+*OUTPUT TYPES:*
+- Object table definition: =*.OTD=
+- Object map placement: =*.OMP=
+
+#+begin_src python :results output
+import os
+from bs4 import BeautifulSoup
+from pprint import pp
+import toml
+
+from ctypes import c_ubyte, c_byte, c_short, c_ushort, c_int
+c_short = c_short.__ctype_be__
+c_ushort = c_ushort.__ctype_be__
+c_int = c_int.__ctype_be__
+
+
+# Constant object table for exporting properties.
+# Only object described here will be exported. Furthermore,
+# if an object described here was not described, you'll get
+# an error.
+COMMON_OBJECT_TABLE = {
+    0: "ring",
+    1: "monitor",
+    2: "spikes",
+    3: "checkpoint",
+    4: "spring_yellow",
+    5: "spring_red",
+    6: "spring_diagonal_yellow",
+    7: "spring_diagonal_red",
+    8: "goal_sign",
+    9: "switch",
+}
+
+map_src = os.path.realpath("../assets/levels/R2/Z1.tmx")
+
+map = None
+tilesets = {}
+
+with open(map_src) as f:
+    map = BeautifulSoup(f, "xml")
+    sets = map.find_all("tileset")
+    sets = [x for x in map.find_all("tileset") if x["source"].find("128") == -1]
+
+    for tsx in sets:
+        set_src = os.path.realpath(os.path.dirname(map_src) + "/" + tsx["source"])
+        with open(set_src) as tsf:
+            # TOML data
+            toml_src = os.path.splitext(set_src)[0] + ".toml"
+            extra_data = toml.load(toml_src)
+            
+            ts = BeautifulSoup(tsf, "xml")
+            ts = ts.find("tileset")
+            tiles = ts.find_all("tile")
+            firstgid = int(tsx["firstgid"])
+            num_objs = int(ts["tilecount"])
+            classes = {}
+            for i in range(int(ts["tilecount"])):
+                collision = None
+                tile = next((x for x in tiles if x["id"] == f"{i}"), None)
+                if tile:
+                    collisions = tile.find("objectgroup")
+                    if collisions:
+                        collisions = collisions.find_all("object", [])
+                        if collisions[0].get("width"):
+                            collision = {}
+                            collision["type"] = "rect"
+                            collision["x"] = int(collisions[0].get("x"))
+                            collision["y"] = int(collisions[0].get("y"))
+                            collision["width"] = int(collisions[0].get("width"))
+                            collision["height"] = int(collisions[0].get("height"))
+                        else:
+                            collision = {}
+                            collision["type"] = "polygon"
+                            poly = collisions[0].find("polygon")
+                            points = poly.get("points").split()
+                            points = [[int(float(p.split(",")[0])), int(float(p.split(",")[1]))] for p in points]
+                            collision["points"] = points
+                    class_name = (tile["type"] if tile else "none").lower()
+                    idx = i + firstgid
+                    classes[idx] = {
+                        "name": class_name,
+                    }
+
+                    # Append TOML data
+                    extra = extra_data.get(class_name)
+                    if extra:
+                        animations = extra["animations"]
+                        animations.sort(key=lambda x: x.get("id"))
+                        classes[idx]["animations"] = [{
+                            "frames": data["frames"],
+                            "loopback": data["loopback"],
+                        } for data in animations]
+                        if extra.get("fragment"):
+                            frag_animations = extra["fragment"]["animations"]
+                            frag_animations.sort(key=lambda x: x.get("id", 999))
+                            classes[idx]["fragment"] = {
+                                "offset": extra["fragment"]["offset"],
+                                "animations": [{
+                                    "frames": data["frames"],
+                                    "loopback": data["loopback"],
+                                } for data in frag_animations]
+                            }
+                    
+                    if collision:
+                        classes[i + firstgid]["collision"] = collision
+                else:
+                    num_objs -= 1
+                    
+            objset = {
+                "out": os.path.splitext(set_src)[0] + ".OTD",
+                "firstgid": firstgid,
+                "num_objs": int(ts["tilecount"]),
+                "object_types": classes,
+            }
+            tilesets[ts["name"]] = objset
+
+
+
+print("Tileset objects:")
+pp(tilesets)
+print("====\n")
+# Get object group
+objgroup = map.find(name="group", attrs={"name": "OBJECTS"})
+
+# Get common objects
+objects_common_tags = (
+    objgroup.find(
+        name="objectgroup", attrs={"name": "COMMON"}
+    ).find_all("object")
+)
+
+# This should be a function
+objects_common = []
+expected_types = tilesets["objects_common"]["object_types"]
+for tag in objects_common_tags:
+    gid = int(tag["gid"])
+    # We NEED to clear the four MSB of the GID.
+    # These guys hold flip information.
+    # (Why the heck would someone store this here????)
+    objtype = expected_types[gid & ~(0b1111 << 29)]["name"]
+    props = None
+    rotation = tag.get("rotation")
+    if objtype == "monitor":
+        props = {}
+        objprops = tag.find("properties")
+        kind = objprops.find(attrs={"name": "Kind"})
+        props["kind"] = kind["value"].lower()
+        
+    obj = {
+        "type": objtype,
+        "x": int(float(tag["x"])),
+        "y": int(float(tag["y"])),
+        "width": int(float(tag["width"])),
+        "height": int(float(tag["height"])),
+        "flip_x": gid & (1 << 31) != 0,
+        "flip_y": gid & (1 << 30) != 0,
+        "rotate_cw": (int(float(rotation)) == 90 if rotation else False),
+        "rotate_ccw": (int(float(rotation)) == -90 if rotation else False),
+    }
+    if props:
+        obj["properties"] = props
+    objects_common.append(obj)
+
+
+print("Map objects:")
+pp(objects_common)
+
+
+# OBJECT TABLE DEFINITION (.OTN) LAYOUT
+# - Type / ID (u8)
+# - num_animations (u16)
+# - Animations:
+#   - num_frames (u16)
+#   - loopback_frame (u8)
+#   - Frames:
+#     - u0 (u8)
+#     - v0 (u8)
+#     - width (u8)
+#     - height (u8)
+#     - flipmask (u8)
+# - Fragment: (single, exists depending on Type)
+#   - offsetx (s16)
+#   - offsety (s16)
+#   - num_animations (u16)
+#   - Fragment Animations: (see Animations above)
+
+# Exporting object table definitions (.OTDs)
+# for table_name, table in tilesets.items():
+#     with open(table["out"], "wb") as otd:
+#         if table_name == "objects_common":
+#             # In this case, iterate over known common objects
+#             # and export them
+#             for obj_idx, obj_name in COMMON_OBJECT_TABLE.items():
+#                 gid = table["firstgid"] + obj_idx
+#                 odef = table["object_types"][gid]
+                
+#             pass
+#         pass
+
+
+
+# OBJECT MAP PLACEMENT (.OMP) LAYOUT
+# - Type / ID (u8)
+# - Flip Mask (u8)
+# - vx (s32)
+# - vy (s32)
+# - Properties (exists depending on Type)
+#   * Properties layout for monitor (id = 1):
+#     - kind (u8)
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Tileset objects:
+{'objects_common': {'out': '/home/alchemist/git/engine-psx/assets/levels/COMMON/objects_common.OTD',
+                    'firstgid': 113,
+                    'num_objs': 16,
+                    'object_types': {113: {'name': 'ring',
+                                           'animations': [{'frames': [[16,
+                                                                       0,
+                                                                       16,
+                                                                       16],
+                                                                      [32,
+                                                                       0,
+                                                                       16,
+                                                                       16],
+                                                                      [48,
+                                                                       0,
+                                                                       8,
+                                                                       16],
+                                                                      [56,
+                                                                       0,
+                                                                       16,
+                                                                       16]],
+                                                           'loopback': 0},
+                                                          {'frames': [[72,
+                                                                       0,
+                                                                       16,
+                                                                       16],
+                                                                      [88,
+                                                                       0,
+                                                                       16,
+                                                                       16],
+                                                                      [104,
+                                                                       0,
+                                                                       16,
+                                                                       16],
+                                                                      [120,
+                                                                       0,
+                                                                       16,
+                                                                       16]],
+                                                           'loopback': -1}]},
+                                     114: {'name': 'monitor',
+                                           'animations': [{'frames': [[136,
+                                                                       0,
+                                                                       32,
+                                                                       32]],
+                                                           'loopback': 0},
+                                                          {'frames': [[224,
+                                                                       32,
+                                                                       32,
+                                                                       16]],
+                                                           'loopback': 0}],
+                                           'fragment': {'offset': [8, 6],
+                                                        'animations': [{'frames': [[168,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [184,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [200,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0},
+                                                                       {'frames': [[168,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [216,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0},
+                                                                       {'frames': [[168,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [232,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0},
+                                                                       {'frames': [[168,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [168,
+                                                                                    16,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0},
+                                                                       {'frames': [[168,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [184,
+                                                                                    16,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0},
+                                                                       {'frames': [[168,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [200,
+                                                                                    16,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0},
+                                                                       {'frames': [[168,
+                                                                                    0,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [216,
+                                                                                    16,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0}]},
+                                           'collision': {'type': 'rect',
+                                                         'x': 16,
+                                                         'y': 34,
+                                                         'width': 30,
+                                                         'height': 30}},
+                                     115: {'name': 'spikes',
+                                           'animations': [{'frames': [[0,
+                                                                       16,
+                                                                       32,
+                                                                       32]],
+                                                           'loopback': 0}],
+                                           'collision': {'type': 'rect',
+                                                         'x': 16,
+                                                         'y': 32,
+                                                         'width': 32,
+                                                         'height': 32}},
+                                     116: {'name': 'checkpoint',
+                                           'animations': [{'frames': [[32,
+                                                                       32,
+                                                                       16,
+                                                                       48]],
+                                                           'loopback': 0}],
+                                           'fragment': {'offset': [0, -16],
+                                                        'animations': [{'frames': [[32,
+                                                                                    16,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0},
+                                                                       {'frames': [[0,
+                                                                                    48,
+                                                                                    16,
+                                                                                    16],
+                                                                                   [16,
+                                                                                    48,
+                                                                                    16,
+                                                                                    16]],
+                                                                        'loopback': 0}]}},
+                                     117: {'name': 'spring_yellow',
+                                           'animations': [{'frames': [[80,
+                                                                       16,
+                                                                       32,
+                                                                       16]],
+                                                           'loopback': 0},
+                                                          {'frames': [[80,
+                                                                       32,
+                                                                       32,
+                                                                       8],
+                                                                      [80,
+                                                                       40,
+                                                                       32,
+                                                                       40]],
+                                                           'loopback': -1}],
+                                           'collision': {'type': 'rect',
+                                                         'x': 16,
+                                                         'y': 48,
+                                                         'width': 32,
+                                                         'height': 16}},
+                                     118: {'name': 'spring_red',
+                                           'animations': [{'frames': [[48,
+                                                                       16,
+                                                                       32,
+                                                                       16]],
+                                                           'loopback': 0},
+                                                          {'frames': [[48,
+                                                                       32,
+                                                                       32,
+                                                                       8],
+                                                                      [48,
+                                                                       40,
+                                                                       32,
+                                                                       40]],
+                                                           'loopback': -1}],
+                                           'collision': {'type': 'rect',
+                                                         'x': 16,
+                                                         'y': 48,
+                                                         'width': 32,
+                                                         'height': 16}},
+                                     119: {'name': 'spring_yellow_diagonal',
+                                           'animations': [{'frames': [[112,
+                                                                       80,
+                                                                       32,
+                                                                       32]],
+                                                           'loopback': 0},
+                                                          {'frames': [[144,
+                                                                       80,
+                                                                       32,
+                                                                       32],
+                                                                      [176,
+                                                                       80,
+                                                                       48,
+                                                                       48]],
+                                                           'loopback': -1}],
+                                           'collision': {'type': 'polygon',
+                                                         'points': [[0, 0],
+                                                                    [9, 0],
+                                                                    [31, 22],
+                                                                    [31, 32],
+                                                                    [0, 32]]}},
+                                     120: {'name': 'spring_red_diagonal',
+                                           'animations': [{'frames': [[112,
+                                                                       32,
+                                                                       32,
+                                                                       32]],
+                                                           'loopback': 0},
+                                                          {'frames': [[144,
+                                                                       32,
+                                                                       32,
+                                                                       32],
+                                                                      [176,
+                                                                       32,
+                                                                       48,
+                                                                       48]],
+                                                           'loopback': -1}],
+                                           'collision': {'type': 'polygon',
+                                                         'points': [[0, 0],
+                                                                    [9, 0],
+                                                                    [31, 22],
+                                                                    [31, 32],
+                                                                    [0, 32]]}},
+                                     121: {'name': 'ring_3h'},
+                                     122: {'name': 'switch',
+                                           'animations': [{'frames': [[112,
+                                                                       64,
+                                                                       32,
+                                                                       16]],
+                                                           'loopback': 0},
+                                                          {'frames': [[144,
+                                                                       72,
+                                                                       32,
+                                                                       8]],
+                                                           'loopback': 0}],
+                                           'collision': {'type': 'rect',
+                                                         'x': 16,
+                                                         'y': 48,
+                                                         'width': 32,
+                                                         'height': 16}},
+                                     123: {'name': 'ring_3v'},
+                                     124: {'name': 'goal_sign',
+                                           'animations': [{'frames': [[0,
+                                                                       80,
+                                                                       48,
+                                                                       56]],
+                                                           'loopback': 0},
+                                                          {'frames': [[0,
+                                                                       80,
+                                                                       48,
+                                                                       56,
+                                                                       0,
+                                                                       0],
+                                                                      [48,
+                                                                       80,
+                                                                       32,
+                                                                       56,
+                                                                       0,
+                                                                       0],
+                                                                      [80,
+                                                                       80,
+                                                                       32,
+                                                                       56,
+                                                                       0,
+                                                                       0],
+                                                                      [48,
+                                                                       80,
+                                                                       32,
+                                                                       56,
+                                                                       1,
+                                                                       0],
+                                                                      [0,
+                                                                       136,
+                                                                       48,
+                                                                       56,
+                                                                       0,
+                                                                       0],
+                                                                      [48,
+                                                                       80,
+                                                                       32,
+                                                                       56,
+                                                                       0,
+                                                                       0],
+                                                                      [80,
+                                                                       80,
+                                                                       32,
+                                                                       56,
+                                                                       0,
+                                                                       0],
+                                                                      [48,
+                                                                       80,
+                                                                       32,
+                                                                       56,
+                                                                       1,
+                                                                       0]],
+                                                           'loopback': 0},
+                                                          {'frames': [[0,
+                                                                       136,
+                                                                       48,
+                                                                       56]],
+                                                           'loopback': 0}]}}}}
+====
+
+Map objects:
+[{'type': 'ring_3h',
+  'x': 398,
+  'y': 287,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'monitor',
+  'x': 1742,
+  'y': 225,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': 'ring'}},
+ {'type': 'monitor',
+  'x': 4866,
+  'y': 453,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': '1up'}},
+ {'type': 'monitor',
+  'x': 5123,
+  'y': 768,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': 'ring'}},
+ {'type': 'spring_red',
+  'x': 5519,
+  'y': 900,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 681,
+  'y': 287,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 1308,
+  'y': 242,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 3166,
+  'y': 180,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 3231,
+  'y': 322,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 2864,
+  'y': 260,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 2956,
+  'y': 260,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 1875,
+  'y': 220,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 1999,
+  'y': 220,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 1850,
+  'y': 326,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 1925,
+  'y': 326,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 3916,
+  'y': 387,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 4065,
+  'y': 388,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 4289,
+  'y': 453,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 4764,
+  'y': 453,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'spring_yellow_diagonal',
+  'x': 3056,
+  'y': 768,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring',
+  'x': 3206,
+  'y': 622,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 3206,
+  'y': 646,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 3181,
+  'y': 673,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring',
+  'x': 3230,
+  'y': 673,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring',
+  'x': 3254,
+  'y': 673,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'monitor',
+  'x': 3055,
+  'y': 324,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': 'ring'}},
+ {'type': 'spring_yellow_diagonal',
+  'x': 6256,
+  'y': 928,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 6361,
+  'y': 883,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'monitor',
+  'x': 6888,
+  'y': 640,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': 'ring'}},
+ {'type': 'monitor',
+  'x': 6919,
+  'y': 640,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': 'ring'}},
+ {'type': 'monitor',
+  'x': 6951,
+  'y': 640,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': 'ring'}},
+ {'type': 'monitor',
+  'x': 6983,
+  'y': 640,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': '1up'}},
+ {'type': 'ring_3h',
+  'x': 5920,
+  'y': 638,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 6042,
+  'y': 638,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 6240,
+  'y': 688,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 6415,
+  'y': 656,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 6625,
+  'y': 688,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 6470,
+  'y': 1155,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 6598,
+  'y': 1155,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 6755,
+  'y': 1152,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'spring_red_diagonal',
+  'x': 5040,
+  'y': 672,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'spring_yellow',
+  'x': 5087,
+  'y': 768,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'monitor',
+  'x': 6016,
+  'y': 896,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': 'ring'}},
+ {'type': 'spikes',
+  'x': 3189,
+  'y': 768,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'spikes',
+  'x': 3221,
+  'y': 768,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 2208,
+  'y': 220,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 2526,
+  'y': 386,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 2643,
+  'y': 383,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'monitor',
+  'x': 3465,
+  'y': 256,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False,
+  'properties': {'kind': 'shield'}},
+ {'type': 'ring_3h',
+  'x': 4615,
+  'y': 964,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 4824,
+  'y': 964,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3h',
+  'x': 5599,
+  'y': 736,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'spring_yellow',
+  'x': 4766,
+  'y': 353,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3v',
+  'x': 4765,
+  'y': 258,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3v',
+  'x': 4765,
+  'y': 186,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3v',
+  'x': 4744,
+  'y': 200,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3v',
+  'x': 4787,
+  'y': 200,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'ring_3v',
+  'x': 4502,
+  'y': 577,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False},
+ {'type': 'spring_yellow',
+  'x': 5696,
+  'y': 978,
+  'width': 64,
+  'height': 64,
+  'flip_x': False,
+  'flip_y': False,
+  'rotate_cw': True,
+  'rotate_ccw': False},
+ {'type': 'spring_red_diagonal',
+  'x': 4880,
+  'y': 223,
+  'width': 64,
+  'height': 64,
+  'flip_x': True,
+  'flip_y': False,
+  'rotate_cw': False,
+  'rotate_ccw': False}]
+#+end_example
+
+* Description of types
+
+For brevity of detailing, the types will be described as C structs directly.
+
+** Object indices
+
+#+begin_src C
+#define OBJ_IDX_RING       0
+#define OBJ_IDX_MONITOR    1
+#define OBJ_IDX_SPIKES     2
+#define OBJ_IDX_CHECKPOINT 3
+#define OBJ_IDX_SPRING_Y   4
+#define OBJ_IDX_SPRING_R   5
+#define OBJ_IDX_SPRING_D_Y 6
+#define OBJ_IDX_SPRING_D_R 7
+#define OBJ_IDX_GOAL_SIGN  8
+#define OBJ_IDX_SWITCH     9
+
+#define OBJ_TABLE_COMMON__SIZE     (OBJ_IDX_SWITCH+1)
+
+
+#define OBJ_IDX_RINGS_3H   -1
+#define OBJ_IDX_RINGS_3V   -2
+#+end_src
+
+** Special flags
+
+Definitions for bitwise flip flags:
+
+#+begin_src C
+#define MASK_FLIP_FLIPX  0x1
+#define MASK_FLIP_FLIPY  0x2
+#define MASK_FLIP_ROTCW  0x4 // Rotated clockwise
+#define MASK_FLIP_ROTCT  0x8 // Rotated counterclockwise
+#+end_src
+
+Definitions for monitor kind:
+
+#+begin_src C
+#define MONITOR_KIND_NONE          0
+#define MONITOR_KIND_RING          1
+#define MONITOR_KIND_SPEEDSHOES    2
+#define MONITOR_KIND_SHIELD        3
+#define MONITOR_KIND_INVINCIBILITY 4
+#define MONITOR_KIND_1UP           5
+#define MONITOR_KIND_SUPER         6
+#+end_src
+
+** Object table definitions
+
+#+begin_src C
+typedef struct {
+    uint8_t u0, v0;
+    uint8_t w, h;
+    uint8_t flipmask;
+} obj_animation_frame;
+
+typedef struct {
+    obj_animation_frame *frames;
+    uint16_t            num_frames;
+    int8_t              loopback_frame;
+} obj_animation;
+
+typedef struct {
+    int16_t       offsetx, offsety;
+    obj_animation *animations;
+    uint16_t      num_animations;
+} obj_fragment;
+
+typedef struct {
+    obj_animation *animations;    // TOML data
+    obj_fragment  *fragment;      // TOML data
+    uint16_t      num_animations; // TOML data
+    // TODO: Collision
+} obj_basicdata;
+
+obj_basicdata obj_table[OBJ_TABLE_COMMON__SIZE];
+#+end_src
+
+*** Properties: Monitor
+
+#+begin_src C
+typedef struct {
+    uint8_t kind;
+} obj_properties_monitor;
+#+end_src
+
+* Object state
+
+Once spawned, objects are created from initial state and manipulated as needed.
+
+#+begin_src C
+typedef struct {
+    uint8_t type;
+    uint8_t animation;
+    uint8_t frame;
+    uint8_t flipmask;
+    VECTOR  pos;
+    void    *props;
+} obj_state;
+#+end_src
