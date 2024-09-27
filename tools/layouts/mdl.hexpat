@@ -1,3 +1,5 @@
+// -*- mode: c; -*-
+
 #include <type/color.pat>
 
 enum PolygonType: u8 {
