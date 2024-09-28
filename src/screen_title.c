@@ -123,7 +123,6 @@ screen_title_load()
         data->planet.scl.vz = 2048;
 
 
-    sound_stop_xa();
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 1, 0);
 
     set_clear_color(56, 104, 200);

@@ -231,7 +231,8 @@ sound_stop_xa(void)
     // of a full stop. Halting the playback completely also
     // stops CD from spinning and may increase time until
     // next playback
-    CdControl(CdlPause, 0, 0);
+    if(_xa_should_play)
+        CdControl(CdlPause, 0, 0);
     _xa_should_play = 0;
     _xa_loopback_sector = 0;
 }

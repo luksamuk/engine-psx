@@ -371,8 +371,6 @@ level_load_level()
     /* } */
 
     // Start playback after we don't need the CD anymore.
-    sound_stop_xa();
-
     snprintf(filename0, 255, "\\BGM\\BGM%03u.XA;1", (level / CHANNELS_PER_BGM) + 1);
     music_channel = level % CHANNELS_PER_BGM;
 

@@ -30,7 +30,6 @@ screen_levelselect_load()
     screen_levelselect_data *data = screen_alloc(sizeof(screen_levelselect_data));
     data->menu_choice = 0;
     bzero(data->buffer, 255);
-    sound_stop_xa();
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0);
 }
 
