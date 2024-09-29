@@ -113,14 +113,14 @@ screen_title_load()
     data->prl_pos[0] = 32 << 12; // Island center
 
     // Planet model
-    load_model(&data->planet, "\\OBJS\\COMMON\\RING.MDL;1");
-    data->planet.rot.vx = 0x478;
-    data->planet.pos.vz = 4288;
-    data->planet.pos.vx = 2048;
-    data->planet.pos.vy = -1280;
-    data->planet.scl.vx =
-        data->planet.scl.vy =
-        data->planet.scl.vz = 2048;
+    /* load_model(&data->planet, "\\OBJS\\COMMON\\RING.MDL;1"); */
+    /* data->planet.rot.vx = 0x478; */
+    /* data->planet.pos.vz = 4288; */
+    /* data->planet.pos.vx = 2048; */
+    /* data->planet.pos.vy = -1280; */
+    /* data->planet.scl.vx = */
+    /*     data->planet.scl.vy = */
+    /*     data->planet.scl.vz = 2048; */
 
 
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 1, 0);
@@ -140,7 +140,7 @@ screen_title_update(void *d)
 {
     screen_title_data *data = (screen_title_data *)d;
 
-    data->planet.rot.vz -= 24;
+    /* data->planet.rot.vz -= 24; */
 
     data->pos.vx -= 1;
     if(data->pos.vx < -646) {
@@ -352,7 +352,7 @@ screen_title_draw(void *d)
     screen_title_drawtitle(data);
     screen_title_drawprl(data);
     screen_title_drawcld(data);
-    render_model(&data->planet);
+    /* render_model(&data->planet); */
 
     if(data->rgb_count >= 128) {
         screen_title_drawtxt(data, data->menu_option, CENTERX, 208);

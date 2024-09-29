@@ -12,6 +12,7 @@
 // by default, so the samples must be placed after those.
 #define SPU_ALLOC_START_ADDR 0x01010
 #define SPU_ALLOC_MAX_ADDR   0x80000
+#define SPU_DUMMY_BLOCK_ADDR 0x01000
 
 // So for the SPU, just like we're doing for primitives,
 // we're going to have an arena allocator. In other words,
@@ -45,10 +46,24 @@ static uint8_t _cd_err_threshold = 0;
 static uint32_t _cd_elapsed_sectors = 0;
 
 void
+_sound_reset_channels(void)
+{
+    SpuSetKey(0, 0x00ffffff);
+
+    for (int i = 0; i < 24; i++) {
+        SPU_CH_ADDR(i) = getSPUAddr(SPU_DUMMY_BLOCK_ADDR);
+        SPU_CH_FREQ(i) = 0x1000;
+    }
+
+    SpuSetKey(1, 0x00ffffff);
+}
+
+void
 sound_init(void)
 {
     SpuInit();
     sound_reset_mem();
+    _sound_reset_channels();
 }
 
 void
