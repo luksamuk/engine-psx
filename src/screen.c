@@ -1,9 +1,13 @@
 #include "screen.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
 #include "render.h"
 #include "memalloc.h"
+#include "util.h"
 
 #include "screens/disclaimer.h"
 #include "screens/levelselect.h"
@@ -20,11 +24,31 @@
 static int8_t current_scene = -1;
 static uint8_t *scene_data[SCREEN_BUFFER_LEN] = { 0 };
 static ArenaAllocator screen_arena;
+static uint8_t loading_logo[9050] = { 0 };// Image has 9034B, should be enough
 
 void
 scene_init()
 {
+    uint32_t length;
     alloc_arena_init(&screen_arena, scene_data, SCREEN_BUFFER_LEN);
+    uint8_t *file = file_read("\\MISC\\LOAD.TIM;1", &length);
+    assert(length < 9050);
+    memcpy(loading_logo, file, length);
+    free(file);
+}
+
+static void
+render_loading_logo()
+{
+    TIM_IMAGE tim;
+    GetTimInfo((const uint32_t *)loading_logo, &tim);
+    RECT r2 = *tim.prect;
+    r2.y += 240;
+    set_clear_color(0, 0, 0);
+    swap_buffers();
+    LoadImage(tim.prect, tim.paddr);
+    LoadImage(&r2, tim.paddr);
+    swap_buffers();
 }
 
 void
@@ -32,8 +56,9 @@ scene_change(ScreenIndex scr)
 {
     if((int8_t)scr != current_scene) {
         printf("Change scene: %d -> %d\n", current_scene, scr);
-        set_clear_color(0, 0, 0);
-        render_loading_text();
+        //set_clear_color(0, 0, 0);
+        //render_loading_text();
+        render_loading_logo();
 
         if(current_scene >= 0)
             scene_unload();

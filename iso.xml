@@ -122,6 +122,9 @@
 	<file name="DISK.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/DISK.TIM" />
+	<file name="LOAD.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/LOAD.TIM" />
       </dir>
 
       <dir name="SFX">
