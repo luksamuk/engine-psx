@@ -42,6 +42,27 @@ setup_context()
 
     // Turn on the video output.
     SetDispMask(1);
+
+    // Clear the screen with a black rectangle so we don't see the PSX logo!
+    for(int i = 0; i < 2; i++) {
+        POLY_F4 *poly = (POLY_F4 *)get_next_prim();
+        setPolyF4(poly);
+        setRGB0(poly, 0, 0, 0);
+        setXYWH(poly, 0, 0, SCREEN_XRES, SCREEN_YRES);
+        sort_prim(poly, 0);
+        increment_prim(sizeof(POLY_F4));
+
+        DrawOTagEnv(&ctx.buffers[ctx.active_buffer].ot[OT_LENGTH - 1],
+                    &ctx.buffers[ctx.active_buffer].draw_env);
+        PutDispEnv(&ctx.buffers[ctx.active_buffer].disp_env);
+
+        DrawSync(0);
+        VSync(0);
+
+        ctx.active_buffer ^= 1;
+        ctx.next_packet    = ctx.buffers[ctx.active_buffer].buffer;
+        ClearOTagR(ctx.buffers[ctx.active_buffer].ot, OT_LENGTH);
+    }
 }
 
 void
