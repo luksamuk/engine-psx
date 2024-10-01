@@ -46,6 +46,7 @@ render_loading_logo()
     r2.y += 240;
     set_clear_color(0, 0, 0);
     swap_buffers();
+    force_clear();
     LoadImage(tim.prect, tim.paddr);
     LoadImage(&r2, tim.paddr);
     swap_buffers();

@@ -44,6 +44,12 @@ setup_context()
     SetDispMask(1);
 
     // Clear the screen with a black rectangle so we don't see the PSX logo!
+    force_clear();
+}
+
+void
+force_clear()
+{
     for(int i = 0; i < 2; i++) {
         POLY_F4 *poly = (POLY_F4 *)get_next_prim();
         setPolyF4(poly);

@@ -38,6 +38,7 @@ typedef struct {
 
 void     setup_context();
 void     set_clear_color(uint8_t r, uint8_t g, uint8_t b);
+void     force_clear();
 void     swap_buffers();
 void     *get_next_prim();
 uint32_t *get_ot_at(uint32_t otz);
