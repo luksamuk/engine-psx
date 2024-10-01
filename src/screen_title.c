@@ -113,7 +113,7 @@ screen_title_load()
     data->prl_pos[0] = 32 << 12; // Island center
 
     // Planet model
-    /* load_model(&data->planet, "\\OBJS\\COMMON\\RING.MDL;1"); */
+    /* load_model(&data->planet, "\\MODELS\\COMMON\\RING.MDL;1"); */
     /* data->planet.rot.vx = 0x478; */
     /* data->planet.pos.vz = 4288; */
     /* data->planet.pos.vx = 2048; */

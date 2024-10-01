@@ -18,7 +18,7 @@ screen_modeltest_load()
     screen_modeltest_data *data = screen_alloc(sizeof(screen_modeltest_data));
 
     data->ring = screen_alloc(sizeof(Model));
-    load_model(data->ring, "\\OBJS\\COMMON\\RING.MDL");
+    load_model(data->ring, "\\MODELS\\COMMON\\RING.MDL");
     data->ring->pos.vz = 4800;
     data->ring->rot.vx = ONE >> 2;
 

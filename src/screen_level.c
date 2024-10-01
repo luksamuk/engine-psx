@@ -83,7 +83,7 @@ void
 screen_level_load()
 {
     screen_level_data *data = screen_alloc(sizeof(screen_level_data));
-    /* load_model(&data->ring, "\\OBJS\\COMMON\\RING.MDL"); */
+    /* load_model(&data->ring, "\\MODELS\\COMMON\\RING.MDL"); */
 
     /* data->ring.pos.vz = 0x12c0; */
     /* data->ring.rot.vx = 0x478; */
