@@ -48,9 +48,15 @@
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z1.LVL" />
+	  <file name="Z1.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z1.OMP" />
 	  <file name="Z2.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z2.LVL" />
+	  <file name="Z2.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z2.OMP" />
 	  <file name="MAP128.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/MAP128.MAP" />
@@ -69,9 +75,15 @@
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/Z1.LVL" />
+	  <file name="Z1.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/Z1.OMP" />
 	  <file name="Z2.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/Z2.LVL" />
+	  <file name="Z2.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/Z2.OMP" />
 	  <file name="MAP128.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/MAP128.MAP" />
@@ -86,11 +98,13 @@
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/TILES.TIM" />
 	</dir>
 
-	<!-- Custom Green Hill by NinjaCakes -->
 	<dir name="R2">
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/Z1.LVL" />
+	  <file name="Z1.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/Z1.OMP" />
 	  <file name="MAP128.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/MAP128.MAP" />

@@ -199,8 +199,10 @@ def parse_map(map_src: str) -> (typing.Dict[str, ObjectMap], ObjectLevelLayout):
 
     # Retrieve objects placement
     layergroup = map.find(name="group", attrs={"name": "OBJECTS"})
-    objgroups = layergroup.find_all("objectgroup")
-    for objgroup in objgroups:
-        layout.placements += parse_object_group(objmaps, objgroup)
+    if layergroup:
+        objgroups = layergroup.find_all("objectgroup")
+        if objgroups:
+            for objgroup in objgroups:
+                layout.placements += parse_object_group(objmaps, objgroup)
 
     return (objmaps, layout)

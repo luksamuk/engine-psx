@@ -167,7 +167,7 @@ class ObjectMap:
         f.write(c_ubyte(int(self.is_level_specific)))
         f.write(c_ushort(self.num_objs))
         for key, t in self.object_types.items():
-            print(f"Writing object class id {t.id} ({t.name})...")
+            # print(f"Writing object class id {t.id} ({t.name})...")
             t.write_to(f)
 
     # I don't have a better name for this. Sorry
@@ -269,10 +269,10 @@ class ObjectLevelLayout:
     def write_to(self, f):
         f.write(c_ushort(len(self.placements)))
         for p in self.placements:
-            description = DummyObjectId(p.otype) if p.otype < 0 else ObjectId(p.otype)
-            if description == ObjectId.MONITOR:
-                description = f"{description}: {MonitorKind(p.properties.kind)}"
-            print(f"Placing object at {(p.x, p.y)} => {description}...")
+            # description = DummyObjectId(p.otype) if p.otype < 0 else ObjectId(p.otype)
+            # if description == ObjectId.MONITOR:
+            #     description = f"{description}: {MonitorKind(p.properties.kind)}"
+            # print(f"Placing object at {(p.x, p.y)} => {description}...")
             p.write_to(f)
 
     def write(self):

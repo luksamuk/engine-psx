@@ -10,6 +10,7 @@ MAP16OUT  := $(addsuffix MAP16.MAP,$(dir $(MAP16SRC)))
 COL16OUT  := $(addsuffix MAP16.COL,$(dir $(COL16SRC)))
 MAP128OUT := $(addsuffix MAP128.MAP,$(dir $(COL16SRC)))
 LVLOUT    := $(addsuffix .LVL,$(basename $(LVLSRC)))
+OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
 
 .PHONY: clean ./build/engine.cue run configure chd cook iso elf debug cooktest purge
 
@@ -79,13 +80,16 @@ purge: clean cleancook
 map16:  $(MAP16OUT) $(COL16OUT)
 map128: $(MAP128OUT)
 lvl:    $(LVLOUT)
+objs:   $(OMPOUT)
 
-cook: map16 map128 lvl
+cook: map16 map128 lvl objs
 
 cleancook:
 	rm -rf assets/levels/**/*.COL \
 	       assets/levels/**/*.MAP \
 	       assets/levels/**/*.LVL \
+	       assets/levels/**/*.OMP \
+	       assets/levels/**/*.OTD \
 	       assets/levels/**/collision16.json \
 	       assets/levels/**/tilemap128.csv \
 	       assets/levels/**/tilemap128_solid.csv \
@@ -124,3 +128,7 @@ cleancook:
 	rm "$(basename $@).psxlvl"
 
 
+# Object level placement
+# (Depends on files such as Z1.tmx, Z2.tmx, etc., generated on Tiled)
+%.OMP: %.tmx
+	./tools/cookobj/cookobj.py $<
