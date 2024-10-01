@@ -1,4 +1,4 @@
-#include "object.h"
+#include "model.h"
 #include "screen.h"
 #include "util.h"
 #include "render.h"

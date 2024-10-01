@@ -14,7 +14,7 @@
 #include "screen.h"
 #include "level.h"
 #include "timer.h"
-#include "object.h"
+#include "model.h"
 
 extern int debug_mode;
 

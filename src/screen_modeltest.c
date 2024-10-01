@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "object.h"
+#include "model.h"
 #include "screen.h"
 #include "input.h"
 #include "render.h"

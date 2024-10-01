@@ -9,7 +9,7 @@
 #include "input.h"
 #include "screen.h"
 #include "sound.h"
-#include "object.h"
+/* #include "model.h" */
 
 #include "screens/fmv.h"
 #include "screens/level.h"
@@ -68,7 +68,7 @@ typedef struct {
     VECTOR  scale;
     MATRIX  world;
 
-    Model planet;
+    /* Model planet; */
 } screen_title_data;
 
 #define MENU_MAX_OPTION 3

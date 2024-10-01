@@ -10,7 +10,6 @@
 #include "screens/fmv.h"
 #include "screens/level.h"
 
-#include "object.h"
 #include <stdio.h>
 
 extern int debug_mode;
