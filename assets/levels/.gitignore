@@ -1,6 +1,8 @@
 *.MAP
 *.LVL
 *.COL
+*.OMP
+*.OTD
 *.psxlvl
 **/collision16.json
 **/tilemap128.csv
