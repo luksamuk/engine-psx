@@ -1701,8 +1701,8 @@ For brevity of detailing, the types will be described as C structs directly.
 #define OBJ_IDX_CHECKPOINT 3
 #define OBJ_IDX_SPRING_Y   4
 #define OBJ_IDX_SPRING_R   5
-#define OBJ_IDX_SPRING_D_Y 6
-#define OBJ_IDX_SPRING_D_R 7
+#define OBJ_IDX_SPRING_Y_D 6
+#define OBJ_IDX_SPRING_R_D 7
 #define OBJ_IDX_GOAL_SIGN  8
 #define OBJ_IDX_SWITCH     9
 

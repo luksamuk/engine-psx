@@ -36,6 +36,8 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
 
     ts = ts.find("tileset")
 
+    o.is_level_specific = ts["name"] != "objects_common"
+
     tiles = ts.find_all("tile")
     o.num_objs = int(ts["tilecount"])
     # "classes" becomes an entry on dict o.object_types.
@@ -87,7 +89,9 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
             #         ]
             #         collision["points"] = points
 
-            o.obj_mapping[gid] = gid - firstgid
+            o.obj_mapping[gid] = (
+                (gid - firstgid) if o.is_level_specific else ObjectId.get(od.name).value
+            )
 
             # Append TOML data
             if extra:
@@ -116,7 +120,6 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
 
     o.firstgid = firstgid
     o.out = splitext(set_src)[0] + ".OTD"
-    o.is_level_specific = ts["name"] != "objects_common"
     o.num_objs = len(o.object_types)
     o.name = ts["name"]
     return (o, ts["name"])
@@ -136,11 +139,9 @@ def parse_object_group(
     # Get first object's gid.
     first_obj = sorted(objects, key=lambda x: int(x.get("gid")))[0]
     first_obj_gid = int(first_obj.get("gid"))
-    print(f"First object gid: {first_obj_gid}")
 
     # Identify if this is from common objects tileset or from level-specific tileset.
     for key, ts in tilesets.items():
-        print(f"First gid: {ts.firstgid}")
         result = ts.get_is_specific_if_from_this_map(first_obj_gid)
         if result is not None:
             current_ts = ts
@@ -153,32 +154,38 @@ def parse_object_group(
     for obj in objects:
         p = ObjectPlacement()
         p.is_level_specific = is_level_specific
-        p.otype = current_ts.get_otype_from_gid(int(obj.get("gid")))
+        gid = int(obj.get("gid"))
+        p.otype = current_ts.get_otype_from_gid(gid)
         p.x = int(float(obj.get("x")))
         p.y = int(float(obj.get("y")))
-        p.flipx = False  # TODO
-        p.flipy = False  # TODO
+        p.flipx = bool(gid & (1 << 31))
+        p.flipy = bool(gid & (1 << 30))
         p.rotcw = int(float(obj.get("rotation", 0))) == 90
         p.rotccw = int(float(obj.get("rotation", 0))) == -90
         props = obj.find("properties")
         if props:
-            # TODO: Check type, build type-specific property, etc
+            if p.otype == ObjectId.MONITOR.value:
+                prop = props.find("property")
+                m = MonitorProperties()
+                m.kind = MonitorKind.get(prop.get("value")).value
+                p.properties = m
             pass
-        print(
-            f"Object type {current_ts.object_types[p.otype + current_ts.firstgid].name if p.otype >= 0 else 'DUMMY'}"
-        )
-        pp(p)
+        # print(
+        #     f"Object type {current_ts.object_types[p.otype + current_ts.firstgid].name if p.otype >= 0 else 'DUMMY'}"
+        # )
+        # pp(p)
         placements.append(p)
 
     return placements
 
 
-def parse_map(map_src: str) -> (typing.Dict[str, ObjectMap], [ObjectPlacement]):
+def parse_map(map_src: str) -> (typing.Dict[str, ObjectMap], ObjectLevelLayout):
     map = None
     with open(map_src) as f:
         map = BeautifulSoup(f, "xml")
     objmaps = {}
-    placements = []
+    layout = ObjectLevelLayout()
+    layout.out = realpath(splitext(map_src)[0] + ".OMP")
 
     # Get all tilesets that are not 128x128.
     # Depends on tileset name.
@@ -194,6 +201,6 @@ def parse_map(map_src: str) -> (typing.Dict[str, ObjectMap], [ObjectPlacement]):
     layergroup = map.find(name="group", attrs={"name": "OBJECTS"})
     objgroups = layergroup.find_all("objectgroup")
     for objgroup in objgroups:
-        placements += parse_object_group(objmaps, objgroup)
+        layout.placements += parse_object_group(objmaps, objgroup)
 
-    return (objmaps, placements)
+    return (objmaps, layout)

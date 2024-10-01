@@ -13,13 +13,44 @@ class DummyObjectId(Enum):
     RING_3V = -2
 
     @staticmethod
-    def get(name: str) -> int:
+    def get(name):
         switch = {
             "ring_3h": DummyObjectId.RING_3H,
             "ring_3v": DummyObjectId.RING_3V,
         }
         result = switch.get(name.lower())
         assert result is not None, f"Unknown dummy object {name}"
+        return result
+
+
+class ObjectId(Enum):
+    RING = 0
+    MONITOR = 1
+    SPIKES = 2
+    CHECKPOINT = 3
+    SPRING_YELLOW = 4
+    SPRING_RED = 5
+    SPRING_YELLOW_DIAGONAL = 6
+    SPRING_RED_DIAGONAL = 7
+    GOAL_SIGN = 8
+    SWITCH = 9
+
+    @staticmethod
+    def get(name):
+        switch = {
+            "ring": ObjectId.RING,
+            "monitor": ObjectId.MONITOR,
+            "spikes": ObjectId.SPIKES,
+            "checkpoint": ObjectId.CHECKPOINT,
+            "spring_yellow": ObjectId.SPRING_YELLOW,
+            "spring_red": ObjectId.SPRING_RED,
+            "spring_yellow_diagonal": ObjectId.SPRING_YELLOW_DIAGONAL,
+            "spring_red_diagonal": ObjectId.SPRING_RED_DIAGONAL,
+            "goal_sign": ObjectId.GOAL_SIGN,
+            "switch": ObjectId.SWITCH,
+        }
+        result = switch.get(name.lower())
+        assert result is not None, f"Unknown common object {name}"
         return result
 
 
@@ -148,27 +179,45 @@ class ObjectMap:
         return None
 
 
-# OBJECT MAP PLACEMENT (.OMP) LAYOUT
-# - is_level_specific (u8)
-# - Type / ID (s8)
-# - Flip Mask (u8)
-# - has_properties (u8)
-# - vx (s32)
-# - vy (s32)
-# - Properties (exists depending on Type)
-#   * Properties layout for monitor (id = 1):
-#     - kind (u8)
+# =======================================
+
+
+class MonitorKind(Enum):
+    NONE = 0
+    RING = 1
+    SPEEDSHOES = 2
+    SHIELD = 3
+    INVINCIBILITY = 4
+    LIFE = 5
+    SUPER = 6
+
+    @staticmethod
+    def get(name):
+        switch = {
+            "NONE": MonitorKind.NONE,
+            "RING": MonitorKind.RING,
+            "SPEEDSHOES": MonitorKind.SPEEDSHOES,
+            "SHIELD": MonitorKind.SHIELD,
+            "INVINCIBILITY": MonitorKind.INVINCIBILITY,
+            "1UP": MonitorKind.LIFE,
+            "SUPER": MonitorKind.SUPER,
+        }
+        result = switch.get(name.upper())
+        assert result is not None, f"Unknown monitor kind {name}"
+        return result
 
 
 @dataclass
 class MonitorProperties:
-    kind: str = ""
+    kind: int = 0
+
+    def write_to(self, f):
+        f.write(c_ubyte(self.kind))
 
 
 ObjectProperties = MonitorProperties | None
 
 
-# Root for the .OMP datatype
 @dataclass
 class ObjectPlacement:
     is_level_specific: bool = False
@@ -194,4 +243,37 @@ class ObjectPlacement:
         f.write(c_int(self.x))
         f.write(c_int(self.y))
         f.write(c_ubyte(flipmask))
-        # TODO: Properties
+        if self.properties is not None:
+            self.properties.write_to(f)
+
+
+# OBJECT MAP PLACEMENT (.OMP) LAYOUT
+# - num_objects (u16)
+# - Array of object placements:
+#   - is_level_specific (u8)
+#   - Type / ID (s8)
+#   - Flip Mask (u8)
+#   - has_properties (u8)
+#   - vx (s32)
+#   - vy (s32)
+#   - Properties (exists depending on Type)
+#     * Properties layout for monitor (id = 1):
+#       - kind (u8)
+
+
+# Root for the .OMP datatype
+@dataclass
+class ObjectLevelLayout:
+    out: str = ""
+    placements: [ObjectPlacement] = field(default_factory=list)
+
+    def write_to(self, f):
+        f.write(c_ushort(len(self.placements)))
+        for p in self.placements:
+            description = DummyObjectId(p.otype) if p.otype < 0 else ObjectId(p.otype)
+            print(f"Writing placement for object ID {p.otype} ({description})...")
+            p.write_to(f)
+
+    def write(self):
+        with open(self.out, "wb") as f:
+            self.write_to(f)
