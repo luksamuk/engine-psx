@@ -1,9 +1,6 @@
 // -*- mode: c; -*-
 
 enum CommonId: s8 {
-    RING_3V = -2,
-    RING_3H = -1,
-
     RING = 0,
     MONITOR = 1,
     SPIKES = 2,

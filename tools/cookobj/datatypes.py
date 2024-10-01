@@ -240,9 +240,9 @@ class ObjectPlacement:
 
         f.write(c_ubyte(int(self.is_level_specific)))
         f.write(c_byte(self.otype))
+        f.write(c_ubyte(flipmask))
         f.write(c_int(self.x))
         f.write(c_int(self.y))
-        f.write(c_ubyte(flipmask))
         if self.properties is not None:
             self.properties.write_to(f)
 
@@ -253,7 +253,6 @@ class ObjectPlacement:
 #   - is_level_specific (u8)
 #   - Type / ID (s8)
 #   - Flip Mask (u8)
-#   - has_properties (u8)
 #   - vx (s32)
 #   - vy (s32)
 #   - Properties (exists depending on Type)
@@ -271,7 +270,9 @@ class ObjectLevelLayout:
         f.write(c_ushort(len(self.placements)))
         for p in self.placements:
             description = DummyObjectId(p.otype) if p.otype < 0 else ObjectId(p.otype)
-            print(f"Writing placement for object ID {p.otype} ({description})...")
+            if description == ObjectId.MONITOR:
+                description = f"{description}: {MonitorKind(p.properties.kind)}"
+            print(f"Placing object at {(p.x, p.y)} => {description}...")
             p.write_to(f)
 
     def write(self):
