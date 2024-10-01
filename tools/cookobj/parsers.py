@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import toml
 from os.path import realpath, dirname, splitext
+from pprint import pp
 
 from datatypes import *
 
@@ -47,14 +48,21 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
             od = ObjectData()
             od.id = obj_id
             od.name = (str(tile["type"]) if tile else "none").lower()
+            gid = int(tile["id"]) + firstgid
             extra = extra_data.get(od.name)
 
             # If this is a dummy object (e.g. rows of rings), we don't
             # need to register it
+            # TODO: These dummy objects will be needed somewhere else!
+            # We actually need to register them, yes! But somewhere
+            # else.
             if extra and extra.get("dummy", False):
                 o.num_objs -= 1
+                o.obj_mapping[gid] = DummyObjectId.get(od.name).value
                 continue
-            # If not a dummy, increase sequential id for next object
+
+            # If this isn't a dummy object, increase object ID.
+            # ID's are sequential only for non-dummy objects.
             obj_id += 1
 
             # Get tile collision
@@ -78,9 +86,8 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
             #             for p in points
             #         ]
             #         collision["points"] = points
-            # Get other tile data
 
-            idx = i + firstgid
+            o.obj_mapping[gid] = gid - firstgid
 
             # Append TOML data
             if extra:
@@ -103,7 +110,7 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
             #     # TODO: append collision
             #     pass
 
-            o.object_types[idx] = od
+            o.object_types[gid] = od
         else:
             o.num_objs -= 1
 
@@ -111,7 +118,59 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
     o.out = splitext(set_src)[0] + ".OTD"
     o.is_level_specific = ts["name"] != "objects_common"
     o.num_objs = len(o.object_types)
+    o.name = ts["name"]
     return (o, ts["name"])
+
+
+def parse_object_group(
+    tilesets: typing.Dict[str, ObjectMap], objgroup
+) -> [ObjectPlacement]:
+    is_level_specific = False
+    current_ts = None
+    placements = []
+
+    objects = objgroup.find_all("object", [])
+    if not objects:
+        return []
+
+    # Get first object's gid.
+    first_obj = sorted(objects, key=lambda x: int(x.get("gid")))[0]
+    first_obj_gid = int(first_obj.get("gid"))
+    print(f"First object gid: {first_obj_gid}")
+
+    # Identify if this is from common objects tileset or from level-specific tileset.
+    for key, ts in tilesets.items():
+        print(f"First gid: {ts.firstgid}")
+        result = ts.get_is_specific_if_from_this_map(first_obj_gid)
+        if result is not None:
+            current_ts = ts
+            is_level_specific = result
+
+    # If the tileset was not found... DON'T GO BEYOND THIS POINT!
+    assert current_ts is not None, "Object was not found in any tilesets!"
+
+    # Iterate over placements
+    for obj in objects:
+        p = ObjectPlacement()
+        p.is_level_specific = is_level_specific
+        p.otype = current_ts.get_otype_from_gid(int(obj.get("gid")))
+        p.x = int(float(obj.get("x")))
+        p.y = int(float(obj.get("y")))
+        p.flipx = False  # TODO
+        p.flipy = False  # TODO
+        p.rotcw = int(float(obj.get("rotation", 0))) == 90
+        p.rotccw = int(float(obj.get("rotation", 0))) == -90
+        props = obj.find("properties")
+        if props:
+            # TODO: Check type, build type-specific property, etc
+            pass
+        print(
+            f"Object type {current_ts.object_types[p.otype + current_ts.firstgid].name if p.otype >= 0 else 'DUMMY'}"
+        )
+        pp(p)
+        placements.append(p)
+
+    return placements
 
 
 def parse_map(map_src: str) -> (typing.Dict[str, ObjectMap], [ObjectPlacement]):
@@ -132,5 +191,9 @@ def parse_map(map_src: str) -> (typing.Dict[str, ObjectMap], [ObjectPlacement]):
         objmaps[ts_name] = loaded_set
 
     # Retrieve objects placement
+    layergroup = map.find(name="group", attrs={"name": "OBJECTS"})
+    objgroups = layergroup.find_all("objectgroup")
+    for objgroup in objgroups:
+        placements += parse_object_group(objmaps, objgroup)
 
     return (objmaps, placements)

@@ -9,7 +9,7 @@ from pprint import pp
 def main():
     map_src = realpath(sys.argv[1])
     obj_defs, obj_places = parse_map(map_src)
-    pp(obj_places)
+    # pp(obj_places)
     for key, d in obj_defs.items():
         d.write()
 

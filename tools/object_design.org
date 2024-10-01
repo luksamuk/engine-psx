@@ -131,7 +131,7 @@ Frames are an array with the following arguments in order:
 - [optional, default False] Flip_Y
   
 
-#+begin_src toml :tangle ../assets/levels/COMMON/objects_common.toml
+#+begin_src toml
 [ring]
 
 [[ring.animations]]
@@ -421,7 +421,7 @@ dummy = true
 
 ** Parse test
 
-#+begin_src python :results output
+#+begin_src python :results output :eval never
 import toml
 from pprint import pp
 

@@ -1,12 +1,26 @@
 from dataclasses import dataclass, field
 import typing
 from ctypes import c_ubyte, c_byte, c_short, c_ushort, c_int
-
-# from enum import Enum
+from enum import Enum
 
 c_short = c_short.__ctype_be__
 c_ushort = c_ushort.__ctype_be__
 c_int = c_int.__ctype_be__
+
+
+class DummyObjectId(Enum):
+    RING_3H = -1
+    RING_3V = -2
+
+    @staticmethod
+    def get(name: str) -> int:
+        switch = {
+            "ring_3h": DummyObjectId.RING_3H,
+            "ring_3v": DummyObjectId.RING_3V,
+        }
+        result = switch.get(name.lower())
+        assert result is not None, f"Unknown dummy object {name}"
+        return result
 
 
 # OBJECT TABLE DEFINITION (.OTN) LAYOUT
@@ -82,12 +96,13 @@ MaybeObjectFragment = ObjectFragment | None
 @dataclass
 class ObjectData:
     id: int = -1
+    gid: int = -1
     name: str = ""
     animations: [ObjectAnimation] = field(default_factory=list)
     fragment: MaybeObjectFragment = None
 
     def write_to(self, f):
-        f.write(c_ubyte(self.id))
+        f.write(c_byte(self.id))
         f.write(c_ubyte(int(self.fragment is not None)))
         f.write(c_ushort(len(self.animations)))
         for animation in self.animations:
@@ -100,10 +115,18 @@ class ObjectData:
 @dataclass
 class ObjectMap:
     is_level_specific: bool = False
+    name: str = ""
     out: str = ""
     firstgid: int = 0
     num_objs: int = 0
     object_types: typing.Dict[int, ObjectData] = field(default_factory=dict)
+
+    # Mapping of dummy objects (gid -> actual id)
+    obj_mapping: typing.Dict[int, int] = field(default_factory=dict)
+
+    def get_otype_from_gid(self, gid: int) -> int:
+        gid = gid & ~(0b1111 << 29)
+        return self.obj_mapping[gid]
 
     def write(self):
         with open(self.out, "wb") as f:
@@ -116,10 +139,20 @@ class ObjectMap:
             print(f"Writing object class id {t.id} ({t.name})...")
             t.write_to(f)
 
+    # I don't have a better name for this. Sorry
+    def get_is_specific_if_from_this_map(self, dirty_gid: int) -> bool | None:
+        # Clean GID
+        gid = dirty_gid & ~(0b1111 << 29)
+        if gid >= self.firstgid:
+            return self.is_level_specific
+        return None
+
 
 # OBJECT MAP PLACEMENT (.OMP) LAYOUT
-# - Type / ID (u8)
+# - is_level_specific (u8)
+# - Type / ID (s8)
 # - Flip Mask (u8)
+# - has_properties (u8)
 # - vx (s32)
 # - vy (s32)
 # - Properties (exists depending on Type)
@@ -127,13 +160,38 @@ class ObjectMap:
 #     - kind (u8)
 
 
+@dataclass
+class MonitorProperties:
+    kind: str = ""
+
+
+ObjectProperties = MonitorProperties | None
+
+
 # Root for the .OMP datatype
 @dataclass
 class ObjectPlacement:
+    is_level_specific: bool = False
     otype: int = 0
     x: int = 0
     y: int = 0
     flipx: bool = False
     flipy: bool = False
-    rotcw: bool = False
-    rotct: bool = False
+    rotcw: bool = False  # clockwise rotation
+    rotct: bool = False  # counterclockwise rotation
+    properties: ObjectProperties = None
+
+    def write_to(self, f):
+        flipmask = (
+            ((1 << 0) if self.flipx else 0)
+            | ((1 << 1) if self.flipy else 0)
+            | ((1 << 2) if self.rotcw else 0)
+            | ((1 << 3) if self.rotct else 0)
+        )
+
+        f.write(c_ubyte(int(self.is_level_specific)))
+        f.write(c_byte(self.otype))
+        f.write(c_int(self.x))
+        f.write(c_int(self.y))
+        f.write(c_ubyte(flipmask))
+        # TODO: Properties
