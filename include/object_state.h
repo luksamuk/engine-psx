@@ -12,11 +12,18 @@ typedef struct {
 } MonitorExtra;
 
 typedef struct {
+    uint16_t animation;
+    uint8_t  frame;
+} ObjectAnimState;
+
+typedef struct {
     uint16_t id;
     uint8_t flipmask;
     uint8_t props;
     int16_t rx, ry; // Positions relative to chunk top-left corner
     void    *extra;
+
+    ObjectAnimState anim_state;
 } ObjectState;
 
 #endif

@@ -107,28 +107,3 @@ end:
     free(bytes);
     printf("Loaded %d object types.\n", tbl->num_entries);
 }
-
-void
-unload_object_table(ObjectTable *tbl)
-{
-    // Since the object table has to be heap-allocated, we need to unload it
-    for(uint16_t i = 0; i < tbl->num_entries; i++) {
-        ObjectTableEntry *entry = &tbl->entries[i];
-        for(uint16_t j = 0; j < entry->num_animations; j++) {
-            ObjectAnim *animation = &entry->animations[j];
-            free(animation->frames);
-        }
-        if(entry->num_animations > 0) free(entry->animations);
-
-        if(entry->fragment) {
-            for(uint16_t j = 0; j < entry->fragment->num_animations; j++) {
-                ObjectAnim *animation = &entry->fragment->animations[j];
-                free(animation->frames);
-            }
-            if(entry->fragment->num_animations > 0)
-                free(entry->fragment->animations);
-            free(entry->fragment);
-        }
-    }
-    free(tbl->entries);
-}

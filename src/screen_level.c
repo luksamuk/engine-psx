@@ -75,7 +75,6 @@ static uint32_t bgm_loop_sectors[] = {
 // Forward function declarations
 static void level_load_player();
 static void level_load_level();
-static void level_unload_level();
 
 // TODO!!!
 typedef struct {
@@ -102,7 +101,6 @@ screen_level_unload(void *)
 {
     sound_stop_xa();
     level_reset();
-    level_unload_level();
     sound_reset_mem();
     screen_free();
 }
@@ -390,11 +388,4 @@ level_load_level()
     music_channel = level % CHANNELS_PER_BGM;
 
     sound_play_xa(filename0, 0, music_channel, bgm_loop_sectors[level]);
-}
-
-static void
-level_unload_level()
-{
-    // Object tables are heap-allocated
-    //unload_object_table(&obj_table_common);
 }

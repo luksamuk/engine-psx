@@ -23,6 +23,8 @@ _emplace_object(
     state->rx = vx & 0x7f;
     state->ry = vy & 0x7f;
     state->extra = extra;
+
+    state->anim_state = (ObjectAnimState){ 0 };
 }
 
 void

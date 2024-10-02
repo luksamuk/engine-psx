@@ -9,7 +9,7 @@
 /*  OBJECT PROPERTY DATA   */
 /* ======================== */
 
-typedef enum int8_t {
+typedef enum {
     // Dummy objects
     OBJ_DUMMY_RINGS_3V         = -2,
     OBJ_DUMMY_RINGS_3H         = -1,
@@ -32,7 +32,7 @@ typedef enum int8_t {
 #define MASK_FLIP_ROTCW  0x4 // Rotated clockwise
 #define MASK_FLIP_ROTCT  0x8 // Rotated counterclockwise
 
-typedef enum uint8_t {
+typedef enum {
     MONITOR_KIND_NONE          = 0,
     MONITOR_KIND_RING          = 1,
     MONITOR_KIND_SPEEDSHOES    = 2,
@@ -41,6 +41,10 @@ typedef enum uint8_t {
     MONITOR_KIND_1UP           = 5,
     MONITOR_KIND_SUPER         = 6,
 } ObjectMonitorKind;
+
+typedef enum {
+    OBJ_FLAG_DESTROYED = 0x1,
+} ObjectGeneralFlag;
 
 
 /* ======================== */
@@ -57,7 +61,7 @@ typedef struct {
     ObjectAnimFrame *frames;
     uint16_t        num_frames;
     int8_t          loopback;
-    // TODO: number of animation frames?
+    // TODO: Animation speed (animation frames per game frame)
 } ObjectAnim;
 
 typedef struct {
@@ -66,12 +70,9 @@ typedef struct {
     uint16_t   num_animations;
 } ObjectFrag;
 
-// TODO: ObjectAnimState
-
 typedef struct {
     ObjectAnim *animations;
     ObjectFrag *fragment;
-    // TODO: Global animation state here, could be NULL
     uint16_t num_animations;
 } ObjectTableEntry;
 
@@ -83,7 +84,6 @@ typedef struct {
 
 
 void load_object_table(const char *filename, ObjectTable *tbl);
-void unload_object_table(ObjectTable *tbl);
 
 
 #endif
