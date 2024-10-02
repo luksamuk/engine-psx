@@ -7,7 +7,7 @@
 
 #define MAX_TILES 1400
 
-static ArenaAllocator _level_arena = { 0 };
+ArenaAllocator _level_arena = { 0 };
 static uint8_t _arena_mem[LEVEL_ARENA_SIZE];
 
 extern int debug_mode;
@@ -174,17 +174,22 @@ load_lvl(LevelData *lvl, const char *filename)
     lvl->num_layers = get_byte(bytes, &b);
     lvl->_unused0 = 0; b += 1;
 
+    uint16_t max_tiles = 0;
+
     lvl->layers = alloc_arena_malloc(&_level_arena, lvl->num_layers * sizeof(LevelLayerData));
     for(uint8_t n_layer = 0; n_layer < lvl->num_layers; n_layer++) {
         LevelLayerData *layer = &lvl->layers[n_layer];
         layer->width = get_byte(bytes, &b);
         layer->height = get_byte(bytes, &b);
         uint16_t num_tiles = (uint16_t)layer->width * (uint16_t)layer->height;
+        if(num_tiles > max_tiles) max_tiles = num_tiles;
         layer->tiles = alloc_arena_malloc(&_level_arena, num_tiles * sizeof(uint16_t));
         for(uint16_t i = 0; i < num_tiles; i++) {
             layer->tiles[i] = get_short_be(bytes, &b);
         }
     }
+
+    free(bytes);
 
     // These values are static because we're always using the same
     // coordinates for tpage and clut info. For some reason they're
@@ -196,7 +201,12 @@ load_lvl(LevelData *lvl, const char *filename)
     //lvl->clutmode = 0; // NOTE: This was set to tim->mode previously.
     lvl->_unused1 = 0;
 
-    free(bytes);
+    // Initialize object state array within level map
+    printf("Allocating object array\n");
+    lvl->objects = alloc_arena_malloc(&_level_arena, max_tiles * sizeof(ChunkObjectData *));
+    for(uint16_t i = 0; i < max_tiles; i++) {
+        lvl->objects[i] = NULL;
+    }
 }
 
 // Level sprite buffer.

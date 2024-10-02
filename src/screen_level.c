@@ -15,6 +15,7 @@
 #include "level.h"
 #include "timer.h"
 #include "model.h"
+#include "object.h"
 
 extern int debug_mode;
 
@@ -24,10 +25,11 @@ static uint8_t music_channel = 0;
 
 static Player player;
 
-TileMap16  map16;
-TileMap128 map128;
-LevelData  leveldata;
-Camera     camera;
+TileMap16   map16;
+TileMap128  map128;
+LevelData   leveldata;
+Camera      camera;
+ObjectTable obj_table_common;
 
 #define CHANNELS_PER_BGM    3
 static uint32_t bgm_loop_sectors[] = {
@@ -73,6 +75,7 @@ static uint32_t bgm_loop_sectors[] = {
 // Forward function declarations
 static void level_load_player();
 static void level_load_level();
+static void level_unload_level();
 
 // TODO!!!
 typedef struct {
@@ -99,6 +102,7 @@ screen_level_unload(void *)
 {
     sound_stop_xa();
     level_reset();
+    level_unload_level();
     sound_reset_mem();
     screen_free();
 }
@@ -356,6 +360,17 @@ level_load_level()
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
 
+    // Load common objects
+    printf("Loading common object table...\n");
+    load_object_table("\\LEVELS\\COMMON\\OBJ.OTD", &obj_table_common);
+
+    // Load level objects
+    // TODO
+
+    // Load object positioning on level
+    snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, (level & 0x01) + 1);
+    load_object_placement(filename0, &leveldata);
+
 
     // Pre-allocate and initialize level primitive buffer
     prepare_renderer(&leveldata);
@@ -375,4 +390,11 @@ level_load_level()
     music_channel = level % CHANNELS_PER_BGM;
 
     sound_play_xa(filename0, 0, music_channel, bgm_loop_sectors[level]);
+}
+
+static void
+level_unload_level()
+{
+    // Object tables are heap-allocated
+    //unload_object_table(&obj_table_common);
 }

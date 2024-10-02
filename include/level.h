@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <psxgpu.h>
 
+#include "object_state.h"
+
 #define LEVEL_MAX_X_CHUNKS   255
 #define LEVEL_MAX_Y_CHUNKS    31
 #define LEVEL_ARENA_SIZE  131072
@@ -51,10 +53,18 @@ typedef struct {
     uint16_t *tiles;
 } LevelLayerData;
 
+#define MAX_OBJECTS_PER_CHUNK 15
+
+typedef struct {
+    uint8_t num_objects;
+    ObjectState objects[MAX_OBJECTS_PER_CHUNK];
+} ChunkObjectData;
+
 typedef struct {
     uint8_t num_layers;
     uint8_t _unused0;
     LevelLayerData *layers;
+    ChunkObjectData **objects;
 
     uint16_t crectx, crecty;
     uint16_t prectx, precty;
@@ -74,5 +84,8 @@ void render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     int32_t cam_x, int32_t cam_y);
 
+
+// Object-related. These are defined in object_state.c
+void load_object_placement(const char *filename, LevelData *lvl);
 
 #endif

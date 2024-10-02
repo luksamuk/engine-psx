@@ -1,5 +1,5 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#ifndef MODEL_H
+#define MODEL_H
 
 #include <stdint.h>
 #include <psxgpu.h>
