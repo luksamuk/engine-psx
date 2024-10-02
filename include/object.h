@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#include "level.h"
-
 /* ======================== */
 /*  OBJECT PROPERTY DATA   */
 /* ======================== */

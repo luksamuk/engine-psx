@@ -194,7 +194,7 @@ screen_level_draw(void *d)
         
     /* render_model(&data->ring); */
 
-    render_lvl(&leveldata, &map128, &map16, camera.pos.vx, camera.pos.vy);
+    render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
 
     // Gouraud-shaded cube
     /* RotMatrix(&rotation, &world); */
@@ -359,8 +359,15 @@ level_load_level()
     load_lvl(&leveldata, filename0);
 
     // Load common objects
+    printf("Loading common object texture...\n");
+    file_read("\\LEVELS\\COMMON\\OBJ.TIM;1", &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    }
+
     printf("Loading common object table...\n");
-    load_object_table("\\LEVELS\\COMMON\\OBJ.OTD", &obj_table_common);
+    load_object_table("\\LEVELS\\COMMON\\OBJ.OTD;1", &obj_table_common);
 
     // Load level objects
     // TODO

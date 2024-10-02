@@ -62,8 +62,7 @@
    <object id="21" gid="129" x="2956.5" y="260" width="64" height="64"/>
    <object id="22" gid="129" x="1875" y="220" width="64" height="64"/>
    <object id="23" gid="129" x="1999.5" y="220" width="64" height="64"/>
-   <object id="24" gid="129" x="1850.67" y="326" width="64" height="64"/>
-   <object id="25" gid="129" x="1925.33" y="326" width="64" height="64"/>
+   <object id="25" gid="129" x="1887" y="326" width="64" height="64"/>
    <object id="26" gid="129" x="3916.33" y="387.333" width="64" height="64"/>
    <object id="27" gid="129" x="4065" y="388" width="64" height="64"/>
    <object id="28" gid="129" x="4289.67" y="453.667" width="64" height="64"/>
@@ -145,8 +144,8 @@
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="103" gid="129" x="4891.97" y="454.219" width="64" height="64"/>
-   <object id="105" gid="125" x="4893.97" y="353.886" width="64" height="64"/>
+   <object id="103" gid="129" x="4896" y="454" width="64" height="64"/>
+   <object id="105" gid="125" x="4894" y="353" width="64" height="64"/>
    <object id="106" gid="131" x="4892.97" y="258.886" width="64" height="64"/>
    <object id="107" gid="131" x="4892.97" y="187.553" width="64" height="64"/>
    <object id="108" gid="131" x="4871.97" y="200.886" width="64" height="64"/>

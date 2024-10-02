@@ -6,6 +6,8 @@
 #include "object_state.h"
 #include "util.h"
 #include "memalloc.h"
+#include "level.h"
+#include "render.h"
 
 extern ArenaAllocator _level_arena;
 
@@ -39,8 +41,9 @@ _emplace_object(
 }
 
 void
-load_object_placement(const char *filename, LevelData *lvl)
+load_object_placement(const char *filename, void *lvl_data)
 {
+    LevelData *lvl = (LevelData *)lvl_data;
     uint8_t *bytes;
     uint32_t b, length;
 
@@ -111,4 +114,54 @@ load_object_placement(const char *filename, LevelData *lvl)
     printf("Loaded %d objects.\n", created_objects);
 
     free(bytes);
+}
+
+
+void object_render(ObjectState *state, ObjectTableEntry *typedata,
+                   int16_t vx, int16_t vy)
+{
+    // Only show rings for now
+    if(state->id != OBJ_RING) return;
+
+    // TODO: This should be part of an update
+    ObjectAnimState *anim = &state->anim_state;
+    if(anim->animation >= typedata->num_animations) return;
+
+    ObjectAnim *an = &typedata->animations[anim->animation];
+    // TODO: check if animation is locked
+    if(anim->counter == 0) {
+        anim->frame++;
+        anim->counter = 6; // TODO: Set to duration
+    } else anim->counter--;
+    if(anim->frame >= an->num_frames) {
+        if(an->loopback >= 0) anim->frame = an->loopback;
+        else {
+            anim->frame = 0;
+            anim->animation = 0xff; // 255 = no animation
+            state->props |= OBJ_FLAG_DESTROYED;
+            return;
+        }
+    }
+
+    ObjectAnimFrame *frame = &an->frames[anim->frame];
+
+    // Calculate actual position from width and height
+    vx -= frame->w >> 1;
+    vy -= 48 - (frame->h >> 1);
+
+    // COMMON OBJECTS have the following VRAM coords:
+    // Sprites: 576x0
+    // CLUT: 576x256
+
+    POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+    increment_prim(sizeof(POLY_FT4));
+    setPolyFT4(poly);
+    setRGB0(poly, 128, 128, 128);
+
+    poly->tpage = getTPage(0, 0, 576, 0);
+    poly->clut = getClut(576, 256);
+
+    setXYWH(poly, vx, vy, frame->w, frame->h);
+    setUVWH(poly, frame->u0, frame->v0, frame->w, frame->h);
+    sort_prim(poly, 3);
 }
