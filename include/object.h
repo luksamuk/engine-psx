@@ -30,6 +30,8 @@ typedef enum {
 #define MASK_FLIP_ROTCW  0x4 // Rotated clockwise
 #define MASK_FLIP_ROTCT  0x8 // Rotated counterclockwise
 
+#define OBJ_ANIMATION_NO_ANIMATION  0xff
+
 typedef enum {
     MONITOR_KIND_NONE          = 0,
     MONITOR_KIND_RING          = 1,

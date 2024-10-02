@@ -3,9 +3,12 @@
 #include <psxetc.h>
 #include <stdio.h>
 
-volatile int timer_counter = 0;
-volatile int frame_counter = 0;
-volatile int frame_rate = 0;
+extern uint8_t paused;
+
+volatile int      timer_counter = 0;
+volatile int      frame_counter = 0;
+volatile int      frame_rate = 0;
+volatile uint32_t frame_count = 0;
 
 void
 timer_tick()
@@ -36,10 +39,23 @@ inline void
 timer_update()
 {
     frame_counter++;
+    if(!paused) frame_count++;
 }
 
 int
 get_frame_rate()
 {
     return frame_rate;
+}
+
+uint32_t
+get_elapsed_frames()
+{
+    return frame_count;
+}
+
+void
+reset_elapsed_frames()
+{
+    frame_count = 0;
 }

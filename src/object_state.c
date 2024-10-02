@@ -8,8 +8,10 @@
 #include "memalloc.h"
 #include "level.h"
 #include "render.h"
+#include "timer.h"
 
 extern ArenaAllocator _level_arena;
+extern uint8_t        paused;
 
 void
 _emplace_object(
@@ -116,7 +118,6 @@ load_object_placement(const char *filename, void *lvl_data)
     free(bytes);
 }
 
-
 void object_render(ObjectState *state, ObjectTableEntry *typedata,
                    int16_t vx, int16_t vy)
 {
@@ -128,16 +129,30 @@ void object_render(ObjectState *state, ObjectTableEntry *typedata,
     if(anim->animation >= typedata->num_animations) return;
 
     ObjectAnim *an = &typedata->animations[anim->animation];
-    // TODO: check if animation is locked
-    if(anim->counter == 0) {
-        anim->frame++;
-        anim->counter = 6; // TODO: Set to duration
-    } else anim->counter--;
+
+    // TODO: Replace with variable within ObjectAnim
+    const uint8_t anim_duration = 6;
+
+    if(state->props & OBJ_FLAG_ANIM_LOCK) {
+        uint32_t frame = get_elapsed_frames();
+        if(anim_duration > 0) {
+            frame = (frame / anim_duration);
+            if(an->loopback >= 0) frame %= an->num_frames;
+        }
+        anim->frame = (uint8_t)frame;
+    } else if(!paused) {
+        if(anim->counter == 0) {
+            anim->frame++;
+            anim->counter = anim_duration;
+        } else anim->counter--;
+    }
+
     if(anim->frame >= an->num_frames) {
         if(an->loopback >= 0) anim->frame = an->loopback;
+        // If animation does not loop back, destroy the object
         else {
             anim->frame = 0;
-            anim->animation = 0xff; // 255 = no animation
+            anim->animation = OBJ_ANIMATION_NO_ANIMATION;
             state->props |= OBJ_FLAG_DESTROYED;
             return;
         }

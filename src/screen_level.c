@@ -20,11 +20,12 @@
 extern int debug_mode;
 
 static uint8_t level = 0;
-static uint8_t paused = 0;
 static uint8_t music_channel = 0;
 
 static Player player;
 
+// Accessible in other source
+uint8_t     paused = 0;
 TileMap16   map16;
 TileMap128  map128;
 LevelData   leveldata;
@@ -94,6 +95,8 @@ screen_level_load()
     level_load_player();
     level_load_level();
     camera_set(&camera, player.pos.vx, player.pos.vy);
+
+    reset_elapsed_frames();
 }
 
 void
