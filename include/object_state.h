@@ -7,6 +7,12 @@
 /*  OBJECT STATE STRUCTURE */
 /* ======================== */
 
+typedef enum {
+    OBJ_FLAG_DESTROYED = 0x1,
+    OBJ_FLAG_INVISIBLE = 0x2,
+    OBJ_FLAG_ANIM_LOCK = 0x4,
+} ObjectGeneralFlag;
+
 typedef struct {
     uint8_t kind;
 } MonitorExtra;

@@ -11,7 +11,7 @@ extern ArenaAllocator _level_arena;
 
 void
 _emplace_object(
-    ChunkObjectData *data,
+    ChunkObjectData *data, int32_t tx, int32_t ty,
     uint8_t is_level_specific,
     int8_t type, uint8_t flipmask, int32_t vx, int32_t vy, void *extra)
 {
@@ -20,9 +20,20 @@ _emplace_object(
 
     state->id = type + (is_level_specific ? 100 : 0);
     state->flipmask = flipmask;
-    state->rx = vx & 0x7f;
-    state->ry = vy & 0x7f;
+
+    state->rx = vx - (tx << 7);
+    state->ry = vy - (ty << 7);
+
     state->extra = extra;
+    state->props = 0;
+
+    // Some very specific features that are object-dependent.
+    switch(type) {
+    default: break;
+    case OBJ_RING:
+        state->props |= OBJ_FLAG_ANIM_LOCK;
+        break;
+    };
 
     state->anim_state = (ObjectAnimState){ 0 };
 }
@@ -71,27 +82,28 @@ load_object_placement(const char *filename, LevelData *lvl)
         if(!data) {
             data = alloc_arena_malloc(&_level_arena, sizeof(ChunkObjectData));
             lvl->objects[chunk_pos] = data;
+            *data = (ChunkObjectData){ 0 };
         }
 
         if(type < 0) {
             // This is a dummy object, so create others in its place.
             switch(type) {
             case OBJ_DUMMY_RINGS_3V:
-                _emplace_object(data, 0, OBJ_RING, 0, vx, vy - 24, NULL);
-                _emplace_object(data, 0, OBJ_RING, 0, vx, vy, NULL);
-                _emplace_object(data, 0, OBJ_RING, 0, vx, vy + 24, NULL);
+                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy - 24, NULL);
+                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy, NULL);
+                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy + 24, NULL);
                 created_objects += 3;
                 break;
             case OBJ_DUMMY_RINGS_3H:
-                _emplace_object(data, 0, OBJ_RING, 0, vx - 24, vy, NULL);
-                _emplace_object(data, 0, OBJ_RING, 0, vx, vy, NULL);
-                _emplace_object(data, 0, OBJ_RING, 0, vx + 24, vy, NULL);
+                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx - 24, vy, NULL);
+                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy, NULL);
+                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx + 24, vy, NULL);
                 created_objects += 3;
                 break;
             default: break;
             }
         } else {
-            _emplace_object(data, is_level_specific, type, flipmask, vx, vy, extra);
+            _emplace_object(data, cx, cy, is_level_specific, type, flipmask, vx, vy, extra);
             created_objects++;
         }
     }

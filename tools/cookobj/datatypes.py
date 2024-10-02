@@ -241,8 +241,8 @@ class ObjectPlacement:
         f.write(c_ubyte(int(self.is_level_specific)))
         f.write(c_byte(self.otype))
         f.write(c_ubyte(flipmask))
-        f.write(c_int(self.x))
-        f.write(c_int(self.y))
+        f.write(c_int(self.x + 32))  # Center X position
+        f.write(c_int(self.y))  # Already at extreme bottom Y position
         if self.properties is not None:
             self.properties.write_to(f)
 

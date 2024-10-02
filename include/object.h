@@ -42,10 +42,6 @@ typedef enum {
     MONITOR_KIND_SUPER         = 6,
 } ObjectMonitorKind;
 
-typedef enum {
-    OBJ_FLAG_DESTROYED = 0x1,
-} ObjectGeneralFlag;
-
 
 /* ======================== */
 /*  OBJECT TABLE STRUCTURE */
