@@ -209,7 +209,7 @@ begin_render_routine:
         } else {
             vx -= frame->w >> 1;
             if(flipmask & MASK_FLIP_FLIPY) vy -= 64 - frame->h;
-            vy -= frame->h - 2;
+            vy -= frame->h;
         }
         break;
     }
