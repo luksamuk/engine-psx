@@ -131,7 +131,7 @@ loopback = 0
 # ------------
 
 [checkpoint.fragment]
-offset = [0, -16]
+offset = [0, -48]
 
 
 [[checkpoint.fragment.animations]]

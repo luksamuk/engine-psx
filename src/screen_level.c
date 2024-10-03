@@ -247,31 +247,31 @@ screen_level_draw(void *d)
                  get_frame_rate());
         draw_text(248, 12, 0, buffer);
 
-        // Sound debug
         if(debug_mode > 1) {
+            // Sound debug
             uint32_t elapsed_sectors;
             sound_xa_get_elapsed_sectors(&elapsed_sectors);
             snprintf(buffer, 255, "%08u", elapsed_sectors);
             draw_text(248, 20, 0, buffer);
-        }
 
-        // Player debug
-        snprintf(buffer, 255,
-                 "GSP %08x\n"
-                 "SPD %08x %08x\n"
-                 "ANG %04x\n"
-                 "POS %08x %08x\n"
-                 "ACT %02u\n"
-                 "REV %08x\n"
-                 ,
-                 player.vel.vz,
-                 player.vel.vx, player.vel.vy,
-                 player.angle,
-                 player.pos.vx, player.pos.vy,
-                 player.action,
-                 player.spinrev
-            );
-        draw_text(8, 12, 0, buffer);
+            // Player debug
+            snprintf(buffer, 255,
+                     "GSP %08x\n"
+                     "SPD %08x %08x\n"
+                     "ANG %04x\n"
+                     "POS %08x %08x\n"
+                     "ACT %02u\n"
+                     "REV %08x\n"
+                     ,
+                     player.vel.vz,
+                     player.vel.vx, player.vel.vy,
+                     player.angle,
+                     player.pos.vx, player.pos.vy,
+                     player.action,
+                     player.spinrev
+                );
+            draw_text(8, 12, 0, buffer);
+        }
     }
 }
 

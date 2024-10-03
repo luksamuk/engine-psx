@@ -32,8 +32,8 @@ class ObjectId(Enum):
     SPRING_RED = 5
     SPRING_YELLOW_DIAGONAL = 6
     SPRING_RED_DIAGONAL = 7
-    GOAL_SIGN = 8
-    SWITCH = 9
+    SWITCH = 8
+    GOAL_SIGN = 9
 
     @staticmethod
     def get(name):

@@ -35,6 +35,7 @@ typedef struct {
     void    *extra;
 
     ObjectAnimState anim_state;
+    ObjectAnimState *frag_anim_state; // Only exists if fragment also exists
 } ObjectState;
 
 typedef struct {

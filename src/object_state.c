@@ -9,9 +9,11 @@
 #include "level.h"
 #include "render.h"
 #include "timer.h"
+#include "camera.h"
 
 extern ArenaAllocator _level_arena;
 extern uint8_t        paused;
+extern Camera         camera;
 
 void
 _emplace_object(
@@ -31,15 +33,32 @@ _emplace_object(
     state->extra = extra;
     state->props = 0;
 
+    state->anim_state = (ObjectAnimState){ 0 };
+    state->frag_anim_state = NULL;
+
+    // Initialize animation state if this object
+    // has a fragment
+    if(state->id == OBJ_MONITOR || state->id == OBJ_CHECKPOINT) {
+        state->frag_anim_state = alloc_arena_malloc(
+            &_level_arena,
+            sizeof(ObjectAnimState));
+        *state->frag_anim_state = (ObjectAnimState){ 0 };
+    }
+
     // Some very specific features that are object-dependent.
     switch(type) {
     default: break;
     case OBJ_RING:
         state->props |= OBJ_FLAG_ANIM_LOCK;
         break;
+    case OBJ_MONITOR:
+        // Set initial animation with respect to kind
+        state->frag_anim_state->animation = (uint16_t)((MonitorExtra *)state->extra)->kind;
+        break;
+    case OBJ_GOAL_SIGN:
+        camera_set_right_bound(&camera, (vx << 12) + ((CENTERX >> 1) << 12));
+        break;
     };
-
-    state->anim_state = (ObjectAnimState){ 0 };
 }
 
 void
@@ -118,18 +137,19 @@ load_object_placement(const char *filename, void *lvl_data)
     free(bytes);
 }
 
-void object_render(ObjectState *state, ObjectTableEntry *typedata,
-                   int16_t vx, int16_t vy)
+void
+object_render(ObjectState *state, ObjectTableEntry *typedata,
+              int16_t ovx, int16_t ovy)
 {
-    // Only show rings for now
-    if(state->id != OBJ_RING) return;
-
     // TODO: This should be part of an update
     ObjectAnimState *anim = &state->anim_state;
     if(anim->animation >= typedata->num_animations) return;
-
     ObjectAnim *an = &typedata->animations[anim->animation];
+    ObjectAnimFrame *frame = NULL;
 
+    uint8_t in_fragment = 0;
+
+begin_render_routine:
     // TODO: Replace with variable within ObjectAnim
     const uint8_t anim_duration = 6;
 
@@ -158,25 +178,104 @@ void object_render(ObjectState *state, ObjectTableEntry *typedata,
         }
     }
 
-    ObjectAnimFrame *frame = &an->frames[anim->frame];
+    frame = &an->frames[anim->frame];
+
+    // Leverage "double flipping"
+    uint8_t flipmask = state->frag_anim_state ? 0 : (state->flipmask ^ frame->flipmask);
+
+    // Some rules:
+    // 1. If an object is flipped, it cannot be rotated.
+    // 2. ct and cw rotations cancel out.
+    // 3. As a rule of thumb... objects with fragments
+    //    cannot be flipped or rotated.
+    // We'll expect these values to work as they should.
+
+    int16_t vx = ovx;
+    int16_t vy = ovy;
 
     // Calculate actual position from width and height
-    vx -= frame->w >> 1;
-    vy -= 48 - (frame->h >> 1);
-
-    // COMMON OBJECTS have the following VRAM coords:
-    // Sprites: 576x0
-    // CLUT: 576x256
+    switch(state->id) {
+    case OBJ_RING:
+        vx -= frame->w >> 1;
+        vy -= 48 - (frame->h >> 1) - 1;
+        break;
+    default:
+        if(flipmask & MASK_FLIP_ROTCW) {
+            vx -= 32 - frame->h - 1;
+            vy += (frame->w >> 1);
+        } else if(flipmask & MASK_FLIP_ROTCT) {
+            vx -= 32 + frame->h;
+            vy -= (frame->w >> 1);
+        } else {
+            vx -= frame->w >> 1;
+            if(flipmask & MASK_FLIP_FLIPY) vy -= 64 - frame->h;
+            vy -= frame->h - 2;
+        }
+        break;
+    }
 
     POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
     increment_prim(sizeof(POLY_FT4));
     setPolyFT4(poly);
     setRGB0(poly, 128, 128, 128);
+    
+    if((flipmask & MASK_FLIP_FLIPX) && (flipmask & MASK_FLIP_FLIPY)) {
+        setXYWH(poly, vx, vy, frame->w, frame->h);
+        setUV4(poly,
+               frame->u0 + frame->w - 1,  frame->v0 + frame->h - 1,
+               frame->u0,                 frame->v0 + frame->h - 1,
+               frame->u0 + frame->w - 1,  frame->v0,
+               frame->u0,                 frame->v0);
+    } else if(flipmask & MASK_FLIP_FLIPX) {
+        setXYWH(poly, vx, vy, frame->w, frame->h);
+        setUV4(poly,
+               frame->u0 + frame->w - 1,  frame->v0,
+               frame->u0,                 frame->v0,
+               frame->u0 + frame->w - 1,  frame->v0 + frame->h - 1,
+               frame->u0,                 frame->v0 + frame->h - 1);
+    } else if(flipmask & MASK_FLIP_FLIPY) {
+        setXYWH(poly, vx, vy, frame->w, frame->h);
+        setUV4(poly,
+               frame->u0,                 frame->v0 + frame->h - 1,
+               frame->u0 + frame->w - 1,  frame->v0 + frame->h - 1,
+               frame->u0,                 frame->v0,
+               frame->u0 + frame->w - 1,  frame->v0);
+    } else if(flipmask & MASK_FLIP_ROTCW) {
+        setXY4(poly,
+               vx,                 vy,
+               vx,                 vy + frame->w - 1,
+               vx - frame->h - 1,  vy,
+               vx - frame->h - 1,  vy + frame->w - 1);
+        setUVWH(poly, frame->u0, frame->v0, frame->w - 1, frame->h - 1);
+    } else if(flipmask & MASK_FLIP_ROTCT) {
+        setXY4(poly,
+               vx,                 vy,
+               vx,                 vy - frame->w - 1,
+               vx + frame->h,      vy,
+               vx + frame->h,      vy - frame->w - 1);
+        setUVWH(poly, frame->u0, frame->v0, frame->w - 1, frame->h);
+    } else {
+        setXYWH(poly, vx, vy, frame->w, frame->h);
+        setUVWH(poly, frame->u0, frame->v0, frame->w, frame->h);
+    }
 
+    // COMMON OBJECTS have the following VRAM coords:
+    // Sprites: 576x0
+    // CLUT: 576x256
+    
     poly->tpage = getTPage(0, 0, 576, 0);
     poly->clut = getClut(576, 256);
 
-    setXYWH(poly, vx, vy, frame->w, frame->h);
-    setUVWH(poly, frame->u0, frame->v0, frame->w, frame->h);
     sort_prim(poly, 3);
+
+    if(!in_fragment && (typedata->fragment != NULL)) {
+        in_fragment = 1;
+        anim = state->frag_anim_state;
+        if(anim->animation >= typedata->fragment->num_animations) return;
+        an = &typedata->fragment->animations[anim->animation];
+        ovx += typedata->fragment->offsetx;
+        ovy += typedata->fragment->offsety;
+        
+        goto begin_render_routine;
+    }
 }

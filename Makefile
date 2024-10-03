@@ -14,7 +14,7 @@ LVLOUT    := $(addsuffix .LVL,$(basename $(LVLSRC)))
 OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
 MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
 
-.PHONY: clean ./build/engine.cue run configure chd cook iso elf debug cooktest purge
+.PHONY: clean ./build/engine.cue run configure chd cook iso elf debug cooktest purge rebuild repack
 
 # Final product is CUE+BIN files
 all: iso
@@ -37,7 +37,6 @@ emu:
 # Run debugger
 debug:
 	gdb-multiarch
-
 
 # =======================================
 #  Targets for executable building
@@ -74,6 +73,12 @@ clean:
 # Clean build directory and purge cooked assets
 purge: clean cleancook
 	rm -rf *.chd
+
+# Clean everything and recreate iso
+repack: purge cook elf iso
+
+# Clean binaries and recreate iso
+rebuild: clean cook elf iso
 
 # =======================================
 #         ASSET COOKING TARGETS
