@@ -178,6 +178,16 @@ screen_level_update(void *d)
 
     camera_update(&camera, &player);
     player_update(&player);
+
+
+
+    // FAKE LEVEL TRANSITION!!!
+    if(level < 4) {
+        if(player.pos.vx >= camera.max_x + (CENTERX << 12)) {
+            screen_level_setlevel(level + 1);
+            scene_change(SCREEN_LEVEL);
+        }
+    }
 }
 
 void

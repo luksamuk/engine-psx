@@ -55,17 +55,15 @@ render_loading_logo()
 void
 scene_change(ScreenIndex scr)
 {
-    if((int8_t)scr != current_scene) {
-        printf("Change scene: %d -> %d\n", current_scene, scr);
-        //set_clear_color(0, 0, 0);
-        //render_loading_text();
-        render_loading_logo();
+    printf("Change scene: %d -> %d\n", current_scene, scr);
+    //set_clear_color(0, 0, 0);
+    //render_loading_text();
+    render_loading_logo();
 
-        if(current_scene >= 0)
-            scene_unload();
-        current_scene = scr;
-        scene_load();
-    }
+    if(current_scene >= 0)
+        scene_unload();
+    current_scene = scr;
+    scene_load();
 }
 
 void
