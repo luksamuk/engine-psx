@@ -3,6 +3,7 @@
 #include "level.h"
 #include "util.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #define CENTERX_FIXP          (CENTERX << 12)
 #define CENTERY_FIXP          (CENTERY << 12)
@@ -137,5 +138,6 @@ camera_set(Camera *c, int32_t vx, int32_t vy)
 void
 camera_set_right_bound(Camera *c, int32_t vx)
 {
-    c->max_x = (vx >> 12) - CENTERX_FIXP;
+    c->max_x = vx - (CENTERX_FIXP >> 1);
+    printf("Set camera max position to %08x\n", c->max_x);
 }

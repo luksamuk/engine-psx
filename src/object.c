@@ -52,19 +52,12 @@ load_object_table(const char *filename, ObjectTable *tbl)
         &_level_arena,
         sizeof(ObjectTableEntry) * tbl->num_entries);
 
-    printf("Entries at %p\n", tbl->entries);
-
-
     for(uint16_t i = 0; i < tbl->num_entries; i++) {
-        printf("Reading entry %d.\n", i);
         ObjectTableEntry *entry = &tbl->entries[i];
-        printf("Init animations and fragment\n");
         entry->animations = NULL;
         entry->fragment = NULL;
-        printf("OK\n");
 
         uint8_t _id = get_byte(bytes, &b); // Entry ID, always sequential; discarded
-        printf("Registered id: %d\n", _id);
         uint8_t has_fragment = get_byte(bytes, &b);
         entry->num_animations = get_short_be(bytes, &b);
 

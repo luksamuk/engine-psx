@@ -92,6 +92,8 @@ screen_level_load()
     /* data->ring.rot.vx = 0x478; */
     /* data->ring.scl.vx = data->ring.scl.vy = data->ring.scl.vz = 0x200; */
 
+    camera_init(&camera);
+
     level_load_player();
     level_load_level();
     camera_set(&camera, player.pos.vx, player.pos.vy);
@@ -384,8 +386,6 @@ level_load_level()
     prepare_renderer(&leveldata);
 
     level_debrief();
-
-    camera_init(&camera);
 
     // Level 0 Zone 2 actually has background sound effects
     /* if(level == 1) { */
