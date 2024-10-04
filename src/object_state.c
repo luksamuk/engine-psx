@@ -266,7 +266,7 @@ begin_render_routine:
     poly->tpage = getTPage(0, 0, 576, 0);
     poly->clut = getClut(576, 256);
 
-    sort_prim(poly, 3);
+    sort_prim(poly, state->id == OBJ_RING ? 3 : 4);
 
     if(!in_fragment && (typedata->fragment != NULL)) {
         in_fragment = 1;
