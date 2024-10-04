@@ -243,16 +243,16 @@ begin_render_routine:
     } else if(flipmask & MASK_FLIP_ROTCW) {
         setXY4(poly,
                vx,                 vy,
-               vx,                 vy + frame->w - 1,
+               vx,                 vy + frame->w,
                vx - frame->h - 1,  vy,
-               vx - frame->h - 1,  vy + frame->w - 1);
+               vx - frame->h - 1,  vy + frame->w);
         setUVWH(poly, frame->u0, frame->v0, frame->w - 1, frame->h - 1);
     } else if(flipmask & MASK_FLIP_ROTCT) {
         setXY4(poly,
                vx,                 vy,
-               vx,                 vy - frame->w - 1,
+               vx,                 vy - frame->w,
                vx + frame->h,      vy,
-               vx + frame->h,      vy - frame->w - 1);
+               vx + frame->h,      vy - frame->w);
         setUVWH(poly, frame->u0, frame->v0, frame->w - 1, frame->h);
     } else {
         setXYWH(poly, vx, vy, frame->w, frame->h);
