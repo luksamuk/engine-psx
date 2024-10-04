@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "object.h"
 #include "object_state.h"
@@ -14,16 +15,34 @@ extern SoundEffect sfx_ring;
 // Update functions
 static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 static void _goal_sign_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
+static void _monitor_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
+
+// Player hitbox information. Calculated once per frame.
+int32_t player_vx, player_vy;
+int32_t player_width = 16;
+int32_t player_height = HEIGHT_RADIUS_NORMAL << 1;
+uint8_t player_attacking;
 
 void
 object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     if(state->props & OBJ_FLAG_DESTROYED) return;
 
+    // Calculate top left corner of player AABB.
+    // Note that player data is in fixed-point format!
+    player_vx = (player.pos.vx >> 12) - 8;
+    player_vy = (player.pos.vy >> 12) - HEIGHT_RADIUS_NORMAL;
+
+    player_attacking = (player.action == ACTION_JUMPING ||
+                        player.action == ACTION_ROLLING ||
+                        player.action == ACTION_SPINDASH ||
+                        player.action == ACTION_DROPDASH);
+
     switch(state->id) {
     default: break;
-    case OBJ_RING: _ring_update(state, typedata, pos);                    break;
+    case OBJ_RING:      _ring_update(state, typedata, pos);               break;
     case OBJ_GOAL_SIGN: _goal_sign_update(state, typedata, pos);          break;
+    case OBJ_MONITOR:   _monitor_update(state, typedata, pos);            break;
     }
 }
 
@@ -39,13 +58,8 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         // Calculate actual top left corner of ring AABB
         pos->vx -= 8;    pos->vy -= (8 + 32);
 
-        // Calculate top left corner of player AABB.
-        // Note that player data is in fixed-point format!
-        int32_t player_vx = (player.pos.vx >> 12) - 8;
-        int32_t player_vy = (player.pos.vy >> 12) - HEIGHT_RADIUS_NORMAL;
-
         if(aabb_intersects(pos->vx, pos->vy, 16, 16,
-                           player_vx, player_vy, 16, HEIGHT_RADIUS_NORMAL << 1))
+                           player_vx, player_vy, player_width, player_height))
         {
             state->anim_state.animation = 1;
             state->anim_state.frame = 0;
@@ -65,5 +79,54 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     if(state->anim_state.animation == 0 && (pos->vx <= (player.pos.vx >> 12))) {
         state->anim_state.animation = 1;
         state->anim_state.frame = 0;
+    }
+}
+
+static void
+_monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+{
+    if(state->anim_state.animation == 0) {
+        // Calculate hitbox
+        int32_t hitbox_vx = pos->vx - 16;
+        int32_t hitbox_vy = pos->vy - 32; // Monitor is a 32x32 box
+        
+        // Perform collision detection
+        if(aabb_intersects(hitbox_vx, hitbox_vy, 32, 32,
+                           player_vx, player_vy, player_width, player_height))
+        {
+            if(player_attacking &&
+               ((abs(player.vel.vx) != 0) || abs(player.vel.vy) != 0)) {
+                state->anim_state.animation = 1;
+                state->anim_state.frame = 0;
+                state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+
+                if(!player.grnd && player.vel.vy > 0) {
+                    player.vel.vy *= -1;
+                }
+            } else {
+                // Landing on top
+                if((player_vy - hitbox_vy < 16) &&
+                   ((player_vx >= hitbox_vx - 4) && (player_vx <= hitbox_vx + 32 - 4)))
+                {
+                    player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
+                    player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
+                    player.ev_grnd1.coord = player.ev_grnd2.coord = hitbox_vy;
+                } else {
+                    // Check for intersection on left/right
+                    if(player_vx < pos->vx) {
+                        player.ev_right.collided = 1;
+                        player.ev_right.coord = (hitbox_vx + 2);
+                        player.ev_right.angle = 0;
+                    } else {
+                        player.ev_left.collided = 1;
+                        player.ev_left.coord = hitbox_vx + 16;
+                        player.ev_right.angle = 0;
+                        printf("Collide\n");
+                    }
+                }
+
+                // Check for intersection on bottom
+            }
+        }
     }
 }

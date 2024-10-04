@@ -89,6 +89,7 @@ CharaAnim *player_get_animation(Player *player, uint32_t sum);
 CharaAnim *player_get_animation_by_name(Player *player, const char *name);
 
 void player_update(Player *player);
+void player_update_collision(Player *player);
 void player_draw(Player *player, VECTOR *screen_pos);
 
 #endif

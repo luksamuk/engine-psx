@@ -152,8 +152,10 @@ player_set_frame_duration(Player *player, uint8_t duration)
 }
 
 void
-_player_collision_linecast(Player *player)
+player_update_collision(Player *player)
 {
+    player->push = 0;
+
     /* Collider linecasts */
     uint16_t
         anchorx = (player->pos.vx >> 12),
@@ -319,11 +321,8 @@ _player_collision_linecast(Player *player)
 }
 
 void
-_player_collision_detection(Player *player)
+_player_handle_collision(Player *player)
 {
-    player->push = 0;
-    _player_collision_linecast(player);
-
     if(player->ev_right.collided && player->vel.vx > 0) {
         if(player->grnd) player->vel.vz = 0;
         else player->vel.vx = 0;
@@ -450,8 +449,7 @@ _player_collision_detection(Player *player)
 void
 player_update(Player *player)
 {
-    _player_collision_detection(player);
-
+    _player_handle_collision(player);
     // X movement
     /* Ground movement */
     if(player->grnd) {

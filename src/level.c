@@ -427,8 +427,10 @@ _render_obj(ObjectState *obj, ObjectTableEntry *typedata,
         if(obj->id == 0)
             setRGB0(poly, 128, 128, 0);
         else setRGB0(poly, 128, 0, 0);
-        setXYWH(poly, px - 8, py - 8 - 32, 16, 16);
-        sort_prim(poly, 3); // 3 = sprite layer
+        if(obj->id == 0)
+            setXYWH(poly, px - 8, py - 8 - 32, 16, 16);
+        else setXYWH(poly, px - 8, py - 8, 16, 16);
+        sort_prim(poly, 4); // 4 = back sprite and character layer
     }
 }
 
