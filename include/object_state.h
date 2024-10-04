@@ -2,6 +2,7 @@
 #define OBJECT_STATE_H
 
 #include <stdint.h>
+#include <psxgte.h>
 
 #include "object.h"
 
@@ -49,6 +50,6 @@ typedef struct {
 void object_render(ObjectState *state, ObjectTableEntry *typedata,
                    int16_t vx, int16_t vy);
 
-void object_update(ObjectState *state, ObjectTableEntry *typedata);
+void object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 
 #endif

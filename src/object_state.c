@@ -52,6 +52,7 @@ _emplace_object(
         state->props |= OBJ_FLAG_ANIM_LOCK;
         break;
     case OBJ_MONITOR:
+        state->props |= OBJ_FLAG_ANIM_LOCK;
         // Set initial animation with respect to kind
         state->frag_anim_state->animation = (uint16_t)((MonitorExtra *)state->extra)->kind;
         break;
@@ -169,11 +170,10 @@ begin_render_routine:
 
     if(anim->frame >= an->num_frames) {
         if(an->loopback >= 0) anim->frame = an->loopback;
-        // If animation does not loop back, destroy the object
+        // If animation does not loop back, set animation to none
         else {
             anim->frame = 0;
             anim->animation = OBJ_ANIMATION_NO_ANIMATION;
-            state->props |= OBJ_FLAG_DESTROYED;
             return;
         }
     }
@@ -231,8 +231,8 @@ begin_render_routine:
         setUV4(poly,
                frame->u0 + frame->w - 1,  frame->v0,
                frame->u0,                 frame->v0,
-               frame->u0 + frame->w - 1,  frame->v0 + frame->h - 1,
-               frame->u0,                 frame->v0 + frame->h - 1);
+               frame->u0 + frame->w - 1,  frame->v0 + frame->h,
+               frame->u0,                 frame->v0 + frame->h);
     } else if(flipmask & MASK_FLIP_FLIPY) {
         setXYWH(poly, vx, vy, frame->w, frame->h);
         setUV4(poly,

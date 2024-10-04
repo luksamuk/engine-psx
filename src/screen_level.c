@@ -22,9 +22,8 @@ extern int debug_mode;
 static uint8_t level = 0;
 static uint8_t music_channel = 0;
 
-static Player player;
-
 // Accessible in other source
+Player      player;
 uint8_t     paused = 0;
 TileMap16   map16;
 TileMap128  map128;
@@ -178,7 +177,7 @@ screen_level_update(void *d)
 
     camera_update(&camera, &player);
     player_update(&player);
-
+    update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
 
 
     // FAKE LEVEL TRANSITION!!!

@@ -201,3 +201,17 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     }
     return ev;
 }
+
+
+int
+aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,
+                int32_t b_vx, int32_t b_vy, int32_t bw, int32_t bh)
+{
+    int32_t a_right  = a_vx + aw;
+    int32_t a_bottom = a_vy + ah;
+    int32_t b_right  = b_vx + bw;
+    int32_t b_bottom = b_vy + bh;
+
+    return !((a_vx > b_right) || (a_right < b_vx) ||
+             (a_bottom < b_vy) || (a_vy > b_bottom));
+}

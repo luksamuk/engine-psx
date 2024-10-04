@@ -433,6 +433,43 @@ _render_obj(ObjectState *obj, ObjectTableEntry *typedata,
 }
 
 void
+update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y)
+{
+    cam_x = cam_x >> 12;
+    cam_y = cam_y >> 12;
+    for(int32_t i = 0; i < 5; i++) {
+        int32_t new_cam_x = cam_x - 256 + (i * 128);
+
+        for(int32_t j = 0; j < 5; j++) {
+            int32_t new_cam_y = cam_y - 256 + (j * 128);
+
+            int32_t cx = new_cam_x >> 7;
+            int32_t cy = new_cam_y >> 7;
+            int32_t chunk_pos;
+            if((cx < 0) || (cx >= lvl->layers[0].width)) chunk_pos = -1;
+            else if((cy < 0) || (cy >= lvl->layers[0].height)) chunk_pos = -1;
+            else chunk_pos = (cy * lvl->layers[0].width) + cx;
+
+            if(chunk_pos > 0) {
+                ChunkObjectData *objdata = lvl->objects[chunk_pos];
+                if(objdata) {
+                    for(uint8_t k = 0; k < objdata->num_objects; k++) {
+                        ObjectState *obj = &objdata->objects[k];
+                        ObjectTableEntry *typedata = &tbl->entries[obj->id];
+                        VECTOR pos = {
+                            .vx = (int32_t)(cx << 7) + (int32_t)obj->rx,
+                            .vy = (int32_t)(cy << 7) + (int32_t)obj->ry,
+                            .vz = 0
+                        };
+                        object_update(obj, typedata, &pos);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void
 _render_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cx, int32_t cy)
 {
     int32_t chunk;
