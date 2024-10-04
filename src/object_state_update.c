@@ -62,7 +62,7 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 static void
 _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
-    if(state->anim_state.animation == 0 && (pos->vx >= (player.pos.vx >> 12))) {
+    if(state->anim_state.animation == 0 && (pos->vx <= (player.pos.vx >> 12))) {
         state->anim_state.animation = 1;
         state->anim_state.frame = 0;
     }
