@@ -163,6 +163,9 @@
 	<file name="DROPD.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/DROPD.VAG" />
+	<file name="POP.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/POP.VAG" />
 	<!-- <file name="RAIN.VAG" -->
 	<!--       type="data" -->
 	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/RAIN.VAG" /> -->

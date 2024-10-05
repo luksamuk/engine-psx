@@ -36,7 +36,7 @@ loopback = 0
 [[monitor.animations]]
 name = "destroyed"
 id = 1
-frames = [[224, 32, 32, 16]]
+frames = [[224, 32, 31, 16]]
 loopback = 0
 
 # ------------
