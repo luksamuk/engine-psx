@@ -3,6 +3,7 @@
 #include "level.h"
 #include "util.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #define CENTERX_FIXP          (CENTERX << 12)
 #define CENTERY_FIXP          (CENTERY << 12)
@@ -26,6 +27,7 @@ camera_init(Camera *c)
     c->extension_x = c->extension_y = 0;
     c->delay = 0;
     c->lag = 0;
+    c->max_x = CAMERAX_MAX;
 }
 
 void
@@ -120,7 +122,7 @@ camera_update(Camera *c, Player *player)
     c->pos.vy = c->realpos.vy + c->extension_y;
 
     if(c->pos.vx < CENTERX_FIXP) c->pos.vx = CENTERX_FIXP;
-    else if(c->pos.vx > CAMERAX_MAX) c->pos.vx = CAMERAX_MAX;
+    else if(c->pos.vx > c->max_x) c->pos.vx = c->max_x;
 
     if(c->pos.vy < CENTERY_FIXP) c->pos.vy = CENTERY_FIXP;
     else if(c->pos.vy > CAMERAY_MAX) c->pos.vy = CAMERAY_MAX;
@@ -131,4 +133,11 @@ camera_set(Camera *c, int32_t vx, int32_t vy)
 {
     c->pos.vx = c->realpos.vx = vx;
     c->pos.vy = c->realpos.vy = vy;
+}
+
+void
+camera_set_right_bound(Camera *c, int32_t vx)
+{
+    c->max_x = vx - (CENTERX_FIXP >> 1);
+    printf("Set camera max position to %08x\n", c->max_x);
 }

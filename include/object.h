@@ -2,112 +2,84 @@
 #define OBJECT_H
 
 #include <stdint.h>
-#include <psxgpu.h>
-#include <psxgte.h>
+
+/* ======================== */
+/*  OBJECT PROPERTY DATA   */
+/* ======================== */
 
 typedef enum {
-    TYPE_F3  = 0x0,
-    TYPE_G3  = 0x1,
-    TYPE_F4  = 0x2,
-    TYPE_G4  = 0x3,
-    TYPE_FT3 = 0x4,
-    TYPE_GT3 = 0x5,
-    TYPE_FT4 = 0x6,
-    TYPE_GT4 = 0x7,
-} ObjPolyType;
+    // Dummy objects
+    OBJ_DUMMY_RINGS_3V         = -2,
+    OBJ_DUMMY_RINGS_3H         = -1,
+
+    // Actual objects
+    OBJ_RING                   = 0x00,
+    OBJ_MONITOR                = 0x01,
+    OBJ_SPIKES                 = 0x02,
+    OBJ_CHECKPOINT             = 0x03,
+    OBJ_SPRING_YELLOW          = 0x04,
+    OBJ_SPRING_RED             = 0x05,
+    OBJ_SPRING_YELLOW_DIAGONAL = 0x06,
+    OBJ_SPRING_RED_DIAGONAL    = 0x07,
+    OBJ_SWITCH                 = 0x08,
+    OBJ_GOAL_SIGN              = 0x09,
+} ObjectType;
+
+#define MASK_FLIP_FLIPX  0x1 // Flip on X axis
+#define MASK_FLIP_FLIPY  0x2 // Flip on Y axis
+#define MASK_FLIP_ROTCW  0x4 // Rotated clockwise
+#define MASK_FLIP_ROTCT  0x8 // Rotated counterclockwise
+
+#define OBJ_ANIMATION_NO_ANIMATION  0xff
+
+typedef enum {
+    MONITOR_KIND_NONE          = 0,
+    MONITOR_KIND_RING          = 1,
+    MONITOR_KIND_SPEEDSHOES    = 2,
+    MONITOR_KIND_SHIELD        = 3,
+    MONITOR_KIND_INVINCIBILITY = 4,
+    MONITOR_KIND_1UP           = 5,
+    MONITOR_KIND_SUPER         = 6,
+} ObjectMonitorKind;
+
+
+/* ======================== */
+/*  OBJECT TABLE STRUCTURE */
+/* ======================== */
 
 typedef struct {
-    uint8_t ftype;
-    uint8_t *info;
-} ObjPolygon;
+    uint8_t u0, v0;
+    uint8_t w, h;
+    uint8_t flipmask;
+} ObjectAnimFrame;
 
 typedef struct {
-    uint8_t  r0, b0, g0;
-    uint16_t iv0, iv1, iv2;
-    uint16_t in0;
-} OBJF3;
+    ObjectAnimFrame *frames;
+    uint16_t        num_frames;
+    int8_t          loopback;
+    // TODO: Animation speed (animation frames per game frame)
+} ObjectAnim;
 
 typedef struct {
-    uint8_t  r0, b0, g0;
-    uint8_t  r1, b1, g1;
-    uint8_t  r2, b2, g2;
-    uint16_t iv0, iv1, iv2;
-    uint16_t in0, in1, in2;
-} OBJG3;
+    int16_t    offsetx, offsety;
+    ObjectAnim *animations;
+    uint16_t   num_animations;
+} ObjectFrag;
 
 typedef struct {
-    uint8_t  r0, b0, g0;
-    uint16_t iv0, iv1, iv2, iv3;
-    uint16_t in0;
-} OBJF4;
+    ObjectAnim *animations;
+    ObjectFrag *fragment;
+    uint16_t num_animations;
+} ObjectTableEntry;
 
 typedef struct {
-    uint8_t  r0, b0, g0;
-    uint8_t  r1, b1, g1;
-    uint8_t  r2, b2, g2;
-    uint8_t  r3, b3, g3;
-    uint16_t iv0, iv1, iv2, iv3;
-    uint16_t in0, in1, in2, in3;
-} OBJG4;
-
-typedef struct {
-    uint8_t  u0, v0;
-    uint8_t  u1, v1;
-    uint8_t  u2, v2;
-    uint8_t  r0, b0, g0;
-    uint16_t iv0, iv1, iv2;
-    uint16_t in0;
-} OBJFT3;
-
-typedef struct {
-    uint8_t  u0, v0;
-    uint8_t  u1, v1;
-    uint8_t  u2, v2;
-    uint8_t  r0, b0, g0;
-    uint8_t  r1, b1, g1;
-    uint8_t  r2, b2, g2;
-    uint16_t iv0, iv1, iv2;
-    uint16_t in0, in1, in2;
-} OBJGT3;
-
-typedef struct {
-    uint8_t  u0, v0;
-    uint8_t  u1, v1;
-    uint8_t  u2, v2;
-    uint8_t  u3, v3;
-    uint8_t  r0, b0, g0;
-    uint16_t iv0, iv1, iv2, iv3;
-    uint16_t in0;
-} OBJFT4;
-
-typedef struct {
-    uint8_t  u0, v0;
-    uint8_t  u1, v1;
-    uint8_t  u2, v2;
-    uint8_t  u3, v3;
-    uint8_t  r0, b0, g0;
-    uint8_t  r1, b1, g1;
-    uint8_t  r2, b2, g2;
-    uint8_t  r3, b3, g3;
-    uint16_t iv0, iv1, iv2, iv3;
-    uint16_t in0, in1, in2, in3;
-} OBJGT4;
-
-typedef struct {
-    VECTOR  pos;
-    VECTOR  scl;
-    SVECTOR rot;
-    MATRIX  world;
-
-    uint16_t num_vertices, num_normals, num_polygons;
-    SVECTOR    *vertices;
-    SVECTOR    *normals;
-    ObjPolygon *polygons;
-} Model;
+    uint8_t          is_level_specific;
+    uint16_t         num_entries;
+    ObjectTableEntry *entries;
+} ObjectTable;
 
 
+void load_object_table(const char *filename, ObjectTable *tbl);
 
-void load_model(Model *m, const char *filename);
-void render_model(Model *m);
 
 #endif

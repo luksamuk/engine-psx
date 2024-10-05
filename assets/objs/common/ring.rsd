@@ -1,5 +1,0 @@
-#RSD data describing the relationships to the PLY, MAT, and texture files
-@RSD940102 
-PLY=ring.ply
-MAT=ring.mat
-NTEX=0

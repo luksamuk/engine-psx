@@ -7,11 +7,12 @@ ArenaAllocator scratchpad_arena;
 #define SCRATCHPAD_SIZE  1024
 
 void
-alloc_arena_init(ArenaAllocator *arena, void *start, uint32_t size)
+alloc_arena_init(ArenaAllocator *arena, void *start, size_t size)
 {
-    arena->start = (uint32_t)start;
+    uintptr_t st = (uintptr_t)start;
+    arena->start = st;
     arena->ptr   = arena->start;
-    arena->size  = (uint32_t)size;
+    arena->size  = size;
 }
 
 void
@@ -21,12 +22,19 @@ alloc_arena_free(ArenaAllocator *arena)
 }
 
 void *
-alloc_arena_malloc(ArenaAllocator *arena, uint32_t size)
+alloc_arena_malloc(ArenaAllocator *arena, size_t size)
 {
-    void *p = (void *)arena->ptr;
-    assert(arena->ptr + size < arena->start + arena->size);
-    arena->ptr += size;
-    return p;
+    // Align size so we don't get unaligned memory access
+    size += 8 - (size % 8);
+
+    uintptr_t p = (uintptr_t)arena->ptr;
+    uintptr_t align_diff = p % 8;
+    /* printf("Alotted size so far: %d / %d, requested: %lu\n", */
+    /*        alloc_arena_bytes_used(arena), alloc_arena_bytes_free(arena), */
+    /*        size); */
+    assert((arena->ptr + size) < (arena->start + arena->size));
+    arena->ptr += size + align_diff;
+    return (void *)p;
 }
 
 uint32_t
@@ -54,7 +62,7 @@ fastalloc_free()
 }
 
 void *
-fastalloc_malloc(uint32_t size)
+fastalloc_malloc(size_t size)
 {
     return alloc_arena_malloc(&scratchpad_arena, size);
 }

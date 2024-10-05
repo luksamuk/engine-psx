@@ -33,6 +33,8 @@ SoundEffect sfx_roll  = { 0 };
 SoundEffect sfx_dash  = { 0 };
 SoundEffect sfx_relea = { 0 };
 SoundEffect sfx_dropd = { 0 };
+SoundEffect sfx_ring  = { 0 };
+SoundEffect sfx_pop  = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -75,6 +77,8 @@ load_player(Player *player,
     if(sfx_dash.addr == 0)  sfx_dash  = sound_load_vag("\\SFX\\DASH.VAG;1");
     if(sfx_relea.addr == 0) sfx_relea = sound_load_vag("\\SFX\\RELEA.VAG;1");
     if(sfx_dropd.addr == 0) sfx_dropd = sound_load_vag("\\SFX\\DROPD.VAG;1");
+    if(sfx_ring.addr == 0)  sfx_ring = sound_load_vag("\\SFX\\RING.VAG;1");
+    if(sfx_pop.addr == 0)   sfx_pop = sound_load_vag("\\SFX\\POP.VAG;1");
 }
 
 void
@@ -150,8 +154,10 @@ player_set_frame_duration(Player *player, uint8_t duration)
 }
 
 void
-_player_collision_linecast(Player *player)
+player_update_collision(Player *player)
 {
+    player->push = 0;
+
     /* Collider linecasts */
     uint16_t
         anchorx = (player->pos.vx >> 12),
@@ -235,6 +241,22 @@ _player_collision_linecast(Player *player)
 
         LINE_F2 *line;
 
+        // Hitbox
+        POLY_F4 *hitbox = get_next_prim();
+        increment_prim(sizeof(POLY_F4));
+        setPolyF4(hitbox);
+        if(player->action == ACTION_ROLLING
+           || player->action == ACTION_JUMPING
+           || player->action == ACTION_SPINDASH
+           || player->action == ACTION_DROPDASH
+           || player->action == ACTION_CROUCHDOWN)
+        {
+            setXYWH(hitbox, ax - 8, ay - HEIGHT_RADIUS_ROLLING, 16, HEIGHT_RADIUS_ROLLING << 1);
+        } else
+            setXYWH(hitbox, ax - 8, ay - HEIGHT_RADIUS_NORMAL, 16, HEIGHT_RADIUS_NORMAL << 1);
+        setRGB0(hitbox, 0xfb, 0x94, 0xdc);
+        sort_prim(hitbox, 5); // behind player sprite
+
         // Ground sensor left
         line = get_next_prim();
         increment_prim(sizeof(LINE_F2));
@@ -301,11 +323,8 @@ _player_collision_linecast(Player *player)
 }
 
 void
-_player_collision_detection(Player *player)
+_player_handle_collision(Player *player)
 {
-    player->push = 0;
-    _player_collision_linecast(player);
-
     if(player->ev_right.collided && player->vel.vx > 0) {
         if(player->grnd) player->vel.vz = 0;
         else player->vel.vx = 0;
@@ -432,8 +451,7 @@ _player_collision_detection(Player *player)
 void
 player_update(Player *player)
 {
-    _player_collision_detection(player);
-
+    _player_handle_collision(player);
     // X movement
     /* Ground movement */
     if(player->grnd) {

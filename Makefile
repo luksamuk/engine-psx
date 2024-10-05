@@ -5,14 +5,16 @@ MAP16SRC  := $(shell ls ./assets/levels/**/map16.json)
 COL16SRC  := $(shell ls ./assets/levels/**/tiles16.tsx)
 MAP128SRC := $(shell ls ./assets/levels/**/tilemap128.tmx)
 LVLSRC    := $(shell ls ./assets/levels/**/Z*.tmx)
+MDLSRC    := $(shell ls ./assets/models/**/*.rsd)
 
 MAP16OUT  := $(addsuffix MAP16.MAP,$(dir $(MAP16SRC)))
 COL16OUT  := $(addsuffix MAP16.COL,$(dir $(COL16SRC)))
 MAP128OUT := $(addsuffix MAP128.MAP,$(dir $(COL16SRC)))
 LVLOUT    := $(addsuffix .LVL,$(basename $(LVLSRC)))
 OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
+MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
 
-.PHONY: clean ./build/engine.cue run configure chd cook iso elf debug cooktest purge
+.PHONY: clean ./build/engine.cue run configure chd cook iso elf debug cooktest purge rebuild repack packrun
 
 # Final product is CUE+BIN files
 all: iso
@@ -35,7 +37,6 @@ emu:
 # Run debugger
 debug:
 	gdb-multiarch
-
 
 # =======================================
 #  Targets for executable building
@@ -73,19 +74,30 @@ clean:
 purge: clean cleancook
 	rm -rf *.chd
 
+# Clean everything and recreate iso
+rebuild: purge cook elf iso
+
+# Clean binaries and recreate iso
+repack: clean cook elf iso
+
+# Repack and run
+packrun: repack run
+
 # =======================================
 #         ASSET COOKING TARGETS
 # =======================================
 
+mdls:   $(MDLOUT)
 map16:  $(MAP16OUT) $(COL16OUT)
 map128: $(MAP128OUT)
 lvl:    $(LVLOUT)
 objs:   $(OMPOUT)
 
-cook: map16 map128 lvl objs
+cook: mdls map16 map128 lvl objs
 
 cleancook:
-	rm -rf assets/levels/**/*.COL \
+	rm -rf assets/models/**/*.mdl \
+	       assets/levels/**/*.COL \
 	       assets/levels/**/*.MAP \
 	       assets/levels/**/*.LVL \
 	       assets/levels/**/*.OMP \
@@ -94,6 +106,10 @@ cleancook:
 	       assets/levels/**/tilemap128.csv \
 	       assets/levels/**/tilemap128_solid.csv \
 	       assets/levels/**/tilemap128_oneway.csv
+
+# Object models
+%.mdl: %.rsd %.ply %.mat
+	./tools/convrsd/convrsd.py $<
 
 # 16x16 tile mapping
 # (Depends on mapping generated on Aseprite)

@@ -107,7 +107,7 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
                     od.fragment.offsety = offset[1]
                     frag_animations = frag["animations"]
                     frag_animations.sort(key=lambda x: x.get("id"))
-                    for data in animations:
+                    for data in frag_animations:
                         od.fragment.animations.append(_parse_animation(data))
 
             # if collision:
@@ -161,7 +161,7 @@ def parse_object_group(
         p.flipx = bool(gid & (1 << 31))
         p.flipy = bool(gid & (1 << 30))
         p.rotcw = int(float(obj.get("rotation", 0))) == 90
-        p.rotccw = int(float(obj.get("rotation", 0))) == -90
+        p.rotct = int(float(obj.get("rotation", 0))) == -90
         props = obj.find("properties")
         if props:
             if p.otype == ObjectId.MONITOR.value:

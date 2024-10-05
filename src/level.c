@@ -5,9 +5,11 @@
 #include "render.h"
 #include "memalloc.h"
 
+#include "object.h"
+
 #define MAX_TILES 1400
 
-static ArenaAllocator _level_arena = { 0 };
+ArenaAllocator _level_arena = { 0 };
 static uint8_t _arena_mem[LEVEL_ARENA_SIZE];
 
 extern int debug_mode;
@@ -174,17 +176,22 @@ load_lvl(LevelData *lvl, const char *filename)
     lvl->num_layers = get_byte(bytes, &b);
     lvl->_unused0 = 0; b += 1;
 
+    uint16_t max_tiles = 0;
+
     lvl->layers = alloc_arena_malloc(&_level_arena, lvl->num_layers * sizeof(LevelLayerData));
     for(uint8_t n_layer = 0; n_layer < lvl->num_layers; n_layer++) {
         LevelLayerData *layer = &lvl->layers[n_layer];
         layer->width = get_byte(bytes, &b);
         layer->height = get_byte(bytes, &b);
         uint16_t num_tiles = (uint16_t)layer->width * (uint16_t)layer->height;
+        if(num_tiles > max_tiles) max_tiles = num_tiles;
         layer->tiles = alloc_arena_malloc(&_level_arena, num_tiles * sizeof(uint16_t));
         for(uint16_t i = 0; i < num_tiles; i++) {
             layer->tiles[i] = get_short_be(bytes, &b);
         }
     }
+
+    free(bytes);
 
     // These values are static because we're always using the same
     // coordinates for tpage and clut info. For some reason they're
@@ -196,7 +203,12 @@ load_lvl(LevelData *lvl, const char *filename)
     //lvl->clutmode = 0; // NOTE: This was set to tim->mode previously.
     lvl->_unused1 = 0;
 
-    free(bytes);
+    // Initialize object state array within level map
+    printf("Allocating object array\n");
+    lvl->objects = alloc_arena_malloc(&_level_arena, max_tiles * sizeof(ChunkObjectData *));
+    for(uint16_t i = 0; i < max_tiles; i++) {
+        lvl->objects[i] = NULL;
+    }
 }
 
 // Level sprite buffer.
@@ -365,9 +377,134 @@ prepare_renderer(LevelData *lvl)
     _current_spritebuf = 0;
 }
 
+inline int32_t
+get_chunk_pos(int32_t vx, int32_t vy, int32_t lvlwidth, int32_t lvlheight)
+{
+    int32_t cx = vx >> 7;
+    int32_t cy = vy >> 7;
+    int32_t chunk_pos;
+    if((cx < 0) || (cx >= lvlwidth)) chunk_pos = -1;
+    else if((cy < 0) || (cy >= lvlheight)) chunk_pos = -1;
+    else chunk_pos = (cy * lvlwidth) + cx;
+
+    return chunk_pos;
+}
+
+void
+_render_obj(ObjectState *obj, ObjectTableEntry *typedata,
+            int32_t cx, int32_t cy, int32_t tx, int32_t ty)
+{
+    if((obj->props & OBJ_FLAG_DESTROYED) || (obj->props & OBJ_FLAG_INVISIBLE))
+        return;
+
+    // cx = camera center x
+    // cy = camera center y
+    // tx = chunk x index on map
+    // ty = chunk y index on map
+
+    // Calculate object center/bottom
+    int16_t vx = (int16_t)(tx << 7) + obj->rx;
+    int16_t vy = (int16_t)(ty << 7) + obj->ry;
+
+    // Now that vx and vy are the world's absolute world positions,
+    // all we need to do is subtrack the camera position from it
+
+    // Calculate screen position
+    cx -= CENTERX; cy -= CENTERY;
+    int16_t px = vx - cx;
+    int16_t py = vy - cy;
+
+    // TODO: THIS IS A DEBUG RENDER!
+    // CHANGE THIS TO AN ACTUAL OBJECT RENDER WITH PROPER
+    // ANIMATION CONTROLS. ^u^
+    object_render(obj, typedata, px, py);
+
+    // Debug render
+    if(debug_mode > 1) {
+        POLY_F4 *poly = (POLY_F4 *)get_next_prim();
+        setPolyF4(poly);
+        increment_prim(sizeof(POLY_F4));
+        if(obj->id == 0)
+            setRGB0(poly, 128, 128, 0);
+        else setRGB0(poly, 128, 0, 0);
+        if(obj->id == 0)
+            setXYWH(poly, px - 8, py - 8 - 32, 16, 16);
+        else setXYWH(poly, px - 8, py - 8, 16, 16);
+        sort_prim(poly, 4); // 4 = back sprite and character layer
+    }
+}
+
+void
+update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y)
+{
+    cam_x = cam_x >> 12;
+    cam_y = cam_y >> 12;
+    for(int32_t i = 0; i < 5; i++) {
+        int32_t new_cam_x = cam_x - 256 + (i * 128);
+
+        for(int32_t j = 0; j < 5; j++) {
+            int32_t new_cam_y = cam_y - 256 + (j * 128);
+
+            int32_t cx = new_cam_x >> 7;
+            int32_t cy = new_cam_y >> 7;
+            int32_t chunk_pos;
+            if((cx < 0) || (cx >= lvl->layers[0].width)) chunk_pos = -1;
+            else if((cy < 0) || (cy >= lvl->layers[0].height)) chunk_pos = -1;
+            else chunk_pos = (cy * lvl->layers[0].width) + cx;
+
+            if(chunk_pos > 0) {
+                ChunkObjectData *objdata = lvl->objects[chunk_pos];
+                if(objdata) {
+                    for(uint8_t k = 0; k < objdata->num_objects; k++) {
+                        ObjectState *obj = &objdata->objects[k];
+                        ObjectTableEntry *typedata = &tbl->entries[obj->id];
+                        VECTOR pos = {
+                            .vx = (int32_t)(cx << 7) + (int32_t)obj->rx,
+                            .vy = (int32_t)(cy << 7) + (int32_t)obj->ry,
+                            .vz = 0
+                        };
+                        object_update(obj, typedata, &pos);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void
+_render_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cx, int32_t cy)
+{
+    int32_t chunk;
+    int32_t w = lvl->layers[0].width;
+    int32_t h = lvl->layers[0].height;
+
+#define _DO_RENDER(x, y)                                                 \
+    chunk = get_chunk_pos(x, y, w, h);                                   \
+    if(chunk > 0) {                                                      \
+        ChunkObjectData *objdata = lvl->objects[chunk];                  \
+        if(objdata) {                                                    \
+            for(uint8_t i = 0; i < objdata->num_objects; i++) {          \
+                ObjectState *obj = &objdata->objects[i];                 \
+                ObjectTableEntry *typedata = &tbl->entries[obj->id];     \
+                _render_obj(obj, typedata, cx, cy, (x) >> 7, (y) >> 7);  \
+            }                                                            \
+        }                                                                \
+    }
+
+    // Render a 5x5 grid of objects.
+    for(int32_t i = 0; i < 5; i++) {
+        int32_t new_cx = cx - 256 + (i * 128);
+        for(int32_t j = 0; j < 5; j++) {
+            int32_t new_cy = cy - 256 + (j * 128);
+            _DO_RENDER(new_cx, new_cy);
+        }
+    }
+}
+
 void
 render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
+    ObjectTable *tbl,
     int32_t cam_x, int32_t cam_y)
 {
     _numsprites = 0;
@@ -384,5 +521,8 @@ render_lvl(
     increment_prim(sizeof(DR_TPAGE));
     setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
     sort_prim(tpage, OT_LENGTH - 1);
+
+    // Render objects on nearest window
+    _render_obj_window(lvl, tbl, cx, cy);
 }
 

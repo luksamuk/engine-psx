@@ -9,7 +9,7 @@
 #include "input.h"
 #include "screen.h"
 #include "sound.h"
-#include "object.h"
+/* #include "model.h" */
 
 #include "screens/fmv.h"
 #include "screens/level.h"
@@ -68,7 +68,7 @@ typedef struct {
     VECTOR  scale;
     MATRIX  world;
 
-    Model planet;
+    /* Model planet; */
 } screen_title_data;
 
 #define MENU_MAX_OPTION 3
@@ -113,7 +113,7 @@ screen_title_load()
     data->prl_pos[0] = 32 << 12; // Island center
 
     // Planet model
-    /* load_model(&data->planet, "\\OBJS\\COMMON\\RING.MDL;1"); */
+    /* load_model(&data->planet, "\\MODELS\\COMMON\\RING.MDL;1"); */
     /* data->planet.rot.vx = 0x478; */
     /* data->planet.pos.vz = 4288; */
     /* data->planet.pos.vx = 2048; */

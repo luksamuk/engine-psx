@@ -10,7 +10,6 @@
 #include "screens/fmv.h"
 #include "screens/level.h"
 
-#include "object.h"
 #include <stdio.h>
 
 extern int debug_mode;
@@ -24,7 +23,7 @@ void
 screen_disclaimer_load()
 {
     screen_disclaimer_data *data = screen_alloc(sizeof(screen_disclaimer_data));
-    uint32_t length;
+    uint32_t length; // 153624 B
     data->disclaimer_bg = file_read("\\MISC\\DISK.TIM;1", &length);
     data->disclaimer_timer = 0;
 }

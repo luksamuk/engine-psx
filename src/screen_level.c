@@ -14,20 +14,22 @@
 #include "screen.h"
 #include "level.h"
 #include "timer.h"
+#include "model.h"
 #include "object.h"
 
 extern int debug_mode;
 
 static uint8_t level = 0;
-static uint8_t paused = 0;
 static uint8_t music_channel = 0;
 
-static Player player;
-
-TileMap16  map16;
-TileMap128 map128;
-LevelData  leveldata;
-Camera     camera;
+// Accessible in other source
+Player      player;
+uint8_t     paused = 0;
+TileMap16   map16;
+TileMap128  map128;
+LevelData   leveldata;
+Camera      camera;
+ObjectTable obj_table_common;
 
 #define CHANNELS_PER_BGM    3
 static uint32_t bgm_loop_sectors[] = {
@@ -83,15 +85,19 @@ void
 screen_level_load()
 {
     screen_level_data *data = screen_alloc(sizeof(screen_level_data));
-    /* load_model(&data->ring, "\\OBJS\\COMMON\\RING.MDL"); */
+    /* load_model(&data->ring, "\\MODELS\\COMMON\\RING.MDL"); */
 
     /* data->ring.pos.vz = 0x12c0; */
     /* data->ring.rot.vx = 0x478; */
     /* data->ring.scl.vx = data->ring.scl.vy = data->ring.scl.vz = 0x200; */
 
+    camera_init(&camera);
+
     level_load_player();
     level_load_level();
     camera_set(&camera, player.pos.vx, player.pos.vy);
+
+    reset_elapsed_frames();
 }
 
 void
@@ -170,7 +176,18 @@ screen_level_update(void *d)
     }
 
     camera_update(&camera, &player);
+    player_update_collision(&player);
+    update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
     player_update(&player);
+
+
+    // FAKE LEVEL TRANSITION!!!
+    if(level < 4) {
+        if(player.pos.vx >= camera.max_x + (CENTERX << 12)) {
+            screen_level_setlevel(level + 1);
+            scene_change(SCREEN_LEVEL);
+        }
+    }
 }
 
 void
@@ -192,7 +209,7 @@ screen_level_draw(void *d)
         
     /* render_model(&data->ring); */
 
-    render_lvl(&leveldata, &map128, &map16, camera.pos.vx, camera.pos.vy);
+    render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
 
     // Gouraud-shaded cube
     /* RotMatrix(&rotation, &world); */
@@ -242,31 +259,31 @@ screen_level_draw(void *d)
                  get_frame_rate());
         draw_text(248, 12, 0, buffer);
 
-        // Sound debug
         if(debug_mode > 1) {
+            // Sound debug
             uint32_t elapsed_sectors;
             sound_xa_get_elapsed_sectors(&elapsed_sectors);
             snprintf(buffer, 255, "%08u", elapsed_sectors);
             draw_text(248, 20, 0, buffer);
-        }
 
-        // Player debug
-        snprintf(buffer, 255,
-                 "GSP %08x\n"
-                 "SPD %08x %08x\n"
-                 "ANG %04x\n"
-                 "POS %08x %08x\n"
-                 "ACT %02u\n"
-                 "REV %08x\n"
-                 ,
-                 player.vel.vz,
-                 player.vel.vx, player.vel.vy,
-                 player.angle,
-                 player.pos.vx, player.pos.vy,
-                 player.action,
-                 player.spinrev
-            );
-        draw_text(8, 12, 0, buffer);
+            // Player debug
+            snprintf(buffer, 255,
+                     "GSP %08x\n"
+                     "SPD %08x %08x\n"
+                     "ANG %04x\n"
+                     "POS %08x %08x\n"
+                     "ACT %02u\n"
+                     "REV %08x\n"
+                     ,
+                     player.vel.vz,
+                     player.vel.vx, player.vel.vy,
+                     player.angle,
+                     player.pos.vx, player.pos.vy,
+                     player.action,
+                     player.spinrev
+                );
+            draw_text(8, 12, 0, buffer);
+        }
     }
 }
 
@@ -356,13 +373,29 @@ level_load_level()
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
 
+    // Load common objects
+    printf("Loading common object texture...\n");
+    file_read("\\LEVELS\\COMMON\\OBJ.TIM;1", &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    }
+
+    printf("Loading common object table...\n");
+    load_object_table("\\LEVELS\\COMMON\\OBJ.OTD;1", &obj_table_common);
+
+    // Load level objects
+    // TODO
+
+    // Load object positioning on level
+    snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, (level & 0x01) + 1);
+    load_object_placement(filename0, &leveldata);
+
 
     // Pre-allocate and initialize level primitive buffer
     prepare_renderer(&leveldata);
 
     level_debrief();
-
-    camera_init(&camera);
 
     // Level 0 Zone 2 actually has background sound effects
     /* if(level == 1) { */

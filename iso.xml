@@ -121,16 +121,16 @@
 
       </dir> <!-- LEVELS -->
 
-      <dir name="OBJS">
+      <dir name="MODELS">
 	<dir name="COMMON">
 	  <file name="RING.MDL"
 		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/objs/common/ring.mdl" />
-	  <file name="PLANET.MDL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/objs/common/planet.mdl" />
+		source="${PROJECT_SOURCE_DIR}/assets/models/common/ring.mdl" />
+	  <!-- <file name="PLANET.MDL" -->
+	  <!-- 	type="data" -->
+	  <!-- 	source="${PROJECT_SOURCE_DIR}/assets/models/common/planet.mdl" /> -->
 	</dir> <!-- COMMON -->
-      </dir> <!-- OBJS -->
+      </dir> <!-- MODELS -->
 
       <dir name="MISC">
 	<file name="DISK.TIM"
@@ -163,6 +163,9 @@
 	<file name="DROPD.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/DROPD.VAG" />
+	<file name="POP.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/POP.VAG" />
 	<!-- <file name="RAIN.VAG" -->
 	<!--       type="data" -->
 	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/RAIN.VAG" /> -->
