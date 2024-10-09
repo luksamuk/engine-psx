@@ -9,6 +9,7 @@ from datatypes import *
 def _parse_animation(data) -> ObjectAnimation:
     anim = ObjectAnimation()
     anim.loopback = data["loopback"]
+    anim.duration = data["duration"]
     for fr in data["frames"]:
         frame = Frame()
         fr_get = lambda i: (fr[i] == 1) if i < len(fr) else False

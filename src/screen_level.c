@@ -181,13 +181,13 @@ screen_level_update(void *d)
     player_update(&player);
 
 
-    // FAKE LEVEL TRANSITION!!!
-    if(level < 4) {
-        if(player.pos.vx >= camera.max_x + (CENTERX << 12)) {
-            screen_level_setlevel(level + 1);
-            scene_change(SCREEN_LEVEL);
-        }
-    }
+    /* // FAKE LEVEL TRANSITION!!! */
+    /* if(level < 4) { */
+    /*     if(player.pos.vx >= camera.max_x + (CENTERX << 12)) { */
+    /*         screen_level_setlevel(level + 1); */
+    /*         scene_change(SCREEN_LEVEL); */
+    /*     } */
+    /* } */
 }
 
 void
@@ -293,6 +293,12 @@ void
 screen_level_setlevel(uint8_t menuchoice)
 {
     level = menuchoice;
+}
+
+uint8_t
+screen_level_getlevel(void)
+{
+    return level;
 }
 
 

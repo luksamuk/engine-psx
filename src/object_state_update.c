@@ -7,9 +7,15 @@
 #include "player.h"
 #include "collision.h"
 #include "sound.h"
+#include "camera.h"
+#include "render.h"
+
+#include "screen.h"
+#include "screens/level.h"
 
 // Extern elements
 extern Player player;
+extern Camera camera;
 extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
 
@@ -77,9 +83,36 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 static void
 _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
-    if(state->anim_state.animation == 0 && (pos->vx <= (player.pos.vx >> 12))) {
-        state->anim_state.animation = 1;
-        state->anim_state.frame = 0;
+    if(state->anim_state.animation == 0) {
+        if(pos->vx <= (player.pos.vx >> 12)) {
+            state->anim_state.animation = 1;
+            state->anim_state.frame = 0;
+            camera_set_left_bound(&camera, ((pos->vx + 80) << 12));
+            state->timer = 180;
+        }
+    } else if(state->anim_state.animation == 1) {
+        state->timer--;
+        if(state->timer < 0) {
+            // Set animation according to character
+            state->anim_state.animation = 2;
+            state->timer = 360; // 6-seconds music
+            sound_play_xa("\\BGM\\EVENT001.XA;1", 0, 0, 0);
+        }
+    } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {
+        state->timer--;
+        if(state->timer < 0) {
+            printf("Timer: %d, animation: %d\n",
+                   state->timer,
+                   state->anim_state.animation);
+            uint8_t lvl = screen_level_getlevel();
+            // TODO: This is temporary and goes only upto R2Z1
+            if(lvl >= 4) {
+                scene_change(SCREEN_COMINGSOON);
+            } else {
+                screen_level_setlevel(lvl + 1);
+                scene_change(SCREEN_LEVEL);
+            }
+        }
     }
 }
 

@@ -57,7 +57,7 @@ typedef struct {
     ObjectAnimFrame *frames;
     uint16_t        num_frames;
     int8_t          loopback;
-    // TODO: Animation speed (animation frames per game frame)
+    uint8_t         duration;
 } ObjectAnim;
 
 typedef struct {

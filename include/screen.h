@@ -10,6 +10,7 @@ typedef enum {
     SCREEN_FMV,
     SCREEN_TITLE,
     SCREEN_MODELTEST,
+    SCREEN_COMINGSOON,
 } ScreenIndex;
 
 void scene_change(ScreenIndex scr);

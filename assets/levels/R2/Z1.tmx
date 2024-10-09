@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="10" nextobjectid="128">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="10" nextobjectid="130">
  <editorsettings>
   <export target="../../../../../Z1.json" format="json"/>
  </editorsettings>
@@ -163,6 +163,16 @@
    <object id="125" gid="136" x="5596" y="736" width="64" height="64"/>
    <object id="126" gid="137" x="4864" y="916" width="64" height="64" rotation="90"/>
    <object id="127" gid="138" x="5696" y="978" width="64" height="64" rotation="90"/>
+   <object id="128" gid="134" x="9136" y="1156" width="64" height="64">
+    <properties>
+     <property name="Kind" value="SPEEDSHOES"/>
+    </properties>
+   </object>
+   <object id="129" gid="134" x="48" y="325" width="64" height="64">
+    <properties>
+     <property name="Kind" value="1UP"/>
+    </properties>
+   </object>
   </objectgroup>
  </group>
 </map>

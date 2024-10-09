@@ -139,6 +139,9 @@
 	<file name="LOAD.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/LOAD.TIM" />
+	<file name="SOON.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/SOON.TIM" />
       </dir>
 
       <dir name="SFX">
@@ -184,11 +187,12 @@
 	<file name="BGM002.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM002.XA" />
-	<!-- Evening Star Remix by EggWard (CoffeeBean6149) -->
-	<!-- Amen Break Remixed Loop 1 by u_ul6ysm8501, found on pixabay.com -->
 	<file name="MNU001.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/MNU001.XA" />
+	<file name="EVENT001.XA"
+	      type="xa"
+	      source="${PROJECT_SOURCE_DIR}/assets/bgm/EVENT001.XA" />
       </dir>
 
       <file name="INTRO.STR"

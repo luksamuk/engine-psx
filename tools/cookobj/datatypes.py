@@ -64,6 +64,7 @@ class ObjectId(Enum):
 #   - Animations:
 #     - num_frames (u16)
 #     - loopback_frame (s8)
+#     - duration of a frame (u8)
 #     - Frames:
 #       - u0 (u8)
 #       - v0 (u8)
@@ -99,10 +100,12 @@ class Frame:
 class ObjectAnimation:
     frames: [Frame] = field(default_factory=list)
     loopback: int = 0
+    duration: int = 0
 
     def write_to(self, f):
         f.write(c_ushort(len(self.frames)))
         f.write(c_byte(self.loopback))
+        f.write(c_ubyte(self.duration))
         for frame in self.frames:
             frame.write_to(f)
 

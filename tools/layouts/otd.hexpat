@@ -30,6 +30,7 @@ struct Frame {
 struct ObjectAnimation {
     be u16 num_frames;
     s8 loopback_frame;
+    u8 duration;
     Frame frames[num_frames];
 };
 

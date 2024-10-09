@@ -151,20 +151,18 @@ object_render(ObjectState *state, ObjectTableEntry *typedata,
     uint8_t in_fragment = 0;
 
 begin_render_routine:
-    // TODO: Replace with variable within ObjectAnim
-    const uint8_t anim_duration = 6;
 
     if(state->props & OBJ_FLAG_ANIM_LOCK) {
         uint32_t frame = get_elapsed_frames();
-        if(anim_duration > 0) {
-            frame = (frame / anim_duration);
+        if(an->duration > 0) {
+            frame = (frame / an->duration);
             if(an->loopback >= 0) frame %= an->num_frames;
         }
         anim->frame = (uint8_t)frame;
     } else if(!paused) {
         if(anim->counter == 0) {
             anim->frame++;
-            anim->counter = anim_duration;
+            anim->counter = an->duration;
         } else anim->counter--;
     }
 

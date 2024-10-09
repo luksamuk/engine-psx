@@ -13,11 +13,13 @@ typedef struct {
     uint8_t delay;
     uint8_t lag;
     int32_t max_x;
+    int32_t min_x;
 } Camera;
 
 void camera_init(Camera *);
 void camera_update(Camera *, Player *);
 void camera_set(Camera *, int32_t vx, int32_t vy);
 void camera_set_right_bound(Camera *, int32_t vx);
+void camera_set_left_bound(Camera *, int32_t vx);
 
 #endif

@@ -33,6 +33,7 @@ typedef struct {
     uint8_t flipmask;
     uint8_t props;
     int16_t rx, ry; // Positions relative to chunk top-left corner
+    int16_t timer;
     void    *extra;
 
     ObjectAnimState anim_state;

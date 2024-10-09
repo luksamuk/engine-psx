@@ -13,6 +13,7 @@ _load_animation(ObjectAnim *animation, uint8_t *bytes, uint32_t *b)
     animation->frames = NULL;
     animation->num_frames = get_short_be(bytes, b);
     animation->loopback   = get_byte(bytes, b);
+    animation->duration   = get_byte(bytes, b);
     if(animation->num_frames > 0) {
         animation->frames = alloc_arena_malloc(
             &_level_arena,

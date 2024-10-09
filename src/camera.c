@@ -28,6 +28,7 @@ camera_init(Camera *c)
     c->delay = 0;
     c->lag = 0;
     c->max_x = CAMERAX_MAX;
+    c->min_x = CENTERX_FIXP;
 }
 
 void
@@ -121,7 +122,7 @@ camera_update(Camera *c, Player *player)
     c->pos.vx = c->realpos.vx + c->extension_x;
     c->pos.vy = c->realpos.vy + c->extension_y;
 
-    if(c->pos.vx < CENTERX_FIXP) c->pos.vx = CENTERX_FIXP;
+    if(c->pos.vx < c->min_x) c->pos.vx = c->min_x;
     else if(c->pos.vx > c->max_x) c->pos.vx = c->max_x;
 
     if(c->pos.vy < CENTERY_FIXP) c->pos.vy = CENTERY_FIXP;
@@ -139,5 +140,10 @@ void
 camera_set_right_bound(Camera *c, int32_t vx)
 {
     c->max_x = vx - (CENTERX_FIXP >> 1);
-    printf("Set camera max position to %08x\n", c->max_x);
+}
+
+void
+camera_set_left_bound(Camera *c, int32_t vx)
+{
+    c->min_x = vx - (CENTERX_FIXP >> 1);
 }

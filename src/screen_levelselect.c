@@ -15,7 +15,8 @@
 #define CHOICE_TITLE     6
 #define CHOICE_SONICT    7
 #define CHOICE_INTRO     8
-#define MAX_LEVELS   (CHOICE_INTRO + 1)
+#define CHOICE_SOON      9
+#define MAX_LEVELS   (CHOICE_SOON + 1)
 
 typedef struct {
     uint8_t menu_choice;
@@ -72,6 +73,8 @@ screen_levelselect_update(void *d)
                 scene_change(SCREEN_FMV);
             } else if(data->menu_choice == CHOICE_MODELTEST) {
                 scene_change(SCREEN_MODELTEST);
+            } else if(data->menu_choice == CHOICE_SOON) {
+                scene_change(SCREEN_COMINGSOON);
             } else {
                 screen_level_setlevel(data->menu_choice);
                 scene_change(SCREEN_LEVEL);
@@ -111,11 +114,11 @@ screen_levelselect_draw(void *d)
         "\n"
         "\n"
         "\n"
-        "\n"
         "%c MODEL TEST\n"
         "%c TITLE\n"
-        "%c FMV:SONICT\n"
-        "%c FMV:INTRO",
+        "%c SONICTEAM\n"
+        "%c INTRO\n"
+        "%c COMING SOON",
         (data->menu_choice == 0) ? '>' : ' ',
         (data->menu_choice == 1) ? '>' : ' ',
         (data->menu_choice == 2) ? '>' : ' ',
@@ -124,7 +127,8 @@ screen_levelselect_draw(void *d)
         (data->menu_choice == CHOICE_MODELTEST) ? '>' : ' ',
         (data->menu_choice == CHOICE_TITLE) ? '>' : ' ',
         (data->menu_choice == CHOICE_SONICT) ? '>' : ' ',
-        (data->menu_choice == CHOICE_INTRO) ? '>' : ' ');
+        (data->menu_choice == CHOICE_INTRO) ? '>' : ' ',
+        (data->menu_choice == CHOICE_SOON) ? '>' : ' ');
     draw_text(8, 36, 0, data->buffer);
 }
 
