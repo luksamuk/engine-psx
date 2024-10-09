@@ -241,22 +241,6 @@ player_update_collision(Player *player)
 
         LINE_F2 *line;
 
-        // Hitbox
-        POLY_F4 *hitbox = get_next_prim();
-        increment_prim(sizeof(POLY_F4));
-        setPolyF4(hitbox);
-        if(player->action == ACTION_ROLLING
-           || player->action == ACTION_JUMPING
-           || player->action == ACTION_SPINDASH
-           || player->action == ACTION_DROPDASH
-           || player->action == ACTION_CROUCHDOWN)
-        {
-            setXYWH(hitbox, ax - 8, ay - HEIGHT_RADIUS_ROLLING, 16, HEIGHT_RADIUS_ROLLING << 1);
-        } else
-            setXYWH(hitbox, ax - 8, ay - HEIGHT_RADIUS_NORMAL, 16, HEIGHT_RADIUS_NORMAL << 1);
-        setRGB0(hitbox, 0xfb, 0x94, 0xdc);
-        sort_prim(hitbox, 5); // behind player sprite
-
         // Ground sensor left
         line = get_next_prim();
         increment_prim(sizeof(LINE_F2));

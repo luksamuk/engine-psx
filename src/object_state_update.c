@@ -18,6 +18,7 @@ extern Player player;
 extern Camera camera;
 extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
+extern int debug_mode;
 
 // Update functions
 static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
@@ -31,6 +32,20 @@ static int32_t player_height = HEIGHT_RADIUS_NORMAL << 1;
 static uint8_t player_attacking;
 
 void
+_draw_player_hitbox()
+{
+    uint16_t
+        rel_vx = player_vx - (camera.pos.vx >> 12) + CENTERX,
+        rel_vy = player_vy - (camera.pos.vy >> 12) + CENTERY;
+    POLY_F4 *hitbox = get_next_prim();
+    increment_prim(sizeof(POLY_F4));
+    setPolyF4(hitbox);
+    setXYWH(hitbox, rel_vx, rel_vy, 16, player_height);
+    setRGB0(hitbox, 0xfb, 0x94, 0xdc);
+    sort_prim(hitbox, 5);
+}
+
+void
 object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     if(state->props & OBJ_FLAG_DESTROYED) return;
@@ -38,12 +53,18 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // Calculate top left corner of player AABB.
     // Note that player data is in fixed-point format!
     player_vx = (player.pos.vx >> 12) - 8;
-    player_vy = (player.pos.vy >> 12) - HEIGHT_RADIUS_NORMAL;
-
     player_attacking = (player.action == ACTION_JUMPING ||
                         player.action == ACTION_ROLLING ||
                         player.action == ACTION_SPINDASH ||
                         player.action == ACTION_DROPDASH);
+    player_height = (player_attacking
+                     ? HEIGHT_RADIUS_ROLLING
+                     : HEIGHT_RADIUS_NORMAL) << 1;
+    player_vy = (player.pos.vy >> 12) - (player_height >> 1);
+
+    if(debug_mode > 1) {
+        _draw_player_hitbox();
+    }
 
     switch(state->id) {
     default: break;
@@ -101,9 +122,6 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {
         state->timer--;
         if(state->timer < 0) {
-            printf("Timer: %d, animation: %d\n",
-                   state->timer,
-                   state->anim_state.animation);
             uint8_t lvl = screen_level_getlevel();
             // TODO: This is temporary and goes only upto R2Z1
             if(lvl >= 4) {
@@ -115,7 +133,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         }
     }
 }
-
+#include "timer.h"
 static void
 _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
@@ -123,24 +141,24 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         // Calculate solidity
         int32_t solidity_vx = pos->vx - 16;
         int32_t solidity_vy = pos->vy - 32; // Monitor is a 32x32 solid box
+
+        int32_t hitbox_vx = pos->vx - 14;
+        int32_t hitbox_vy = pos->vy - 32; // Monitor hitbox is a 30x32 solid box
         
         // Perform collision detection
         if(aabb_intersects(solidity_vx, solidity_vy, 32, 32,
                            player_vx, player_vy, player_width, player_height))
         {
-            if(player_attacking) {
-                if((player.grnd && (abs(player.vel.vx) != 0)) ||
-                   (!player.grnd &&
-                    (((player_vy + player_height < pos->vy) && player.vel.vy > 0)
-                     || (player_vy + (player_height >> 1) > pos->vy)))) {
-                    state->anim_state.animation = 1;
-                    state->anim_state.frame = 0;
-                    state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
-                    sound_play_vag(sfx_pop, 0);
+            if(aabb_intersects(hitbox_vx, hitbox_vy, 30, 32,
+                               player_vx, player_vy, player_width, player_height)
+               && player_attacking) {
+                state->anim_state.animation = 1;
+                state->anim_state.frame = 0;
+                state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+                sound_play_vag(sfx_pop, 0);
 
-                    if(!player.grnd && player.vel.vy > 0) {
-                        player.vel.vy *= -1;
-                    }
+                if(!player.grnd && player.vel.vy > 0) {
+                    player.vel.vy *= -1;
                 }
             } else {
                 // Landing on top
