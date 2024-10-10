@@ -6,3 +6,6 @@ for f in *.ogg; do
 	rm "${f%%.ogg}.WAV";
 done
 
+for f in *.wav; do
+	wav2vag "$f" "${f%%.wav}.VAG";
+done
