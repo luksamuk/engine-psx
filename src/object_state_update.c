@@ -18,12 +18,14 @@ extern Player player;
 extern Camera camera;
 extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
+extern SoundEffect sfx_sprn;
 extern int debug_mode;
 
 // Update functions
 static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 static void _goal_sign_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 static void _monitor_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
+static void _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red);
 
 // Player hitbox information. Calculated once per frame.
 static int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -68,9 +70,11 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
     switch(state->id) {
     default: break;
-    case OBJ_RING:      _ring_update(state, typedata, pos);               break;
-    case OBJ_GOAL_SIGN: _goal_sign_update(state, typedata, pos);          break;
-    case OBJ_MONITOR:   _monitor_update(state, typedata, pos);            break;
+    case OBJ_RING:          _ring_update(state, typedata, pos);          break;
+    case OBJ_GOAL_SIGN:     _goal_sign_update(state, typedata, pos);     break;
+    case OBJ_MONITOR:       _monitor_update(state, typedata, pos);       break;
+    case OBJ_SPRING_YELLOW: _spring_update(state, typedata, pos, 0);     break;
+    case OBJ_SPRING_RED:    _spring_update(state, typedata, pos, 1);     break;
     }
 }
 
@@ -133,7 +137,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         }
     }
 }
-#include "timer.h"
+
 static void
 _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
@@ -142,14 +146,14 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         int32_t solidity_vx = pos->vx - 16;
         int32_t solidity_vy = pos->vy - 32; // Monitor is a 32x32 solid box
 
-        int32_t hitbox_vx = pos->vx - 14;
-        int32_t hitbox_vy = pos->vy - 32; // Monitor hitbox is a 30x32 solid box
+        int32_t hitbox_vx = pos->vx - 12;
+        int32_t hitbox_vy = pos->vy - 32; // Monitor hitbox is a 28x32 solid box
         
         // Perform collision detection
         if(aabb_intersects(solidity_vx, solidity_vy, 32, 32,
                            player_vx, player_vy, player_width, player_height))
         {
-            if(aabb_intersects(hitbox_vx, hitbox_vy, 30, 32,
+            if(aabb_intersects(hitbox_vx, hitbox_vy, 28, 32,
                                player_vx, player_vy, player_width, player_height)
                && player_attacking) {
                 state->anim_state.animation = 1;
@@ -182,5 +186,58 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 }
             }
         }
+    }
+}
+
+static void
+_spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
+{
+    // Let's start with a single, simple edge case: a spring upwards.
+    if(state->flipmask != 0) return;
+
+    if(state->anim_state.animation == 0) {
+        int32_t solidity_vx = pos->vx - 16;
+        int32_t solidity_vy = pos->vy - 16; // Spring is 32x16 solid
+
+        ObjectCollision collision_side =
+            hitbox_collision(player_vx, player_vy, player_width, player_height,
+                             solidity_vx, solidity_vy, 32, 16);
+
+        switch(collision_side) {
+        default: return;
+        case OBJ_SIDE_LEFT:
+            player.ev_right = (CollisionEvent) {
+                .collided = 1,
+                .coord = solidity_vx + 2,
+                .angle = 0
+            };
+            break;
+        case OBJ_SIDE_RIGHT:
+            player.ev_left = (CollisionEvent) {
+                .collided = 1,
+                .coord = (solidity_vx + 15),
+                .angle = 0
+            };
+            break;
+        case OBJ_SIDE_TOP:
+        case OBJ_SIDE_BOTTOM:
+            /* player.ev_grnd1 = player.ev_grnd2 = (CollisionEvent) { */
+            /*     .collided = 1, */
+            /*     .coord = solidity_vy, */
+            /*     .angle = 0 */
+            /* }; */
+            if(player.vel.vy > 0) {
+                player.grnd = 0;
+                player.vel.vy = is_red ? -0x10000 : -0xa000;
+                player.angle = 0;
+                player.action = 0;
+                state->anim_state.animation = 1;
+                sound_play_vag(sfx_sprn, 0);
+            }
+            break;
+        }
+    } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION) {
+        state->anim_state.animation = 0;
+        state->anim_state.frame = 0;
     }
 }

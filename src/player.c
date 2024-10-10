@@ -34,7 +34,8 @@ SoundEffect sfx_dash  = { 0 };
 SoundEffect sfx_relea = { 0 };
 SoundEffect sfx_dropd = { 0 };
 SoundEffect sfx_ring  = { 0 };
-SoundEffect sfx_pop  = { 0 };
+SoundEffect sfx_pop   = { 0 };
+SoundEffect sfx_sprn  = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -77,8 +78,9 @@ load_player(Player *player,
     if(sfx_dash.addr == 0)  sfx_dash  = sound_load_vag("\\SFX\\DASH.VAG;1");
     if(sfx_relea.addr == 0) sfx_relea = sound_load_vag("\\SFX\\RELEA.VAG;1");
     if(sfx_dropd.addr == 0) sfx_dropd = sound_load_vag("\\SFX\\DROPD.VAG;1");
-    if(sfx_ring.addr == 0)  sfx_ring = sound_load_vag("\\SFX\\RING.VAG;1");
-    if(sfx_pop.addr == 0)   sfx_pop = sound_load_vag("\\SFX\\POP.VAG;1");
+    if(sfx_ring.addr == 0)  sfx_ring  = sound_load_vag("\\SFX\\RING.VAG;1");
+    if(sfx_pop.addr == 0)   sfx_pop   = sound_load_vag("\\SFX\\POP.VAG;1");
+    if(sfx_sprn.addr == 0)  sfx_sprn   = sound_load_vag("\\SFX\\SPRN.VAG;1");
 }
 
 void
