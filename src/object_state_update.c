@@ -13,6 +13,9 @@
 #include "screen.h"
 #include "screens/level.h"
 
+// Adler32 sums of player animation names
+#define ANIM_WALKING    0x0854020e
+
 // Extern elements
 extern Player player;
 extern Camera camera;
@@ -232,6 +235,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
                 player.angle = 0;
                 player.action = 0;
                 state->anim_state.animation = 1;
+                player_set_animation_direct(&player, ANIM_WALKING);
                 sound_play_vag(sfx_sprn, 0);
             }
             break;
