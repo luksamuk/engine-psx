@@ -11,6 +11,7 @@
 #include "screens/fmv.h"
 #include "sound.h"
 #include "util.h"
+#include "timer.h"
 
 #define CHOICE_MODELTEST 5
 #define CHOICE_TITLE     6
@@ -57,7 +58,7 @@ screen_levelselect_load()
     data->bg_state = 0;
     data->bg_timer = BG_PAUSE;
     
-    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0);
+    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0); // 2600
 }
 
 void
@@ -109,39 +110,54 @@ screen_levelselect_update(void *d)
 
     if(pad_pressed(PAD_DOWN))
             data->menu_choice++;
-        else if(pad_pressed(PAD_UP)) {
-            if(data->menu_choice == 0) data->menu_choice = MAX_LEVELS - 1;
-            else data->menu_choice--;
-        }
+    else if(pad_pressed(PAD_UP)) {
+        if(data->menu_choice == 0) data->menu_choice = MAX_LEVELS - 1;
+        else data->menu_choice--;
+    }
 
-        data->menu_choice = (data->menu_choice % MAX_LEVELS);
-
-        if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
-            if(data->menu_choice == CHOICE_TITLE) {
-                scene_change(SCREEN_TITLE);
-            } else if(data->menu_choice == CHOICE_INTRO) {
-                screen_fmv_set_next(SCREEN_LEVELSELECT);
-                screen_fmv_enqueue("\\INTRO.STR;1");
-                scene_change(SCREEN_FMV);
-            } else if(data->menu_choice == CHOICE_SONICT) {
-                screen_fmv_set_next(SCREEN_LEVELSELECT);
-                screen_fmv_enqueue("\\SONICT.STR;1");
-                scene_change(SCREEN_FMV);
-            } else if(data->menu_choice == CHOICE_MODELTEST) {
-                scene_change(SCREEN_MODELTEST);
-            } else if(data->menu_choice == CHOICE_SOON) {
-                scene_change(SCREEN_COMINGSOON);
-            } else {
-                screen_level_setlevel(data->menu_choice);
-                scene_change(SCREEN_LEVEL);
-            }
+    data->menu_choice = (data->menu_choice % MAX_LEVELS);
+        
+    if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
+        if(data->menu_choice == CHOICE_TITLE) {
+            scene_change(SCREEN_TITLE);
+        } else if(data->menu_choice == CHOICE_INTRO) {
+            screen_fmv_set_next(SCREEN_LEVELSELECT);
+            screen_fmv_enqueue("\\INTRO.STR;1");
+            scene_change(SCREEN_FMV);
+        } else if(data->menu_choice == CHOICE_SONICT) {
+            screen_fmv_set_next(SCREEN_LEVELSELECT);
+            screen_fmv_enqueue("\\SONICT.STR;1");
+            scene_change(SCREEN_FMV);
+        } else if(data->menu_choice == CHOICE_MODELTEST) {
+            scene_change(SCREEN_MODELTEST);
+        } else if(data->menu_choice == CHOICE_SOON) {
+            scene_change(SCREEN_COMINGSOON);
+        } else {
+            screen_level_setlevel(data->menu_choice);
+            scene_change(SCREEN_LEVEL);
         }
+    }
+
+    uint32_t elapsed_sectors;
+    sound_xa_get_elapsed_sectors(&elapsed_sectors);
+    if(elapsed_sectors >= 2600) sound_stop_xa();
 }
 
 void
 screen_levelselect_draw(void *d)
 {
     screen_levelselect_data *data = (screen_levelselect_data *)d;
+
+    if(debug_mode) {
+        uint32_t elapsed_sectors;
+        sound_xa_get_elapsed_sectors(&elapsed_sectors);
+        FntPrint(-1, "BRANCH: %-21s %4s %3d\n",
+                 GIT_COMMIT,
+                 GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
+                 get_frame_rate());
+        FntPrint(-1, "                              %08u\n", elapsed_sectors);
+        FntFlush(-1);
+    }
 
     // Draw background
     for(uint16_t y = 0; y < SCREEN_YRES; y += 32) {

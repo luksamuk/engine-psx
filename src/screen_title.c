@@ -10,9 +10,12 @@
 #include "screen.h"
 #include "sound.h"
 /* #include "model.h" */
+#include "timer.h"
 
 #include "screens/fmv.h"
 #include "screens/level.h"
+
+extern int debug_mode;
 
 typedef struct {
     int32_t prect_x;
@@ -122,6 +125,7 @@ screen_title_load()
     /*     data->planet.scl.vy = */
     /*     data->planet.scl.vz = 2048; */
 
+    printf("Commit: %s:%s\n", GIT_SHA1, GIT_REFSPEC);
 
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 1, 0);
 
@@ -138,7 +142,16 @@ screen_title_unload(void *)
 void
 screen_title_update(void *d)
 {
+    if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
+       (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
+        debug_mode = (debug_mode + 1) % 3;
+    }
+
     screen_title_data *data = (screen_title_data *)d;
+
+    uint32_t elapsed_sectors;
+    sound_xa_get_elapsed_sectors(&elapsed_sectors);
+    if(elapsed_sectors >= 950) sound_stop_xa();
 
     /* data->planet.rot.vz -= 24; */
 
@@ -355,6 +368,21 @@ screen_title_draw(void *d)
                     LERPC(data->rgb_count, 104),
                     LERPC(data->rgb_count, 200));
 
+    char buffer[255] = { 0 };
+
+    if(debug_mode) {
+        uint32_t elapsed_sectors;
+        sound_xa_get_elapsed_sectors(&elapsed_sectors);
+        FntPrint(-1, "BRANCH: %-21s %4s %3d\n",
+                 GIT_COMMIT,
+                 GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
+                 get_frame_rate());
+        FntPrint(-1, "%11s %8s          %08u\n",
+                 __DATE__, __TIME__, elapsed_sectors);
+        FntFlush(-1);
+    }
+
+
     
     screen_title_drawtitle(data);
     screen_title_drawprl(data);
@@ -370,9 +398,10 @@ screen_title_draw(void *d)
                 screen_title_drawtxt(data, 5, CENTERX + 60, 208);
         }
 
-        char buffer[255] = { 0 };
-        snprintf(buffer, 255, "%s %s", __DATE__, __TIME__);
-        int16_t x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
-        draw_text(x, SCREEN_YRES - 16, 0, buffer);
+        int16_t x;
+
+        snprintf(buffer, 255, "v0.1 Beta");
+        x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
+        draw_text(x, SCREEN_YRES - 14, 0, buffer);
     }
 }

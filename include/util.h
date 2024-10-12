@@ -4,6 +4,20 @@
 #include <psxgpu.h>
 #include <psxgte.h>
 
+// These definitions should be given by CMake
+#ifndef GIT_SHA1
+#define GIT_SHA1 "UNKNOWN"
+#endif
+
+#ifndef GIT_REFSPEC
+#define GIT_REFSPEC "UNKNOWN"
+#endif
+
+#ifndef GIT_COMMIT
+#define GIT_COMMIT "UNKNOWN"
+#endif
+
+
 #define BCD_TO_DEC(x) (((x & 0xF0) >> 4) * 10 + (x & 0x0F))
 #define SIGNUM(x) (x < 0 ? -1 : 1)
 #define MAX(x, y) (x > y ? x : y)
