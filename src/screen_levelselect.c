@@ -22,12 +22,20 @@
 typedef struct {
     uint8_t menu_choice;
     char buffer[255];
-    int32_t bg_prect_x;
-    int32_t bg_prect_y;
-    uint8_t bg_mode;
+    int32_t  bg_prect_x;
+    int32_t  bg_prect_y;
+    uint8_t  bg_mode;
+    uint8_t  bg_frame;
+    uint8_t  bg_state;
+    uint16_t bg_timer;
 } screen_levelselect_data;
 
 extern int debug_mode;
+
+
+#define BG_PAUSE  90
+#define BG_FPS    4
+#define BG_FRAMES 4
 
 void
 screen_levelselect_load()
@@ -44,6 +52,10 @@ screen_levelselect_load()
     data->bg_prect_x = bg.prect->x;
     data->bg_prect_y = bg.prect->y;
     free(img);
+
+    data->bg_frame = 0;
+    data->bg_state = 0;
+    data->bg_timer = BG_PAUSE;
     
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0);
 }
@@ -64,6 +76,36 @@ screen_levelselect_update(void *d)
     }
 
     screen_levelselect_data *data = (screen_levelselect_data *)d;
+
+
+    if((data->bg_state == 0) || (data->bg_state == 2)) {
+        data->bg_timer--;
+        if(data->bg_timer == 0) {
+            data->bg_state++;
+            data->bg_timer = BG_FPS;
+        }
+    } else if(data->bg_state == 1) {
+        data->bg_timer--;
+        if(data->bg_timer == 0) {
+            data->bg_frame++;
+            data->bg_timer = BG_FPS;
+            if(data->bg_frame == BG_FRAMES - 1) {
+                data->bg_state++;
+                data->bg_timer = BG_PAUSE;
+            }
+        }
+    } else if(data->bg_state == 3) {
+        data->bg_timer--;
+        if(data->bg_timer == 0) {
+            data->bg_frame--;
+            data->bg_timer = BG_FPS;
+            if(data->bg_frame == 0) {
+                data->bg_state = 0;
+                data->bg_timer = BG_PAUSE;
+            }
+        }
+    }
+    
 
     if(pad_pressed(PAD_DOWN))
             data->menu_choice++;
@@ -114,7 +156,7 @@ screen_levelselect_draw(void *d)
                                    data->bg_prect_y);
             poly->clut = 0;
             setXYWH(poly, x, y, 48, 32);
-            setUVWH(poly, 0, 0, 48, 32);
+            setUVWH(poly, 0, 32 * data->bg_frame, 48, 32);
             sort_prim(poly, 3);
         }
     }

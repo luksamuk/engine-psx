@@ -79,7 +79,7 @@ screen_modeltest_update(void *d)
     }
 
     if(pad_pressed(PAD_SELECT)) {
-        scene_change(SCREEN_TITLE);
+        scene_change(SCREEN_LEVELSELECT);
     }
 }
 
