@@ -7,5 +7,7 @@ for f in *.ogg; do
 done
 
 for f in *.wav; do
-	wav2vag "$f" "${f%%.wav}.VAG";
+	ffmpeg -y -i "$f" -acodec pcm_s16le -ac 1 -ar 22050 "${f%%.wav}_2.WAV";
+	wav2vag "${f%%.wav}_2.WAV" "${f%%.wav}.VAG";
+	rm "${f%%.wav}_2.WAV";
 done

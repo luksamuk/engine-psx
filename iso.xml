@@ -172,15 +172,6 @@
 	<file name="SPRN.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SPRN.VAG" />
-	<!-- <file name="RAIN.VAG" -->
-	<!--       type="data" -->
-	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/RAIN.VAG" /> -->
-	<!-- <file name="THUNDER1.VAG" -->
-	<!--       type="data" -->
-	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/THUNDER1.VAG" /> -->
-	<!-- <file name="THUNDER2.VAG" -->
-	<!--       type="data" -->
-	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/THUNDER2.VAG" /> -->
       </dir>
 
       <dir name="BGM">
