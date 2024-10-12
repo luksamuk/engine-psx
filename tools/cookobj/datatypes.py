@@ -11,12 +11,14 @@ c_int = c_int.__ctype_be__
 class DummyObjectId(Enum):
     RING_3H = -1
     RING_3V = -2
+    STARTPOS = -3
 
     @staticmethod
     def get(name):
         switch = {
             "ring_3h": DummyObjectId.RING_3H,
             "ring_3v": DummyObjectId.RING_3V,
+            "startpos": DummyObjectId.STARTPOS,
         }
         result = switch.get(name.lower())
         assert result is not None, f"Unknown dummy object {name}"

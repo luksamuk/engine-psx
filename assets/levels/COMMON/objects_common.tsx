@@ -48,4 +48,5 @@
  </tile>
  <tile id="10" type="ring_3v"/>
  <tile id="11" type="goal_sign"/>
+ <tile id="12" type="startpos"/>
 </tileset>

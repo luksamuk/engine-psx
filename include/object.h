@@ -9,6 +9,7 @@
 
 typedef enum {
     // Dummy objects
+    OBJ_DUMMY_STARTPOS         = -3,
     OBJ_DUMMY_RINGS_3V         = -2,
     OBJ_DUMMY_RINGS_3H         = -1,
 

@@ -13,6 +13,7 @@
 
 extern ArenaAllocator _level_arena;
 extern uint8_t        paused;
+extern Player         player;
 extern Camera         camera;
 
 void
@@ -124,6 +125,11 @@ load_object_placement(const char *filename, void *lvl_data)
                 _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy, NULL);
                 _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx + 24, vy, NULL);
                 created_objects += 3;
+                break;
+            case OBJ_DUMMY_STARTPOS:
+                // Initialize player at position
+                player.startpos = (VECTOR){ .vx = vx << 12, .vy = (vy - 8) << 12, .vz = 0 };
+                player.pos = player.startpos;
                 break;
             default: break;
             }

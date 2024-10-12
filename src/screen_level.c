@@ -169,7 +169,7 @@ screen_level_update(void *d)
     /* --------- */
 
     if(pad_pressed(PAD_SELECT)) {
-        player.pos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
+        player.pos = player.startpos;
         player.grnd = 0;
         player.anim_dir = 1;
         player.vel.vx = player.vel.vy = player.vel.vz = 0;
@@ -316,7 +316,8 @@ level_load_player()
     }
 
     load_player(&player, "\\SPRITES\\SONIC.CHARA;1", &tim);
-    player.pos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
+    player.startpos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
+    player.pos = player.startpos;
 }
 
 static void

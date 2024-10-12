@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="5" nextobjectid="26">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="5" nextobjectid="27">
  <tileset firstgid="1" source="128x128.tsx"/>
- <tileset firstgid="37" source="../COMMON/objects_common.tsx"/>
+ <tileset firstgid="45" source="../COMMON/objects_common.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
   <data encoding="csv">
 24,0,0,10,9,12,12,12,9,9,9,9,9,9,9,9,9,9,9,9,12,8,0,0,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,23,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -39,38 +39,39 @@
  </layer>
  <group id="3" name="OBJECTS">
   <objectgroup id="4" name="COMMON">
-   <object id="1" gid="48" x="7584" y="1408" width="64" height="64"/>
-   <object id="2" gid="45" x="799" y="511.5" width="64" height="64"/>
-   <object id="3" gid="2147483691" x="3152" y="768" width="64" height="64"/>
-   <object id="4" gid="43" x="2928" y="640" width="64" height="64"/>
-   <object id="5" gid="2147483691" x="3152" y="576" width="64" height="64"/>
-   <object id="6" gid="43" x="2928" y="512" width="64" height="64"/>
-   <object id="7" gid="38" x="2800" y="384" width="64" height="64">
+   <object id="1" gid="56" x="7584" y="1408" width="64" height="64"/>
+   <object id="2" gid="53" x="799" y="511.5" width="64" height="64"/>
+   <object id="3" gid="2147483699" x="3152" y="768" width="64" height="64"/>
+   <object id="4" gid="51" x="2928" y="640" width="64" height="64"/>
+   <object id="5" gid="2147483699" x="3152" y="576" width="64" height="64"/>
+   <object id="6" gid="51" x="2928" y="512" width="64" height="64"/>
+   <object id="7" gid="46" x="2800" y="384" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="9" gid="1073741865" x="624" y="688" width="64" height="64"/>
-   <object id="10" gid="41" x="128" y="592" width="64" height="64" rotation="90"/>
-   <object id="19" gid="47" x="305" y="929" width="64" height="64"/>
-   <object id="20" gid="38" x="978" y="768" width="64" height="64">
+   <object id="9" gid="1073741873" x="624" y="688" width="64" height="64"/>
+   <object id="10" gid="49" x="128" y="592" width="64" height="64" rotation="90"/>
+   <object id="19" gid="55" x="305" y="929" width="64" height="64"/>
+   <object id="20" gid="46" x="978" y="768" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="21" gid="45" x="1055" y="1159" width="64" height="64"/>
-   <object id="22" gid="45" x="1887" y="1030" width="64" height="64"/>
-   <object id="23" gid="38" x="3088" y="192" width="64" height="64">
+   <object id="21" gid="53" x="1055" y="1159" width="64" height="64"/>
+   <object id="22" gid="53" x="1887" y="1030" width="64" height="64"/>
+   <object id="23" gid="46" x="3088" y="192" width="64" height="64">
     <properties>
      <property name="Kind" value="SHIELD"/>
     </properties>
    </object>
-   <object id="24" gid="38" x="801" y="416" width="64" height="64">
+   <object id="24" gid="46" x="801" y="416" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="25" gid="40" x="3355" y="320" width="64" height="64"/>
+   <object id="25" gid="48" x="3355" y="320" width="64" height="64"/>
+   <object id="26" gid="57" x="256" y="640" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

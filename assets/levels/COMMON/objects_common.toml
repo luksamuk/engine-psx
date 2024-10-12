@@ -317,3 +317,6 @@ dummy = true
 
 [ring_3v]
 dummy = true
+
+[startpos]
+dummy = true

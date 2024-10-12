@@ -75,6 +75,8 @@ typedef struct {
     CollisionEvent ev_right;
     CollisionEvent ev_ceil1;
     CollisionEvent ev_ceil2;
+
+    VECTOR startpos;
 } Player;
 
 void load_player(Player *player, const char *chara_filename, TIM_IMAGE  *sprites);
