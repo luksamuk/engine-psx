@@ -30,6 +30,10 @@ run: ./build/engine.cue
 		-run -interpreter -fastboot -stdout \
 		-iso ./build/engine.cue
 
+# Target for running the image on Mednafen
+mednafen: ./build/engine.cue
+	mednafen $<
+
 # Run PCSX-Redux emulator
 emu:
 	2>/dev/null 1>&2 pcsx-redux -gdb -gdb-port 3333 -run -interpreter -fastboot &

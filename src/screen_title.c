@@ -125,7 +125,7 @@ screen_title_load()
 
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 1, 0);
 
-    set_clear_color(56, 104, 200);
+    set_clear_color(0, 0, 0);
 }
 
 void
@@ -269,7 +269,7 @@ screen_title_drawprl(screen_title_data *data)
             POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
             increment_prim(sizeof(POLY_FT4));
             setPolyFT4(poly);
-            setRGB0(poly, 128, 128, 128);
+            setRGB0(poly, data->rgb_count, data->rgb_count, data->rgb_count);
             poly->tpage = getTPage(
                 data->props_prl.mode & 0x3,
                 0,
@@ -306,7 +306,7 @@ screen_title_drawcld(screen_title_data *data)
 
         POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
         setPolyFT4(poly);
-        setRGB0(poly, 128, 128, 128);
+        setRGB0(poly, data->rgb_count, data->rgb_count, data->rgb_count);
         poly->tpage = getTPage(
             data->props_cld.mode & 0x3,
             0,
@@ -345,10 +345,17 @@ screen_title_drawcld(screen_title_data *data)
     }
 }
 
+#define LERPC(bg, c) ((c * bg) / 128)
+
 void
 screen_title_draw(void *d)
-{
+{   
     screen_title_data *data = (screen_title_data *)d;
+    set_clear_color(LERPC(data->rgb_count, 56),
+                    LERPC(data->rgb_count, 104),
+                    LERPC(data->rgb_count, 200));
+
+    
     screen_title_drawtitle(data);
     screen_title_drawprl(data);
     screen_title_drawcld(data);
