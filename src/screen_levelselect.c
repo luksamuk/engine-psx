@@ -10,6 +10,7 @@
 #include "screens/level.h"
 #include "screens/fmv.h"
 #include "sound.h"
+#include "util.h"
 
 #define CHOICE_MODELTEST 5
 #define CHOICE_TITLE     6
@@ -21,6 +22,9 @@
 typedef struct {
     uint8_t menu_choice;
     char buffer[255];
+    int32_t bg_prect_x;
+    int32_t bg_prect_y;
+    uint8_t bg_mode;
 } screen_levelselect_data;
 
 extern int debug_mode;
@@ -31,6 +35,16 @@ screen_levelselect_load()
     screen_levelselect_data *data = screen_alloc(sizeof(screen_levelselect_data));
     data->menu_choice = 0;
     bzero(data->buffer, 255);
+
+    uint32_t length;
+    TIM_IMAGE bg;
+    uint8_t *img = file_read("\\MISC\\LVLSEL.TIM;1", &length);
+    load_texture(img, &bg);
+    data->bg_mode = bg.mode;
+    data->bg_prect_x = bg.prect->x;
+    data->bg_prect_y = bg.prect->y;
+    free(img);
+    
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0);
 }
 
@@ -86,7 +100,26 @@ void
 screen_levelselect_draw(void *d)
 {
     screen_levelselect_data *data = (screen_levelselect_data *)d;
+
+    // Draw background
+    for(uint16_t y = 0; y < SCREEN_YRES; y += 32) {
+        for(uint16_t x = 0; x < SCREEN_XRES; x += 48) {
+            POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+            increment_prim(sizeof(POLY_FT4));
+            setPolyFT4(poly);
+            setRGB0(poly, 128, 128, 128);
+            poly->tpage = getTPage(data->bg_mode & 0x3,
+                                   0,
+                                   data->bg_prect_x,
+                                   data->bg_prect_y);
+            poly->clut = 0;
+            setXYWH(poly, x, y, 48, 32);
+            setUVWH(poly, 0, 0, 48, 32);
+            sort_prim(poly, 3);
+        }
+    }
     
+    // Draw text
     int16_t x;
     const char *title = "Level Select";
     x = CENTERX - (strlen(title) * 4);
@@ -129,6 +162,6 @@ screen_levelselect_draw(void *d)
         (data->menu_choice == CHOICE_SONICT) ? '>' : ' ',
         (data->menu_choice == CHOICE_INTRO) ? '>' : ' ',
         (data->menu_choice == CHOICE_SOON) ? '>' : ' ');
-    draw_text(8, 36, 0, data->buffer);
+    draw_text(8, 40, 0, data->buffer);
 }
 

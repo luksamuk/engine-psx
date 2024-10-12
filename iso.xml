@@ -142,6 +142,9 @@
 	<file name="SOON.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/SOON.TIM" />
+	<file name="LVLSEL.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/LVLSEL.TIM" />
       </dir>
 
       <dir name="SFX">
