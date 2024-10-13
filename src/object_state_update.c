@@ -197,12 +197,16 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 static void
 _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
 {
-    // Let's start with a single, simple edge case: a spring upwards.
-    if(state->flipmask != 0) return;
+    // Only allow simple cases (normal and Y-flipped)
+    if(state->flipmask & (MASK_FLIP_ROTCW | MASK_FLIP_ROTCT)) return;
 
     if(state->anim_state.animation == 0) {
         int32_t solidity_vx = pos->vx - 16;
         int32_t solidity_vy = pos->vy - 16; // Spring is 32x16 solid
+
+        if(state->flipmask & MASK_FLIP_FLIPY) {
+            solidity_vy -= 48;
+        }
 
         ObjectCollision collision_side =
             hitbox_collision(player_vx, player_vy, player_width, player_height,
@@ -233,7 +237,11 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             /* }; */
             if(player.vel.vy > 0) {
                 player.grnd = 0;
-                player.vel.vy = is_red ? -0x10000 : -0xa000;
+
+                if(state->flipmask & MASK_FLIP_FLIPY) {
+                    player.vel.vy = is_red ? 0x10000 : 0xa000;
+                } else player.vel.vy = is_red ? -0x10000 : -0xa000;
+
                 player.angle = 0;
                 player.action = 0;
                 state->anim_state.animation = 1;
