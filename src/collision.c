@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <assert.h>
 
+// Debug-only stuff
+#include "render.h"
+#include "camera.h"
+extern int debug_mode;
+extern Camera camera;
+
 void
 _move_point_linecast(uint8_t direction, int32_t vx, int32_t vy,
                      int32_t *lx, int32_t *ly,
@@ -216,6 +222,20 @@ aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,
              (a_bottom < b_vy) || (a_vy > b_bottom));
 }
 
+void
+_draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h)
+{
+    uint16_t
+        rel_vx = vx - (camera.pos.vx >> 12) + CENTERX,
+        rel_vy = vy - (camera.pos.vy >> 12) + CENTERY;
+    POLY_F4 *hitbox = get_next_prim();
+    increment_prim(sizeof(POLY_F4));
+    setPolyF4(hitbox);
+    setSemiTrans(hitbox, 1);
+    setXYWH(hitbox, rel_vx, rel_vy, w, h);
+    setRGB0(hitbox, 0x40, 0xd2, 0x25);
+    sort_prim(hitbox, 3); // Object layer
+}
 
 ObjectCollision
 hitbox_collision(int32_t p_vx, int32_t p_vy, int32_t pw, int32_t ph,
@@ -225,6 +245,8 @@ hitbox_collision(int32_t p_vx, int32_t p_vy, int32_t pw, int32_t ph,
     int32_t player_y = p_vy + (ph >> 1);
     int32_t obj_x = o_vx + (ow >> 1);
     int32_t obj_y = o_vy + (oh >> 1);
+
+    if(debug_mode > 1) _draw_collision_hitbox(o_vx, o_vy, ow, oh);
 
     // Check for overlap
     int32_t combined_x_radius = (ow >> 1) + (pw >> 1) + 1;

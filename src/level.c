@@ -416,31 +416,33 @@ _render_obj(ObjectState *obj, ObjectTableEntry *typedata,
     int16_t px = vx - cx;
     int16_t py = vy - cy;
 
-    // TODO: THIS IS A DEBUG RENDER!
-    // CHANGE THIS TO AN ACTUAL OBJECT RENDER WITH PROPER
-    // ANIMATION CONTROLS. ^u^
-    object_render(obj, typedata, px, py);
-
     // Debug render
     if(debug_mode > 1) {
         POLY_F4 *poly = (POLY_F4 *)get_next_prim();
         setPolyF4(poly);
         increment_prim(sizeof(POLY_F4));
+        setSemiTrans(poly, 1);
         if(obj->id == 0)
             setRGB0(poly, 128, 128, 0);
         else setRGB0(poly, 128, 0, 0);
         if(obj->id == 0)
-            setXYWH(poly, px - 8, py - 8 - 32, 16, 16);
-        else setXYWH(poly, px - 8, py - 8, 16, 16);
-        sort_prim(poly, 4); // 4 = back sprite and character layer
+            setXYWH(poly, px - 4, py - 4 - 32, 8, 8);
+        else setXYWH(poly, px - 4, py - 4, 8, 8);
+        sort_prim(poly, 3); // 3 = front sprite and character layer
     }
+
+    object_render(obj, typedata, px, py);
 }
+
+extern int player_hitbox_shown;
 
 void
 update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y)
 {
     cam_x = cam_x >> 12;
     cam_y = cam_y >> 12;
+    player_hitbox_shown = 0;
+    
     for(int32_t i = 0; i < 5; i++) {
         int32_t new_cam_x = cam_x - 256 + (i * 128);
 
