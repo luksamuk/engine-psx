@@ -15,6 +15,7 @@ extern ArenaAllocator _level_arena;
 extern uint8_t        paused;
 extern Player         player;
 extern Camera         camera;
+extern uint8_t        level_fade;
 
 void
 _emplace_object(
@@ -221,7 +222,7 @@ begin_render_routine:
     POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
     increment_prim(sizeof(POLY_FT4));
     setPolyFT4(poly);
-    setRGB0(poly, 128, 128, 128);
+    setRGB0(poly, level_fade, level_fade, level_fade);
     
     if((flipmask & MASK_FLIP_FLIPX) && (flipmask & MASK_FLIP_FLIPY)) {
         setXYWH(poly, vx, vy, frame->w, frame->h);

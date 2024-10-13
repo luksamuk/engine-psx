@@ -128,7 +128,9 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         }
     } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {
         state->timer--;
-        if(state->timer < 0) {
+        if((state->timer < 0) && (screen_level_getstate() == 1)) {
+            screen_level_setstate(2);
+        } else if(screen_level_getstate() == 3) {
             uint8_t lvl = screen_level_getlevel();
             // TODO: This is temporary and goes only upto R2Z1
             if(lvl >= 4) {

@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+extern uint8_t level_fade;
+
 void
 load_chara(Chara *chara, const char *filename, TIM_IMAGE *tim)
 {
@@ -140,7 +142,7 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
             POLY_FT4 *poly = (POLY_FT4 *) get_next_prim();
             increment_prim(sizeof(POLY_FT4));
             setPolyFT4(poly);
-            setRGB0(poly, 128, 128, 128);
+            setRGB0(poly, level_fade, level_fade, level_fade);
             setTPage(poly, 0, 0, chara->prectx, chara->precty);
             setClut(poly, chara->crectx, chara->crecty);
             setXYWH(poly, xy0.vx, xy0.vy, 8, 8);

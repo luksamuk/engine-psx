@@ -10,5 +10,7 @@ void screen_level_draw(void *);
 
 void    screen_level_setlevel(uint8_t menuchoice);
 uint8_t screen_level_getlevel(void);
+void    screen_level_setstate(uint8_t state);
+uint8_t screen_level_getstate();
 
 #endif

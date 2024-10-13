@@ -358,8 +358,6 @@ screen_title_drawcld(screen_title_data *data)
     }
 }
 
-#define LERPC(bg, c) ((c * bg) / 128)
-
 void
 screen_title_draw(void *d)
 {   

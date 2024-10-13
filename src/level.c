@@ -13,6 +13,7 @@ ArenaAllocator _level_arena = { 0 };
 static uint8_t _arena_mem[LEVEL_ARENA_SIZE];
 
 extern int debug_mode;
+extern uint8_t level_fade;
 
 void
 level_init()
@@ -242,6 +243,7 @@ _render_8(
     SPRT_8 *sprt = &_sprites[_current_spritebuf ^ 1][_numsprites++];
     setXY0(sprt, vx, vy);
     setUV0(sprt, u0, v0);
+    if(sprt->r0 != level_fade) setRGB0(sprt, level_fade, level_fade, level_fade);
     sort_prim(sprt, otz);
 }
 
@@ -365,13 +367,13 @@ prepare_renderer(LevelData *lvl)
     for(int i = 0; i < MAX_TILES; i++) {
         SPRT_8 *sprt = &_sprites[0][i];
         setSprt8(sprt);
-        setRGB0(sprt, 128, 128, 128);
+        setRGB0(sprt, level_fade, level_fade, level_fade);
         setClut(sprt, lvl->crectx, lvl->crecty);
     }
     for(int i = 0; i < MAX_TILES; i++) {
         SPRT_8 *sprt = &_sprites[1][i];
         setSprt8(sprt);
-        setRGB0(sprt, 128, 128, 128);
+        setRGB0(sprt, level_fade, level_fade, level_fade);
         setClut(sprt, lvl->crectx, lvl->crecty);
     }
     _current_spritebuf = 0;

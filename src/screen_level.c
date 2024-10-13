@@ -30,6 +30,7 @@ TileMap128  map128;
 LevelData   leveldata;
 Camera      camera;
 ObjectTable obj_table_common;
+uint8_t     level_fade;
 
 #define CHANNELS_PER_BGM    3
 static uint32_t bgm_loop_sectors[] = {
@@ -75,16 +76,19 @@ static uint32_t bgm_loop_sectors[] = {
 // Forward function declarations
 static void level_load_player();
 static void level_load_level();
+static void level_set_clearcolor();
 
 // TODO!!!
 typedef struct {
     /* Model ring; */
+    uint8_t level_transition;
 } screen_level_data;
 
 void
 screen_level_load()
 {
     screen_level_data *data = screen_alloc(sizeof(screen_level_data));
+    data->level_transition = 0;
     /* load_model(&data->ring, "\\MODELS\\COMMON\\RING.MDL"); */
 
     /* data->ring.pos.vz = 0x12c0; */
@@ -98,11 +102,14 @@ screen_level_load()
     camera_set(&camera, player.pos.vx, player.pos.vy);
 
     reset_elapsed_frames();
+
+    level_fade = 0;
 }
 
 void
 screen_level_unload(void *)
 {
+    level_fade = 0;
     sound_stop_xa();
     level_reset();
     sound_reset_mem();
@@ -113,9 +120,26 @@ void
 screen_level_update(void *d)
 {
     screen_level_data *data = (screen_level_data *)d;
+
     if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
        (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
         debug_mode = (debug_mode + 1) % 3;
+    }
+
+    level_set_clearcolor();
+
+    // Manage fade in and fade out
+    if(data->level_transition == 0) { // Fade in
+        level_fade += 2;
+        if(level_fade >= 128) {
+            level_fade = 128;
+            data->level_transition = 1;
+        }
+    } else if(data->level_transition == 2) { // Fade out
+        level_fade -= 2;
+        if(level_fade == 0) {
+            data->level_transition = 3;
+        }
     }
 
     if(pad_pressed(PAD_START)) paused = !paused;
@@ -330,9 +354,7 @@ level_load_level()
 
     uint8_t round = level >> 1;
 
-    if(level == 4 || level == 5)
-        set_clear_color(26, 104, 200); // GHZ placeholder
-    else set_clear_color(63, 0, 127);
+    level_set_clearcolor();
 
     snprintf(basepath, 255, "\\LEVELS\\R%1u", round);
 
@@ -415,4 +437,28 @@ level_load_level()
     music_channel = level % CHANNELS_PER_BGM;
 
     sound_play_xa(filename0, 0, music_channel, bgm_loop_sectors[level]);
+}
+
+
+static void
+level_set_clearcolor()
+{
+    if(level == 4 || level == 5)
+        // GHZ placeholder
+        set_clear_color(LERPC(level_fade, 26), LERPC(level_fade, 104), LERPC(level_fade, 200));
+    else set_clear_color(LERPC(level_fade, 63), LERPC(level_fade, 0), LERPC(level_fade, 127));
+}
+
+void
+screen_level_setstate(uint8_t state)
+{
+    screen_level_data *data = screen_get_data();
+    data->level_transition = state;
+}
+
+uint8_t
+screen_level_getstate()
+{
+    screen_level_data *data = screen_get_data();
+    return data->level_transition;
 }

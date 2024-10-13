@@ -23,5 +23,6 @@ void scene_draw();
 
 void *screen_alloc(uint32_t size);
 void screen_free();
+void *screen_get_data();
 
 #endif

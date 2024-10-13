@@ -21,6 +21,10 @@
 //#define BUFFER_LENGTH 40960
 //#define BUFFER_LENGTH 65532
 
+// Lerp color with respect to background color (0-128) and target color
+// (useful for fade in and fade out)
+#define LERPC(bg, c) ((c * bg) / 128)
+
 /* Framebuffer/display list class */
 
 typedef struct {

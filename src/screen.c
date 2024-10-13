@@ -143,3 +143,9 @@ screen_free()
            alloc_arena_bytes_free(&screen_arena));
     alloc_arena_free(&screen_arena);
 }
+
+void *
+screen_get_data()
+{
+    return scene_data;
+}
