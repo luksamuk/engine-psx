@@ -16,6 +16,8 @@ typedef enum {
     OBJ_FLAG_DESTROYED = 0x1,
     OBJ_FLAG_INVISIBLE = 0x2,
     OBJ_FLAG_ANIM_LOCK = 0x4,
+
+    OBJ_FLAG_CHECKPOINT_ACTIVE = 0x8,
 } ObjectGeneralFlag;
 
 typedef struct {

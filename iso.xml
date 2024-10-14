@@ -175,6 +175,9 @@
 	<file name="SPRN.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SPRN.VAG" />
+	<file name="CHEK.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/CHEK.VAG" />
       </dir>
 
       <dir name="BGM">

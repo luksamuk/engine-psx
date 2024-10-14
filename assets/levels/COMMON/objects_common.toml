@@ -163,7 +163,7 @@ loopback = 0
 [[checkpoint.fragment.animations]]
 name = "active"
 id = 1
-duration = 2
+duration = 4
 frames = [
     [0, 48, 16, 16],
     [16, 48, 16, 16],
@@ -185,7 +185,7 @@ loopback = 0
 [[spring_yellow.animations]]
 name = "bounce"
 id = 1
-duration = 2
+duration = 4
 frames = [
     [80, 32, 32, 8],
     [80, 40, 32, 40],
@@ -206,7 +206,7 @@ loopback = 0
 [[spring_red.animations]]
 name = "bounce"
 id = 1
-duration = 2
+duration = 4
 frames = [
     [48, 32, 32, 8],
     [48, 40, 32, 40],
@@ -227,7 +227,7 @@ loopback = 0
 [[spring_yellow_diagonal.animations]]
 name = "bounce"
 id = 1
-duration = 2
+duration = 4
 frames = [
     [144, 80, 32, 32],
     [176, 80, 48, 48],
@@ -248,7 +248,7 @@ loopback = 0
 [[spring_red_diagonal.animations]]
 name = "bounce"
 id = 1
-duration = 2
+duration = 4
 frames = [
     [144, 32, 32, 32],
     [176, 32, 48, 48],

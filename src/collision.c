@@ -208,20 +208,6 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     return ev;
 }
 
-
-int
-aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,
-                int32_t b_vx, int32_t b_vy, int32_t bw, int32_t bh)
-{
-    int32_t a_right  = a_vx + aw;
-    int32_t a_bottom = a_vy + ah;
-    int32_t b_right  = b_vx + bw;
-    int32_t b_bottom = b_vy + bh;
-
-    return !((a_vx > b_right) || (a_right < b_vx) ||
-             (a_bottom < b_vy) || (a_vy > b_bottom));
-}
-
 void
 _draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h)
 {
@@ -237,12 +223,28 @@ _draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h)
     sort_prim(hitbox, 3); // Object layer
 }
 
+int
+aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,
+                int32_t b_vx, int32_t b_vy, int32_t bw, int32_t bh)
+{
+    if(debug_mode > 1) _draw_collision_hitbox(b_vx, b_vy, bw, bh);
+
+    int32_t a_right  = a_vx + aw;
+    int32_t a_bottom = a_vy + ah;
+    int32_t b_right  = b_vx + bw;
+    int32_t b_bottom = b_vy + bh;
+
+    return !((a_vx > b_right) || (a_right < b_vx) ||
+             (a_bottom < b_vy) || (a_vy > b_bottom));
+}
+
 ObjectCollision
 hitbox_collision(int32_t p_vx, int32_t p_vy, int32_t pw, int32_t ph,
                  int32_t o_vx, int32_t o_vy, int32_t ow, int32_t oh)
 {
     int32_t player_x = p_vx + (pw >> 1);
     int32_t player_y = p_vy + (ph >> 1);
+    
     int32_t obj_x = o_vx + (ow >> 1);
     int32_t obj_y = o_vy + (oh >> 1);
 
@@ -252,8 +254,8 @@ hitbox_collision(int32_t p_vx, int32_t p_vy, int32_t pw, int32_t ph,
     int32_t combined_x_radius = (ow >> 1) + (pw >> 1) + 1;
     int32_t combined_y_radius = (oh >> 1) + (ph >> 1);
 
-    int32_t combined_x_diameter = combined_x_radius << 1;
-    int32_t combined_y_diameter = combined_y_radius << 1;
+    int32_t combined_x_diameter = ow + pw + 1;
+    int32_t combined_y_diameter = oh + ph;
 
     int32_t left_difference = player_x - obj_x + combined_x_radius;
     if((left_difference < 0) || (left_difference > combined_x_diameter))
@@ -266,14 +268,14 @@ hitbox_collision(int32_t p_vx, int32_t p_vy, int32_t pw, int32_t ph,
     uint8_t is_right = player_x > obj_x;
     uint8_t is_bottom = player_y > obj_y;
 
-    int32_t x_distance = left_difference - (is_right ? ow : 0);
+    int32_t x_distance = left_difference - (is_right ? ow : 0) + 1;
     int32_t y_distance = top_difference - (is_bottom ? (4 + oh) : 0);
 
     ObjectCollision col;
     y_distance -= (oh >> 1);
     x_distance -= (ow >> 1);
     if(abs(x_distance) > abs(y_distance)) {
-        col = (y_distance < 0) ? OBJ_SIDE_TOP : OBJ_SIDE_BOTTOM;
+        col = (y_distance > 0) ? OBJ_SIDE_TOP : OBJ_SIDE_BOTTOM;
     }
     else {
         col = (x_distance < 0) ? OBJ_SIDE_LEFT : OBJ_SIDE_RIGHT;

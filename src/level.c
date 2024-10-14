@@ -422,12 +422,8 @@ _render_obj(ObjectState *obj, ObjectTableEntry *typedata,
         setPolyF4(poly);
         increment_prim(sizeof(POLY_F4));
         setSemiTrans(poly, 1);
-        if(obj->id == 0)
-            setRGB0(poly, 128, 128, 0);
-        else setRGB0(poly, 128, 0, 0);
-        if(obj->id == 0)
-            setXYWH(poly, px - 4, py - 4 - 32, 8, 8);
-        else setXYWH(poly, px - 4, py - 4, 8, 8);
+        setRGB0(poly, 128, 0, 0);
+        setXYWH(poly, px - 4, py - 4, 8, 8);
         sort_prim(poly, 3); // 3 = front sprite and character layer
     }
 

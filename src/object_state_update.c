@@ -22,6 +22,7 @@ extern Camera camera;
 extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
 extern SoundEffect sfx_sprn;
+extern SoundEffect sfx_chek;
 extern int debug_mode;
 
 // Update functions
@@ -29,6 +30,7 @@ static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR 
 static void _goal_sign_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 static void _monitor_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 static void _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red);
+static void _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos);
 
 // Player hitbox information. Calculated once per frame.
 static int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -70,7 +72,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     player_height = (player_attacking
                      ? HEIGHT_RADIUS_ROLLING
                      : HEIGHT_RADIUS_NORMAL) << 1;
-    player_vy = (player.pos.vy >> 12) - (player_height >> 1);
+    player_vy = (player.pos.vy >> 12) - (player_height >> 1) - 1;
 
     if(debug_mode > 1) {
         _draw_player_hitbox();
@@ -83,6 +85,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_MONITOR:       _monitor_update(state, typedata, pos);       break;
     case OBJ_SPRING_YELLOW: _spring_update(state, typedata, pos, 0);     break;
     case OBJ_SPRING_RED:    _spring_update(state, typedata, pos, 1);     break;
+    case OBJ_CHECKPOINT:    _checkpoint_update(state, typedata, pos);    break;
     }
 }
 
@@ -98,8 +101,8 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         // Calculate actual top left corner of ring AABB
         pos->vx -= 8;    pos->vy -= (8 + 32);
 
-        if(aabb_intersects(pos->vx, pos->vy, 16, 16,
-                           player_vx, player_vy, player_width, player_height))
+        if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                           pos->vx, pos->vy, 16, 16))
         {
             state->anim_state.animation = 1;
             state->anim_state.frame = 0;
@@ -160,11 +163,11 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         int32_t hitbox_vy = pos->vy - 32; // Monitor hitbox is a 28x32 solid box
         
         // Perform collision detection
-        if(aabb_intersects(solidity_vx, solidity_vy, 32, 32,
-                           player_vx, player_vy, player_width, player_height))
+        if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                           solidity_vx, solidity_vy, 32, 32))
         {
-            if(aabb_intersects(hitbox_vx, hitbox_vy, 28, 32,
-                               player_vx, player_vy, player_width, player_height)
+            if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                               hitbox_vx, hitbox_vy, 28, 32)
                && player_attacking) {
                 state->anim_state.animation = 1;
                 state->anim_state.frame = 0;
@@ -219,7 +222,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             solidity_w  = 16;
             solidity_h  = 32;
         } else if(state->flipmask & MASK_FLIP_FLIPY) {
-            solidity_vy -= 32;
+            solidity_vy -= 48;
         }
 
         ObjectCollision collision_side =
@@ -231,7 +234,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
         case OBJ_SIDE_LEFT:
             if(state->flipmask & MASK_FLIP_ROTCT) {
                 if(player.grnd) player.vel.vz = is_red ? -0x10000 : -0xa000;
-                else player.vel.vy = is_red ? -0x10000 : -0xa000;
+                else player.vel.vx = is_red ? -0x10000 : -0xa000;
                 player.ctrllock = 16;
                 player.anim_dir = -1;
                 state->anim_state.animation = 1;
@@ -239,7 +242,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             } else {
                 player.ev_right = (CollisionEvent) {
                     .collided = 1,
-                    .coord = solidity_vx + 2,
+                    .coord = solidity_vx + 1,
                     .angle = 0
                 };
             }
@@ -247,7 +250,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
         case OBJ_SIDE_RIGHT:
             if(state->flipmask & MASK_FLIP_ROTCW) {
                 if(player.grnd) player.vel.vz = is_red ? 0x10000 : 0xa000;
-                else player.vel.vy = is_red ? 0x10000 : 0xa000;
+                else player.vel.vx = is_red ? 0x10000 : 0xa000;
                 player.ctrllock = 16;
                 player.anim_dir = 1;
                 state->anim_state.animation = 1;
@@ -262,15 +265,13 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             break;
         case OBJ_SIDE_TOP:
             if(state->flipmask == 0) {
-                if(player.vel.vy > 0) {
-                    player.grnd = 0;
-                    player.vel.vy = is_red ? -0x10000 : -0xa000;
-                    player.angle = 0;
-                    player.action = 0;
-                    state->anim_state.animation = 1;
-                    player_set_animation_direct(&player, ANIM_WALKING);
-                    sound_play_vag(sfx_sprn, 0);
-                }
+                player.grnd = 0;
+                player.vel.vy = is_red ? -0x10000 : -0xa000;
+                player.angle = 0;
+                player.action = 0;
+                state->anim_state.animation = 1;
+                player_set_animation_direct(&player, ANIM_WALKING);
+                sound_play_vag(sfx_sprn, 0);
             } else {
                 player.ev_grnd1 = player.ev_grnd2 = (CollisionEvent) {
                     .collided = 1,
@@ -281,15 +282,13 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             break;
         case OBJ_SIDE_BOTTOM:
             if(state->flipmask & MASK_FLIP_FLIPY) {
-                if(player.vel.vy > 0) {
-                    player.grnd = 0;
-                    player.vel.vy = is_red ? 0x10000 : 0xa000;
-                    player.angle = 0;
-                    player.action = 0;
-                    state->anim_state.animation = 1;
-                    player_set_animation_direct(&player, ANIM_WALKING);
-                    sound_play_vag(sfx_sprn, 0);
-                }
+                player.grnd = 0;
+                player.vel.vy = is_red ? 0x10000 : 0xa000;
+                player.angle = 0;
+                player.action = 0;
+                state->anim_state.animation = 1;
+                player_set_animation_direct(&player, ANIM_WALKING);
+                sound_play_vag(sfx_sprn, 0);
             } else {
                 player.ev_ceil1 = player.ev_ceil2 = (CollisionEvent) {
                     .collided = 1,
@@ -302,5 +301,24 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
     } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION) {
         state->anim_state.animation = 0;
         state->anim_state.frame = 0;
+    }
+}
+
+
+static void
+_checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+{
+    if(!(state->props & OBJ_FLAG_CHECKPOINT_ACTIVE)) {
+        int32_t hitbox_vx = pos->vx - 8;
+        int32_t hitbox_vy = pos->vy - 48;
+
+        if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                           hitbox_vx, hitbox_vy, 16, 48))
+        {
+            state->props |= OBJ_FLAG_CHECKPOINT_ACTIVE;
+            state->frag_anim_state->animation = 1;
+            state->frag_anim_state->frame = 0;
+            sound_play_vag(sfx_chek, 0);
+        }
     }
 }
