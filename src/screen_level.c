@@ -443,8 +443,9 @@ level_load_level()
 static void
 level_set_clearcolor()
 {
-    if(level == 4 || level == 5)
-        // GHZ placeholder
+    if(level == 2 || level == 3)
+        set_clear_color(LERPC(level_fade, 145), LERPC(level_fade, 59), LERPC(level_fade, 59));
+    else if(level == 4 || level == 5)
         set_clear_color(LERPC(level_fade, 26), LERPC(level_fade, 104), LERPC(level_fade, 200));
     else set_clear_color(LERPC(level_fade, 63), LERPC(level_fade, 0), LERPC(level_fade, 127));
 }

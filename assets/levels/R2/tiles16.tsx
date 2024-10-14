@@ -193,6 +193,20 @@
    <object id="1" x="0" y="0" width="16" height="16"/>
   </objectgroup>
  </tile>
+ <tile id="93">
+  <objectgroup draworder="index" id="2">
+   <object id="2" x="0" y="16">
+    <polygon points="0,0 16.125,-9 16,0"/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="94">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0.0625" y="6.625">
+    <polygon points="0,0 11.875,-5.0625 15.9375,-4.9375 15.9375,9.375 -0.0625,9.375"/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="95">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="2" width="16" height="14"/>
@@ -224,6 +238,46 @@
    </object>
   </objectgroup>
  </tile>
+ <tile id="100">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="101">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="102">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="103">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="104">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="105">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="107">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="2" width="16" height="14"/>
+  </objectgroup>
+ </tile>
+ <tile id="108">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
  <tile id="118">
   <objectgroup draworder="index" id="2">
    <object id="3" x="0" y="6" width="16" height="10"/>
@@ -252,6 +306,16 @@
  <tile id="123">
   <objectgroup draworder="index" id="2">
    <object id="3" x="0" y="4" width="16" height="12"/>
+  </objectgroup>
+ </tile>
+ <tile id="126">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
+  </objectgroup>
+ </tile>
+ <tile id="127">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="16"/>
   </objectgroup>
  </tile>
  <tile id="128">
