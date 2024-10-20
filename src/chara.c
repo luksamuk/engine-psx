@@ -77,8 +77,8 @@ load_chara(Chara *chara, const char *filename, TIM_IMAGE *tim)
     /*        tim->crect->x, tim->crect->y, */
     /*        tim->crect->w, tim->crect->h, */
     /*        getClut(tim->crect->x, tim->crect->y)); */
-    chara->crectx = 320;
-    chara->crecty = 256;
+    chara->crectx = 0;
+    chara->crecty = 480;
     chara->prectx = 320;
     chara->precty = 0; // why not loading correctly???
 

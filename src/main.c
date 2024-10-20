@@ -21,6 +21,14 @@
 #include "memalloc.h"
 #include "screen.h"
 
+/*
+  Locations of common textures on frame buffer:
+  ================================================
+  Player 1:       320x0; CLUT: 0x480
+  Common objects: 576x0; CLUT: 0x481
+  Level tiles:    448x0; CLUT: 0x482 (if exists)
+ */
+
 int debug_mode = 0;
 
 int

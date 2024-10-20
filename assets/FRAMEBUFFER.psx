@@ -1,11 +1,9 @@
 [TIM Files]
-File_0=Z:\home\alchemist\git\engine-psx\assets\levels\R0\tiles.TIM
-File_1=Z:\home\alchemist\git\engine-psx\assets\levels\R1\tiles.TIM
-File_2=Z:\home\alchemist\git\engine-psx\assets\levels\R2\tiles.TIM
-File_3=Z:\home\alchemist\git\engine-psx\assets\sprites\SONIC.TIM
-File_4=Z:\home\alchemist\git\engine-psx\assets\levels\COMMON\obj.TIM
-[Locked Images]
-File_0=Z:\home\alchemist\git\engine-psx\assets\sprites\SONIC.TIM
+File_0=Z:\home\alchemist\git\engine-psx\assets\levels\COMMON\obj.TIM
+File_1=Z:\home\alchemist\git\engine-psx\assets\levels\R0\tiles.TIM
+File_2=Z:\home\alchemist\git\engine-psx\assets\levels\R1\tiles.TIM
+File_3=Z:\home\alchemist\git\engine-psx\assets\levels\R2\tiles.TIM
+File_4=Z:\home\alchemist\git\engine-psx\assets\sprites\SONIC.TIM
 [Graphics Mode]
 Width=320
 Height=240

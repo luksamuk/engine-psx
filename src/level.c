@@ -199,8 +199,8 @@ load_lvl(LevelData *lvl, const char *filename)
     // not loading correctly, but we don't really need them
     lvl->prectx   = 448;
     lvl->precty   = 0;
-    lvl->crectx   = 320;
-    lvl->crecty   = 257;
+    lvl->crectx   = 0;
+    lvl->crecty   = 482;
     //lvl->clutmode = 0; // NOTE: This was set to tim->mode previously.
     lvl->_unused1 = 0;
 
