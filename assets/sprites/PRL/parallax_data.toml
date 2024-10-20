@@ -1,0 +1,65 @@
+[island]
+width = 256
+height = 48
+u0 = 0
+v0 = 62
+speed = 0x0000
+y0 = 170
+single = True
+
+# =============
+[cloud]
+width = 256
+height = 37
+u0 = 0
+v0 = 25
+speed = 0x019a
+y0 = 181
+single = False
+
+# =============
+[water1]
+width = 64
+height = 6
+u0 = 0
+v0 = 0
+speed = 0x0666
+y0 = 216
+single = False
+
+[water2]
+width = 64
+height = 5
+u0 = 0
+v0 = 6
+speed = 0x0800
+y0 = 222
+single = False
+
+[water3]
+width = 62
+height = 5
+u0 = 0
+v0 = 11
+speed = 0x099a
+y0 = 227
+single = False
+
+[water4]
+width = 64
+height = 5
+u0 = 0
+v0 = 16
+speed = 0x0b33
+y0 = 232
+single = False
+
+[water5]
+width = 66
+height = 4
+u0 = 0
+v0 = 20
+speed = 0x0ccd
+y0 = 237
+single = False
+

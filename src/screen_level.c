@@ -361,8 +361,8 @@ level_load_level()
     TIM_IMAGE tim;
     uint32_t filelength;
 
+    // Load level tiles
     snprintf(filename0, 255, "%s\\TILES.TIM;1", basepath);
-
     printf("Loading %s...\n", filename0);
     uint8_t *timfile = file_read(filename0, &filelength);
     if(timfile) {
@@ -390,6 +390,23 @@ level_load_level()
         }
     }
 
+    // Load level background textures
+    snprintf(filename0, 255, "%s\\BG0.TIM;1", basepath);
+    printf("Loading %s...\n", filename0);
+    timfile = file_read(filename0, &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    } else printf("Warning: Level BG0 not found, ignoring\n");
+
+    snprintf(filename0, 255, "%s\\BG1.TIM;1", basepath);
+    printf("Loading %s...\n", filename0);
+    timfile = file_read(filename0, &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    } else printf("Warning: Level BG1 not found, ignoring\n");
+
     snprintf(filename0, 255, "%s\\MAP16.MAP;1", basepath);
     snprintf(filename1, 255, "%s\\MAP16.COL;1", basepath);
     printf("Loading %s and %s...\n", filename0, filename1);
@@ -404,7 +421,7 @@ level_load_level()
 
     // Load common objects
     printf("Loading common object texture...\n");
-    file_read("\\LEVELS\\COMMON\\OBJ.TIM;1", &filelength);
+    timfile = file_read("\\LEVELS\\COMMON\\OBJ.TIM;1", &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
         free(timfile);

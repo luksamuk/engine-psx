@@ -117,6 +117,12 @@
 	  <file name="TILES.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/TILES.TIM" />
+	  <file name="BG0.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/BG0.TIM" />
+	  <file name="BG1.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/BG1.TIM" />
 	</dir>
 
       </dir> <!-- LEVELS -->
