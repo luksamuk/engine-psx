@@ -3,47 +3,41 @@ width = 256
 height = 44
 u0 = 0
 v0 = 0
-speed = 0x0000 # TODO
+scrollx = 0 # TODO
 y0 = 64
-single = False
+single = false
 
 # =============
 [island2]
-width = 1280
 height = 40
-speed = 0x0000
+scrollx = 0
 y0 = 108
-single = False
+single = false
 
 [[island2.parts]]
 u0 = 0
 v0 = 44
 width = 256
-height = 40
 
 [[island2.parts]]
 u0 = 0
 v0 = 84
 width = 256
-height = 40
 
 [[island2.parts]]
 u0 = 0
 v0 = 124
 width = 256
-height = 40
 
 [[island2.parts]]
 u0 = 0
 v0 = 164
 width = 256
-height = 40
 
 [[island2.parts]]
 u0 = 0
 v0 = 204
 width = 256
-height = 40
 
 # =============
 # Water starts at BG1.
@@ -54,18 +48,18 @@ width = 32
 height = 3
 u0 = 0
 v0 = 256
-speed = 0x0000 # TODO
+scrollx = 0 # TODO
 y0 = 148
-single = False
+single = false
 
 [water2]
 width = 32
 height = 4
 u0 = 0
 v0 = 259
-speed = 0x0000 # TODO
+scrollx = 0 # TODO
 y0 = 151
-single = False
+single = false
 
 
 [water3]
@@ -73,52 +67,54 @@ width = 32
 height = 8
 u0 = 0
 v0 = 263
-speed = 0x0000 # TODO
-y0 = 
-single = False
+scrollx = 0 # TODO
+y0 = 155
+single = false
 
 [water4]
 width = 32
 height = 12
 u0 = 0
 v0 = 271
-speed = 0x0000 # TODO
-y0 = 155
-single = False
+scrollx = 0 # TODO
+y0 = 167
+single = false
 
 [water5]
 width = 32
 height = 16
 u0 = 0
 v0 = 283
-speed = 0x0000 # TODO
-y0 = 167
-single = False
+scrollx = 0 # TODO
+y0 = 183
+single = false
 
 [water6]
 width = 32
 height = 17
 u0 = 0
 v0 = 299
-speed = 0x0000 # TODO
-y0 = 183
-single = False
+scrollx = 0 # TODO
+y0 = 200
+single = false
 
 [water7]
 width = 32
 height = 22
 u0 = 0
 v0 = 316
-speed = 0x0000 # TODO
-y0 = 200
-single = False
+scrollx = 0 # TODO
+y0 = 222
+single = false
 
+# TODO: This is being rendered outside view.
+# Move it up?
 [water8]
 width = 32
 height = 22
 u0 = 0
 v0 = 338
-speed = 0x0000 # TODO
-y0 = 222
-single = False
+scrollx = 0 # TODO
+y0 = 244
+single = false
 

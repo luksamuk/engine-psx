@@ -16,6 +16,7 @@
 #include "timer.h"
 #include "model.h"
 #include "object.h"
+#include "parallax.h"
 
 extern int debug_mode;
 
@@ -31,6 +32,7 @@ LevelData   leveldata;
 Camera      camera;
 ObjectTable obj_table_common;
 uint8_t     level_fade;
+Parallax    parallax;
 
 #define CHANNELS_PER_BGM    3
 static uint32_t bgm_loop_sectors[] = {
@@ -78,9 +80,7 @@ static void level_load_player();
 static void level_load_level();
 static void level_set_clearcolor();
 
-// TODO!!!
 typedef struct {
-    /* Model ring; */
     uint8_t level_transition;
 } screen_level_data;
 
@@ -418,6 +418,11 @@ level_load_level()
     snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, (level & 0x01) + 1);
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
+
+    // Load level parallax data
+    snprintf(filename0, 255, "%s\\PRL.PRL", basepath);
+    printf("Loading parallax data...\n");
+    load_parallax(&parallax, filename0);
 
     // Load common objects
     printf("Loading common object texture...\n");

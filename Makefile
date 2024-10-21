@@ -6,6 +6,7 @@ COL16SRC  := $(shell ls ./assets/levels/**/tiles16.tsx)
 MAP128SRC := $(shell ls ./assets/levels/**/tilemap128.tmx)
 LVLSRC    := $(shell ls ./assets/levels/**/Z*.tmx)
 MDLSRC    := $(shell ls ./assets/models/**/*.rsd)
+PRLSRC    := $(shell ls ./assets/levels/**/parallax.toml)
 
 MAP16OUT  := $(addsuffix MAP16.MAP,$(dir $(MAP16SRC)))
 COL16OUT  := $(addsuffix MAP16.COL,$(dir $(COL16SRC)))
@@ -13,6 +14,7 @@ MAP128OUT := $(addsuffix MAP128.MAP,$(dir $(COL16SRC)))
 LVLOUT    := $(addsuffix .LVL,$(basename $(LVLSRC)))
 OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
 MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
+PRLOUT    := $(addsuffix PRL.PRL,$(dir $(PRLSRC)))
 
 .PHONY: clean ./build/engine.cue run configure chd cook iso elf debug cooktest purge rebuild repack packrun
 
@@ -95,6 +97,7 @@ mdls:   $(MDLOUT)
 map16:  $(MAP16OUT) $(COL16OUT)
 map128: $(MAP128OUT)
 lvl:    $(LVLOUT)
+prl:	$(PRLOUT)
 objs:   $(OMPOUT)
 
 cook: mdls map16 map128 lvl objs
@@ -106,6 +109,7 @@ cleancook:
 	       assets/levels/**/*.LVL \
 	       assets/levels/**/*.OMP \
 	       assets/levels/**/*.OTD \
+	       assets/levels/**/*.PRL \
 	       assets/levels/**/collision16.json \
 	       assets/levels/**/tilemap128.csv \
 	       assets/levels/**/tilemap128_solid.csv \
@@ -152,3 +156,8 @@ cleancook:
 # (Depends on files such as Z1.tmx, Z2.tmx, etc., generated on Tiled)
 %.OMP: %.tmx
 	./tools/cookobj/cookobj.py $<
+
+# Level parallax data
+# (Depends on a specific file named parallax.toml within level directory)
+%/PRL.PRL: %/parallax.toml
+	./tools/buildprl/buildprl.py $<
