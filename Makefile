@@ -100,7 +100,7 @@ lvl:    $(LVLOUT)
 prl:	$(PRLOUT)
 objs:   $(OMPOUT)
 
-cook: mdls map16 map128 lvl objs
+cook: mdls map16 map128 lvl objs prl
 
 cleancook:
 	rm -rf assets/models/**/*.mdl \

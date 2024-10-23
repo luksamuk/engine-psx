@@ -515,12 +515,12 @@ render_lvl(
         cy = (cam_y >> 12);
 
     if(lvl->num_layers > 0)
-        _render_layer(lvl, map128, map16, cx, cy, OT_LENGTH - 1, 0);
+        _render_layer(lvl, map128, map16, cx, cy, OT_LENGTH - 3, 0);
 
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
     setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
-    sort_prim(tpage, OT_LENGTH - 1);
+    sort_prim(tpage, OT_LENGTH - 3);
 
     // Render objects on nearest window
     _render_obj_window(lvl, tbl, cx, cy);

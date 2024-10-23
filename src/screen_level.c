@@ -32,7 +32,6 @@ LevelData   leveldata;
 Camera      camera;
 ObjectTable obj_table_common;
 uint8_t     level_fade;
-Parallax    parallax;
 
 #define CHANNELS_PER_BGM    3
 static uint32_t bgm_loop_sectors[] = {
@@ -82,6 +81,12 @@ static void level_set_clearcolor();
 
 typedef struct {
     uint8_t level_transition;
+    Parallax parallax;
+    uint8_t parallax_tx_mode;
+    int32_t parallax_px;
+    int32_t parallax_py;
+    int32_t parallax_cx;
+    int32_t parallax_cy;
 } screen_level_data;
 
 void
@@ -98,7 +103,7 @@ screen_level_load()
     camera_init(&camera);
 
     level_load_player();
-    level_load_level();
+    level_load_level(data);
     camera_set(&camera, player.pos.vx, player.pos.vy);
 
     reset_elapsed_frames();
@@ -234,6 +239,10 @@ screen_level_draw(void *d)
     /* render_model(&data->ring); */
 
     render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
+    parallax_draw(&data->parallax, &camera,
+                  data->parallax_tx_mode,
+                  data->parallax_px, data->parallax_py,
+                  data->parallax_cx, data->parallax_cy);
 
     // Gouraud-shaded cube
     /* RotMatrix(&rotation, &world); */
@@ -345,7 +354,7 @@ level_load_player()
 }
 
 static void
-level_load_level()
+level_load_level(screen_level_data *data)
 {
     paused = 0;
 
@@ -361,6 +370,7 @@ level_load_level()
     TIM_IMAGE tim;
     uint32_t filelength;
 
+    /* === LEVEL TILES === */
     // Load level tiles
     snprintf(filename0, 255, "%s\\TILES.TIM;1", basepath);
     printf("Loading %s...\n", filename0);
@@ -390,12 +400,36 @@ level_load_level()
         }
     }
 
-    // Load level background textures
+    /* === PARALLAX === */
+    // Load level parallax data
+    snprintf(filename0, 255, "%s\\PRL.PRL;1", basepath);
+    printf("Loading parallax data...\n");
+    load_parallax(&data->parallax, filename0);
+    printf("Loaded parallax strips: %d\n", data->parallax.num_strips);
+    
+    // Load level parallax textures
     snprintf(filename0, 255, "%s\\BG0.TIM;1", basepath);
     printf("Loading %s...\n", filename0);
     timfile = file_read(filename0, &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
+
+        // Background compression must be the same for both background
+        // images. Also, they must be one texture page apart (64 bytes)
+        // horizontally, and their clut must be vertically aligned
+        /* data->parallax_tx_mode = tim.mode; */
+        /* data->parallax_px = tim.prect->x; */
+        /* data->parallax_py = tim.prect->y; */
+        /* if(tim.mode & 0x3) { */
+        /*     data->parallax_cx = tim.crect->x; */
+        /*     data->parallax_cy = tim.crect->y; */
+        /* } */
+        data->parallax_tx_mode = tim.mode;
+        data->parallax_px = 448;
+        data->parallax_py = 256;
+        data->parallax_cx = 0;
+        data->parallax_cy = 483;
+        
         free(timfile);
     } else printf("Warning: Level BG0 not found, ignoring\n");
 
@@ -419,11 +453,7 @@ level_load_level()
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
 
-    // Load level parallax data
-    snprintf(filename0, 255, "%s\\PRL.PRL", basepath);
-    printf("Loading parallax data...\n");
-    load_parallax(&parallax, filename0);
-
+    /* === OBJECTS === */
     // Load common objects
     printf("Loading common object texture...\n");
     timfile = file_read("\\LEVELS\\COMMON\\OBJ.TIM;1", &filelength);
@@ -443,6 +473,7 @@ level_load_level()
     load_object_placement(filename0, &leveldata);
 
 
+    /* === RENDERING PREPARATION === */
     // Pre-allocate and initialize level primitive buffer
     prepare_renderer(&leveldata);
 

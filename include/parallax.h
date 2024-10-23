@@ -2,6 +2,7 @@
 #define PARALLAX_H
 
 #include <stdint.h>
+#include "camera.h"
 
 /* .PRL file layout
    ==================
@@ -27,6 +28,9 @@ typedef struct {
     uint8_t  bgindex;
     uint16_t width;
     uint16_t height;
+
+    // Calculated on load
+    uint16_t offsetx;
 } ParallaxPart;
 
 // Holds a single parallax strip for a level.
@@ -37,8 +41,10 @@ typedef struct {
     uint8_t is_single;
     int32_t scrollx;
     int16_t y0;
-    uint16_t width; // Sum of all widths, calculated on load!
     ParallaxPart *parts;
+
+    // Calculated on load
+    uint16_t width;
 } ParallaxStrip;
 
 // Holds all parallax strips for a level
@@ -48,5 +54,7 @@ typedef struct {
 } Parallax;
 
 void load_parallax(Parallax *parallax, const char *filename);
+void parallax_draw(Parallax *prl, Camera *camera,
+                   uint8_t tx_mode, int32_t px, int32_t py, int32_t cx, int32_t cy);
 
 #endif
