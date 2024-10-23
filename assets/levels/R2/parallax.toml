@@ -3,7 +3,7 @@ width = 256
 height = 44
 u0 = 0
 v0 = 0
-scrollx = 0.25 # TODO
+scrollx = 0.2
 y0 = 52
 single = false
 

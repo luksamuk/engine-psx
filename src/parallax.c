@@ -67,11 +67,12 @@ parallax_draw(Parallax *prl, Camera *camera,
 {
     // Camera left boundary (fixed 20.12 format)
     int32_t camera_vx = (camera->pos.vx - (CENTERX << 12));
-    //printf("Number of strips: %d\n", prl->num_strips);
 
     for(uint8_t si = 0; si < prl->num_strips; si++) {
         ParallaxStrip *strip = &prl->strips[si];
-        int32_t stripx = ((camera_vx * strip->scrollx) >> 24);
+        // Cast multiplication to avoid sign extension on bit shift
+        // This gets the mult. result but also removes the decimal part
+        uint32_t stripx = (uint32_t)(camera_vx * strip->scrollx) >> 24;
         for(uint8_t pi = 0; pi < strip->num_parts; pi++) {
             ParallaxPart *part = &strip->parts[pi];
 
@@ -81,7 +82,6 @@ parallax_draw(Parallax *prl, Camera *camera,
             // Given that each part is a horizontal piece of a strip, we assume
             // that these parts repeat at every (strip width), so just draw
             // all equal parts now at once, until we exhaust the screen width
-            int ri = 0;
             for(int32_t wx = vx;
                 wx < (int32_t)(SCREEN_XRES + part->width);
                 wx += part->width)
@@ -90,10 +90,6 @@ parallax_draw(Parallax *prl, Camera *camera,
                 uint16_t curr_px = (uint16_t)(px + ((uint32_t)part->bgindex << 6));
                 uint16_t curr_cy = (uint16_t)(cy + part->bgindex);
 
-                // TODO: WE NEED TESSELATION HERE! If the quad is too big, it may
-                // be clipped by PSX at the left. Prevent that by performing
-                // polygon subdivision -- since we're operating on integer scale,
-                // we're not going to have t-junctions here.
                 POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
                 increment_prim(sizeof(POLY_FT4));
                 setPolyFT4(poly);
@@ -103,7 +99,6 @@ parallax_draw(Parallax *prl, Camera *camera,
                 setXYWH(poly, wx, strip->y0, part->width, part->height);
                 setUVWH(poly, part->u0, part->v0, part->width - 1, part->height - 1);
                 sort_prim(poly, OT_LENGTH - 2); // Layer 5: Background
-                ri++;
 
                 // If drawing a single time, stop now
                 if(strip->is_single) break;
