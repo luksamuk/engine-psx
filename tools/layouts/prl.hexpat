@@ -11,7 +11,7 @@ struct ParallaxPart {
 struct ParallaxStrip {
        u8 num_parts;
        u8 is_single;
-       be s16 scrollx;
+       be s32 scrollx;
        be s16 y0;
        ParallaxPart parts[num_parts];
 };

@@ -35,7 +35,7 @@ typedef struct {
 typedef struct {
     uint8_t num_parts;
     uint8_t is_single;
-    int16_t scrollx;
+    int32_t scrollx;
     int16_t y0;
     uint16_t width; // Sum of all widths, calculated on load!
     ParallaxPart *parts;

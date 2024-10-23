@@ -33,7 +33,7 @@ load_parallax(Parallax *parallax, const char *filename)
 
         strip->num_parts = get_byte(bytes, &b);
         strip->is_single = get_byte(bytes, &b);
-        strip->scrollx   = get_short_be(bytes, &b);
+        strip->scrollx   = get_long_be(bytes, &b);
         strip->y0        = get_short_be(bytes, &b);
 
         strip->parts = alloc_arena_malloc(

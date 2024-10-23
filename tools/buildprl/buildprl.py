@@ -12,6 +12,14 @@ c_ushort = c_ushort.__ctype_be__
 c_int = c_int.__ctype_be__
 
 
+def tofixed(value: float, scale: int) -> int:
+    return int(value * (1 << scale))
+
+
+def tofixed12(value: float) -> int:
+    return tofixed(value, 12)
+
+
 @dataclass
 class ParallaxPart:
     u0: int = 0
@@ -31,14 +39,14 @@ class ParallaxPart:
 @dataclass
 class ParallaxStrip:
     single: bool = False
-    scrollx: int = 0
+    scrollx: float = 0
     y0: int = 0
     parts: [ParallaxPart] = field(default_factory=list)
 
     def write_to(self, f):
         f.write(c_ubyte(len(self.parts)))
         f.write(c_ubyte(int(self.single)))
-        f.write(c_short(self.scrollx))
+        f.write(c_int(tofixed12(self.scrollx)))
         f.write(c_short(self.y0))
         for p in self.parts:
             p.write_to(f)
