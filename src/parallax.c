@@ -68,7 +68,9 @@ parallax_draw(Parallax *prl, Camera *camera,
     // Camera left boundary (fixed 20.12 format)
     int32_t camera_vx = (camera->pos.vx - (CENTERX << 12));
 
-    for(uint8_t si = 0; si < prl->num_strips; si++) {
+    // Strips are draw bottom to top so we can have further stuff
+    // (e.g. clouds) drawn on back
+    for(int8_t si = prl->num_strips - 1; si >= 0; si--) {
         ParallaxStrip *strip = &prl->strips[si];
         // Cast multiplication to avoid sign extension on bit shift
         // This gets the mult. result but also removes the decimal part

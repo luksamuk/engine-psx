@@ -1,3 +1,32 @@
+[sky1]
+width = 256
+height = 32
+u0 = 0
+v0 = 360 # 104 @ BG1
+scrollx = 0.14
+y0 = 0
+single = false
+
+[sky2]
+width = 256
+height = 16
+u0 = 0
+v0 = 392
+scrollx = 0.16
+y0 = 32
+single = false
+
+[sky3]
+width = 256
+height = 16
+u0 = 0
+v0 = 408
+scrollx = 0.18
+y0 = 48
+single = false
+
+
+# =============
 [island1]
 width = 256
 height = 44
