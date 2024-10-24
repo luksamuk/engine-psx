@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="10" nextobjectid="163">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="10" nextobjectid="164">
  <editorsettings>
   <export target="../../../../../Z1.json" format="json"/>
  </editorsettings>
@@ -194,6 +194,7 @@
    <object id="160" gid="141" x="2763.75" y="352.75" width="64" height="64"/>
    <object id="161" gid="141" x="2769.25" y="320.75" width="64" height="64"/>
    <object id="162" gid="141" x="2719.75" y="398.25" width="64" height="64"/>
+   <object id="163" gid="145" x="4736" y="980" width="64" height="64" rotation="-90"/>
   </objectgroup>
  </group>
 </map>
