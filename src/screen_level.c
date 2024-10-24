@@ -417,13 +417,6 @@ level_load_level(screen_level_data *data)
         // Background compression must be the same for both background
         // images. Also, they must be one texture page apart (64 bytes)
         // horizontally, and their clut must be vertically aligned
-        /* data->parallax_tx_mode = tim.mode; */
-        /* data->parallax_px = tim.prect->x; */
-        /* data->parallax_py = tim.prect->y; */
-        /* if(tim.mode & 0x3) { */
-        /*     data->parallax_cx = tim.crect->x; */
-        /*     data->parallax_cy = tim.crect->y; */
-        /* } */
         data->parallax_tx_mode = tim.mode;
         data->parallax_px = 448;
         data->parallax_py = 256;
