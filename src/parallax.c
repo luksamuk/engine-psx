@@ -77,7 +77,7 @@ parallax_draw(Parallax *prl, Camera *camera,
             ParallaxPart *part = &strip->parts[pi];
 
             // Calculate part X position based on factor and camera (int format)
-            int32_t vx = ((int32_t)part->offsetx) - stripx;
+            int32_t vx = (int32_t)(pi * strip->width) + ((int32_t)part->offsetx) - stripx;
 
             // Given that each part is a horizontal piece of a strip, we assume
             // that these parts repeat at every (strip width), so just draw

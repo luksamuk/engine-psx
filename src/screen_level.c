@@ -472,12 +472,6 @@ level_load_level(screen_level_data *data)
 
     level_debrief();
 
-    // Level 0 Zone 2 actually has background sound effects
-    /* if(level == 1) { */
-    /*     SoundEffect sfx_rain = sound_load_vag("\\SFX\\RAIN.VAG;1"); */
-    /*     sound_play_vag(sfx_rain, 1); */
-    /* } */
-
     // Start playback after we don't need the CD anymore.
     snprintf(filename0, 255, "\\BGM\\BGM%03u.XA;1", (level / CHANNELS_PER_BGM) + 1);
     music_channel = level % CHANNELS_PER_BGM;
@@ -489,10 +483,11 @@ level_load_level(screen_level_data *data)
 static void
 level_set_clearcolor()
 {
-    if(level == 2 || level == 3)
-        set_clear_color(LERPC(level_fade, 145), LERPC(level_fade, 59), LERPC(level_fade, 59));
-    else if(level == 4 || level == 5)
+    if(level == 2 || level == 3) // R1
         set_clear_color(LERPC(level_fade, 26), LERPC(level_fade, 104), LERPC(level_fade, 200));
+    else if(level == 4 || level == 5) // R2 (GHZ)
+        set_clear_color(LERPC(level_fade, 36), LERPC(level_fade, 0), LERPC(level_fade, 180));
+    // R0
     else set_clear_color(LERPC(level_fade, 63), LERPC(level_fade, 0), LERPC(level_fade, 127));
 }
 

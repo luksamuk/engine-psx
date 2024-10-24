@@ -4,14 +4,14 @@ height = 44
 u0 = 0
 v0 = 0
 scrollx = 0.2
-y0 = 52
+y0 = 36
 single = false
 
 # =============
 [island2]
 height = 40
 scrollx = 0.25
-y0 = 96
+y0 = 80
 single = false
 
 [[island2.parts]]
@@ -49,7 +49,7 @@ height = 3
 u0 = 0
 v0 = 256
 scrollx = 0.25
-y0 = 136
+y0 = 120
 single = false
 
 [water2]
@@ -58,7 +58,7 @@ height = 4
 u0 = 0
 v0 = 259
 scrollx = 0.28
-y0 = 139
+y0 = 123
 single = false
 
 
@@ -68,7 +68,7 @@ height = 8
 u0 = 0
 v0 = 263
 scrollx = 0.31
-y0 = 143
+y0 = 127
 single = false
 
 [water4]
@@ -77,7 +77,7 @@ height = 12
 u0 = 0
 v0 = 271
 scrollx = 0.35
-y0 = 151
+y0 = 135
 single = false
 
 [water5]
@@ -86,7 +86,7 @@ height = 16
 u0 = 0
 v0 = 283
 scrollx = 0.39
-y0 = 163
+y0 = 147
 single = false
 
 [water6]
@@ -95,7 +95,7 @@ height = 17
 u0 = 0
 v0 = 299
 scrollx = 0.42
-y0 = 179
+y0 = 163
 single = false
 
 [water7]
@@ -104,7 +104,7 @@ height = 22
 u0 = 0
 v0 = 316
 scrollx = 0.46
-y0 = 196
+y0 = 180
 single = false
 
 [water8]
@@ -113,6 +113,14 @@ height = 22
 u0 = 0
 v0 = 338
 scrollx = 0.5
-y0 = 218
+y0 = 202
 single = false
 
+[water9]
+width = 32
+height = 22
+u0 = 0
+v0 = 338
+scrollx = 0.52
+y0 = 224
+single = false
