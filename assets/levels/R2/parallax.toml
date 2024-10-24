@@ -48,26 +48,6 @@ u0 = 0
 v0 = 44
 width = 256
 
-[[island2.parts]]
-u0 = 0
-v0 = 84
-width = 256
-
-[[island2.parts]]
-u0 = 0
-v0 = 124
-width = 256
-
-[[island2.parts]]
-u0 = 0
-v0 = 164
-width = 256
-
-[[island2.parts]]
-u0 = 0
-v0 = 204
-width = 256
-
 # =============
 # Water starts at BG1.
 # Anything with v0 >= 256 is at BG1
@@ -77,7 +57,7 @@ width = 32
 height = 3
 u0 = 0
 v0 = 256
-scrollx = 0.25
+scrollx = 0.27
 y0 = 120
 single = false
 
@@ -86,17 +66,16 @@ width = 32
 height = 4
 u0 = 0
 v0 = 259
-scrollx = 0.28
+scrollx = 0.285
 y0 = 123
 single = false
-
 
 [water3]
 width = 32
 height = 8
 u0 = 0
 v0 = 263
-scrollx = 0.31
+scrollx = 0.3
 y0 = 127
 single = false
 
@@ -105,7 +84,7 @@ width = 32
 height = 12
 u0 = 0
 v0 = 271
-scrollx = 0.35
+scrollx = 0.315
 y0 = 135
 single = false
 
@@ -114,7 +93,7 @@ width = 32
 height = 16
 u0 = 0
 v0 = 283
-scrollx = 0.39
+scrollx = 0.33
 y0 = 147
 single = false
 
@@ -123,7 +102,7 @@ width = 32
 height = 17
 u0 = 0
 v0 = 299
-scrollx = 0.42
+scrollx = 0.345
 y0 = 163
 single = false
 
@@ -132,7 +111,7 @@ width = 32
 height = 22
 u0 = 0
 v0 = 316
-scrollx = 0.46
+scrollx = 0.36
 y0 = 180
 single = false
 
@@ -141,7 +120,7 @@ width = 32
 height = 22
 u0 = 0
 v0 = 338
-scrollx = 0.5
+scrollx = 0.375
 y0 = 202
 single = false
 
@@ -150,6 +129,6 @@ width = 32
 height = 22
 u0 = 0
 v0 = 338
-scrollx = 0.52
+scrollx = 0.39
 y0 = 224
 single = false

@@ -74,12 +74,12 @@ parallax_draw(Parallax *prl, Camera *camera,
         ParallaxStrip *strip = &prl->strips[si];
         // Cast multiplication to avoid sign extension on bit shift
         // This gets the mult. result but also removes the decimal part
-        uint32_t stripx = (uint32_t)(camera_vx * strip->scrollx) >> 24;
+        int32_t stripx = (uint32_t)(camera_vx * strip->scrollx) >> 24;
         for(uint8_t pi = 0; pi < strip->num_parts; pi++) {
             ParallaxPart *part = &strip->parts[pi];
 
             // Calculate part X position based on factor and camera (int format)
-            int32_t vx = (int32_t)(pi * strip->width) + ((int32_t)part->offsetx) - stripx;
+            int32_t vx = ((int32_t)part->offsetx) - stripx;
 
             // Given that each part is a horizontal piece of a strip, we assume
             // that these parts repeat at every (strip width), so just draw
@@ -88,6 +88,9 @@ parallax_draw(Parallax *prl, Camera *camera,
                 wx < (int32_t)(SCREEN_XRES + part->width);
                 wx += part->width)
             {
+                // Don't draw if strip is outside screen
+                if((wx + part->width) < 0) continue;
+
                 // TODO: 6 or 8 Depends on CLUT!!!
                 uint16_t curr_px = (uint16_t)(px + ((uint32_t)part->bgindex << 6));
                 uint16_t curr_cy = (uint16_t)(cy + part->bgindex);
