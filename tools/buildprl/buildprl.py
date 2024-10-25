@@ -40,6 +40,7 @@ class ParallaxPart:
 class ParallaxStrip:
     single: bool = False
     scrollx: float = 0
+    speedx: float = 0
     y0: int = 0
     parts: [ParallaxPart] = field(default_factory=list)
 
@@ -47,6 +48,7 @@ class ParallaxStrip:
         f.write(c_ubyte(len(self.parts)))
         f.write(c_ubyte(int(self.single)))
         f.write(c_int(tofixed12(self.scrollx)))
+        f.write(c_int(tofixed12(self.speedx)))
         f.write(c_short(self.y0))
         for p in self.parts:
             p.write_to(f)
@@ -69,6 +71,7 @@ def parse(data) -> Parallax:
         strip = ParallaxStrip()
         strip.single = strip_data.get("single", False)
         strip.scrollx = strip_data.get("scrollx", 0)
+        strip.speedx = strip_data.get("speedx", 0)
         strip.y0 = strip_data.get("y0")
         height = strip_data.get("height")  # Reserved
         parts = strip_data.get("parts")

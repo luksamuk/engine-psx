@@ -40,11 +40,15 @@ typedef struct {
     uint8_t num_parts;
     uint8_t is_single;
     int32_t scrollx;
+    int32_t speedx;
     int16_t y0;
     ParallaxPart *parts;
 
     // Calculated on load
     uint16_t width;
+
+    // State
+    int32_t rposx;
 } ParallaxStrip;
 
 // Holds all parallax strips for a level

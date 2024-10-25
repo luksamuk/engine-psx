@@ -38,7 +38,9 @@ load_parallax(Parallax *parallax, const char *filename)
         strip->num_parts = get_byte(bytes, &b);
         strip->is_single = get_byte(bytes, &b);
         strip->scrollx   = get_long_be(bytes, &b);
+        strip->speedx    = get_long_be(bytes, &b);
         strip->y0        = get_short_be(bytes, &b);
+        strip->rposx     = 0;
 
         strip->parts = alloc_arena_malloc(
             &_level_arena,
@@ -75,11 +77,17 @@ parallax_draw(Parallax *prl, Camera *camera,
         // Cast multiplication to avoid sign extension on bit shift
         // This gets the mult. result but also removes the decimal part
         int32_t stripx = (uint32_t)(camera_vx * strip->scrollx) >> 24;
+
+        // Update strip relative position when there's speed involved
+        strip->rposx -= strip->speedx;
+        if((strip->rposx >> 12) < -((int32_t)strip->width))
+            strip->rposx = 0;
+
         for(uint8_t pi = 0; pi < strip->num_parts; pi++) {
             ParallaxPart *part = &strip->parts[pi];
 
             // Calculate part X position based on factor and camera (int format)
-            int32_t vx = ((int32_t)part->offsetx) - stripx;
+            int32_t vx = ((int32_t)part->offsetx) - stripx + (strip->rposx >> 12);
 
             // Given that each part is a horizontal piece of a strip, we assume
             // that these parts repeat at every (strip width), so just draw
