@@ -69,6 +69,12 @@
 	  <file name="TILES.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/TILES.TIM" />
+	  <file name="BG0.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/BG0.TIM" />
+	  <file name="PRL.PRL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/PRL.PRL" />
 	</dir>
 
 	<dir name="R1">
@@ -96,6 +102,12 @@
 	  <file name="TILES.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/TILES.TIM" />
+	  <file name="BG0.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/BG0.TIM" />
+	  <file name="PRL.PRL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/PRL.PRL" />
 	</dir>
 
 	<dir name="R2">
@@ -117,6 +129,15 @@
 	  <file name="TILES.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/TILES.TIM" />
+	  <file name="BG0.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/BG0.TIM" />
+	  <file name="BG1.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/BG1.TIM" />
+	  <file name="PRL.PRL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/PRL.PRL" />
 	</dir>
 
       </dir> <!-- LEVELS -->

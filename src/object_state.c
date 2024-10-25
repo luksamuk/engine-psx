@@ -266,10 +266,10 @@ begin_render_routine:
 
     // COMMON OBJECTS have the following VRAM coords:
     // Sprites: 576x0
-    // CLUT: 576x256
+    // CLUT: 0x481
     
     poly->tpage = getTPage(0, 0, 576, 0);
-    poly->clut = getClut(576, 256);
+    poly->clut = getClut(0, 481);
 
     sort_prim(poly, state->id == OBJ_RING ? 3 : 4);
 

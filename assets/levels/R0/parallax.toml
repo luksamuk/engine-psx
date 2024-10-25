@@ -1,0 +1,27 @@
+[part1]
+width = 256
+height = 128
+u0 = 0
+v0 = 0
+scrollx = 0.25
+y0 = 0
+single = false
+
+[part2]
+width = 256
+height = 128
+u0 = 0
+v0 = 0
+scrollx = 0.25
+y0 = 128
+single = false
+
+[part3]
+width = 256
+height = 128
+u0 = 0
+v0 = 0
+scrollx = 0.25
+y0 = 256
+single = false
+

@@ -24,6 +24,8 @@ alloc_arena_free(ArenaAllocator *arena)
 void *
 alloc_arena_malloc(ArenaAllocator *arena, size_t size)
 {
+    if(size == 0) return NULL;
+
     // Align size so we don't get unaligned memory access
     size += 8 - (size % 8);
 

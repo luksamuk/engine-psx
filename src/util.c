@@ -115,8 +115,10 @@ load_texture(uint8_t *data, TIM_IMAGE *tim)
 {
     GetTimInfo((const uint32_t *)data, tim);
     LoadImage(tim->prect, tim->paddr);
+    DrawSync(0);
     if(tim->mode & 0x8) {
         LoadImage(tim->crect, tim->caddr);
+        DrawSync(0);
     }
 }
 

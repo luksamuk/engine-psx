@@ -151,7 +151,7 @@ screen_levelselect_draw(void *d)
     if(debug_mode) {
         uint32_t elapsed_sectors;
         sound_xa_get_elapsed_sectors(&elapsed_sectors);
-        FntPrint(-1, "BRANCH: %-21s %4s %3d\n",
+        FntPrint(-1, "%-29s %4s %3d\n",
                  GIT_COMMIT,
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
                  get_frame_rate());

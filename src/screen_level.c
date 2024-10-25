@@ -16,6 +16,7 @@
 #include "timer.h"
 #include "model.h"
 #include "object.h"
+#include "parallax.h"
 
 extern int debug_mode;
 
@@ -78,10 +79,14 @@ static void level_load_player();
 static void level_load_level();
 static void level_set_clearcolor();
 
-// TODO!!!
 typedef struct {
-    /* Model ring; */
     uint8_t level_transition;
+    Parallax parallax;
+    uint8_t parallax_tx_mode;
+    int32_t parallax_px;
+    int32_t parallax_py;
+    int32_t parallax_cx;
+    int32_t parallax_cy;
 } screen_level_data;
 
 void
@@ -98,7 +103,7 @@ screen_level_load()
     camera_init(&camera);
 
     level_load_player();
-    level_load_level();
+    level_load_level(data);
     camera_set(&camera, player.pos.vx, player.pos.vy);
 
     reset_elapsed_frames();
@@ -234,6 +239,10 @@ screen_level_draw(void *d)
     /* render_model(&data->ring); */
 
     render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
+    parallax_draw(&data->parallax, &camera,
+                  data->parallax_tx_mode,
+                  data->parallax_px, data->parallax_py,
+                  data->parallax_cx, data->parallax_cy);
 
     // Gouraud-shaded cube
     /* RotMatrix(&rotation, &world); */
@@ -345,7 +354,7 @@ level_load_player()
 }
 
 static void
-level_load_level()
+level_load_level(screen_level_data *data)
 {
     paused = 0;
 
@@ -361,8 +370,9 @@ level_load_level()
     TIM_IMAGE tim;
     uint32_t filelength;
 
+    /* === LEVEL TILES === */
+    // Load level tiles
     snprintf(filename0, 255, "%s\\TILES.TIM;1", basepath);
-
     printf("Loading %s...\n", filename0);
     uint8_t *timfile = file_read(filename0, &filelength);
     if(timfile) {
@@ -390,6 +400,40 @@ level_load_level()
         }
     }
 
+    /* === PARALLAX === */
+    // Load level parallax data
+    snprintf(filename0, 255, "%s\\PRL.PRL;1", basepath);
+    printf("Loading parallax data...\n");
+    load_parallax(&data->parallax, filename0);
+    printf("Loaded parallax strips: %d\n", data->parallax.num_strips);
+    
+    // Load level parallax textures
+    snprintf(filename0, 255, "%s\\BG0.TIM;1", basepath);
+    printf("Loading %s...\n", filename0);
+    timfile = file_read(filename0, &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+
+        // Background compression must be the same for both background
+        // images. Also, they must be one texture page apart (64 bytes)
+        // horizontally, and their clut must be vertically aligned
+        data->parallax_tx_mode = tim.mode;
+        data->parallax_px = 448;
+        data->parallax_py = 256;
+        data->parallax_cx = 0;
+        data->parallax_cy = 483;
+        
+        free(timfile);
+    } else printf("Warning: Level BG0 not found, ignoring\n");
+
+    snprintf(filename0, 255, "%s\\BG1.TIM;1", basepath);
+    printf("Loading %s...\n", filename0);
+    timfile = file_read(filename0, &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    } else printf("Warning: Level BG1 not found, ignoring\n");
+
     snprintf(filename0, 255, "%s\\MAP16.MAP;1", basepath);
     snprintf(filename1, 255, "%s\\MAP16.COL;1", basepath);
     printf("Loading %s and %s...\n", filename0, filename1);
@@ -402,9 +446,10 @@ level_load_level()
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
 
+    /* === OBJECTS === */
     // Load common objects
     printf("Loading common object texture...\n");
-    file_read("\\LEVELS\\COMMON\\OBJ.TIM;1", &filelength);
+    timfile = file_read("\\LEVELS\\COMMON\\OBJ.TIM;1", &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
         free(timfile);
@@ -421,16 +466,11 @@ level_load_level()
     load_object_placement(filename0, &leveldata);
 
 
+    /* === RENDERING PREPARATION === */
     // Pre-allocate and initialize level primitive buffer
     prepare_renderer(&leveldata);
 
     level_debrief();
-
-    // Level 0 Zone 2 actually has background sound effects
-    /* if(level == 1) { */
-    /*     SoundEffect sfx_rain = sound_load_vag("\\SFX\\RAIN.VAG;1"); */
-    /*     sound_play_vag(sfx_rain, 1); */
-    /* } */
 
     // Start playback after we don't need the CD anymore.
     snprintf(filename0, 255, "\\BGM\\BGM%03u.XA;1", (level / CHANNELS_PER_BGM) + 1);
@@ -443,10 +483,11 @@ level_load_level()
 static void
 level_set_clearcolor()
 {
-    if(level == 2 || level == 3)
-        set_clear_color(LERPC(level_fade, 145), LERPC(level_fade, 59), LERPC(level_fade, 59));
-    else if(level == 4 || level == 5)
+    if(level == 2 || level == 3) // R1
         set_clear_color(LERPC(level_fade, 26), LERPC(level_fade, 104), LERPC(level_fade, 200));
+    else if(level == 4 || level == 5) // R2 (GHZ)
+        set_clear_color(LERPC(level_fade, 36), LERPC(level_fade, 0), LERPC(level_fade, 180));
+    // R0
     else set_clear_color(LERPC(level_fade, 63), LERPC(level_fade, 0), LERPC(level_fade, 127));
 }
 

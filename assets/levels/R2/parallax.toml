@@ -1,0 +1,137 @@
+[sky1]
+width = 256
+height = 32
+u0 = 0
+v0 = 360 # 104 @ BG1
+scrollx = 0
+speedx  = 0.14
+y0 = 0
+single = false
+
+[sky2]
+width = 256
+height = 16
+u0 = 0
+v0 = 392
+scrollx = 0
+speedx = 0.16
+y0 = 32
+single = false
+
+[sky3]
+width = 256
+height = 16
+u0 = 0
+v0 = 408
+scrollx = 0
+speedx = 0.18
+y0 = 48
+single = false
+
+
+# =============
+[island1]
+width = 256
+height = 44
+u0 = 0
+v0 = 0
+scrollx = 0.2
+y0 = 36
+single = false
+
+# =============
+[island2]
+height = 40
+scrollx = 0.25
+y0 = 80
+single = false
+
+[[island2.parts]]
+u0 = 0
+v0 = 44
+width = 256
+
+# =============
+# Water starts at BG1.
+# Anything with v0 >= 256 is at BG1
+
+[water1]
+width = 32
+height = 3
+u0 = 0
+v0 = 256
+scrollx = 0.27
+y0 = 120
+single = false
+
+[water2]
+width = 32
+height = 4
+u0 = 0
+v0 = 259
+scrollx = 0.285
+y0 = 123
+single = false
+
+[water3]
+width = 32
+height = 8
+u0 = 0
+v0 = 263
+scrollx = 0.3
+y0 = 127
+single = false
+
+[water4]
+width = 32
+height = 12
+u0 = 0
+v0 = 271
+scrollx = 0.315
+y0 = 135
+single = false
+
+[water5]
+width = 32
+height = 16
+u0 = 0
+v0 = 283
+scrollx = 0.33
+y0 = 147
+single = false
+
+[water6]
+width = 32
+height = 17
+u0 = 0
+v0 = 299
+scrollx = 0.345
+y0 = 163
+single = false
+
+[water7]
+width = 32
+height = 22
+u0 = 0
+v0 = 316
+scrollx = 0.36
+y0 = 180
+single = false
+
+[water8]
+width = 32
+height = 22
+u0 = 0
+v0 = 338
+scrollx = 0.375
+y0 = 202
+single = false
+
+[water9]
+width = 32
+height = 22
+u0 = 0
+v0 = 338
+scrollx = 0.39
+y0 = 224
+single = false
