@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="10" nextobjectid="164">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="10" nextobjectid="170">
  <editorsettings>
   <export target="../../../../../Z1.json" format="json"/>
  </editorsettings>
@@ -63,8 +63,6 @@
    <object id="27" gid="149" x="4065" y="388" width="64" height="64"/>
    <object id="28" gid="149" x="4289.67" y="453.667" width="64" height="64"/>
    <object id="34" gid="147" x="3056" y="768" width="64" height="64"/>
-   <object id="44" gid="149" x="3206" y="646" width="64" height="64"/>
-   <object id="45" gid="149" x="3206" y="673" width="64" height="64"/>
    <object id="48" gid="142" x="3055.75" y="324" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
@@ -194,7 +192,11 @@
    <object id="160" gid="141" x="2763.75" y="352.75" width="64" height="64"/>
    <object id="161" gid="141" x="2769.25" y="320.75" width="64" height="64"/>
    <object id="162" gid="141" x="2719.75" y="398.25" width="64" height="64"/>
-   <object id="163" gid="145" x="4736" y="980" width="64" height="64" rotation="-90"/>
+   <object id="164" gid="141" x="3112.5" y="723" width="64" height="64"/>
+   <object id="165" gid="141" x="3130.5" y="704" width="64" height="64"/>
+   <object id="166" gid="141" x="3149.5" y="686" width="64" height="64"/>
+   <object id="168" gid="148" x="2288" y="256.5" width="64" height="64"/>
+   <object id="169" gid="146" x="4736" y="980" width="64" height="64" rotation="-90"/>
   </objectgroup>
  </group>
 </map>

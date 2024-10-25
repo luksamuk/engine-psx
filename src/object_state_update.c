@@ -30,6 +30,7 @@ static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR 
 static void _goal_sign_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 static void _monitor_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 static void _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red);
+static void _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red);
 static void _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos);
 
 // Player hitbox information. Calculated once per frame.
@@ -80,12 +81,14 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
     switch(state->id) {
     default: break;
-    case OBJ_RING:          _ring_update(state, typedata, pos);          break;
-    case OBJ_GOAL_SIGN:     _goal_sign_update(state, typedata, pos);     break;
-    case OBJ_MONITOR:       _monitor_update(state, typedata, pos);       break;
-    case OBJ_SPRING_YELLOW: _spring_update(state, typedata, pos, 0);     break;
-    case OBJ_SPRING_RED:    _spring_update(state, typedata, pos, 1);     break;
-    case OBJ_CHECKPOINT:    _checkpoint_update(state, typedata, pos);    break;
+    case OBJ_RING:                   _ring_update(state, typedata, pos);               break;
+    case OBJ_GOAL_SIGN:              _goal_sign_update(state, typedata, pos);          break;
+    case OBJ_MONITOR:                _monitor_update(state, typedata, pos);            break;
+    case OBJ_SPRING_YELLOW:          _spring_update(state, typedata, pos, 0);          break;
+    case OBJ_SPRING_RED:             _spring_update(state, typedata, pos, 1);          break;
+    case OBJ_SPRING_YELLOW_DIAGONAL: _spring_diagonal_update(state, typedata, pos, 0); break;
+    case OBJ_SPRING_RED_DIAGONAL:    _spring_diagonal_update(state, typedata, pos, 1); break;
+    case OBJ_CHECKPOINT:             _checkpoint_update(state, typedata, pos);         break;
     }
 }
 
@@ -251,6 +254,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
         } else if(state->flipmask == 0) { // Top-pointing spring
             player.grnd = 0;
             player.vel.vy = is_red ? -0x10000 : -0xa000;
+            player.vel.vz = 0;
             player.angle = 0;
             player.action = 0;
             state->anim_state.animation = 1;
@@ -259,6 +263,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
         } else if(state->flipmask & MASK_FLIP_FLIPY) { // Bottom-pointing spring
             player.grnd = 0;
             player.vel.vy = is_red ? 0x10000 : 0xa000;
+            player.vel.vz = 0;
             player.angle = 0;
             player.action = 0;
             state->anim_state.animation = 1;
@@ -360,4 +365,72 @@ _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             sound_play_vag(sfx_chek, 0);
         }
     }
+}
+
+#define SPRND_ST_R 0x0000b500 // 11.3125
+#define SPRND_ST_Y 0x00007120 // 7.0703125
+
+static void
+_spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
+{
+    // For diagonal springs, interaction should occur if and only if the player
+    // is colliding with its top.
+    if(state->anim_state.animation == 0) {
+        int32_t solidity_vx = pos->vx - 16;
+        int32_t solidity_vy = pos->vy - 32; // Spring is 32x32 solid
+        int32_t solidity_w  = 32;
+        int32_t solidity_h  = 32;
+
+        // Spring hitbox is actually calculated relative to player's X position
+        // within it.
+        // The hitbox is always low on the bottom 10 pixels of the spring,
+        // unless the player is at any given X coordinate of it; if so, the
+        // hitbox height increases/decreases to give a diagonal effect.
+        // This way, the player will always collide with a hitbox that looks
+        // like a diagonal trapezium.
+
+        int32_t shrink = 0;
+        int32_t delta = 0;
+        if(state->flipmask & MASK_FLIP_FLIPX) {
+            delta = solidity_w - (player_vx - solidity_vx);
+        } else {
+            delta = player_vx - solidity_vx + 16;
+        }
+
+        if(delta > 10 && delta < 33) {
+            shrink = delta - 10;
+        } else shrink = 22;
+
+        solidity_h -= shrink;
+        
+        if(state->flipmask & MASK_FLIP_FLIPY) {
+            solidity_vy -= 32;
+        } else solidity_vy += shrink;
+
+        ObjectCollision collision_side =
+            hitbox_collision(player_vx, player_vy, player_width, player_height,
+                             solidity_vx, solidity_vy, solidity_w, solidity_h);
+
+        if(collision_side == OBJ_SIDE_NONE) return;
+        
+        player.grnd = 0;
+        player.vel.vx = is_red ? SPRND_ST_R : SPRND_ST_Y;
+        player.vel.vy = is_red ? SPRND_ST_R : SPRND_ST_Y;
+        player.vel.vz = 0;
+        if(!(state->flipmask & MASK_FLIP_FLIPY)) player.vel.vy *= -1;
+        if(state->flipmask & MASK_FLIP_FLIPX) {
+            player.vel.vx *= -1;
+            player.anim_dir = -1; // Flip on X: point player left
+        } else player.anim_dir = 1; // No flip on X: point player right
+        player.angle = 0;
+        player.action = 0;
+        state->anim_state.animation = 1;
+        player_set_animation_direct(&player, ANIM_WALKING);
+        sound_play_vag(sfx_sprn, 0);
+        
+    } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION) {
+        state->anim_state.animation = 0;
+        state->anim_state.frame = 0;
+    }
+    
 }
