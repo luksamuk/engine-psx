@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 
 #include "parallax.h"
 #include "util.h"
@@ -8,6 +9,11 @@
 
 extern ArenaAllocator _level_arena;
 extern uint8_t level_fade;
+
+// Pre-allocated parallax polygons
+#define PRL_POLYS 200
+POLY_FT4 prl_polys[2][PRL_POLYS];
+uint8_t prl_current_buffer = 0;
 
 void
 load_parallax(Parallax *parallax, const char *filename)
@@ -33,40 +39,38 @@ load_parallax(Parallax *parallax, const char *filename)
         sizeof(ParallaxStrip) * parallax->num_strips);
     for(uint8_t i = 0; i < parallax->num_strips; i++) {
         ParallaxStrip *strip = &parallax->strips[i];
-        strip->width = 0;
-
-        strip->num_parts = get_byte(bytes, &b);
+        strip->u0 = get_byte(bytes, &b);
+        strip->v0 = get_byte(bytes, &b);
+        strip->width = get_short_be(bytes, &b);
+        strip->height = get_short_be(bytes, &b);
+        strip->bgindex = get_byte(bytes, &b);
         strip->is_single = get_byte(bytes, &b);
         strip->scrollx   = get_long_be(bytes, &b);
         strip->speedx    = get_long_be(bytes, &b);
         strip->y0        = get_short_be(bytes, &b);
+
         strip->rposx     = 0;
-
-        strip->parts = alloc_arena_malloc(
-            &_level_arena,
-            sizeof(ParallaxPart) * strip->num_parts);
-        for(uint8_t j = 0; j < strip->num_parts; j++) {
-            ParallaxPart *part = &strip->parts[j];
-
-            part->u0      = get_byte(bytes, &b);
-            part->v0      = get_byte(bytes, &b);
-            part->bgindex = get_byte(bytes, &b);
-            part->width   = get_short_be(bytes, &b);
-            part->height  = get_short_be(bytes, &b);
-            part->offsetx = (j == 0)
-                ? 0
-                : (strip->parts[j-1].offsetx + strip->parts[j-1].width);
-            strip->width += part->width;
-        }
     }
 
     free(bytes);
+
+    // Pre-allocate polygons
+    prl_current_buffer = 0;
+    for(uint32_t i = 0; i < PRL_POLYS; i++) {
+        for(int j = 0; j < 2; j++) {
+            POLY_FT4 *poly = &prl_polys[j][i];
+            setPolyFT4(poly);
+            setRGB0(poly, 0, 0, 0);
+        }
+    }
 }
 
 void
 parallax_draw(Parallax *prl, Camera *camera,
               uint8_t tx_mode, int32_t px, int32_t py, int32_t cx, int32_t cy)
 {
+    uint32_t poly_count = 0;
+    
     // Camera left boundary (fixed 20.12 format)
     int32_t camera_vx = (camera->pos.vx - (CENTERX << 12));
 
@@ -76,46 +80,52 @@ parallax_draw(Parallax *prl, Camera *camera,
         ParallaxStrip *strip = &prl->strips[si];
         // Cast multiplication to avoid sign extension on bit shift
         // This gets the mult. result but also removes the decimal part
-        int32_t stripx = (uint32_t)(camera_vx * strip->scrollx) >> 24;
+        int32_t stripx = (uint32_t)(camera_vx * -strip->scrollx) >> 24;
+
+        // Coordinates currently start drawing at screen center, so
+        // push them back one screem
+        stripx -= SCREEN_XRES;
 
         // Update strip relative position when there's speed involved
         strip->rposx -= strip->speedx;
-        if((strip->rposx >> 12) < -((int32_t)strip->width))
-            strip->rposx = 0;
 
-        for(uint8_t pi = 0; pi < strip->num_parts; pi++) {
-            ParallaxPart *part = &strip->parts[pi];
+        // Calculate part X position based on factor and camera (int format)
+        int32_t vx = stripx + (strip->rposx >> 12);
 
-            // Calculate part X position based on factor and camera (int format)
-            int32_t vx = ((int32_t)part->offsetx) - stripx + (strip->rposx >> 12);
+        // Given that each part is a horizontal piece of a strip, we assume
+        // that these parts repeat at every (strip width), so just draw
+        // all equal parts now at once, until we exhaust the screen width
+        for(int32_t wx = vx;
+            wx < (int32_t)(SCREEN_XRES + strip->width);
+            wx += strip->width)
+        {
+            // Don't draw if strip is outside screen
+            if((wx + strip->width) < 0) continue;
 
-            // Given that each part is a horizontal piece of a strip, we assume
-            // that these parts repeat at every (strip width), so just draw
-            // all equal parts now at once, until we exhaust the screen width
-            for(int32_t wx = vx;
-                wx < (int32_t)(SCREEN_XRES + part->width);
-                wx += part->width)
-            {
-                // Don't draw if strip is outside screen
-                if((wx + part->width) < 0) continue;
+            // TODO: 6 or 8 Depends on CLUT!!!
+            uint16_t curr_px = (uint16_t)(px + ((uint32_t)strip->bgindex << 6));
+            uint16_t curr_cy = (uint16_t)(cy + strip->bgindex);
 
-                // TODO: 6 or 8 Depends on CLUT!!!
-                uint16_t curr_px = (uint16_t)(px + ((uint32_t)part->bgindex << 6));
-                uint16_t curr_cy = (uint16_t)(cy + part->bgindex);
+            //POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+            //increment_prim(sizeof(POLY_FT4));
+            //setPolyFT4(poly);
+            POLY_FT4 *poly = &prl_polys[prl_current_buffer][poly_count];
 
-                POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
-                increment_prim(sizeof(POLY_FT4));
-                setPolyFT4(poly);
+            if(poly->r0 != level_fade)
                 setRGB0(poly, level_fade, level_fade, level_fade);
-                poly->tpage = getTPage(tx_mode & 0x3, 0, curr_px, py);
-                poly->clut = getClut(cx, curr_cy);
-                setXYWH(poly, wx, strip->y0, part->width, part->height);
-                setUVWH(poly, part->u0, part->v0, part->width - 1, part->height - 1);
-                sort_prim(poly, OT_LENGTH - 2); // Layer 5: Background
+            poly->tpage = getTPage(tx_mode & 0x3, 0, curr_px, py);
+            poly->clut = getClut(cx, curr_cy);
+            setXYWH(poly, wx, strip->y0, strip->width, strip->height);
+            setUVWH(poly, strip->u0, strip->v0, strip->width - 1, strip->height - 1);
+            sort_prim(poly, OT_LENGTH - 2); // Layer 5: Background
+            
+            poly_count++;
+            assert(poly_count < PRL_POLYS);
 
-                // If drawing a single time, stop now
-                if(strip->is_single) break;
-            }
+            // If drawing a single time, stop now
+            if(strip->is_single) break;
         }
     }
+
+    prl_current_buffer ^= 1;
 }

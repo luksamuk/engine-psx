@@ -1,20 +1,15 @@
 // -*- mode: c; -*-
 
-struct ParallaxPart {
+struct ParallaxStrip {
        u8 u0;
        u8 v0;
-       u8 tex_idx;
        be u16 width;
        be u16 height;
-};
-
-struct ParallaxStrip {
-       u8 num_parts;
+       u8 tex_idx;
        u8 is_single;
        be s32 scrollx;
        be s32 speedx;
        be s16 y0;
-       ParallaxPart parts[num_parts];
 };
 
 struct Parallax {

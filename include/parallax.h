@@ -20,32 +20,18 @@
           height: u16
  */
 
-// Holds a single parallax strip part.
-// Parts are a horizontal slice of a single strip.
+// Holds a single parallax strip for a level.
+// A strip is a horizontally-repeating quad.
 typedef struct {
     uint8_t  u0;
     uint8_t  v0;
-    uint8_t  bgindex;
     uint16_t width;
     uint16_t height;
-
-    // Calculated on load
-    uint16_t offsetx;
-} ParallaxPart;
-
-// Holds a single parallax strip for a level.
-// A strip may be a horizontally-repeating quad, or it
-// may be composed of more than one quad that forms a bigger strip.
-typedef struct {
-    uint8_t num_parts;
+    uint8_t  bgindex;
     uint8_t is_single;
     int32_t scrollx;
     int32_t speedx;
     int16_t y0;
-    ParallaxPart *parts;
-
-    // Calculated on load
-    uint16_t width;
 
     // State
     int32_t rposx;

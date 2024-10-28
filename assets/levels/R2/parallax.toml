@@ -41,15 +41,13 @@ single = false
 
 # =============
 [island2]
+width = 256
 height = 40
+u0 = 0
+v0 = 44
 scrollx = 0.25
 y0 = 80
 single = false
-
-[[island2.parts]]
-u0 = 0
-v0 = 44
-width = 256
 
 # =============
 # Water starts at BG1.

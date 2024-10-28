@@ -21,37 +21,27 @@ def tofixed12(value: float) -> int:
 
 
 @dataclass
-class ParallaxPart:
+class ParallaxStrip:
     u0: int = 0
     v0: int = 0
-    bg_index: int = 0
     width: int = 0
     height: int = 0
-
-    def write_to(self, f):
-        f.write(c_ubyte(self.u0))
-        f.write(c_ubyte(self.v0))
-        f.write(c_ubyte(self.bg_index))
-        f.write(c_ushort(self.width))
-        f.write(c_ushort(self.height))
-
-
-@dataclass
-class ParallaxStrip:
+    bg_index: int = 0
     single: bool = False
     scrollx: float = 0
     speedx: float = 0
     y0: int = 0
-    parts: [ParallaxPart] = field(default_factory=list)
 
     def write_to(self, f):
-        f.write(c_ubyte(len(self.parts)))
+        f.write(c_ubyte(self.u0))
+        f.write(c_ubyte(self.v0))
+        f.write(c_ushort(self.width))
+        f.write(c_ushort(self.height))
+        f.write(c_ubyte(self.bg_index))
         f.write(c_ubyte(int(self.single)))
         f.write(c_int(tofixed12(self.scrollx)))
         f.write(c_int(tofixed12(self.speedx)))
         f.write(c_short(self.y0))
-        for p in self.parts:
-            p.write_to(f)
 
 
 @dataclass
@@ -73,29 +63,13 @@ def parse(data) -> Parallax:
         strip.scrollx = strip_data.get("scrollx", 0)
         strip.speedx = strip_data.get("speedx", 0)
         strip.y0 = strip_data.get("y0")
-        height = strip_data.get("height")  # Reserved
-        parts = strip_data.get("parts")
+        strip.width = strip_data.get("width")
+        strip.height = strip_data.get("height")
 
-        if not parts:
-            # This is a single-piece strip
-            part = ParallaxPart()
-            v0 = strip_data.get("v0")
-            part.bg_index = int(v0 / 256)
-            part.u0 = strip_data.get("u0")
-            part.v0 = v0 % 256
-            part.width = strip_data.get("width")
-            part.height = height
-            strip.parts.append(part)
-        else:
-            for part_data in parts:
-                part = ParallaxPart()
-                v0 = part_data.get("v0")
-                part.bg_index = int(v0 / 256)
-                part.u0 = part_data.get("u0")
-                part.v0 = v0 % 256
-                part.width = part_data.get("width")
-                part.height = height
-                strip.parts.append(part)
+        v0 = strip_data.get("v0")
+        strip.bg_index = int(v0 / 256)
+        strip.u0 = strip_data.get("u0")
+        strip.v0 = v0 % 256
 
         p.strips.append(strip)
     return p
