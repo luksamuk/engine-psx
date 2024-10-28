@@ -43,8 +43,8 @@ typedef struct {
     ParallaxStrip *strips;
 } Parallax;
 
-void load_parallax(Parallax *parallax, const char *filename);
-void parallax_draw(Parallax *prl, Camera *camera,
+void load_parallax(Parallax *parallax, const char *filename,
                    uint8_t tx_mode, int32_t px, int32_t py, int32_t cx, int32_t cy);
+void parallax_draw(Parallax *prl, Camera *camera);
 
 #endif

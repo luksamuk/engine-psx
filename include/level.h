@@ -9,7 +9,7 @@
 
 #define LEVEL_MAX_X_CHUNKS   255
 #define LEVEL_MAX_Y_CHUNKS    31
-#define LEVEL_ARENA_SIZE  131072
+#define LEVEL_ARENA_SIZE  196608 // 192KB
 
 typedef struct {
     uint8_t floor[8];

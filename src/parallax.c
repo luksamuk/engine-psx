@@ -11,12 +11,18 @@ extern ArenaAllocator _level_arena;
 extern uint8_t level_fade;
 
 // Pre-allocated parallax polygons
-#define PRL_POLYS 200
-POLY_FT4 prl_polys[2][PRL_POLYS];
 uint8_t prl_current_buffer = 0;
 
+// Sorry for this mess, but it's needed:
+// prl_pols[i]: Array of polygons (POLY_FT4**) for current buffer (double buffering)
+// prl_pols[i][j]: Pointer to list of polygons (POLY_FT4*) for the parallax strip #j
+// prl_pols[i][j][k]: A single polygon for current strip
+POLY_FT4 **prl_pols[2];
+
 void
-load_parallax(Parallax *parallax, const char *filename)
+load_parallax(Parallax *parallax, const char *filename,
+              uint8_t tx_mode, int32_t px, int32_t py,
+              int32_t cx, int32_t cy)
 {
     uint8_t *bytes;
     uint32_t b, length;
@@ -37,6 +43,15 @@ load_parallax(Parallax *parallax, const char *filename)
     parallax->strips = alloc_arena_malloc(
         &_level_arena,
         sizeof(ParallaxStrip) * parallax->num_strips);
+
+    // Prepare polygon lists
+    prl_pols[0] = alloc_arena_malloc(
+        &_level_arena,
+        sizeof(POLY_FT4 **) * parallax->num_strips);
+    prl_pols[1] = alloc_arena_malloc(
+        &_level_arena,
+        sizeof(POLY_FT4 **) * parallax->num_strips);
+    
     for(uint8_t i = 0; i < parallax->num_strips; i++) {
         ParallaxStrip *strip = &parallax->strips[i];
         strip->u0 = get_byte(bytes, &b);
@@ -50,27 +65,51 @@ load_parallax(Parallax *parallax, const char *filename)
         strip->y0        = get_short_be(bytes, &b);
 
         strip->rposx     = 0;
+
+        /* RENDERING OPTIMIZATION */
+        // 1. Calculate number of polygons needed for this strip, round up
+        uint32_t polygons_per_strip = (SCREEN_XRES / strip->width) + 3;
+        
+        // 2. Allocate polygons for this strip
+        prl_pols[0][i] = alloc_arena_malloc(
+            &_level_arena,
+            sizeof(POLY_FT4) * polygons_per_strip);
+        prl_pols[1][i] = alloc_arena_malloc(
+            &_level_arena,
+            sizeof(POLY_FT4) * polygons_per_strip);
+
+        // 3. Preload and prepare polygons for this strip
+        // TODO: 6 or 8 Depends on CLUT!!!
+        uint16_t curr_px = (uint16_t)(px + ((uint32_t)strip->bgindex << 6));
+        uint16_t curr_cy = (uint16_t)(cy + strip->bgindex);
+
+        for(uint32_t p = 0; p < polygons_per_strip; p++) {
+            POLY_FT4 *poly0 = &prl_pols[0][i][p];
+            POLY_FT4 *poly1 = &prl_pols[1][i][p];
+            
+            setPolyFT4(poly0);
+            setRGB0(poly0, 0, 0, 0);
+            poly0->tpage = getTPage(tx_mode & 0x3, 0, curr_px, py);
+            poly0->clut = getClut(cx, curr_cy);
+            //setXYWH(poly0, 0, strip->y0, strip->width, strip->height);
+            setUVWH(poly0, strip->u0, strip->v0, strip->width - 1, strip->height - 1);
+            
+            setPolyFT4(poly1);
+            setRGB0(poly1, 0, 0, 0);
+            poly1->tpage = getTPage(tx_mode & 0x3, 0, curr_px, py);
+            poly1->clut = getClut(cx, curr_cy);
+            //setXYWH(poly1, 0, strip->y0, strip->width, strip->height);
+            setUVWH(poly1, strip->u0, strip->v0, strip->width - 1, strip->height - 1);
+        }
+        
     }
 
     free(bytes);
-
-    // Pre-allocate polygons
-    prl_current_buffer = 0;
-    for(uint32_t i = 0; i < PRL_POLYS; i++) {
-        for(int j = 0; j < 2; j++) {
-            POLY_FT4 *poly = &prl_polys[j][i];
-            setPolyFT4(poly);
-            setRGB0(poly, 0, 0, 0);
-        }
-    }
 }
 
 void
-parallax_draw(Parallax *prl, Camera *camera,
-              uint8_t tx_mode, int32_t px, int32_t py, int32_t cx, int32_t cy)
+parallax_draw(Parallax *prl, Camera *camera)
 {
-    uint32_t poly_count = 0;
-    
     // Camera left boundary (fixed 20.12 format)
     int32_t camera_vx = (camera->pos.vx - (CENTERX << 12));
 
@@ -84,7 +123,7 @@ parallax_draw(Parallax *prl, Camera *camera,
 
         // Coordinates currently start drawing at screen center, so
         // push them back one screem
-        stripx -= SCREEN_XRES;
+        stripx -= SCREEN_XRES + SCREEN_XRES;
 
         // Update strip relative position when there's speed involved
         strip->rposx -= strip->speedx;
@@ -95,6 +134,7 @@ parallax_draw(Parallax *prl, Camera *camera,
         // Given that each part is a horizontal piece of a strip, we assume
         // that these parts repeat at every (strip width), so just draw
         // all equal parts now at once, until we exhaust the screen width
+        uint32_t poly_n = 0;
         for(int32_t wx = vx;
             wx < (int32_t)(SCREEN_XRES + strip->width);
             wx += strip->width)
@@ -102,26 +142,12 @@ parallax_draw(Parallax *prl, Camera *camera,
             // Don't draw if strip is outside screen
             if((wx + strip->width) < 0) continue;
 
-            // TODO: 6 or 8 Depends on CLUT!!!
-            uint16_t curr_px = (uint16_t)(px + ((uint32_t)strip->bgindex << 6));
-            uint16_t curr_cy = (uint16_t)(cy + strip->bgindex);
-
-            //POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
-            //increment_prim(sizeof(POLY_FT4));
-            //setPolyFT4(poly);
-            POLY_FT4 *poly = &prl_polys[prl_current_buffer][poly_count];
-
-            if(poly->r0 != level_fade)
-                setRGB0(poly, level_fade, level_fade, level_fade);
-            poly->tpage = getTPage(tx_mode & 0x3, 0, curr_px, py);
-            poly->clut = getClut(cx, curr_cy);
+            POLY_FT4 *poly = &prl_pols[prl_current_buffer][si][poly_n];
+            setRGB0(poly, level_fade, level_fade, level_fade);
             setXYWH(poly, wx, strip->y0, strip->width, strip->height);
-            setUVWH(poly, strip->u0, strip->v0, strip->width - 1, strip->height - 1);
             sort_prim(poly, OT_LENGTH - 2); // Layer 5: Background
-            
-            poly_count++;
-            assert(poly_count < PRL_POLYS);
 
+            poly_n++;
             // If drawing a single time, stop now
             if(strip->is_single) break;
         }

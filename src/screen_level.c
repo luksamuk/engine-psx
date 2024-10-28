@@ -239,10 +239,7 @@ screen_level_draw(void *d)
     /* render_model(&data->ring); */
 
     render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
-    parallax_draw(&data->parallax, &camera,
-                  data->parallax_tx_mode,
-                  data->parallax_px, data->parallax_py,
-                  data->parallax_cx, data->parallax_cy);
+    parallax_draw(&data->parallax, &camera);
 
     // Gouraud-shaded cube
     /* RotMatrix(&rotation, &world); */
@@ -401,12 +398,6 @@ level_load_level(screen_level_data *data)
     }
 
     /* === PARALLAX === */
-    // Load level parallax data
-    snprintf(filename0, 255, "%s\\PRL.PRL;1", basepath);
-    printf("Loading parallax data...\n");
-    load_parallax(&data->parallax, filename0);
-    printf("Loaded parallax strips: %d\n", data->parallax.num_strips);
-    
     // Load level parallax textures
     snprintf(filename0, 255, "%s\\BG0.TIM;1", basepath);
     printf("Loading %s...\n", filename0);
@@ -433,6 +424,15 @@ level_load_level(screen_level_data *data)
         load_texture(timfile, &tim);
         free(timfile);
     } else printf("Warning: Level BG1 not found, ignoring\n");
+
+    // Load level parallax data
+    snprintf(filename0, 255, "%s\\PRL.PRL;1", basepath);
+    printf("Loading parallax data...\n");
+    load_parallax(&data->parallax, filename0,
+                  data->parallax_tx_mode,
+                  data->parallax_px, data->parallax_py,
+                  data->parallax_cx, data->parallax_cy);
+    printf("Loaded parallax strips: %d\n", data->parallax.num_strips);
 
     snprintf(filename0, 255, "%s\\MAP16.MAP;1", basepath);
     snprintf(filename1, 255, "%s\\MAP16.COL;1", basepath);
