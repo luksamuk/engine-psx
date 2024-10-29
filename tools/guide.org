@@ -59,7 +59,7 @@ Extra files such as 'tiles16.tsx' will also be generated.
     - Make  sure you  un-mark the  "Set for  Black" option  in Semi  Transparent
       Information.
     - Make sure your tileset is at 448x0  and that the CLUT information is 4-bit
-      depth and at  320x257.  Notice that texture  pages 8 and 24  are for level
+      depth and at  0x482.  Notice that texture  pages 8 and 24  are for level
       tiles and CLUT information, respectively.
     - *NOTE:* If you use another tool such  as TIMEDIT, just make sure the black
       color   is  accurately   picked  as   transparent  color,   and  that   no
@@ -86,8 +86,10 @@ Please make  sure that  the first  tile is  COMPLETELY BLANK  and mind  the tile
 sequence (tiles are counted first from left to right, then up to down).
 
 1. Create a 'tiles16.tsx' map from '16x16.png', if you haven't already.
-2. Create  a 'tilemap128.tmx' map and  use 'tiles16.tsx' as tileset.  This map
-   must have infinite dimensions.
+2. Create a  'tilemap128.tmx' map and use 'tiles16.tsx' as  tileset. I recommend
+   this map to start with 32x112 dimensions, and 16x16 tiles, of course.
+   - Create layers  called "none",  "oneway" and "solid"  (top to  bottom), with
+     those specific names.
 3. Create your tiles from left to right, and if you must, up to down. Be mindful
    of  tile order,  and make  sure that  the first  tile (first  eight rows  and
    columns) are completely blank.
