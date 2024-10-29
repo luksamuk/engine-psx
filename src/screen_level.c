@@ -35,12 +35,13 @@ uint8_t     level_fade;
 
 #define CHANNELS_PER_BGM    3
 static uint32_t bgm_loop_sectors[] = {
-    4000,
-    4800,
-    3230,
-
-    7300,
-    7300,
+    4000, // R0Z1
+    4800, // R0Z2
+    3230, // R1Z1
+    4050, // R1Z2
+    4050, // GHZ1
+    4050, // GHZ2
+    3250, // SWZ1
 };
 
 
@@ -473,8 +474,30 @@ level_load_level(screen_level_data *data)
     level_debrief();
 
     // Start playback after we don't need the CD anymore.
-    snprintf(filename0, 255, "\\BGM\\BGM%03u.XA;1", (level / CHANNELS_PER_BGM) + 1);
-    music_channel = level % CHANNELS_PER_BGM;
+    if(level == 0) { // R0Z1
+        snprintf(filename0, 255, "\\BGM\\BGM001.XA;1");
+        music_channel = 0;
+    } else if(level == 1) { // R0Z2
+        snprintf(filename0, 255, "\\BGM\\BGM001.XA;1");
+        music_channel = 1;
+    } else if(level == 2) { // R1Z1
+        snprintf(filename0, 255, "\\BGM\\BGM001.XA;1");
+        music_channel = 2;
+    } else if(level == 3) { // R1Z2
+        snprintf(filename0, 255, "\\BGM\\BGM002.XA;1");
+        music_channel = 0;
+    } else if(level == 4 || level == 5) { // GHZ1 / GHZ2
+        snprintf(filename0, 255, "\\BGM\\BGM002.XA;1");
+        music_channel = 1;
+    } else if(level == 6) { // SWZ1
+        // El Gato Battle 2 Vortex Remake by pkVortex
+        // https://www.youtube.com/watch?v=ZU-MGiM5YlA
+        snprintf(filename0, 255, "\\BGM\\BGM002.XA;1");
+        music_channel = 2;
+    } else {
+        // Do not play anything
+        return;
+    }
 
     sound_play_xa(filename0, 0, music_channel, bgm_loop_sectors[level]);
 }
@@ -487,6 +510,8 @@ level_set_clearcolor()
         set_clear_color(LERPC(level_fade, 26), LERPC(level_fade, 104), LERPC(level_fade, 200));
     else if(level == 4 || level == 5) // R2 (GHZ)
         set_clear_color(LERPC(level_fade, 36), LERPC(level_fade, 0), LERPC(level_fade, 180));
+    else if(level == 6 || level == 7)
+        set_clear_color(0, 0, 0);
     // R0
     else set_clear_color(LERPC(level_fade, 63), LERPC(level_fade, 0), LERPC(level_fade, 127));
 }

@@ -1,0 +1,9 @@
+[part1]
+width = 256
+height = 240
+u0 = 0
+v0 = 0
+scrollx = 0.25
+y0 = 0
+single = false
+

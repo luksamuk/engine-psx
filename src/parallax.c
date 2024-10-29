@@ -54,11 +54,11 @@ load_parallax(Parallax *parallax, const char *filename,
     
     for(uint8_t i = 0; i < parallax->num_strips; i++) {
         ParallaxStrip *strip = &parallax->strips[i];
-        strip->u0 = get_byte(bytes, &b);
-        strip->v0 = get_byte(bytes, &b);
+        uint8_t u0 = get_byte(bytes, &b);
+        uint8_t v0 = get_byte(bytes, &b);
         strip->width = get_short_be(bytes, &b);
         strip->height = get_short_be(bytes, &b);
-        strip->bgindex = get_byte(bytes, &b);
+        uint8_t bgindex = get_byte(bytes, &b);
         strip->is_single = get_byte(bytes, &b);
         strip->scrollx   = get_long_be(bytes, &b);
         strip->speedx    = get_long_be(bytes, &b);
@@ -80,8 +80,8 @@ load_parallax(Parallax *parallax, const char *filename,
 
         // 3. Preload and prepare polygons for this strip
         // TODO: 6 or 8 Depends on CLUT!!!
-        uint16_t curr_px = (uint16_t)(px + ((uint32_t)strip->bgindex << 6));
-        uint16_t curr_cy = (uint16_t)(cy + strip->bgindex);
+        uint16_t curr_px = (uint16_t)(px + ((uint32_t)bgindex << 6));
+        uint16_t curr_cy = (uint16_t)(cy + bgindex);
 
         for(uint32_t p = 0; p < polygons_per_strip; p++) {
             POLY_FT4 *poly0 = &prl_pols[0][i][p];
@@ -92,14 +92,14 @@ load_parallax(Parallax *parallax, const char *filename,
             poly0->tpage = getTPage(tx_mode & 0x3, 0, curr_px, py);
             poly0->clut = getClut(cx, curr_cy);
             //setXYWH(poly0, 0, strip->y0, strip->width, strip->height);
-            setUVWH(poly0, strip->u0, strip->v0, strip->width - 1, strip->height - 1);
+            setUVWH(poly0, u0, v0, strip->width - 1, strip->height - 1);
             
             setPolyFT4(poly1);
             setRGB0(poly1, 0, 0, 0);
             poly1->tpage = getTPage(tx_mode & 0x3, 0, curr_px, py);
             poly1->clut = getClut(cx, curr_cy);
             //setXYWH(poly1, 0, strip->y0, strip->width, strip->height);
-            setUVWH(poly1, strip->u0, strip->v0, strip->width - 1, strip->height - 1);
+            setUVWH(poly1, u0, v0, strip->width - 1, strip->height - 1);
         }
         
     }

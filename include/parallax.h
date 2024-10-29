@@ -23,11 +23,11 @@
 // Holds a single parallax strip for a level.
 // A strip is a horizontally-repeating quad.
 typedef struct {
-    uint8_t  u0;
-    uint8_t  v0;
+    //uint8_t  u0;
+    //uint8_t  v0;
     uint16_t width;
     uint16_t height;
-    uint8_t  bgindex;
+    //uint8_t  bgindex;
     uint8_t is_single;
     int32_t scrollx;
     int32_t speedx;

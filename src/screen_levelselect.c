@@ -13,11 +13,11 @@
 #include "util.h"
 #include "timer.h"
 
-#define CHOICE_MODELTEST 5
-#define CHOICE_TITLE     6
-#define CHOICE_SONICT    7
-#define CHOICE_INTRO     8
-#define CHOICE_SOON      9
+#define CHOICE_MODELTEST 7
+#define CHOICE_TITLE     8
+#define CHOICE_SONICT    9
+#define CHOICE_INTRO     10
+#define CHOICE_SOON      11
 #define MAX_LEVELS   (CHOICE_SOON + 1)
 
 typedef struct {
@@ -189,13 +189,13 @@ screen_levelselect_draw(void *d)
 
     snprintf(
         data->buffer, 255,
-        "%c ROUND 0    ZONE 1\n"
-        "%c            ZONE 2\n"
-        "%c ROUND 1    ZONE 1\n"
-        "%c            ZONE 2\n"
-        "%c GREEN HILL ZONE 1\n"
-        "\n"
-        "\n"
+        "%c ROUND 0     ZONE 1\n"
+        "%c             ZONE 2\n"
+        "%c ROUND 1     ZONE 1\n"
+        "%c             ZONE 2\n"
+        "%c GREEN HILL  ZONE 1\n"
+        "%c             ZONE 2\n"
+        "%c SURELY WOOD ZONE 1\n" // Wood Zone retexture by Nite Shadow
         "\n"
         "\n"
         "\n"
@@ -215,6 +215,8 @@ screen_levelselect_draw(void *d)
         (data->menu_choice == 2) ? '>' : ' ',
         (data->menu_choice == 3) ? '>' : ' ',
         (data->menu_choice == 4) ? '>' : ' ',
+        (data->menu_choice == 5) ? '>' : ' ',
+        (data->menu_choice == 6) ? '>' : ' ',
         (data->menu_choice == CHOICE_MODELTEST) ? '>' : ' ',
         (data->menu_choice == CHOICE_TITLE) ? '>' : ' ',
         (data->menu_choice == CHOICE_SONICT) ? '>' : ' ',
