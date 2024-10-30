@@ -33,10 +33,10 @@ static int32_t next_channel = 0;
 /* static XACDSector _sector; */
 
 // Current .XA audio data start location.
-static CdlLOC   _xa_loc;
-static int      _xa_should_play = 0;
-static uint32_t _cd_status = 0;
-static uint32_t _xa_loopback_sector = 0;
+static volatile CdlLOC   _xa_loc;
+static volatile int      _xa_should_play = 0;
+static volatile uint32_t _cd_status = 0;
+static volatile uint32_t _xa_loopback_sector = 0;
 
 // Read error threshold. If surpasses the limit, restart the music.
 #define CD_MAX_ERR_THRESHOLD 10
@@ -199,7 +199,7 @@ sound_play_xa(const char *filename, int double_speed,
     _cd_elapsed_sectors = 0;
     _xa_loopback_sector = loopback_sector;
     CdControl(CdlSetfilter, &filter, 0);
-    CdControl(CdlReadS, &_xa_loc, 0);
+    CdControl(CdlReadS, (const void *)&_xa_loc, 0);
     _xa_should_play = 1;
 }
 
@@ -216,7 +216,7 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
             // Loop back to beginning
             _cd_err_threshold = 0;
             _cd_elapsed_sectors = 0;
-            CdControlF(CdlReadS, &_xa_loc);
+            CdControlF(CdlReadS, (const void *)&_xa_loc);
         }
         break;
     case CdlDiskError:

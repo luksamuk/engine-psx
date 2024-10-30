@@ -16,18 +16,18 @@
 // Since the stream context in this case can use approx. 320K of RAM,
 // it seems like a better choice to let it live on the heap.
 // No need to manage this using an arena allocator, though.
-static StreamContext *str_ctx = NULL;
+static volatile StreamContext *str_ctx = NULL;
 
 // MDEC lookup table, generally lives on the scratchpad
 // Using v2 because it looks much better after AVI conversion!
-static VLC_TableV2   *lookup_table;
+static volatile VLC_TableV2   *lookup_table;
 
 // Temporary area for CD sectors read from CD.
 // Accessed by DMA, therefore must not be on heap
-static STR_Header    sector_header;
+static volatile STR_Header    sector_header;
 
 // STR file location on CD
-static CdlFILE       file;
+static volatile CdlFILE       file;
 
 static int decode_errors;
 static int frame_time;
@@ -67,7 +67,7 @@ mdec_start(const char *filepath)
 
     // Copy MDEC lookup table to scratchpad
     lookup_table = fastalloc_malloc(sizeof(VLC_TableV2));
-    DecDCTvlcCopyTableV2(lookup_table);
+    DecDCTvlcCopyTableV2((VLC_TableV2 *)lookup_table);
 
     // Setup stream context
     if(!str_ctx) str_ctx = malloc(sizeof(StreamContext));
@@ -80,7 +80,7 @@ mdec_start(const char *filepath)
     // Find file on CD.
     // We won't be using the util.h library since we need to find
     // the actual file position to stream
-    if(!CdSearchFile(&file, filepath)) {
+    if(!CdSearchFile((CdlFILE *)&file, filepath)) {
         printf("Could not find .STR file %s.\n", filepath);
         // TODO: Halt forever?
         return;
@@ -99,7 +99,7 @@ mdec_start(const char *filepath)
     // Start reading in real-time mode (doesn't retry in case of errors).
     uint8_t mode = CdlModeRT | CdlModeSpeed;
     CdControl(CdlSetmode, (const uint8_t *)&mode, 0);
-    CdControl(CdlReadS, &file.pos, 0);
+    CdControl(CdlReadS, (const void *)&file.pos, 0);
 
     // Wait for first frame to be buffered.
     _mdec_get_next_frame();
@@ -114,8 +114,8 @@ mdec_stop()
     CdControlB(CdlPause, 0, 0);
 
     if(str_ctx) {
-       free(str_ctx);
-       str_ctx = NULL;
+        free((void *)str_ctx);
+        str_ctx = NULL;
     }
     fastalloc_free();
     render_mdec_dispose();
@@ -207,7 +207,7 @@ mdec_loop()
         str_ctx->frame_width = VRAM_X_COORD(frame->width);
 
         DecDCTout(
-            str_ctx->slices[str_ctx->cur_slice],
+            (uint32_t *)str_ctx->slices[str_ctx->cur_slice],
             BLOCK_SIZE * str_ctx->slice_pos.h / 2);
 
         if(debug_mode) frame_time = (TIMER_VALUE(1) - frame_start) & 0xffff;
@@ -232,14 +232,14 @@ _mdec_dma_callback(void)
 
     // Upload the decoded slice to VRAM and start decoding
     // the next slice into another buffer, if any
-    LoadImage(&str_ctx->slice_pos, str_ctx->slices[str_ctx->cur_slice]);
+    LoadImage((const RECT *)&str_ctx->slice_pos, (const uint32_t *)str_ctx->slices[str_ctx->cur_slice]);
 
     str_ctx->cur_slice ^= 0x1;
     str_ctx->slice_pos.x += BLOCK_SIZE;
 
     if(str_ctx->slice_pos.x < str_ctx->frame_width) {
         DecDCTout(
-            str_ctx->slices[str_ctx->cur_slice],
+            (uint32_t *)str_ctx->slices[str_ctx->cur_slice],
             BLOCK_SIZE * str_ctx->slice_pos.h / 2);
     }
 }
@@ -266,13 +266,13 @@ _mdec_cd_event_callback(CdlIntrResult event, uint8_t *)
 void
 _mdec_cd_sector_handler(void)
 {
-    StreamBuffer *frame = &str_ctx->frames[str_ctx->cur_frame];
+    volatile StreamBuffer *frame = &str_ctx->frames[str_ctx->cur_frame];
 
     // Fetch .STR header of the sector that has been read and
     // make sure it is valid. If not, assume the file has ended
     // and set frame_ready as a signal for the playback loop to
     // stop playback.
-    CdGetSector(&sector_header, sizeof(STR_Header) >> 2);
+    CdGetSector((void *)&sector_header, sizeof(STR_Header) >> 2);
     if(sector_header.magic != 0x0160) {
         str_ctx->frame_ready = -1;
         return;
@@ -311,7 +311,7 @@ _mdec_cd_sector_handler(void)
     // Append payload contained in this sector to the current buffer
     str_ctx->sector_count--;
     CdGetSector(
-        &(frame->bs_data[2016 / 4 * sector_header.sector_id]),
+        (void *)&(frame->bs_data[2016 / 4 * sector_header.sector_id]),
         2016 / 4);
 }
 
@@ -329,7 +329,7 @@ _mdec_get_next_frame(void)
     }
 
     str_ctx->frame_ready = 0;
-    return &str_ctx->frames[str_ctx->cur_frame ^ 0x1];
+    return (StreamBuffer *)&str_ctx->frames[str_ctx->cur_frame ^ 0x1];
 }
 
 

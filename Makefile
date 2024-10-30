@@ -32,17 +32,29 @@ run: ./build/engine.cue
 		-run -interpreter -fastboot -stdout \
 		-iso ./build/engine.cue
 
+# Run on pcsx-redux, but don't build
+dry-run:
+	pcsx-redux-appimage \
+		-run -interpreter -fastboot -stdout \
+		-iso ./build/engine.cue
+
 # Target for running the image on Mednafen
 mednafen: ./build/engine.cue
 	mednafen $<
 
-# Run PCSX-Redux emulator
+# Emulate on Mednafen, but do not build
 emu:
-	2>/dev/null 1>&2 pcsx-redux -gdb -gdb-port 3333 -run -interpreter -fastboot &
+	mednafen ./build/engine.cue
 
 # Run debugger
 debug:
 	gdb-multiarch
+
+# Build on release target
+release: purge cook
+	cmake --preset release .
+	cd build && make iso
+	tochd -d . -- ./build/engine.cue
 
 # =======================================
 #  Targets for executable building
