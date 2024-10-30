@@ -146,11 +146,15 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         } else if(screen_level_getstate() == 3) {
             uint8_t lvl = screen_level_getlevel();
             // TODO: This is temporary and goes only upto R2Z1
-            if(lvl >= 4) {
-                scene_change(SCREEN_COMINGSOON);
-            } else {
-                screen_level_setlevel(lvl + 1);
+            if(lvl < 6) {
+                if(lvl == 4) {
+                    // TODO: Transition from GHZ1 to SWZ1
+                    // THIS IS TEMPORARY
+                    screen_level_setlevel(6);
+                } else screen_level_setlevel(lvl + 1);
                 scene_change(SCREEN_LEVEL);
+            } else {
+                scene_change(SCREEN_COMINGSOON);
             }
         }
     }

@@ -183,7 +183,9 @@ screen_title_update(void *d)
                     data->selected = 1;
                     switch(data->menu_option) {
                     case 2: // New Game
-                        screen_level_setlevel(0);
+                        //screen_level_setlevel(0);
+                        // Start at Green Hill Zone 1
+                        screen_level_setlevel(4);
                         screen_fmv_set_next(SCREEN_LEVEL);
                         screen_fmv_enqueue("\\INTRO.STR;1");
                         data->next_scene = SCREEN_FMV;
