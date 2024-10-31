@@ -24,11 +24,27 @@
 /*
   Locations of common textures on frame buffer:
   ================================================
-  Player 1:       320x0;   CLUT: 0x480
-  Common objects: 576x0;   CLUT: 0x481
-  Level tiles:    448x0;   CLUT: 0x482 (if exists)
-  Level BG0:      448x256; CLUT: 0x483 (4-bit only)
-  Level BG1:      512x256; CLUT: 0x484 (4-bit only)
+  Player 1:       320x0;     CLUT: 0x480
+  Common objects: 576x0;     CLUT: 0x481
+  Level tiles:    448x0;     CLUT: 0x482 (if exists)
+  Level BG0:      448x256;   CLUT: 0x483 (4-bit only)
+  Level BG1:      512x256;   CLUT: 0x484 (4-bit only)
+
+  Basic fonts:    960x256;   CLUT: 0x490 (4-bit always)
+ */
+
+/*
+  General depth for elements in ordering table
+  (Ordering table depths act like sprite planes)
+  ================================================
+        0       | Highest plane (debug information, etc)
+        1       | Heads-up display and text layer
+        2       | Level tile (SPRT_8 + DR_TPAGE) layer (front) -- UNUSED
+        3       | Object sprite layer
+        4       | Player sprite layer
+       ...      | ...
+  OT_LENGTH - 3 | Level tile (SPRT_8 + DR_TPAGE) layer (back)
+  OT_LENGTH - 2 | Level background (parallax)
  */
 
 int debug_mode = 0;
