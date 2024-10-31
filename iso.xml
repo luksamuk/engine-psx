@@ -21,6 +21,9 @@
 	<file name="SONIC.CHARA"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/SONIC.CHARA" />
+	<file name="BASEFONT.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/BASEFONT.TIM" />
 	<dir name="TITLE">
 	  <file name="TITLE.TIM"
 		type="data"

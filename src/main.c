@@ -20,6 +20,7 @@
 #include "camera.h"
 #include "memalloc.h"
 #include "screen.h"
+#include "basic_font.h"
 
 /*
   Locations of common textures on frame buffer:
@@ -30,6 +31,7 @@
   Level BG0:      448x256;   CLUT: 0x483 (4-bit only)
   Level BG1:      512x256;   CLUT: 0x484 (4-bit only)
 
+  System fonts:   960x0      (CLUT on same TPAGE; reserved!)
   Basic fonts:    960x256;   CLUT: 0x490 (4-bit always)
  */
 
@@ -60,6 +62,7 @@ main(void)
     timer_init();
     fastalloc_init();
     level_init();
+    font_init();
 
     // Set first scene
     scene_init();
@@ -73,7 +76,8 @@ main(void)
         timer_update();
 
         // Draw scene
-        scene_draw();        
+        scene_draw();
+        font_flush();
         swap_buffers();
     }
 
