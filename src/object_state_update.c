@@ -176,7 +176,7 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                            solidity_vx, solidity_vy, 32, 32))
         {
             if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                               hitbox_vx, hitbox_vy, 28, 32)
+                               hitbox_vx, hitbox_vy, 26, 32)
                && player_attacking) {
                 state->anim_state.animation = 1;
                 state->anim_state.frame = 0;
