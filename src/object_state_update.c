@@ -25,6 +25,9 @@ extern SoundEffect sfx_sprn;
 extern SoundEffect sfx_chek;
 extern int debug_mode;
 
+extern uint8_t level_ring_count;
+extern uint8_t level_score_count;
+
 // Update functions
 static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 static void _goal_sign_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
@@ -112,6 +115,7 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             state->anim_state.animation = 1;
             state->anim_state.frame = 0;
             state->props ^= OBJ_FLAG_ANIM_LOCK; // Unlock from global timer
+            level_ring_count++;
             sound_play_vag(sfx_ring, 0);
         }
     } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION
@@ -182,6 +186,14 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 state->anim_state.frame = 0;
                 state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
                 sound_play_vag(sfx_pop, 0);
+
+                switch(((MonitorExtra *)state->extra)->kind) {
+                case MONITOR_KIND_RING:
+                    level_ring_count += 10;
+                    sound_play_vag(sfx_ring, 0);
+                    break;
+                default: break;
+                }
 
                 if(!player.grnd && player.vel.vy > 0) {
                     player.vel.vy *= -1;

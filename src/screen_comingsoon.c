@@ -7,8 +7,6 @@
 #include "input.h"
 #include "sound.h"
 
-#include "screens/fmv.h"
-
 typedef struct {
     int32_t prectx;
     int32_t precty;
@@ -42,6 +40,7 @@ screen_comingsoon_load()
 void
 screen_comingsoon_unload(void *)
 {
+    sound_stop_xa();
     screen_free();
 }
 
@@ -68,11 +67,7 @@ screen_comingsoon_update(void *d)
         }
     } else {
         if(data->fade > 0) data->fade -= 2;
-        else {
-            screen_fmv_set_next(SCREEN_TITLE);
-            screen_fmv_enqueue("\\SONICT.STR;1");
-            scene_change(SCREEN_FMV);
-        }
+        else scene_change(SCREEN_CREDITS);
     }
 }
 

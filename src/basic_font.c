@@ -152,6 +152,84 @@ _draw_glyph(
     sort_prim(sprt, 1); // 1 = HUD and text layer
 }
 
+uint16_t
+_font_measurew_generic(const char *text,
+                       const uint8_t ws_w,
+                       const uint8_t gap,
+                       uint8_t *ginfo)
+{
+    uint16_t w = 0;
+    uint16_t vx = 0;
+    while(*text != '\0') {
+        switch(*text) {
+        case ' ':
+            vx += ws_w + gap;
+            text++;
+            continue;
+        case '\n':
+            vx = 0;
+            text++;
+            continue;
+        case '\t':
+            vx += (ws_w << 2) + (gap << 2);
+            text++;
+            continue;
+        }
+
+        uint8_t offset = 0xff;
+
+        if((*text >= 'a') && (*text <= 'z'))
+            offset = (uint8_t)((unsigned)(*text) - (unsigned)('a'));
+        else if((*text >= 'A') && (*text <= 'Z'))
+            offset = (uint8_t)((unsigned)(*text) - (unsigned)('A'));
+        else if((*text >= '0') && (*text <= '9')) {
+            offset = 26 + (uint8_t)((unsigned)(*text) - (unsigned)('0'));
+        } else {
+            switch(*text) {
+            case '*': offset = 36; break;
+            case '.': offset = 37; break;
+            case ';': offset = 38; break;
+            case '-': offset = 39; break;
+            case '=': offset = 40; break;
+            case '!': offset = 41; break;
+            case '?': offset = 42; break;
+            default:  offset = 0xff; break;
+            }
+        }
+
+        uint8_t gw = ws_w;
+        if(offset != 0xff) {
+            uint8_t *info = &ginfo[offset * 4];
+            if(info[0] == 0xff) {
+                // Glyph doesn't exist, so don't draw
+                goto jump_ws;
+            }
+            gw = info[2];
+        }
+
+    jump_ws:
+        vx += gw + gap;
+        text++;
+
+        if(vx > w) w = vx;
+    }
+    return w;
+}
+
+uint16_t
+font_measurew_big(const char *text)
+{
+    return _font_measurew_generic(
+        text, GLYPH_WHITE_WIDTH, GLYPH_GAP, glyph_info_big);
+}
+
+uint16_t
+font_measurew_sm(const char *text)
+{
+   return _font_measurew_generic(
+       text, GLYPH_SML_WHITE_WIDTH, GLYPH_SML_GAP, glyph_info_sm);
+}
+
 void
 _font_draw_generic(const char *text, int16_t vx, int16_t vy,
                    const uint8_t ws_w, const uint8_t ws_h,

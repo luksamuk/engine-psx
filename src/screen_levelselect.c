@@ -19,7 +19,8 @@
 #define CHOICE_SONICT    9
 #define CHOICE_INTRO     10
 #define CHOICE_SOON      11
-#define MAX_LEVELS   (CHOICE_SOON + 1)
+#define CHOICE_CREDITS   12
+#define MAX_LEVELS   (CHOICE_CREDITS + 1)
 
 typedef struct {
     uint8_t menu_choice;
@@ -37,13 +38,12 @@ extern int debug_mode;
 static const char *menutext[] = {
     "PLAYGROUND  ZONE 1",
     "            ZONE 2",
-    "TESTBED     ZONE 1",
-    "            ZONE 2",
+    "            ZONE 3",
+    "            ZONE 4",
     "GREEN HILL  ZONE 1",
     "            ZONE 2",
     "SURELY WOOD ZONE 1",
 
-    "\n",
     "\n",
     "\n",
     "\n",
@@ -53,6 +53,7 @@ static const char *menutext[] = {
     "SONICTEAM",
     "INTRO",
     "COMINGSOON",
+    "CREDITS",
     NULL,
 };
 
@@ -154,6 +155,8 @@ screen_levelselect_update(void *d)
             scene_change(SCREEN_MODELTEST);
         } else if(data->menu_choice == CHOICE_SOON) {
             scene_change(SCREEN_COMINGSOON);
+        } else if(data->menu_choice == CHOICE_CREDITS) {
+            scene_change(SCREEN_CREDITS);
         } else {
             screen_level_setlevel(data->menu_choice);
             scene_change(SCREEN_LEVEL);

@@ -9,7 +9,6 @@
 #include "input.h"
 #include "screen.h"
 #include "sound.h"
-/* #include "model.h" */
 #include "timer.h"
 
 #include "screens/fmv.h"

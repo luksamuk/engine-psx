@@ -17,6 +17,7 @@
 #include "model.h"
 #include "object.h"
 #include "parallax.h"
+#include "basic_font.h"
 
 extern int debug_mode;
 
@@ -32,6 +33,8 @@ LevelData   leveldata;
 Camera      camera;
 ObjectTable obj_table_common;
 uint8_t     level_fade;
+uint8_t     level_ring_count;
+uint8_t     level_score_count;
 
 #define CHANNELS_PER_BGM    3
 static uint32_t bgm_loop_sectors[] = {
@@ -110,6 +113,9 @@ screen_level_load()
     reset_elapsed_frames();
 
     level_fade = 0;
+
+    level_ring_count = 0;
+    level_score_count = 0;
 }
 
 void
@@ -281,6 +287,24 @@ screen_level_draw(void *d)
         int16_t x = CENTERX - (strlen(line1) * 4);
         draw_text(x, CENTERY - 12, 0, line1);
     }
+
+    // Heads-up display
+    font_set_color(
+        LERPC(level_fade, 0x7f),
+        LERPC(level_fade, 0x7f),
+        0);
+    font_draw_big("SCORE", 10, 10);
+    font_draw_big("TIME",  10, 24);
+    font_draw_big("RINGS", 10, 38);
+    font_set_color(
+        LERPC(level_fade, 0x7f),
+        LERPC(level_fade, 0x7f),
+        LERPC(level_fade, 0x7f));
+    font_draw_big("00000000", 60, 10);
+    font_draw_big("0:00", 54, 24);
+    snprintf(buffer, 255, "%3d", level_ring_count);
+    font_draw_big(buffer, 60, 38);
+    font_reset_color();
 
     if(debug_mode) {
         // Video debug
