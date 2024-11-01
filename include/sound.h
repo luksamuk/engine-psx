@@ -69,5 +69,6 @@ void     sound_stop_xa(void);
 void     sound_xa_set_channel(uint8_t channel);
 void     sound_xa_get_pos(uint8_t *minute, uint8_t *second, uint8_t *sector);
 void     sound_xa_get_elapsed_sectors(uint32_t *out);
+void     sound_xa_set_volume(uint8_t vol);
 
 #endif

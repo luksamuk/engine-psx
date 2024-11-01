@@ -64,6 +64,7 @@ sound_init(void)
     SpuInit();
     sound_reset_mem();
     _sound_reset_channels();
+    sound_xa_set_volume(0x7f);
 }
 
 void
@@ -196,6 +197,9 @@ sound_play_xa(const char *filename, int double_speed,
     filter.file = 1;
     filter.chan = channel;
 
+    // Set CD volume to 100%
+    sound_xa_set_volume(0x7f);
+
     _cd_elapsed_sectors = 0;
     _xa_loopback_sector = loopback_sector;
     CdControl(CdlSetfilter, &filter, 0);
@@ -284,4 +288,13 @@ void
 sound_xa_get_elapsed_sectors(uint32_t *out)
 {
     *out = _cd_elapsed_sectors;
+}
+
+void
+sound_xa_set_volume(uint8_t vol)
+{
+    CdlATV v;
+    v.val0 = v.val1 = v.val2 = v.val3 = vol;
+    CdMix(&v);
+    CdSync(0, 0);
 }

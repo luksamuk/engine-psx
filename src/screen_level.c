@@ -154,7 +154,11 @@ screen_level_update(void *d)
         }
     }
 
-    if(pad_pressed(PAD_START)) paused = !paused;
+    if(pad_pressed(PAD_START)) {
+        paused = !paused;
+        if(paused) sound_xa_set_volume(0x00);
+        else sound_xa_set_volume(0x7f);
+    }
     
     if(paused) {
         if(pad_pressed(PAD_SELECT)) {
