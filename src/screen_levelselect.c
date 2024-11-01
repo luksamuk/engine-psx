@@ -12,6 +12,7 @@
 #include "sound.h"
 #include "util.h"
 #include "timer.h"
+#include "basic_font.h"
 
 #define CHOICE_MODELTEST 7
 #define CHOICE_TITLE     8
@@ -33,6 +34,27 @@ typedef struct {
 
 extern int debug_mode;
 
+static const char *menutext[] = {
+    "PLAYGROUND  ZONE 1",
+    "            ZONE 2",
+    "TESTBED     ZONE 1",
+    "            ZONE 2",
+    "GREEN HILL  ZONE 1",
+    "            ZONE 2",
+    "SURELY WOOD ZONE 1",
+
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+
+    "MODELTEST",
+    "TITLESCREEN",
+    "SONICTEAM",
+    "INTRO",
+    "COMINGSOON",
+    NULL,
+};
 
 #define BG_PAUSE  90
 #define BG_FPS    4
@@ -178,50 +200,31 @@ screen_levelselect_draw(void *d)
     }
     
     // Draw text
+    font_reset_color();
     int16_t x;
     const char *title = "Level Select";
     x = CENTERX - (strlen(title) * 4);
-    draw_text(x, 12, 0, title);
+    font_draw_big(title, x, 12);
+    
 
-    const char *subtitle = "https://luksamuk.codes/";
+    const char *subtitle = "*luksamuk.codes*";
     x = SCREEN_XRES - (strlen(subtitle) * 8) - 8;
-    draw_text(x, SCREEN_YRES - 24, 0, subtitle);
+    font_draw_sm(subtitle, x, SCREEN_YRES - 24);
 
-    snprintf(
-        data->buffer, 255,
-        "%c ROUND 0     ZONE 1\n"
-        "%c             ZONE 2\n"
-        "%c ROUND 1     ZONE 1\n"
-        "%c             ZONE 2\n"
-        "%c GREEN HILL  ZONE 1\n"
-        "%c             ZONE 2\n"
-        "%c SURELY WOOD ZONE 1\n" // Wood Zone retexture by Nite Shadow
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "\n"
-        "%c MODEL TEST\n"
-        "%c TITLE\n"
-        "%c SONICTEAM\n"
-        "%c INTRO\n"
-        "%c COMING SOON",
-        (data->menu_choice == 0) ? '>' : ' ',
-        (data->menu_choice == 1) ? '>' : ' ',
-        (data->menu_choice == 2) ? '>' : ' ',
-        (data->menu_choice == 3) ? '>' : ' ',
-        (data->menu_choice == 4) ? '>' : ' ',
-        (data->menu_choice == 5) ? '>' : ' ',
-        (data->menu_choice == 6) ? '>' : ' ',
-        (data->menu_choice == CHOICE_MODELTEST) ? '>' : ' ',
-        (data->menu_choice == CHOICE_TITLE) ? '>' : ' ',
-        (data->menu_choice == CHOICE_SONICT) ? '>' : ' ',
-        (data->menu_choice == CHOICE_INTRO) ? '>' : ' ',
-        (data->menu_choice == CHOICE_SOON) ? '>' : ' ');
-    draw_text(8, 40, 0, data->buffer);
+    uint8_t txtidx = 0;
+    uint8_t cursel = 0;
+    const char **txt = menutext;
+    int16_t vy = 40;
+    while(*txt != NULL) {
+        if((*txt)[0] == '\n') goto end_line;
+        if(data->menu_choice == cursel) font_set_color(128, 128, 0);
+        font_draw_sm(*txt, 8, vy);
+        if(data->menu_choice == cursel) font_reset_color();
+        cursel++;
+
+    end_line:
+        vy += GLYPH_SML_WHITE_HEIGHT + GLYPH_SML_GAP;
+        txt = &menutext[++txtidx];
+    }
 }
 

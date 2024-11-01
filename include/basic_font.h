@@ -3,6 +3,14 @@
 
 #include <stdint.h>
 
+#define GLYPH_WHITE_WIDTH   5
+#define GLYPH_WHITE_HEIGHT 11
+#define GLYPH_GAP           1
+
+#define GLYPH_SML_WHITE_WIDTH    8
+#define GLYPH_SML_WHITE_HEIGHT  11
+#define GLYPH_SML_GAP            0
+
 void font_init();
 void font_flush();
 void font_draw_big(const char *text, int16_t vx, int16_t vy);

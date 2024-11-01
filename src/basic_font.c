@@ -4,14 +4,6 @@
 #include "render.h"
 #include "util.h"
 
-#define GLYPH_WHITE_WIDTH   5
-#define GLYPH_WHITE_HEIGHT 11
-#define GLYPH_GAP     1
-
-#define GLYPH_SML_WHITE_WIDTH    7
-#define GLYPH_SML_WHITE_HEIGHT  11
-#define GLYPH_SML_GAP            0
-
 static uint8_t font_mode;
 static uint8_t font_color[] = {128, 128, 128};
 
@@ -169,7 +161,10 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
     int16_t start_vx = vx;
     while(*text != '\0') {
         switch(*text) {
-        case ' ': goto jump_ws;
+        case ' ':
+            vx += ws_w + gap;
+            text++;
+            continue;
         case '\n':
             vy += ws_h + gap;
             vx = start_vx;
