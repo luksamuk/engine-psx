@@ -23,9 +23,10 @@ static const char *creditstxt[] = {
 
 
     /* BGM */
-    "background music",
+    "BGM Track Listing",
     "\r",
 
+    "Title Screen Theme",
     "Amen Break Remixed Loop 01 160 BPM",
     "By u_ul6ysm8501",
     "\r",
@@ -46,7 +47,7 @@ static const char *creditstxt[] = {
     "\r",
 
     "Playground Zone 4",
-    "Let Mom Sleep Remix",
+    "Let Mom Sleep: No Sleep Remix",
     "By Hideki Naganuma",
     "Remixed by Richard Jacques",
     "\r",
@@ -103,7 +104,7 @@ static const char *creditstxt[] = {
     /* Ending */
     "sonic the hedgehog owned by",
     "sonic team",
-    "sega inc",
+    "sega inc.",
     "\r",
 
     "special thanks",
@@ -111,6 +112,8 @@ static const char *creditstxt[] = {
     "The Spriters Resource",
     "\r",
 
+    "Thanks for Playing",
+    "\r",
 
     NULL,
 };
