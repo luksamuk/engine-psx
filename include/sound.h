@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <psxcd.h>
 
+#define XA_DEFAULT_VOLUME 0x60 // 75%
+
 // .VAG audio header
 typedef struct {
     uint32_t magic;

@@ -39,7 +39,7 @@ static uint8_t glyph_info_big[] = {
 
     // 0-9
     10, 11, 7, 11,
-    22, 11, 4, 11,
+    21, 11, 7, 11,
     30, 11, 7, 11,
     40, 11, 7, 11,
     50, 11, 7, 11,
@@ -50,8 +50,8 @@ static uint8_t glyph_info_big[] = {
     100, 11, 7, 11,
 
     0xff, 0, 0, 0, // * (no char)
-    0xff, 0, 0, 0, // . (no char)
-    0xff, 0, 0, 0, // : (no char)
+    247, 0, 3, 11, // .
+    250, 0, 3, 11, // :
     0xff, 0, 0, 0, // - (no char)
     0xff, 0, 0, 0, // = (no char)
     0xff, 0, 0, 0, // ! (no char)
@@ -188,7 +188,7 @@ _font_measurew_generic(const char *text,
             switch(*text) {
             case '*': offset = 36; break;
             case '.': offset = 37; break;
-            case ';': offset = 38; break;
+            case ':': offset = 38; break;
             case '-': offset = 39; break;
             case '=': offset = 40; break;
             case '!': offset = 41; break;
@@ -266,7 +266,7 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
             switch(*text) {
             case '*': offset = 36; break;
             case '.': offset = 37; break;
-            case ';': offset = 38; break;
+            case ':': offset = 38; break;
             case '-': offset = 39; break;
             case '=': offset = 40; break;
             case '!': offset = 41; break;

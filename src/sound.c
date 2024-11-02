@@ -64,7 +64,7 @@ sound_init(void)
     SpuInit();
     sound_reset_mem();
     _sound_reset_channels();
-    sound_xa_set_volume(0x7f);
+    sound_xa_set_volume(XA_DEFAULT_VOLUME);
 }
 
 void
@@ -197,8 +197,8 @@ sound_play_xa(const char *filename, int double_speed,
     filter.file = 1;
     filter.chan = channel;
 
-    // Set CD volume to 100%
-    sound_xa_set_volume(0x7f);
+    // Set CD volume to 50%
+    sound_xa_set_volume(XA_DEFAULT_VOLUME);
 
     _cd_elapsed_sectors = 0;
     _xa_loopback_sector = loopback_sector;
@@ -294,7 +294,18 @@ void
 sound_xa_set_volume(uint8_t vol)
 {
     CdlATV v;
-    v.val0 = v.val1 = v.val2 = v.val3 = vol;
+    // Stereo
+    /* v.val0 = v.val3 = vol; // L->L and R->R volumes */
+    /* v.val1 = v.val2 = 0x00; // L->R and R->L volumes */
+
+    // Reversed stereo
+    /* v.val0 = v.val3 = 0x00; // L->L and R->R volumes */
+    /* v.val1 = v.val2 = vol; // L->R and R->L volumes */
+
+    // Mono
+    v.val0 = v.val3 = vol >> 1; // L->L and R->R volumes
+    v.val1 = v.val2 = vol >> 1; // L->R and R->L volume
+    
     CdMix(&v);
     CdSync(0, 0);
 }

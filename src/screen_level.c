@@ -157,7 +157,7 @@ screen_level_update(void *d)
     if(pad_pressed(PAD_START)) {
         paused = !paused;
         if(paused) sound_xa_set_volume(0x00);
-        else sound_xa_set_volume(0x7f);
+        else sound_xa_set_volume(XA_DEFAULT_VOLUME);
     }
     
     if(paused) {
@@ -289,7 +289,8 @@ screen_level_draw(void *d)
     if(paused) {
         const char *line1 = "Paused";
         int16_t x = CENTERX - (strlen(line1) * 4);
-        draw_text(x, CENTERY - 12, 0, line1);
+        font_draw_big(line1, x, CENTERY - 12);
+        /* draw_text(x, CENTERY - 12, 0, line1); */
     }
 
     // Heads-up display
@@ -304,10 +305,19 @@ screen_level_draw(void *d)
         LERPC(level_fade, 0x7f),
         LERPC(level_fade, 0x7f),
         LERPC(level_fade, 0x7f));
-    font_draw_big("00000000", 60, 10);
-    font_draw_big("0:00", 54, 24);
+
+    snprintf(buffer, 255, "%8d", level_score_count);
+    font_draw_big(buffer, 60, 10);
+
+    {
+        uint32_t frames = get_elapsed_frames() / 60;
+        snprintf(buffer, 255, "%2d:%02d", frames / 60, frames % 60);
+        font_draw_big(buffer, 54, 24);
+    }
+
     snprintf(buffer, 255, "%3d", level_ring_count);
     font_draw_big(buffer, 60, 38);
+
     font_reset_color();
 
     if(debug_mode) {
