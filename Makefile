@@ -82,7 +82,8 @@ engine.chd: ./build/engine.cue
 
 # Create build directory and generate CMake config from preset
 configure:
-	cmake --preset default .
+#	cmake --preset default .
+	cmake --preset release .
 
 # Clean build directory
 clean:
