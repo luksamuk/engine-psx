@@ -48,6 +48,11 @@ void     *get_next_prim();
 uint32_t *get_ot_at(uint32_t otz);
 void     increment_prim(uint32_t size);
 void     sort_prim(void *prim, uint32_t otz);
+void     draw_quad(int16_t vx, int16_t vy,
+                   int16_t w, int16_t h,
+                   uint8_t r, uint8_t g, uint8_t b,
+                   uint8_t semitrans,
+                   uint16_t otz);
 
 void draw_text(int x, int y, int z, const char *text);
 

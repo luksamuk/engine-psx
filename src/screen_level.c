@@ -294,31 +294,33 @@ screen_level_draw(void *d)
     }
 
     // Heads-up display
-    font_set_color(
-        LERPC(level_fade, 0x7f),
-        LERPC(level_fade, 0x7f),
-        0);
-    font_draw_big("SCORE", 10, 10);
-    font_draw_big("TIME",  10, 24);
-    font_draw_big("RINGS", 10, 38);
-    font_set_color(
-        LERPC(level_fade, 0x7f),
-        LERPC(level_fade, 0x7f),
-        LERPC(level_fade, 0x7f));
+    if(debug_mode <= 1) {
+        font_set_color(
+            LERPC(level_fade, 0x7f),
+            LERPC(level_fade, 0x7f),
+            0);
+        font_draw_big("SCORE", 10, 10);
+        font_draw_big("TIME",  10, 24);
+        font_draw_big("RINGS", 10, 38);
+        font_set_color(
+            LERPC(level_fade, 0x7f),
+            LERPC(level_fade, 0x7f),
+            LERPC(level_fade, 0x7f));
 
-    snprintf(buffer, 255, "%8d", level_score_count);
-    font_draw_big(buffer, 60, 10);
+        snprintf(buffer, 255, "%8d", level_score_count);
+        font_draw_big(buffer, 60, 10);
 
-    {
-        uint32_t frames = get_elapsed_frames() / 60;
-        snprintf(buffer, 255, "%2d:%02d", frames / 60, frames % 60);
-        font_draw_big(buffer, 54, 24);
+        {
+            uint32_t frames = get_elapsed_frames() / 60;
+            snprintf(buffer, 255, "%2d:%02d", frames / 60, frames % 60);
+            font_draw_big(buffer, 54, 24);
+        }
+
+        snprintf(buffer, 255, "%3d", level_ring_count);
+        font_draw_big(buffer, 60, 38);
+
+        font_reset_color();
     }
-
-    snprintf(buffer, 255, "%3d", level_ring_count);
-    font_draw_big(buffer, 60, 38);
-
-    font_reset_color();
 
     if(debug_mode) {
         // Video debug
@@ -326,14 +328,16 @@ screen_level_draw(void *d)
                  "%4s %3d",
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
                  get_frame_rate());
-        draw_text(248, 12, 0, buffer);
+        font_draw_sm(buffer, 248, 12);
+        /* draw_text(248, 12, 0, buffer); */
 
         if(debug_mode > 1) {
             // Sound debug
             uint32_t elapsed_sectors;
             sound_xa_get_elapsed_sectors(&elapsed_sectors);
             snprintf(buffer, 255, "%08u", elapsed_sectors);
-            draw_text(248, 20, 0, buffer);
+            font_draw_sm(buffer, 248, 20);
+            /* draw_text(248, 20, 0, buffer); */
 
             // Player debug
             snprintf(buffer, 255,
@@ -351,7 +355,9 @@ screen_level_draw(void *d)
                      player.action,
                      player.spinrev
                 );
-            draw_text(8, 12, 0, buffer);
+            font_draw_sm(buffer, 8, 12);
+            draw_quad(0, 0, 320, 84, 0, 0, 0, 1, 2);
+            //draw_text(8, 12, 0, buffer);
         }
     }
 }

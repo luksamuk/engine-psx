@@ -199,3 +199,21 @@ render_mdec_dispose(void)
     //ctx.buffers[0].disp_env.isrgb24 = 0;
     //ctx.buffers[1].disp_env.isrgb24 = 0;
 }
+
+
+void
+draw_quad(int16_t vx, int16_t vy,
+          int16_t w, int16_t h,
+          uint8_t r, uint8_t g, uint8_t b,
+          uint8_t semitrans,
+          uint16_t otz)
+{
+    TILE *tile = get_next_prim();
+    setTile(tile);
+    increment_prim(sizeof(TILE));
+    setXY0(tile, vx, vy);
+    setWH(tile, w, h);
+    setRGB0(tile, r, g, b);
+    setSemiTrans(tile, semitrans);
+    sort_prim(tile, otz);
+}
