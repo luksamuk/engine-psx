@@ -44,7 +44,8 @@ typedef enum {
     ACTION_JUMPING,
     ACTION_ROLLING,
     ACTION_SPINDASH,
-    ACTION_DROPDASH
+    ACTION_DROPDASH,
+    ACTION_SPRING,
 } PlayerAction;
 
 typedef struct {
@@ -64,6 +65,7 @@ typedef struct {
     uint8_t   push;
     uint32_t  spinrev;
     uint8_t   ctrllock;
+    uint8_t   airdirlock;
     uint8_t   framecount;
     uint8_t   holding_jump;
 

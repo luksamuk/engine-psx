@@ -28,6 +28,95 @@ python -m venv ./venv
 To   run   any   scripts    with   this   venv,   run   ~./tools/venv/bin/python
 ./tools/script.py~.
 
+* Generating a character sprite 8x8 tileset and mappings
+
+For characters, we need to use the Aseprite tool for building sprites.
+
+Import the character's sprites as a sprite sheet and into an .aseprite file (see
+'assets/sprites/CHARA/SONIC.aseprite').
+
+The character's sprites must be manipulated  into individual frames on a tileset
+layer, with 8x8  tiles. Plus, you'll have  to organize the frames in  such a way
+that frames of the same animation are coupled together.
+
+Finally,  group frames  into animations  by creating  tags with  animation names
+(again, see 'SONIC.aseprite' for valid animation names).
+
+Finally, export the animation names and mappings using 'export_tilemap_psx.lua',
+then export the player tileset using 'export_tileset_psx.lua'.
+
+This will create a 'SONIC.png' file and a 'SONIC.json' file.
+
+Now, just  pack the frame and  tile data into a  CHARA file, and generate  a TIM
+image with correct CLUT and TPAGE info:
+
+#+begin_src bash :eval never
+framepacker.py SONIC.json SONIC.CHARA
+img2tim -usealpha -org 320 0 -plt 0 480 -bpp 8 -o SONIC.TIM SONIC.png
+#+end_src
+
+Notice that, different  than other image tile data, character  sprites rely on a
+PNG's alpha  channel to generate  transparency bits,  instead of using  the full
+black color as mask.
+
+NOTE: If you need to refer to  an animation directly by name, the animations are
+referred to by the engine by their Adler32  hash, so you might want to add a new
+definition for that on ~player.c~.
+
+The names used on tags are always converted to uppercase, with no spaces.
+
+To calculate the Adler32 hash for a string, one may use Zlib through Python.
+
+Here's a tool to generate hash definitions for some animations.
+
+#+begin_src python :results output
+import zlib
+
+names = [
+    "STOPPED",
+    "IDLE",
+    "WALKING",
+    "RUNNING",
+    "ROLLING",
+    "SKIDDING",
+    "PEELOUT",
+    "PUSHING",
+    "CROUCHDOWN",
+    "LOOKUP",
+    "SPRING",
+    "HURT",
+    "DEATH",
+]
+
+def get_hash(name):
+    hash = zlib.adler32(str.encode(name))
+    return f"0x{hash:08x}"
+
+def print_hashes(names):
+    for name in names:
+        hash = get_hash(name)
+        print(f"#define ANIM_{name:16} {hash}")
+
+print_hashes(names)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+#define ANIM_STOPPED          0x08cd0220
+#define ANIM_IDLE             0x02d1011f
+#define ANIM_WALKING          0x0854020e
+#define ANIM_RUNNING          0x08bf0222
+#define ANIM_ROLLING          0x08890218
+#define ANIM_SKIDDING         0x0a85024e
+#define ANIM_PEELOUT          0x0849021f
+#define ANIM_PUSHING          0x08b2021f
+#define ANIM_CROUCHDOWN       0x104802fd
+#define ANIM_LOOKUP           0x067001db
+#define ANIM_SPRING           0x068e01d4
+#define ANIM_HURT             0x031b0144
+#define ANIM_DEATH            0x04200167
+#+end_example
+
 * Generating 8x8 tiles and their 16x16 mappings
 
 The following  steps will  allow you to  create intermediate  files 'tiles.png',

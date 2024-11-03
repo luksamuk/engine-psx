@@ -14,16 +14,19 @@
 #define ANIM_IDLE_TIMER_MAX 180
 
 // Adler32 sums of animation names for ease of use
-#define ANIM_STOPPED    0x08cd0220
-#define ANIM_IDLE       0x02d1011f
-#define ANIM_WALKING    0x0854020e
-#define ANIM_RUNNING    0x08bf0222
-#define ANIM_ROLLING    0x08890218
-#define ANIM_SKIDDING   0x0a85024e
-#define ANIM_PEELOUT    0x0849021f
-#define ANIM_PUSHING    0x08b2021f
-#define ANIM_CROUCHDOWN 0x104802fd
-#define ANIM_LOOKUP     0x067001db
+#define ANIM_STOPPED          0x08cd0220
+#define ANIM_IDLE             0x02d1011f
+#define ANIM_WALKING          0x0854020e
+#define ANIM_RUNNING          0x08bf0222
+#define ANIM_ROLLING          0x08890218
+#define ANIM_SKIDDING         0x0a85024e
+#define ANIM_PEELOUT          0x0849021f
+#define ANIM_PUSHING          0x08b2021f
+#define ANIM_CROUCHDOWN       0x104802fd
+#define ANIM_LOOKUP           0x067001db
+#define ANIM_SPRING           0x068e01d4
+#define ANIM_HURT             0x031b0144
+#define ANIM_DEATH            0x04200167
 
 extern int debug_mode;
 
@@ -56,6 +59,7 @@ load_player(Player *player,
     player->angle = 0;
     player->spinrev = 0;
     player->ctrllock = 0;
+    player->airdirlock = 0;
     player->framecount = 0;
 
     player_set_animation_direct(player, ANIM_STOPPED);
@@ -367,8 +371,12 @@ _player_handle_collision(Player *player)
             player->pos.vy = ((new_coord - 16) << 12);
             player->grnd = 1;
 
-            if(player->action == ACTION_JUMPING || player->action == ACTION_ROLLING)
+            if(player->action == ACTION_JUMPING
+               || player->action == ACTION_ROLLING
+               || player->action == ACTION_SPRING) {
                 player->action = ACTION_NONE;
+                player->airdirlock = 0;
+            }
             else if(player->action == ACTION_DROPDASH) {
                 // Perform drop dash
                 player->framecount   = 0;
@@ -555,11 +563,13 @@ player_update(Player *player)
         if(pad_pressing(PAD_RIGHT)) {
             if(player->vel.vx < X_TOP_SPD)
                 player->vel.vx += X_AIR_ACCEL;
-            player->anim_dir = 1;
+            if(!player->airdirlock)
+                player->anim_dir = 1;
         } else if(pad_pressing(PAD_LEFT)) {
             if(player->vel.vx > -X_TOP_SPD)
                 player->vel.vx -= X_AIR_ACCEL;
-            player->anim_dir = -1;
+            if(!player->airdirlock)
+                player->anim_dir = -1;
         }
 
         // Air drag. Calculated before applying gravity.
@@ -654,7 +664,21 @@ player_update(Player *player)
                 player_set_animation_direct(player, ANIM_RUNNING);
             } else player_set_animation_direct(player, ANIM_WALKING);
         }
-    } else player->idle_timer = ANIM_IDLE_TIMER_MAX;
+    } else {
+        player->idle_timer = ANIM_IDLE_TIMER_MAX;
+        if(player->action == ACTION_SPRING) {
+            if(player->vel.vy < 0) {
+                player_set_animation_direct(player, ANIM_SPRING);
+            } else {
+                player->airdirlock = 0;
+                if(abs(player->vel.vz) >= (10 << 12)) {
+                    player_set_animation_direct(player, ANIM_PEELOUT);
+                } else if(abs(player->vel.vz) >= (6 << 12)) {
+                    player_set_animation_direct(player, ANIM_RUNNING);
+                } else player_set_animation_direct(player, ANIM_WALKING);
+            }
+        }
+    }
 
     // Animation speed correction
     if(player->anim_timer == 0) {

@@ -143,7 +143,7 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
             increment_prim(sizeof(POLY_FT4));
             setPolyFT4(poly);
             setRGB0(poly, level_fade, level_fade, level_fade);
-            setTPage(poly, 0, 0, chara->prectx, chara->precty);
+            setTPage(poly, 1, 1, chara->prectx, chara->precty); // 8-bit CLUT
             setClut(poly, chara->crectx, chara->crecty);
             setXYWH(poly, xy0.vx, xy0.vy, 8, 8);
             
