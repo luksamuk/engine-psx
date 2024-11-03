@@ -26,7 +26,7 @@ add_definitions("-DGIT_COMMIT=\"${GIT_BRANCH}/${GIT_SHORTHASH}\"")
 if(GIT_TAG)
   add_definitions("-DGIT_VERSION=\"${GIT_TAG}\"")
 else()
-  add_definitions("-DGIT_VERSION=\"GIT ${GIT_SHORTHASH}\"")
+  add_definitions("-DGIT_VERSION=\"DEV BUILD ${GIT_SHORTHASH}\"")
 endif()
 
 set(CMAKE_C_FLAGS "-Wall")
