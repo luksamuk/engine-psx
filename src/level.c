@@ -515,12 +515,22 @@ render_lvl(
         cy = (cam_y >> 12);
 
     if(lvl->num_layers > 0)
-        _render_layer(lvl, map128, map16, cx, cy, OT_LENGTH - 3, 0);
+        _render_layer(lvl, map128, map16, cx, cy, OTZ_LAYER_LEVEL_FG_BACK, 0);
 
+    // TODO: Add front layer rendered at OTZ_LAYER_LEVEL_FG_FRONT
+    // TODO: Fix level mapping tool to consider only mapping layers
+
+    // Texture TPAGE info for level foreground (back tiles)
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
     setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
-    sort_prim(tpage, OTZ_LAYER_LEVEL_FG_BACK); // TODO: What about front tiles?
+    sort_prim(tpage, OTZ_LAYER_LEVEL_FG_BACK);
+
+    // Texture TPAGE info for level foreground (front tiles)
+    tpage = get_next_prim();
+    increment_prim(sizeof(DR_TPAGE));
+    setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
+    sort_prim(tpage, OTZ_LAYER_LEVEL_FG_FRONT);
 
     // Render objects on nearest window
     _render_obj_window(lvl, tbl, cx, cy);
