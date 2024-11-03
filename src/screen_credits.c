@@ -110,6 +110,8 @@ static const char *creditstxt[] = {
     "special thanks",
     "PSXDEV Network",
     "The Spriters Resource",
+    "Schnappy",
+    "Lameguy64",
     "\r",
 
     "Thanks for Playing",
