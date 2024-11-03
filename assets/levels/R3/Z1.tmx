@@ -215,9 +215,9 @@
    <object id="140" gid="65" x="8098.67" y="766.667" width="64" height="64"/>
    <object id="141" gid="65" x="8673.33" y="762.667" width="64" height="64"/>
    <object id="142" gid="65" x="9257.33" y="765.333" width="64" height="64"/>
-   <object id="145" gid="65" x="9996" y="816" width="64" height="64"/>
-   <object id="146" gid="65" x="10020" y="840" width="64" height="64"/>
-   <object id="147" gid="65" x="10044" y="864" width="64" height="64"/>
+   <object id="145" gid="65" x="10046" y="919" width="64" height="64"/>
+   <object id="146" gid="65" x="10070" y="943" width="64" height="64"/>
+   <object id="147" gid="65" x="10094" y="967" width="64" height="64"/>
    <object id="149" gid="58" x="9170" y="1600" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
