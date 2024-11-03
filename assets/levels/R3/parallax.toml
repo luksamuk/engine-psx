@@ -7,99 +7,99 @@ scrollx = 0.25
 y0 = 0
 single = false
 
-# ====================
+# # ====================
 
-[leaves1_2]
-width = 256
-height = 60
-u0 = 0
-v0 = 256
-scrollx = 0.2
-speedx = 0.6
-y0 = 60
-single = false
+# [leaves1_2]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 256
+# scrollx = 0.2
+# speedx = 0.6
+# y0 = 60
+# single = false
 
-[leaves1_3]
-width = 256
-height = 60
-u0 = 0
-v0 = 256
-scrollx = 0.2
-speedx = 0.62
-y0 = 120
-single = false
+# [leaves1_3]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 256
+# scrollx = 0.2
+# speedx = 0.62
+# y0 = 120
+# single = false
 
-[leaves1_4]
-width = 256
-height = 60
-u0 = 0
-v0 = 256
-scrollx = 0.2
-speedx = 0.64
-y0 = 180
-single = false
+# [leaves1_4]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 256
+# scrollx = 0.2
+# speedx = 0.64
+# y0 = 180
+# single = false
 
-# ====================
+# # ====================
 
-[leaves2_1]
-width = 256
-height = 60
-u0 = 0
-v0 = 316
-scrollx = 0.3
-speedx = 0.75
-y0 = 0
-single = false
+# [leaves2_1]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 316
+# scrollx = 0.3
+# speedx = 0.75
+# y0 = 0
+# single = false
 
-[leaves2_3]
-width = 256
-height = 60
-u0 = 0
-v0 = 316
-scrollx = 0.3
-speedx = 0.77
-y0 = 120
-single = false
+# [leaves2_3]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 316
+# scrollx = 0.3
+# speedx = 0.77
+# y0 = 120
+# single = false
 
-[leaves2_4]
-width = 256
-height = 60
-u0 = 0
-v0 = 316
-scrollx = 0.3
-speedx = 0.79
-y0 = 180
-single = false
+# [leaves2_4]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 316
+# scrollx = 0.3
+# speedx = 0.79
+# y0 = 180
+# single = false
 
-# ====================
+# # ====================
 
-[leaves3_1]
-width = 256
-height = 60
-u0 = 0
-v0 = 376
-scrollx = 0.5
-speedx = 0.9
-y0 = 0
-single = false
+# [leaves3_1]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 376
+# scrollx = 0.5
+# speedx = 0.9
+# y0 = 0
+# single = false
 
-[leaves3_2]
-width = 256
-height = 60
-u0 = 0
-v0 = 376
-scrollx = 0.5
-speedx = 0.92
-y0 = 60
-single = false
+# [leaves3_2]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 376
+# scrollx = 0.5
+# speedx = 0.92
+# y0 = 60
+# single = false
 
-[leaves3_4]
-width = 256
-height = 60
-u0 = 0
-v0 = 376
-scrollx = 0.5
-speedx = 0.94
-y0 = 180
-single = false
+# [leaves3_4]
+# width = 256
+# height = 60
+# u0 = 0
+# v0 = 376
+# scrollx = 0.5
+# speedx = 0.94
+# y0 = 180
+# single = false
 
