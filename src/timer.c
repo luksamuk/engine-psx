@@ -8,6 +8,7 @@ extern uint8_t paused;
 volatile int      timer_counter = 0;
 volatile int      frame_counter = 0;
 volatile int      frame_rate = 0;
+volatile uint8_t  counting_frames = 0;
 volatile uint32_t frame_count = 0;
 
 void
@@ -39,7 +40,8 @@ inline void
 timer_update()
 {
     frame_counter++;
-    if(!paused) frame_count++;
+    if(counting_frames && !paused)
+        frame_count++;
 }
 
 int
@@ -55,7 +57,14 @@ get_elapsed_frames()
 }
 
 void
+pause_elapsed_frames()
+{
+    counting_frames = 0;
+}
+
+void
 reset_elapsed_frames()
 {
     frame_count = 0;
+    counting_frames = 1;
 }
