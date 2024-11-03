@@ -290,8 +290,11 @@ screen_level_draw(void *d)
     if(paused) {
         const char *line1 = "Paused";
         int16_t x = CENTERX - (strlen(line1) * 4);
+        font_set_color(
+            LERPC(level_fade, 0xc8),
+            LERPC(level_fade, 0xc8),
+            LERPC(level_fade, 0xc8));
         font_draw_big(line1, x, CENTERY - 12);
-        /* draw_text(x, CENTERY - 12, 0, line1); */
     }
 
     // Heads-up display
