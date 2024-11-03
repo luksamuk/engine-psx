@@ -296,16 +296,16 @@ screen_level_draw(void *d)
     // Heads-up display
     if(debug_mode <= 1) {
         font_set_color(
-            LERPC(level_fade, 0x7f),
-            LERPC(level_fade, 0x7f),
+            LERPC(level_fade, 0xc8),
+            LERPC(level_fade, 0xc8),
             0);
         font_draw_big("SCORE", 10, 10);
         font_draw_big("TIME",  10, 24);
         font_draw_big("RINGS", 10, 38);
         font_set_color(
-            LERPC(level_fade, 0x7f),
-            LERPC(level_fade, 0x7f),
-            LERPC(level_fade, 0x7f));
+            LERPC(level_fade, 0xc8),
+            LERPC(level_fade, 0xc8),
+            LERPC(level_fade, 0xc8));
 
         snprintf(buffer, 255, "%8d", level_score_count);
         font_draw_big(buffer, 60, 10);
