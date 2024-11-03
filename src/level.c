@@ -424,7 +424,7 @@ _render_obj(ObjectState *obj, ObjectTableEntry *typedata,
         setSemiTrans(poly, 1);
         setRGB0(poly, 128, 0, 0);
         setXYWH(poly, px - 4, py - 4, 8, 8);
-        sort_prim(poly, 3); // 3 = front sprite and character layer
+        sort_prim(poly, OTZ_LAYER_OBJECTS);
     }
 
     object_render(obj, typedata, px, py);
@@ -520,7 +520,7 @@ render_lvl(
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
     setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
-    sort_prim(tpage, OT_LENGTH - 3);
+    sort_prim(tpage, OTZ_LAYER_LEVEL_FG_BACK); // TODO: What about front tiles?
 
     // Render objects on nearest window
     _render_obj_window(lvl, tbl, cx, cy);

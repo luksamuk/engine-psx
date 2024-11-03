@@ -85,5 +85,5 @@ void screen_comingsoon_draw(void *d)
     poly->clut = 0;
     setXYWH(poly, 32, 0, 255, 240);
     setUVWH(poly, 0, 0, 255, 239);
-    sort_prim(poly, 0);
+    sort_prim(poly, OTZ_LAYER_TOPMOST);
 }

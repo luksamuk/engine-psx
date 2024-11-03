@@ -220,7 +220,7 @@ _draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h)
     setSemiTrans(hitbox, 1);
     setXYWH(hitbox, rel_vx, rel_vy, w, h);
     setRGB0(hitbox, 0x40, 0xd2, 0x25);
-    sort_prim(hitbox, 3); // Object layer
+    sort_prim(hitbox, OTZ_LAYER_OBJECTS);
 }
 
 int

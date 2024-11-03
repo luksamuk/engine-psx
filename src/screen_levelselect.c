@@ -205,7 +205,7 @@ screen_levelselect_draw(void *d)
             poly->clut = 0;
             setXYWH(poly, x, y, 48, 32);
             setUVWH(poly, 0, 32 * data->bg_frame, 48, 32);
-            sort_prim(poly, 3);
+            sort_prim(poly, OTZ_LAYER_LEVEL_BG);
         }
     }
     

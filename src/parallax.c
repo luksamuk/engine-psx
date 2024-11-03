@@ -145,7 +145,7 @@ parallax_draw(Parallax *prl, Camera *camera)
             POLY_FT4 *poly = &prl_pols[prl_current_buffer][si][poly_n];
             setRGB0(poly, level_fade, level_fade, level_fade);
             setXYWH(poly, wx, strip->y0, strip->width, strip->height);
-            sort_prim(poly, OT_LENGTH - 2); // Layer 5: Background
+            sort_prim(poly, OTZ_LAYER_LEVEL_BG);
 
             poly_n++;
             // If drawing a single time, stop now

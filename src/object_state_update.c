@@ -59,7 +59,7 @@ _draw_player_hitbox()
     setSemiTrans(hitbox, 1);
     setXYWH(hitbox, rel_vx, rel_vy, 16, player_height);
     setRGB0(hitbox, 0xfb, 0x94, 0xdc);
-    sort_prim(hitbox, 3);
+    sort_prim(hitbox, OTZ_LAYER_OBJECTS);
 }
 
 void

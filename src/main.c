@@ -42,8 +42,8 @@
         0       | Highest plane (debug information, etc)
         1       | Heads-up display and text layer
         2       | Level tile (SPRT_8 + DR_TPAGE) layer (front) -- UNUSED
-        3       | Object sprite layer
-        4       | Player sprite layer
+        3       | Object sprite layer (upper objects such as rings, and hitboxes)
+        4       | Player sprite layer (most objects, player is atop)
        ...      | ...
   OT_LENGTH - 3 | Level tile (SPRT_8 + DR_TPAGE) layer (back)
   OT_LENGTH - 2 | Level background (parallax)

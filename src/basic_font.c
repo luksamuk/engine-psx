@@ -131,7 +131,7 @@ font_flush()
     increment_prim(sizeof(DR_TPAGE));
     setDrawTPage(tpage, 0, 1,
                  getTPage(font_mode & 0x3, 1, 960, 256));
-    sort_prim(tpage, 1); // 1 = HUD and text layer
+    sort_prim(tpage, OTZ_LAYER_HUD);
 }
 
 void
@@ -149,7 +149,7 @@ _draw_glyph(
     sprt->h = h;
     setUV0(sprt, u0, v0);
     sprt->clut = getClut(0, 490);
-    sort_prim(sprt, 1); // 1 = HUD and text layer
+    sort_prim(sprt, OTZ_LAYER_HUD);
 }
 
 uint16_t

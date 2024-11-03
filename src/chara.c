@@ -157,9 +157,7 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
             } else {
                 setUVWH(poly, u0, v0, tw, th);
             }
-            // 3 = sprite and background layer
-            // 4 = player sprite layer
-            sort_prim(poly, 4);
+            sort_prim(poly, OTZ_LAYER_PLAYER);
         }
     }
 }

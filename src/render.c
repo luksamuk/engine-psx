@@ -55,7 +55,7 @@ force_clear()
         setPolyF4(poly);
         setRGB0(poly, 0, 0, 0);
         setXYWH(poly, 0, 0, SCREEN_XRES, SCREEN_YRES);
-        sort_prim(poly, 0);
+        sort_prim(poly, OTZ_LAYER_TOPMOST);
         increment_prim(sizeof(POLY_F4));
 
         DrawOTagEnv(&ctx.buffers[ctx.active_buffer].ot[OT_LENGTH - 1],

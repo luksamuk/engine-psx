@@ -231,7 +231,7 @@ screen_title_drawtitle(screen_title_data *data)
            255, 0,
            0,   174,
            255, 174);
-    sort_prim(poly, 3);
+    sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
 }
 
 static void
@@ -265,7 +265,7 @@ screen_title_drawtxt(screen_title_data *data, uint8_t idx, int16_t cx, int16_t c
            u0 + w , v0,
            u0,         v0 + h,
            u0 + w , v0 + h);
-    sort_prim(poly, 1);
+    sort_prim(poly, OTZ_LAYER_HUD);
 }
 
 static void
@@ -303,7 +303,7 @@ screen_title_drawprl(screen_title_data *data)
                    w - 1, v0,
                    0, v0 + h,
                    w - 1, v0 + h);
-            sort_prim(poly, OT_LENGTH - 2);
+            sort_prim(poly, OTZ_LAYER_LEVEL_FG_BACK);
 
             if(s) break;
         }

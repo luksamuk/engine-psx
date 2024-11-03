@@ -271,7 +271,7 @@ begin_render_routine:
     poly->tpage = getTPage(0, 0, 576, 0);
     poly->clut = getClut(0, 481);
 
-    sort_prim(poly, state->id == OBJ_RING ? 3 : 4);
+    sort_prim(poly, state->id == OBJ_RING ? OTZ_LAYER_OBJECTS : OTZ_LAYER_PLAYER);
 
     if(!in_fragment && (typedata->fragment != NULL)) {
         in_fragment = 1;
