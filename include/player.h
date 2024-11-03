@@ -14,6 +14,7 @@
 #define X_DECEL          0x00800
 #define X_TOP_SPD        0x06000
 #define Y_GRAVITY        0x00380
+#define Y_HURT_GRAVITY   0x00300
 #define Y_MIN_JUMP       0x04000
 #define Y_JUMP_STRENGTH  0x06800
 #define X_MIN_ROLL_SPD   0x01000
@@ -28,6 +29,8 @@
 #define X_MAX_SLIP_SPD   0x02800
 #define X_DRPSPD         0x08000
 #define X_DRPMAX         0x0c000
+#define Y_HURT_FORCE     0x04000
+#define X_HURT_FORCE     0x02000
 
 // Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      8
@@ -35,6 +38,8 @@
 #define WIDTH_RADIUS_ROLLING     7
 #define HEIGHT_RADIUS_ROLLING   14
 #define PUSH_RADIUS             14
+
+#define PLAYER_HURT_IFRAMES     120
 
 typedef enum {
     ACTION_NONE,
@@ -46,6 +51,7 @@ typedef enum {
     ACTION_SPINDASH,
     ACTION_DROPDASH,
     ACTION_SPRING,
+    ACTION_HURT,
 } PlayerAction;
 
 typedef struct {
@@ -68,6 +74,7 @@ typedef struct {
     uint8_t   airdirlock;
     uint8_t   framecount;
     uint8_t   holding_jump;
+    uint16_t  iframes;
 
     PlayerAction action;
 
@@ -94,5 +101,7 @@ CharaAnim *player_get_animation_by_name(Player *player, const char *name);
 
 void player_update(Player *player);
 void player_draw(Player *player, VECTOR *screen_pos);
+
+void player_set_hurt(Player *player, int32_t hazard_x);
 
 #endif

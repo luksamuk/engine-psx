@@ -40,6 +40,7 @@ SoundEffect sfx_ring  = { 0 };
 SoundEffect sfx_pop   = { 0 };
 SoundEffect sfx_sprn  = { 0 };
 SoundEffect sfx_chek  = { 0 };
+SoundEffect sfx_death = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -61,6 +62,7 @@ load_player(Player *player,
     player->ctrllock = 0;
     player->airdirlock = 0;
     player->framecount = 0;
+    player->iframes = 0;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -87,6 +89,7 @@ load_player(Player *player,
     if(sfx_pop.addr == 0)   sfx_pop   = sound_load_vag("\\SFX\\POP.VAG;1");
     if(sfx_sprn.addr == 0)  sfx_sprn  = sound_load_vag("\\SFX\\SPRN.VAG;1");
     if(sfx_chek.addr == 0)  sfx_chek  = sound_load_vag("\\SFX\\CHEK.VAG;1");
+    if(sfx_death.addr == 0) sfx_death = sound_load_vag("\\SFX\\DEATH.VAG;1");
 }
 
 void
@@ -314,7 +317,12 @@ _player_update_collision_tb(Player *player)
 
             if(player->action == ACTION_JUMPING
                || player->action == ACTION_ROLLING
-               || player->action == ACTION_SPRING) {
+               || player->action == ACTION_SPRING
+               || player->action == ACTION_HURT) {
+                if(player->action == ACTION_HURT) {
+                    player->iframes = PLAYER_HURT_IFRAMES;
+                    player->ctrllock = 0;
+                }
                 player->action = ACTION_NONE;
                 player->airdirlock = 0;
             }
@@ -390,10 +398,15 @@ player_update(Player *player)
 {
     _player_update_collision_lr(player);
 
+    // Iframes
+    if(player->iframes > 0) player->iframes--;
+
     // X movement
     /* Ground movement */
     if(player->grnd) {
-        if(player->ctrllock > 0) player->ctrllock--;
+        if(player->ctrllock > 0) {
+            player->ctrllock--;
+        }
 
         if(player->action == ACTION_ROLLING) {
             // Rolling physics.
@@ -502,12 +515,12 @@ player_update(Player *player)
         player->vel.vy = (player->vel.vz * -rsin(player->angle)) >> 12;
     } else {
         // Air X movement
-        if(pad_pressing(PAD_RIGHT)) {
+        if(pad_pressing(PAD_RIGHT) && (player->ctrllock == 0)) {
             if(player->vel.vx < X_TOP_SPD)
                 player->vel.vx += X_AIR_ACCEL;
             if(!player->airdirlock)
                 player->anim_dir = 1;
-        } else if(pad_pressing(PAD_LEFT)) {
+        } else if(pad_pressing(PAD_LEFT) && (player->ctrllock == 0)) {
             if(player->vel.vx > -X_TOP_SPD)
                 player->vel.vx -= X_AIR_ACCEL;
             if(!player->airdirlock)
@@ -551,7 +564,9 @@ player_update(Player *player)
                 }
             }
         }
-        player->vel.vy += Y_GRAVITY;
+        player->vel.vy += (player->action == ACTION_HURT)
+            ? Y_HURT_GRAVITY
+            : Y_GRAVITY;
     } else {
         if(pad_pressed(PAD_CROSS) && player->action != ACTION_SPINDASH) {
             player->vel.vx -= (Y_JUMP_STRENGTH * rsin(player->angle)) >> 12;
@@ -621,6 +636,8 @@ player_update(Player *player)
                     player_set_animation_direct(player, ANIM_RUNNING);
                 } else player_set_animation_direct(player, ANIM_WALKING);
             }
+        } else if(player->action == ACTION_HURT) {
+            player_set_animation_direct(player, ANIM_HURT);
         }
     }
 
@@ -680,15 +697,29 @@ player_update(Player *player)
     player->ev_grnd2 = (CollisionEvent){ 0 };
     player->ev_ceil1 = (CollisionEvent){ 0 };
     player->ev_ceil2 = (CollisionEvent){ 0 };
+
+    
 }
 
 void
 player_draw(Player *player, VECTOR *pos)
 {
-    if(player->cur_anim)
+    // if iframes, do not show for every 4 frames
+    if(player->cur_anim && ((player->iframes >> 2) % 2) == 0)
         chara_render_frame(&player->chara,
                            player->anim_frame,
                            (int16_t)(pos->vx >> 12),
                            (int16_t)(pos->vy >> 12) - 8,
                            player->anim_dir < 0);
+}
+
+void
+player_set_hurt(Player *player, int32_t hazard_x)
+{
+    player->action = ACTION_HURT;
+    player->grnd = 0;
+    player->vel.vy = -Y_HURT_FORCE;
+    int32_t a = SIGNUM(player->pos.vx - hazard_x);
+    player->vel.vx = X_HURT_FORCE * ((a == 0) ? 1 : a);
+    player->ctrllock = 2;
 }

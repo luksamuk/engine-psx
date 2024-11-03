@@ -21,6 +21,7 @@ extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
 extern SoundEffect sfx_sprn;
 extern SoundEffect sfx_chek;
+extern SoundEffect sfx_death;
 extern int debug_mode;
 
 extern uint8_t level_ring_count;
@@ -404,6 +405,12 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         if(((player_vy + 8) - solidity_vy < 16) &&
            ((player_vx >= solidity_vx - 4) && ((player_vx + 8) <= solidity_vx + 32 - 4)))
         {
+            if(player.action != ACTION_HURT && player.iframes == 0) {
+                player_set_hurt(&player, (solidity_vx + 16) << 12);
+                sound_play_vag(sfx_death, 0); // TODO: SFX changes depending on situation
+                return;
+            }
+
             player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
             player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
             player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy;

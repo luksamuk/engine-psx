@@ -238,6 +238,9 @@
 	<file name="CHEK.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/CHEK.VAG" />
+	<file name="DEATH.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/DEATH.VAG" />
       </dir>
 
       <dir name="BGM">
