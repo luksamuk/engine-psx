@@ -25,6 +25,7 @@ extern int debug_mode;
 
 extern uint8_t level_ring_count;
 extern uint8_t level_score_count;
+extern uint8_t level_finished;
 
 // Update functions
 static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
@@ -132,6 +133,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             state->anim_state.frame = 0;
             camera_set_left_bound(&camera, ((pos->vx + 80) << 12));
             state->timer = 180;
+            level_finished = 1;
             pause_elapsed_frames();
         }
     } else if(state->anim_state.animation == 1) {

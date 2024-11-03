@@ -35,6 +35,7 @@ ObjectTable obj_table_common;
 uint8_t     level_fade;
 uint8_t     level_ring_count;
 uint8_t     level_score_count;
+uint8_t     level_finished;
 
 #define CHANNELS_PER_BGM    3
 static uint32_t bgm_loop_sectors[] = {
@@ -116,6 +117,7 @@ screen_level_load()
 
     level_ring_count = 0;
     level_score_count = 0;
+    level_finished = 0;
 }
 
 void
@@ -154,7 +156,7 @@ screen_level_update(void *d)
         }
     }
 
-    if(pad_pressed(PAD_START)) {
+    if(pad_pressed(PAD_START) && !level_finished) {
         paused = !paused;
         if(paused) sound_xa_set_volume(0x00);
         else sound_xa_set_volume(XA_DEFAULT_VOLUME);
@@ -208,7 +210,7 @@ screen_level_update(void *d)
     /* rotation.vz -= 12; */
     /* --------- */
 
-    if(pad_pressed(PAD_SELECT)) {
+    if(pad_pressed(PAD_SELECT) && !level_finished) {
         player.pos = player.startpos;
         player.grnd = 0;
         player.anim_dir = 1;
@@ -323,6 +325,8 @@ screen_level_draw(void *d)
     }
 
     if(debug_mode) {
+        font_set_color(0xc8, 0xc8, 0xc8);
+
         // Video debug
         snprintf(buffer, 255,
                  "%4s %3d",
@@ -356,8 +360,6 @@ screen_level_draw(void *d)
                      player.spinrev
                 );
             font_draw_sm(buffer, 8, 12);
-            draw_quad(0, 0, 320, 84, 0, 0, 0, 1, 2);
-            //draw_text(8, 12, 0, buffer);
         }
     }
 }
