@@ -34,7 +34,7 @@ Camera      camera;
 ObjectTable obj_table_common;
 uint8_t     level_fade;
 uint8_t     level_ring_count;
-uint8_t     level_score_count;
+uint32_t    level_score_count;
 uint8_t     level_finished;
 
 #define CHANNELS_PER_BGM    3
@@ -116,7 +116,7 @@ screen_level_load()
     level_fade = 0;
 
     level_ring_count = 0;
-    level_score_count = 0;
+    /* level_score_count = 0; */
     level_finished = 0;
 }
 
@@ -315,8 +315,8 @@ screen_level_draw(void *d)
         font_draw_big(buffer, 60, 10);
 
         {
-            uint32_t frames = get_elapsed_frames() / 60;
-            snprintf(buffer, 255, "%2d:%02d", frames / 60, frames % 60);
+            uint32_t seconds = get_elapsed_frames() / 60;
+            snprintf(buffer, 255, "%2d:%02d", seconds / 60, seconds % 60);
             font_draw_big(buffer, 54, 24);
         }
 

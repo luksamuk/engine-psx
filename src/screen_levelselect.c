@@ -22,6 +22,8 @@
 #define CHOICE_CREDITS   12
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
 
+extern uint32_t level_score_count;
+
 typedef struct {
     uint8_t menu_choice;
     char buffer[255];
@@ -80,6 +82,11 @@ screen_levelselect_load()
     data->bg_frame = 0;
     data->bg_state = 0;
     data->bg_timer = BG_PAUSE;
+
+    // Regardless of the level, reset score.
+    // You're already cheating, I'm not going to allow you
+    // to have any points. :)
+    level_score_count = 0;
     
     sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0); // 2600
 }

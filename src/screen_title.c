@@ -15,7 +15,8 @@
 #include "screens/fmv.h"
 #include "screens/level.h"
 
-extern int debug_mode;
+extern int      debug_mode;
+extern uint32_t level_score_count;
 
 typedef struct {
     int32_t prect_x;
@@ -189,6 +190,7 @@ screen_title_update(void *d)
                         screen_fmv_set_next(SCREEN_LEVEL);
                         screen_fmv_enqueue("\\INTRO.STR;1");
                         data->next_scene = SCREEN_FMV;
+                        level_score_count = 0;
                         break;
                     case 3: // Level Select
                         data->next_scene = SCREEN_LEVELSELECT;

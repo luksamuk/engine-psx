@@ -397,6 +397,7 @@ void
 player_update(Player *player)
 {
     _player_update_collision_lr(player);
+    _player_update_collision_tb(player);
 
     // Iframes
     if(player->iframes > 0) player->iframes--;
@@ -541,8 +542,6 @@ player_update(Player *player)
         if(player->vel.vx > X_MAX_SPD) player->vel.vx = X_MAX_SPD;
         else if(player->vel.vx < -X_MAX_SPD) player->vel.vx = -X_MAX_SPD;
     }
-
-    _player_update_collision_tb(player);
 
     // Y movement
     if(!player->grnd) {

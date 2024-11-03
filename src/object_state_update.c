@@ -24,9 +24,9 @@ extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern int debug_mode;
 
-extern uint8_t level_ring_count;
-extern uint8_t level_score_count;
-extern uint8_t level_finished;
+extern uint8_t  level_ring_count;
+extern uint32_t level_score_count;
+extern uint8_t  level_finished;
 
 // Update functions
 static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
@@ -125,6 +125,25 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     }
 }
 
+void
+_goal_sign_change_score()
+{
+    // TODO: A temporary score count. Change this later!
+    level_score_count += level_ring_count * 100;
+
+    uint32_t seconds = get_elapsed_frames() / 60;
+
+    if(seconds <= 29)       level_score_count += 50000; // Under 0:30
+    else if(seconds <= 44)  level_score_count += 10000; // Under 0:45
+    else if(seconds <= 59)  level_score_count += 5000;  // Under 1:00
+    else if(seconds <= 89)  level_score_count += 4000;  // Under 1:30
+    else if(seconds <= 119) level_score_count += 3000;  // Under 2:00
+    else if(seconds <= 179) level_score_count += 2000;  // Under 3:00
+    else if(seconds <= 239) level_score_count += 1000;  // Under 4:00
+    else if(seconds <= 299) level_score_count += 500;   // Under 5:00
+    // Otherwise you get nothing
+}
+
 static void
 _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
@@ -144,6 +163,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             state->anim_state.animation = 2;
             state->timer = 360; // 6-seconds music
             sound_play_xa("\\BGM\\EVENT001.XA;1", 0, 0, 0);
+            _goal_sign_change_score();
         }
     } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {
         state->timer--;
@@ -187,6 +207,7 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 state->anim_state.animation = 1;
                 state->anim_state.frame = 0;
                 state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+                level_score_count += 10;
                 sound_play_vag(sfx_pop, 0);
 
                 switch(((MonitorExtra *)state->extra)->kind) {
