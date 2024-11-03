@@ -218,7 +218,6 @@ screen_level_update(void *d)
     }
 
     camera_update(&camera, &player);
-    player_update_collision(&player);
     update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
     player_update(&player);
 

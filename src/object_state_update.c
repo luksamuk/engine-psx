@@ -201,15 +201,15 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 }
             } else {
                 // Landing on top
-                if((player_vy - solidity_vy < 16) &&
-                   ((player_vx >= solidity_vx - 4) && (player_vx <= solidity_vx + 32 - 4)))
+                if(((player_vy + 8) - solidity_vy < 16) &&
+                   ((player_vx >= solidity_vx - 4) && ((player_vx + 8) <= solidity_vx + 32 - 4)))
                 {
                     player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
                     player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
                     player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy;
                 } else {
                     // Check for intersection on left/right
-                    if(player_vx < pos->vx) {
+                    if((player_vx + 8) < pos->vx) {
                         player.ev_right.collided = 1;
                         player.ev_right.coord = (solidity_vx + 2);
                         player.ev_right.angle = 0;
@@ -401,15 +401,15 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     {
        
         // Landing on top
-        if((player_vy - solidity_vy < 16) &&
-           ((player_vx >= solidity_vx - 4) && (player_vx <= solidity_vx + 32 - 4)))
+        if(((player_vy + 8) - solidity_vy < 16) &&
+           ((player_vx >= solidity_vx - 4) && ((player_vx + 8) <= solidity_vx + 32 - 4)))
         {
             player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
             player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
             player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy;
         } else {
             // Check for intersection on left/right
-            if(player_vx < pos->vx) {
+            if((player_vx + 8) < pos->vx) {
                 player.ev_right.collided = 1;
                 player.ev_right.coord = (solidity_vx + 2);
                 player.ev_right.angle = 0;
