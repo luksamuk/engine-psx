@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(PSXEngine
   LANGUAGES    C CXX ASM
-  VERSION      1.0.0
+  VERSION      0.1.0
   DESCRIPTION  "Platformer Engine for PSX"
   HOMEPAGE_URL "https://luksamuk.codes")
 
@@ -14,6 +14,7 @@ list(APPEND CMAKE_MODULE_PATH
   "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+git_get_exact_tag(GIT_TAG)
 
 string(SUBSTRING "${GIT_SHA1}"     0  7 GIT_SHORTHASH)
 string(SUBSTRING "${GIT_REFSPEC}" 11 -1 GIT_BRANCH)
@@ -21,6 +22,12 @@ string(SUBSTRING "${GIT_REFSPEC}" 11 -1 GIT_BRANCH)
 add_definitions("-DGIT_SHA1=\"${GIT_SHA1}\"")
 add_definitions("-DGIT_REFSPEC=\"${GIT_REFSPEC}\"")
 add_definitions("-DGIT_COMMIT=\"${GIT_BRANCH}/${GIT_SHORTHASH}\"")
+
+if(GIT_TAG)
+  add_definitions("-DGIT_VERSION=\"${GIT_TAG}\"")
+else()
+  add_definitions("-DGIT_VERSION=\"GIT ${GIT_SHORTHASH}\"")
+endif()
 
 set(CMAKE_C_FLAGS "-Wall")
 

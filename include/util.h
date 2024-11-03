@@ -17,6 +17,9 @@
 #define GIT_COMMIT "UNKNOWN"
 #endif
 
+#ifndef GIT_VERSION
+#define GIT_VERSION "UNKNOWN"
+#endif
 
 #define BCD_TO_DEC(x) (((x & 0xF0) >> 4) * 10 + (x & 0x0F))
 #define SIGNUM(x) (x < 0 ? -1 : 1)

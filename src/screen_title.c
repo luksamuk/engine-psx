@@ -10,6 +10,7 @@
 #include "screen.h"
 #include "sound.h"
 #include "timer.h"
+#include "basic_font.h"
 
 #include "screens/fmv.h"
 #include "screens/level.h"
@@ -228,7 +229,7 @@ screen_title_drawtitle(screen_title_data *data)
            255, 0,
            0,   174,
            255, 174);
-    sort_prim(poly, 1);
+    sort_prim(poly, 3);
 }
 
 static void
@@ -262,7 +263,7 @@ screen_title_drawtxt(screen_title_data *data, uint8_t idx, int16_t cx, int16_t c
            u0 + w , v0,
            u0,         v0 + h,
            u0 + w , v0 + h);
-    sort_prim(poly, 0);
+    sort_prim(poly, 1);
 }
 
 static void
@@ -300,7 +301,7 @@ screen_title_drawprl(screen_title_data *data)
                    w - 1, v0,
                    0, v0 + h,
                    w - 1, v0 + h);
-            sort_prim(poly, 1);
+            sort_prim(poly, OT_LENGTH - 2);
 
             if(s) break;
         }
@@ -396,11 +397,19 @@ screen_title_draw(void *d)
             if(data->menu_option < 3)
                 screen_title_drawtxt(data, 5, CENTERX + 60, 208);
         }
-
-        int16_t x;
-
-        snprintf(buffer, 255, "v0.1 Beta");
-        x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
-        draw_text(x, SCREEN_YRES - 14, 0, buffer);
     }
+
+    int16_t x;
+
+    font_set_color(
+        LERPC(data->rgb_count, 200),
+        LERPC(data->rgb_count, 200),
+        LERPC(data->rgb_count, 200));
+
+    x = SCREEN_XRES - (strlen(GIT_VERSION) * 8) - 8;
+    font_draw_sm(GIT_VERSION, x, SCREEN_YRES - 21);
+
+    snprintf(buffer, 255, "2024 luksamuk");
+    x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
+    font_draw_sm(buffer, x, SCREEN_YRES - 14);
 }
