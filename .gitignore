@@ -9,3 +9,4 @@ build/
 /*.mcd
 /*.chd
 *.tiled-session
+/.pcsx

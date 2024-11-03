@@ -30,21 +30,15 @@ chd: engine.chd
 run: ./build/engine.cue
 	pcsx-redux-appimage \
 		-run -interpreter -fastboot -stdout \
-		-iso ./build/engine.cue
-
-# Run on pcsx-redux, but don't build
-dry-run:
-	pcsx-redux-appimage \
-		-run -interpreter -fastboot -stdout \
-		-iso ./build/engine.cue
+		-iso $<
 
 # Target for running the image on Mednafen
-mednafen: ./build/engine.cue
+run-mednafen: ./build/engine.cue
 	mednafen $<
 
-# Emulate on Mednafen, but do not build
-emu:
-	mednafen ./build/engine.cue
+# Target for running the image on PCSX-ReARMed
+run-rearmed: ./build/engine.cue
+	pcsx -cdfile $<
 
 # Run debugger
 debug:

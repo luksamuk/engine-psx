@@ -36,13 +36,13 @@ typedef struct {
 extern int debug_mode;
 
 static const char *menutext[] = {
-    "PLAYGROUND  ZONE 1",
-    "            ZONE 2",
-    "            ZONE 3",
-    "            ZONE 4",
-    "GREEN HILL  ZONE 1",
-    "            ZONE 2",
-    "SURELY WOOD ZONE 1",
+    "PLAYGROUND  1",
+    "            2",
+    "            3",
+    "            4",
+    "GREEN HILL  1",
+    "            2",
+    "SURELY WOOD 1",
 
     "\n",
     "\n",

@@ -51,7 +51,7 @@ static uint8_t glyph_info_big[] = {
 
     0xff, 0, 0, 0, // * (no char)
     247, 0, 3, 11, // .
-    250, 0, 3, 11, // :
+    108, 11, 7, 11, // :
     0xff, 0, 0, 0, // - (no char)
     0xff, 0, 0, 0, // = (no char)
     0xff, 0, 0, 0, // ! (no char)
