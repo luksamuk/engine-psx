@@ -61,7 +61,8 @@ static const char *creditstxt[] = {
     "El Gato Battle 2 Vortex Remake",
     "By pkVortex",
     "\r",
-    
+
+    "Intro FMV",
     "You Can Do Anything",
     "By Sonic Team",
     "\r",
