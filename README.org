@@ -145,6 +145,8 @@ tochd -d . -- ./build/engine.cue
 
 | Screenshot                                            | Description                                                                                     |
 |-------------------------------------------------------+-------------------------------------------------------------------------------------------------|
+| [[file:./screenshots/sonicxa-110424-swz.gif]]             | Beta engine [2024-11-04]. Like below. Showcasing Surely Wood Zone, springs, background, etc.    |
+| [[file:./screenshots/sonicxa-110424-ghz.gif]]             | Beta engine [2024-11-04]. Many changes, notably a HUD, improved collision, spikes and damage.   |
 | [[file:./screenshots/sonicxa-100424-gh.gif]]              | Beta engine [2024-10-04]. Same as below, showcasing Green Hill Zone.                            |
 | [[file:./screenshots/sonicxa-100424.gif]]                 | Beta engine [2024-10-04]. Includes object rendering, and monitors and rings can be interacted.  |
 | [[file:./screenshots/sonicxa-092224-gh.gif]]              | Beta engine [2024-09-22]. Same as below, but showcasing an initial Green Hill Zone.             |
