@@ -529,7 +529,8 @@ player_update(Player *player)
         }
 
         // Air drag. Calculated before applying gravity.
-        if(player->vel.vy < 0 && player->vel.vy > -Y_MIN_JUMP) {
+        if((player->vel.vy < 0 && player->vel.vy > -Y_MIN_JUMP)
+           && (player->action != ACTION_HURT)) {
             // xsp -= (xsp div 0.125) / 256
             int32_t air_drag = (div12(abs(player->vel.vx), 0x200) << 12) / 0x100000;
             if(player->vel.vx > 0)
