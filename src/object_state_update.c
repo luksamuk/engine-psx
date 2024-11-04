@@ -426,7 +426,6 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         if(((player_vy + player_height) < solidity_vy + 16) &&
            ((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32)))
         {
-            printf("Player VY: %d, Solidity VY: %d\n", player_vy, solidity_vy);
             if(player.action != ACTION_HURT && player.iframes == 0) {
                 player_set_hurt(&player, (solidity_vx + 16) << 12);
                 sound_play_vag(sfx_death, 0); // TODO: SFX changes depending on situation
