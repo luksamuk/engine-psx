@@ -220,7 +220,7 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
             // Loop back to beginning
             _cd_err_threshold = 0;
             _cd_elapsed_sectors = 0;
-            CdControlF(CdlReadS, (const void *)&_xa_loc);
+            CdControl(CdlReadS, (const void *)&_xa_loc, 0);
         }
         break;
     case CdlDiskError:
@@ -233,7 +233,7 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
             _cd_err_threshold = 0;
             _cd_elapsed_sectors = 0;
             printf("Resetting playback\n");
-            CdControlF(CdlReadS, &_xa_loc);
+            CdControl(CdlReadS, (const void *)&_xa_loc, 0);
         }
         break;
     default:
