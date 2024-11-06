@@ -10,8 +10,11 @@
 
 #include "cd_callback.h"
 #include "memalloc.h"
+#include "screen.h"
 
 #define VRAM_X_COORD(x) ((x) * BLOCK_SIZE / 16)
+
+#define MAX_FRAME_BUFFER_ATTEMPTS 10
 
 // Since the stream context in this case can use approx. 320K of RAM,
 // it seems like a better choice to let it live on the heap.
@@ -31,6 +34,7 @@ static volatile CdlFILE       file;
 
 static int decode_errors;
 static int frame_time;
+static volatile int should_abort;
 
 // Extern structure and functions related to render buffers
 extern RenderContext ctx;
@@ -58,6 +62,7 @@ void
 mdec_start(const char *filepath)
 {
     printf("Preparing MDEC playback.\n");
+    should_abort = 0;
     DecDCTReset(0);
 
     render_mdec_prepare();
@@ -69,8 +74,10 @@ mdec_start(const char *filepath)
     lookup_table = fastalloc_malloc(sizeof(VLC_TableV2));
     DecDCTvlcCopyTableV2((VLC_TableV2 *)lookup_table);
 
-    // Setup stream context
-    if(!str_ctx) str_ctx = malloc(sizeof(StreamContext));
+    // Setup stream context.
+    // Use current screen storage for that
+    if(!str_ctx) str_ctx = screen_alloc(sizeof(volatile StreamContext));
+
     str_ctx->cur_frame = 0;
     str_ctx->cur_slice = 0;
 
@@ -114,7 +121,6 @@ mdec_stop()
     CdControlB(CdlPause, 0, 0);
 
     if(str_ctx) {
-        free((void *)str_ctx);
         str_ctx = NULL;
     }
     fastalloc_free();
@@ -132,10 +138,18 @@ mdec_loop()
         if(debug_mode) frame_start = TIMER_VALUE(1);
 
         // Wait for a full frame read from disc
+        uint8_t frame_attempts = 0;
+    try_fetch_frame:
         StreamBuffer *frame = _mdec_get_next_frame();
         if(!frame) {
-            printf("MDEC playback ended\n");
-            return;
+            if(should_abort || (frame_attempts >= MAX_FRAME_BUFFER_ATTEMPTS)) {
+                printf("MDEC playback ended\n");
+                return;
+            }
+            printf("MDEC: Tried reading frame (attempt #%d), retrying...\n",
+                   frame_attempts);
+            frame_attempts++;
+            goto try_fetch_frame;
         }
 
         if(_mdec_should_abort()) {
@@ -320,8 +334,10 @@ _mdec_get_next_frame(void)
 {
     while(!str_ctx->frame_ready) {
         __asm__ volatile("");
-        if(_mdec_should_abort())
+        if(_mdec_should_abort()) {
+            should_abort = 1;
             return NULL;
+        }
     }
 
     if(str_ctx->frame_ready < 0) {

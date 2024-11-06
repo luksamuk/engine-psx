@@ -20,6 +20,9 @@ void
 screen_fmv_unload(void *)
 {
     fmv_count = 0;
+    // Since screen allocations are used for MDEC playback,
+    // dispose of any used memory
+    screen_free();
 }
 
 void
