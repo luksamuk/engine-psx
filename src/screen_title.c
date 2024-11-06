@@ -12,7 +12,6 @@
 #include "timer.h"
 #include "basic_font.h"
 
-#include "screens/fmv.h"
 #include "screens/level.h"
 
 extern int      debug_mode;
@@ -187,9 +186,7 @@ screen_title_update(void *d)
                         //screen_level_setlevel(0);
                         // Start at Green Hill Zone 1
                         screen_level_setlevel(4);
-                        screen_fmv_set_next(SCREEN_LEVEL);
-                        screen_fmv_enqueue("\\INTRO.STR;1");
-                        data->next_scene = SCREEN_FMV;
+                        data->next_scene = SCREEN_LEVEL;
                         level_score_count = 0;
                         break;
                     case 3: // Level Select

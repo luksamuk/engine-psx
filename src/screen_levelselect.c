@@ -17,9 +17,8 @@
 #define CHOICE_MODELTEST 7
 #define CHOICE_TITLE     8
 #define CHOICE_SONICT    9
-#define CHOICE_INTRO     10
-#define CHOICE_SOON      11
-#define CHOICE_CREDITS   12
+#define CHOICE_SOON      10
+#define CHOICE_CREDITS   11
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
 
 extern uint32_t level_score_count;
@@ -49,11 +48,11 @@ static const char *menutext[] = {
     "\n",
     "\n",
     "\n",
+    "\n",
 
     "MODELTEST",
     "TITLESCREEN",
     "SONICTEAM",
-    "INTRO",
     "COMINGSOON",
     "CREDITS",
     NULL,
@@ -150,10 +149,6 @@ screen_levelselect_update(void *d)
     if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
         if(data->menu_choice == CHOICE_TITLE) {
             scene_change(SCREEN_TITLE);
-        } else if(data->menu_choice == CHOICE_INTRO) {
-            screen_fmv_set_next(SCREEN_LEVELSELECT);
-            screen_fmv_enqueue("\\INTRO.STR;1");
-            scene_change(SCREEN_FMV);
         } else if(data->menu_choice == CHOICE_SONICT) {
             screen_fmv_set_next(SCREEN_LEVELSELECT);
             screen_fmv_enqueue("\\SONICT.STR;1");

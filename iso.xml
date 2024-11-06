@@ -259,11 +259,6 @@
       </dir>
 
       <dummy sectors="1024"/>
-      <file name="INTRO.STR"
-	    type="mixed"
-	    source="${PROJECT_SOURCE_DIR}/assets/fmv/INTRO.STR" />
-
-      <dummy sectors="1024"/>
       <file name="SONICT.STR"
 	    type="mixed"
 	    source="${PROJECT_SOURCE_DIR}/assets/fmv/SONICT.STR" />
