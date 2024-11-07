@@ -151,7 +151,7 @@ screen_title_update(void *d)
 
     uint32_t elapsed_sectors;
     sound_xa_get_elapsed_sectors(&elapsed_sectors);
-    if(elapsed_sectors >= 950) sound_stop_xa();
+    if(elapsed_sectors >= 450) sound_stop_xa();
 
     /* data->planet.rot.vz -= 24; */
 

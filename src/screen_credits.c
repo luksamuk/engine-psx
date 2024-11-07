@@ -6,6 +6,10 @@
 #include "render.h"
 #include "basic_font.h"
 #include "input.h"
+#include "sound.h"
+#include "util.h"
+
+extern int debug_mode;
 
 static const char *creditstxt[] = {
     "SONIC XA CREDITS",
@@ -62,10 +66,12 @@ static const char *creditstxt[] = {
     "By pkVortex",
     "\r",
 
-    "Intro FMV",
-    "You Can Do Anything",
-    "By Sonic Team",
+    "Level Select",
+    "Sonic 3D Blast Main Title: You're My Hero",
+    "By Richard Jacques",
     "\r",
+
+    // TODO: Credits (You're My Hero Remix)
 
 
     /* Graphics credits */
@@ -141,17 +147,24 @@ screen_credits_load()
     data->fade = 0;
     data->countdown = FADE_FRAMES;
     data->state = 0;
+
+    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 2, 0);
 }
 
 void
 screen_credits_unload(void *)
 {
+    sound_stop_xa();
     screen_free();
 }
 
 void
 screen_credits_update(void *d)
 {
+    uint32_t elapsed_sectors;
+    sound_xa_get_elapsed_sectors(&elapsed_sectors);
+    if(elapsed_sectors >= 4850) sound_stop_xa();
+
     screen_credits_data *data = (screen_credits_data *)d;
     if(creditstxt[data->entry] != NULL
        && (!pad_pressed(PAD_START) && !pad_pressed(PAD_CROSS))) {
@@ -202,6 +215,17 @@ void
 screen_credits_draw(void *d)
 {
     screen_credits_data *data = (screen_credits_data *)d;
+
+    if(debug_mode) {
+        uint32_t elapsed_sectors;
+        sound_xa_get_elapsed_sectors(&elapsed_sectors);
+        FntPrint(-1, "%-29s %4s %3d\n",
+                 GIT_COMMIT,
+                 GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
+                 get_frame_rate());
+        FntPrint(-1, "                              %08u\n", elapsed_sectors);
+        FntFlush(-1);
+    }
 
     // Get current text
     const char **window = &creditstxt[data->entry];

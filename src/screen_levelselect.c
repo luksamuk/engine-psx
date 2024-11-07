@@ -87,7 +87,7 @@ screen_levelselect_load()
     // to have any points. :)
     level_score_count = 0;
     
-    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0); // 2600
+    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0);
 }
 
 void
@@ -167,7 +167,7 @@ screen_levelselect_update(void *d)
 
     uint32_t elapsed_sectors;
     sound_xa_get_elapsed_sectors(&elapsed_sectors);
-    if(elapsed_sectors >= 2600) sound_stop_xa();
+    if(elapsed_sectors >= 1550) sound_stop_xa();
 }
 
 void
