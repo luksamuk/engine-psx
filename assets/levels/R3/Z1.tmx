@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="4" nextobjectid="161">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="161">
  <tileset firstgid="1" source="128x128.tsx"/>
- <tileset firstgid="57" source="../COMMON/objects_common.tsx"/>
+ <tileset firstgid="73" source="../COMMON/objects_common.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
   <data encoding="csv">
 10,26,20,9,49,51,9,18,26,26,19,26,30,0,0,0,0,0,0,9,9,0,0,0,0,9,9,0,0,0,9,26,26,9,9,0,0,0,0,18,19,20,7,7,0,0,0,7,7,7,18,30,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -11,7 +11,7 @@
 11,8,8,3,5,6,9,7,7,7,18,19,20,7,18,30,24,20,56,4,21,41,25,28,27,9,9,0,22,22,4,32,31,9,9,2,2,2,17,32,34,35,0,0,0,34,35,0,0,34,35,7,7,18,30,0,0,25,26,27,25,26,27,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 2,2,2,2,2,2,17,16,16,17,13,0,15,17,13,0,14,15,4,4,4,0,0,24,20,9,9,25,26,27,21,0,0,9,9,29,29,29,29,27,37,38,8,41,23,36,38,8,41,36,38,17,17,13,23,0,0,8,0,25,26,27,7,7,7,0,0,0,0,18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 2,2,2,2,2,2,2,0,0,2,8,8,8,2,8,8,5,6,9,9,9,25,29,27,15,4,21,22,14,15,4,49,51,9,9,0,0,0,0,0,0,0,9,0,0,0,0,9,0,0,0,9,9,25,27,15,4,2,39,40,5,6,17,17,17,32,31,17,17,13,0,15,2,39,40,5,6,18,19,26,27,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,2,2,17,17,17,0,0,0,0,17,17,32,16,31,17,32,31,17,17,5,6,0,0,0,0,0,9,0,0,0,0,9,0,0,0,9,9,25,28,27,9,2,2,2,2,2,2,2,2,0,52,2,2,0,0,0,2,2,2,2,2,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,17,17,32,16,31,17,32,31,17,17,5,6,0,0,0,0,0,9,0,0,0,0,9,0,0,0,9,9,25,28,27,9,2,2,2,2,2,2,2,2,0,52,2,2,0,0,0,2,2,2,2,2,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,8,2,2,41,12,42,2,0,0,2,2,2,2,2,2,32,34,35,9,0,0,0,0,9,0,0,0,9,9,25,29,27,9,19,29,9,19,20,9,29,29,0,0,2,2,0,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 2,2,2,2,2,2,2,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,2,2,2,18,19,26,2,0,0,2,2,2,2,2,2,0,37,38,3,5,6,0,0,9,0,0,0,9,9,8,8,8,3,41,43,54,55,15,4,32,16,16,31,2,2,0,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 2,2,2,2,2,2,2,0,0,2,2,2,29,29,30,0,0,25,29,29,29,27,0,0,2,2,2,13,0,0,2,0,0,2,2,2,2,2,2,0,0,0,2,2,2,39,40,3,41,42,8,17,17,2,2,2,2,0,0,9,25,27,9,0,0,0,0,44,46,0,0,0,44,45,45,45,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -39,217 +39,217 @@
  </layer>
  <group id="2" name="OBJECTS">
   <objectgroup id="3" name="COMMON">
-   <object id="1" gid="69" x="35" y="575" width="64" height="64"/>
-   <object id="2" gid="65" x="225" y="579" width="64" height="64"/>
-   <object id="3" gid="61" x="1616" y="832" width="64" height="64"/>
-   <object id="4" gid="67" x="1613.75" y="770.25" width="64" height="64"/>
-   <object id="7" gid="59" x="1423" y="832" width="64" height="64"/>
-   <object id="8" gid="59" x="1455" y="832" width="64" height="64"/>
-   <object id="9" gid="61" x="2464" y="384" width="64" height="64"/>
-   <object id="10" gid="63" x="2672" y="918" width="64" height="64"/>
-   <object id="11" gid="61" x="3152" y="1088" width="64" height="64"/>
-   <object id="13" gid="58" x="1264" y="832" width="64" height="64">
+   <object id="1" gid="85" x="35" y="575" width="64" height="64"/>
+   <object id="2" gid="81" x="225" y="579" width="64" height="64"/>
+   <object id="3" gid="77" x="1616" y="832" width="64" height="64"/>
+   <object id="4" gid="83" x="1613.75" y="770.25" width="64" height="64"/>
+   <object id="7" gid="75" x="1423" y="832" width="64" height="64"/>
+   <object id="8" gid="75" x="1455" y="832" width="64" height="64"/>
+   <object id="9" gid="77" x="2464" y="384" width="64" height="64"/>
+   <object id="10" gid="79" x="2672" y="918" width="64" height="64"/>
+   <object id="11" gid="77" x="3152" y="1088" width="64" height="64"/>
+   <object id="13" gid="74" x="1264" y="832" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="14" gid="61" x="1792" y="784" width="64" height="64" rotation="90"/>
-   <object id="15" gid="65" x="2432" y="896" width="64" height="64"/>
-   <object id="16" gid="65" x="2722" y="583" width="64" height="64"/>
-   <object id="18" gid="65" x="2334" y="508" width="64" height="64"/>
-   <object id="20" gid="65" x="2863" y="261" width="64" height="64"/>
-   <object id="21" gid="65" x="2992" y="261" width="64" height="64"/>
-   <object id="22" gid="57" x="2706.5" y="896" width="64" height="64"/>
-   <object id="23" gid="57" x="2724.5" y="877" width="64" height="64"/>
-   <object id="24" gid="57" x="2743.5" y="859" width="64" height="64"/>
-   <object id="25" gid="65" x="1695.5" y="637.5" width="64" height="64"/>
-   <object id="26" gid="58" x="2032" y="256" width="64" height="64">
+   <object id="14" gid="77" x="1792" y="784" width="64" height="64" rotation="90"/>
+   <object id="15" gid="81" x="2464" y="904" width="64" height="64"/>
+   <object id="16" gid="81" x="2722" y="583" width="64" height="64"/>
+   <object id="18" gid="81" x="2334" y="508" width="64" height="64"/>
+   <object id="20" gid="81" x="2863" y="261" width="64" height="64"/>
+   <object id="21" gid="81" x="2992" y="261" width="64" height="64"/>
+   <object id="22" gid="73" x="2706.5" y="896" width="64" height="64"/>
+   <object id="23" gid="73" x="2724.5" y="877" width="64" height="64"/>
+   <object id="24" gid="73" x="2743.5" y="859" width="64" height="64"/>
+   <object id="25" gid="81" x="1695.5" y="637.5" width="64" height="64"/>
+   <object id="26" gid="74" x="2032" y="256" width="64" height="64">
     <properties>
      <property name="Kind" value="SHIELD"/>
     </properties>
    </object>
-   <object id="27" gid="57" x="2032" y="650" width="64" height="64"/>
-   <object id="28" gid="65" x="3293.33" y="258.667" width="64" height="64"/>
-   <object id="29" gid="65" x="3614" y="174" width="64" height="64"/>
-   <object id="30" gid="59" x="3675" y="896" width="64" height="64"/>
-   <object id="31" gid="59" x="3707" y="896" width="64" height="64"/>
-   <object id="32" gid="59" x="3504" y="896" width="64" height="64"/>
-   <object id="33" gid="59" x="3536" y="896" width="64" height="64"/>
-   <object id="34" gid="61" x="3873" y="704" width="64" height="64"/>
-   <object id="35" gid="65" x="4065" y="899" width="64" height="64"/>
-   <object id="36" gid="67" x="3871" y="602" width="64" height="64"/>
-   <object id="37" gid="61" x="4480" y="913" width="64" height="64" rotation="90"/>
-   <object id="38" gid="65" x="4897" y="134" width="64" height="64"/>
-   <object id="39" gid="57" x="5150" y="199" width="64" height="64"/>
-   <object id="40" gid="65" x="4064" y="261" width="64" height="64"/>
-   <object id="43" gid="58" x="6272" y="128" width="64" height="64">
+   <object id="27" gid="73" x="2032" y="650" width="64" height="64"/>
+   <object id="28" gid="81" x="3293.33" y="258.667" width="64" height="64"/>
+   <object id="29" gid="81" x="3614" y="174" width="64" height="64"/>
+   <object id="30" gid="75" x="3675" y="896" width="64" height="64"/>
+   <object id="31" gid="75" x="3707" y="896" width="64" height="64"/>
+   <object id="32" gid="75" x="3504" y="896" width="64" height="64"/>
+   <object id="33" gid="75" x="3536" y="896" width="64" height="64"/>
+   <object id="34" gid="77" x="3873" y="704" width="64" height="64"/>
+   <object id="35" gid="81" x="4065" y="899" width="64" height="64"/>
+   <object id="36" gid="83" x="3871" y="602" width="64" height="64"/>
+   <object id="37" gid="77" x="4480" y="913" width="64" height="64" rotation="90"/>
+   <object id="38" gid="81" x="4897" y="134" width="64" height="64"/>
+   <object id="39" gid="73" x="5150" y="199" width="64" height="64"/>
+   <object id="40" gid="81" x="4064" y="261" width="64" height="64"/>
+   <object id="43" gid="74" x="6272" y="128" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="44" gid="62" x="7424" y="720" width="64" height="64" rotation="90"/>
-   <object id="45" gid="62" x="7936" y="911" width="64" height="64" rotation="-90"/>
-   <object id="48" gid="67" x="8531.33" y="860" width="64" height="64"/>
-   <object id="49" gid="2147483711" x="8528" y="1152" width="64" height="64"/>
-   <object id="50" gid="62" x="3072" y="1488" width="64" height="64" rotation="-90"/>
-   <object id="51" gid="62" x="1536" y="1552" width="64" height="64" rotation="90"/>
-   <object id="52" gid="58" x="1776" y="1664" width="64" height="64">
+   <object id="44" gid="78" x="7424" y="720" width="64" height="64" rotation="90"/>
+   <object id="45" gid="78" x="7936" y="911" width="64" height="64" rotation="-90"/>
+   <object id="48" gid="83" x="8531.33" y="860" width="64" height="64"/>
+   <object id="49" gid="2147483727" x="8528" y="1152" width="64" height="64"/>
+   <object id="50" gid="78" x="3072" y="1488" width="64" height="64" rotation="-90"/>
+   <object id="51" gid="78" x="1536" y="1552" width="64" height="64" rotation="90"/>
+   <object id="52" gid="74" x="1776" y="1664" width="64" height="64">
     <properties>
      <property name="Kind" value="SHIELD"/>
     </properties>
    </object>
-   <object id="53" gid="61" x="3733" y="1727" width="64" height="64"/>
-   <object id="59" gid="61" x="3440" y="1280" width="64" height="64"/>
-   <object id="60" gid="62" x="3616" y="1088" width="64" height="64"/>
-   <object id="61" gid="67" x="3440" y="1215.5" width="64" height="64"/>
-   <object id="62" gid="57" x="3614.67" y="510.667" width="64" height="64"/>
-   <object id="64" gid="62" x="2984" y="2752" width="64" height="64"/>
-   <object id="65" gid="64" x="2928" y="2176" width="64" height="64"/>
-   <object id="66" gid="2147483712" x="3536" y="2048" width="64" height="64"/>
-   <object id="69" gid="62" x="5376" y="2896" width="64" height="64" rotation="-90"/>
-   <object id="70" gid="62" x="5376" y="2320" width="64" height="64" rotation="-90"/>
-   <object id="71" gid="62" x="4480" y="1872" width="64" height="64" rotation="90"/>
-   <object id="72" gid="62" x="5376" y="1808" width="64" height="64" rotation="-90"/>
-   <object id="73" gid="58" x="5330" y="2752" width="64" height="64">
+   <object id="53" gid="77" x="3733" y="1727" width="64" height="64"/>
+   <object id="59" gid="77" x="3440" y="1280" width="64" height="64"/>
+   <object id="60" gid="78" x="3616" y="1088" width="64" height="64"/>
+   <object id="61" gid="83" x="3440" y="1215.5" width="64" height="64"/>
+   <object id="62" gid="73" x="3614.67" y="510.667" width="64" height="64"/>
+   <object id="64" gid="78" x="2984" y="2752" width="64" height="64"/>
+   <object id="65" gid="80" x="2928" y="2176" width="64" height="64"/>
+   <object id="66" gid="2147483728" x="3536" y="2048" width="64" height="64"/>
+   <object id="69" gid="78" x="5376" y="2896" width="64" height="64" rotation="-90"/>
+   <object id="70" gid="78" x="5376" y="2320" width="64" height="64" rotation="-90"/>
+   <object id="71" gid="78" x="4480" y="1872" width="64" height="64" rotation="90"/>
+   <object id="72" gid="78" x="5376" y="1808" width="64" height="64" rotation="-90"/>
+   <object id="73" gid="74" x="5330" y="2752" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="74" gid="62" x="4480" y="2512" width="64" height="64" rotation="90"/>
-   <object id="75" gid="59" x="3401" y="2752" width="64" height="64"/>
-   <object id="76" gid="59" x="3433" y="2752" width="64" height="64"/>
-   <object id="78" gid="59" x="3056" y="2752" width="64" height="64"/>
-   <object id="79" gid="59" x="3088" y="2752" width="64" height="64"/>
-   <object id="80" gid="67" x="2980" y="2662" width="64" height="64"/>
-   <object id="81" gid="65" x="5005.33" y="1801.33" width="64" height="64"/>
-   <object id="82" gid="65" x="4900.67" y="1926" width="64" height="64"/>
-   <object id="83" gid="65" x="5020.67" y="2306.67" width="64" height="64"/>
-   <object id="86" gid="65" x="4639" y="2821" width="64" height="64"/>
-   <object id="88" gid="65" x="4258" y="2821" width="64" height="64"/>
-   <object id="89" gid="65" x="3236" y="1794" width="64" height="64"/>
-   <object id="91" gid="63" x="8304" y="1024" width="64" height="64"/>
-   <object id="92" gid="61" x="8528" y="960" width="64" height="64"/>
-   <object id="93" gid="61" x="3617" y="1472" width="64" height="64"/>
-   <object id="95" gid="58" x="3085" y="768" width="64" height="64">
+   <object id="74" gid="78" x="4480" y="2512" width="64" height="64" rotation="90"/>
+   <object id="75" gid="75" x="3401" y="2752" width="64" height="64"/>
+   <object id="76" gid="75" x="3433" y="2752" width="64" height="64"/>
+   <object id="78" gid="75" x="3056" y="2752" width="64" height="64"/>
+   <object id="79" gid="75" x="3088" y="2752" width="64" height="64"/>
+   <object id="80" gid="83" x="2980" y="2662" width="64" height="64"/>
+   <object id="81" gid="81" x="5005.33" y="1801.33" width="64" height="64"/>
+   <object id="82" gid="81" x="4900.67" y="1926" width="64" height="64"/>
+   <object id="83" gid="81" x="5020.67" y="2306.67" width="64" height="64"/>
+   <object id="86" gid="81" x="4639" y="2821" width="64" height="64"/>
+   <object id="88" gid="81" x="4258" y="2821" width="64" height="64"/>
+   <object id="89" gid="81" x="3236" y="1794" width="64" height="64"/>
+   <object id="91" gid="79" x="8304" y="1024" width="64" height="64"/>
+   <object id="92" gid="77" x="8528" y="960" width="64" height="64"/>
+   <object id="93" gid="77" x="3617" y="1472" width="64" height="64"/>
+   <object id="95" gid="74" x="3085" y="768" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="96" gid="58" x="3116" y="768" width="64" height="64">
+   <object id="96" gid="74" x="3116" y="768" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="97" gid="58" x="3794" y="1088" width="64" height="64">
+   <object id="97" gid="74" x="3794" y="1088" width="64" height="64">
     <properties>
      <property name="Kind" value="SHIELD"/>
     </properties>
    </object>
-   <object id="98" gid="59" x="5263" y="1216" width="64" height="64"/>
-   <object id="99" gid="60" x="4381" y="896" width="64" height="64"/>
-   <object id="100" gid="60" x="7325" y="704" width="64" height="64"/>
-   <object id="101" gid="61" x="7440" y="1664" width="64" height="64"/>
-   <object id="102" gid="64" x="7280" y="1536" width="64" height="64"/>
-   <object id="103" gid="58" x="9426" y="2240" width="64" height="64">
+   <object id="98" gid="75" x="5263" y="1216" width="64" height="64"/>
+   <object id="99" gid="76" x="4381" y="896" width="64" height="64"/>
+   <object id="100" gid="76" x="7325" y="704" width="64" height="64"/>
+   <object id="101" gid="77" x="7440" y="1664" width="64" height="64"/>
+   <object id="102" gid="80" x="7280" y="1536" width="64" height="64"/>
+   <object id="103" gid="74" x="9426" y="2240" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="104" gid="58" x="9395" y="2240" width="64" height="64">
+   <object id="104" gid="74" x="9395" y="2240" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="105" gid="58" x="9364.33" y="2240" width="64" height="64">
+   <object id="105" gid="74" x="9364.33" y="2240" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="106" gid="58" x="9333" y="2240" width="64" height="64">
+   <object id="106" gid="74" x="9333" y="2240" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="107" gid="62" x="9216" y="2320" width="64" height="64" rotation="-90"/>
-   <object id="108" gid="61" x="7711" y="1792" width="64" height="64"/>
-   <object id="109" gid="58" x="7280" y="2176" width="64" height="64">
+   <object id="107" gid="78" x="9216" y="2320" width="64" height="64" rotation="-90"/>
+   <object id="108" gid="77" x="7711" y="1792" width="64" height="64"/>
+   <object id="109" gid="74" x="7280" y="2176" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="111" gid="65" x="7453" y="1990" width="64" height="64"/>
-   <object id="112" gid="65" x="7582" y="1857" width="64" height="64"/>
-   <object id="113" gid="65" x="8480" y="2240" width="64" height="64"/>
-   <object id="114" gid="65" x="7961" y="2241" width="64" height="64"/>
-   <object id="116" gid="58" x="7890" y="2048" width="64" height="64">
+   <object id="111" gid="81" x="7453" y="1990" width="64" height="64"/>
+   <object id="112" gid="81" x="7582" y="1857" width="64" height="64"/>
+   <object id="113" gid="81" x="8480" y="2240" width="64" height="64"/>
+   <object id="114" gid="81" x="7961" y="2241" width="64" height="64"/>
+   <object id="116" gid="74" x="7890" y="2048" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="117" gid="61" x="6016" y="208" width="64" height="64" rotation="-90"/>
-   <object id="118" gid="61" x="5632" y="144" width="64" height="64" rotation="90"/>
-   <object id="119" gid="65" x="4507" y="261" width="64" height="64"/>
-   <object id="120" gid="57" x="2094" y="650" width="64" height="64"/>
-   <object id="121" gid="68" x="12048" y="1664" width="64" height="64"/>
-   <object id="122" gid="65" x="5473.33" y="130.667" width="64" height="64"/>
-   <object id="123" gid="67" x="6604" y="366.667" width="64" height="64"/>
-   <object id="124" gid="65" x="4320" y="450" width="64" height="64"/>
-   <object id="125" gid="58" x="4769" y="448" width="64" height="64">
+   <object id="117" gid="77" x="6016" y="208" width="64" height="64" rotation="-90"/>
+   <object id="118" gid="77" x="5632" y="144" width="64" height="64" rotation="90"/>
+   <object id="119" gid="81" x="4507" y="261" width="64" height="64"/>
+   <object id="120" gid="73" x="2094" y="650" width="64" height="64"/>
+   <object id="121" gid="84" x="12048" y="1664" width="64" height="64"/>
+   <object id="122" gid="81" x="5473.33" y="130.667" width="64" height="64"/>
+   <object id="123" gid="83" x="6604" y="366.667" width="64" height="64"/>
+   <object id="124" gid="81" x="4320" y="450" width="64" height="64"/>
+   <object id="125" gid="74" x="4769" y="448" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="126" gid="65" x="5088" y="518" width="64" height="64"/>
-   <object id="127" gid="65" x="5408.67" y="705.333" width="64" height="64"/>
-   <object id="128" gid="65" x="5934" y="703.333" width="64" height="64"/>
-   <object id="129" gid="65" x="6174" y="704" width="64" height="64"/>
-   <object id="130" gid="60" x="5571" y="128" width="64" height="64"/>
-   <object id="131" gid="60" x="8350" y="1473" width="64" height="64"/>
-   <object id="132" gid="65" x="6173" y="1344" width="64" height="64"/>
-   <object id="133" gid="65" x="6367" y="1344" width="64" height="64"/>
-   <object id="134" gid="65" x="5732" y="1285.33" width="64" height="64"/>
-   <object id="136" gid="65" x="7135" y="766" width="64" height="64"/>
-   <object id="137" gid="65" x="7966.67" y="1146.67" width="64" height="64"/>
-   <object id="138" gid="65" x="7968" y="1402.67" width="64" height="64"/>
-   <object id="139" gid="65" x="7008" y="1221" width="64" height="64"/>
-   <object id="140" gid="65" x="8098.67" y="766.667" width="64" height="64"/>
-   <object id="141" gid="65" x="8673.33" y="762.667" width="64" height="64"/>
-   <object id="142" gid="65" x="9257.33" y="765.333" width="64" height="64"/>
-   <object id="145" gid="65" x="10046" y="919" width="64" height="64"/>
-   <object id="146" gid="65" x="10070" y="943" width="64" height="64"/>
-   <object id="147" gid="65" x="10094" y="967" width="64" height="64"/>
-   <object id="149" gid="58" x="9170" y="1600" width="64" height="64">
+   <object id="126" gid="81" x="5088" y="518" width="64" height="64"/>
+   <object id="127" gid="81" x="5408.67" y="705.333" width="64" height="64"/>
+   <object id="128" gid="81" x="5934" y="703.333" width="64" height="64"/>
+   <object id="129" gid="81" x="6174" y="704" width="64" height="64"/>
+   <object id="130" gid="76" x="5571" y="128" width="64" height="64"/>
+   <object id="131" gid="76" x="8350" y="1473" width="64" height="64"/>
+   <object id="132" gid="81" x="6173" y="1344" width="64" height="64"/>
+   <object id="133" gid="81" x="6367" y="1344" width="64" height="64"/>
+   <object id="134" gid="81" x="5732" y="1285.33" width="64" height="64"/>
+   <object id="136" gid="81" x="7135" y="766" width="64" height="64"/>
+   <object id="137" gid="81" x="7966.67" y="1146.67" width="64" height="64"/>
+   <object id="138" gid="81" x="7968" y="1402.67" width="64" height="64"/>
+   <object id="139" gid="81" x="7008" y="1221" width="64" height="64"/>
+   <object id="140" gid="81" x="8098.67" y="766.667" width="64" height="64"/>
+   <object id="141" gid="81" x="8673.33" y="762.667" width="64" height="64"/>
+   <object id="142" gid="81" x="9257.33" y="765.333" width="64" height="64"/>
+   <object id="145" gid="81" x="10046" y="919" width="64" height="64"/>
+   <object id="146" gid="81" x="10070" y="943" width="64" height="64"/>
+   <object id="147" gid="81" x="10094" y="967" width="64" height="64"/>
+   <object id="149" gid="74" x="9170" y="1600" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
    </object>
-   <object id="150" gid="65" x="8864" y="1536" width="64" height="64"/>
-   <object id="151" gid="65" x="991.333" y="641" width="64" height="64"/>
-   <object id="152" gid="58" x="6546" y="1280" width="64" height="64">
+   <object id="150" gid="81" x="8864" y="1536" width="64" height="64"/>
+   <object id="151" gid="81" x="991.333" y="641" width="64" height="64"/>
+   <object id="152" gid="74" x="6546" y="1280" width="64" height="64">
     <properties>
      <property name="Kind" value="SPEEDSHOES"/>
     </properties>
    </object>
-   <object id="153" gid="62" x="3968" y="2768" width="64" height="64" rotation="90"/>
-   <object id="154" gid="57" x="7670.83" y="1221.83" width="64" height="64"/>
-   <object id="155" gid="57" x="7688.83" y="1202.83" width="64" height="64"/>
-   <object id="156" gid="57" x="7707.83" y="1184.83" width="64" height="64"/>
-   <object id="157" gid="58" x="0" y="192" width="64" height="64">
+   <object id="153" gid="78" x="3968" y="2768" width="64" height="64" rotation="90"/>
+   <object id="154" gid="73" x="7670.83" y="1221.83" width="64" height="64"/>
+   <object id="155" gid="73" x="7688.83" y="1202.83" width="64" height="64"/>
+   <object id="156" gid="73" x="7707.83" y="1184.83" width="64" height="64"/>
+   <object id="157" gid="74" x="0" y="192" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="158" gid="58" x="30" y="192" width="64" height="64">
+   <object id="158" gid="74" x="30" y="192" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="159" gid="58" x="60" y="192" width="64" height="64">
+   <object id="159" gid="74" x="60" y="192" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
-   <object id="160" gid="59" x="2287" y="384" width="64" height="64"/>
+   <object id="160" gid="75" x="2287" y="384" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>
