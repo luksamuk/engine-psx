@@ -66,12 +66,17 @@ static const char *creditstxt[] = {
     "By pkVortex",
     "\r",
 
-    "Level Select",
-    "Sonic 3D Blast Main Title: You're My Hero",
+    "Level Select Theme",
+    "Sonic 3D Blast Main Title:",
+    "Youre My Hero",
     "By Richard Jacques",
     "\r",
 
-    // TODO: Credits (You're My Hero Remix)
+    "Credits Theme",
+    "Sonic Generations Challenge Mission 5:",
+    "Youre My Hero Remix",
+    "By Richard Jacques",
+    "\r",
 
 
     /* Graphics credits */
