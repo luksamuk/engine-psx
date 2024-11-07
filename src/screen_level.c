@@ -547,6 +547,8 @@ level_load_level(screen_level_data *data)
         return;
     }
 
+    printf("Number of level layers: %d\n", leveldata.num_layers);
+
     sound_play_xa(filename0, 0, music_channel, bgm_loop_sectors[level]);
 }
 

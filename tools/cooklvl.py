@@ -52,6 +52,7 @@ def main():
     j = load_json(jsonfile)
 
     with open(outfile, "wb") as f:
+        print(f"Number of level layers: {j.get('num_layers')}")
         f.write(c_ubyte(j.get("num_layers")))
         f.write(c_ubyte(0))  # _unused
         layer_data = j.get("layer_data")

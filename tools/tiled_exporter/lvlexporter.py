@@ -40,13 +40,6 @@ class PSXPreLevel(Plugin):
                         tile = tileLayer.cellAt(x, y).tile()
                         layer["tiles"].append(tile.id() if tile else 0)
                 filedata["layer_data"].append(layer)
-            # elif isObjectGroupAt(tileMap, i):
-            #     # Unfortunately, the available options for MapObject are
-            #     # VERY LIMITED, so we'll have to figure things out by directly
-            #     # parsing a .tmx file for objects, with an external tool :/
-            #     # For more info on MapObject, see:
-            #     # https://github.com/mapeditor/tiled/blob/06e94bdea0790dceb9c9eb104af9982ce6a0e04e/src/plugins/python/tiledbinding.py#L257
-            #     pass
         with open(fileName, "w") as f:
             print(json.dumps(filedata), file=f)
         return True

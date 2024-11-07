@@ -1,6 +1,7 @@
 #include "level.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 #include "util.h"
 #include "render.h"
 #include "memalloc.h"
@@ -240,6 +241,7 @@ _render_8(
         u0 = (u0_idx << 3),
         v0 = (v0_idx << 3);
 
+    assert(_numsprites < MAX_TILES);
     SPRT_8 *sprt = &_sprites[_current_spritebuf ^ 1][_numsprites++];
     setXY0(sprt, vx, vy);
     setUV0(sprt, u0, v0);
@@ -519,6 +521,8 @@ render_lvl(
 
     // TODO: Add front layer rendered at OTZ_LAYER_LEVEL_FG_FRONT
     // TODO: Fix level mapping tool to consider only mapping layers
+    /* if(lvl->num_layers > 1) */
+    /*     _render_layer(lvl, map128, map16, cx, cy, OTZ_LAYER_LEVEL_FG_FRONT, 1); */
 
     // Texture TPAGE info for level foreground (back tiles)
     DR_TPAGE *tpage = get_next_prim();
@@ -527,10 +531,10 @@ render_lvl(
     sort_prim(tpage, OTZ_LAYER_LEVEL_FG_BACK);
 
     // Texture TPAGE info for level foreground (front tiles)
-    tpage = get_next_prim();
-    increment_prim(sizeof(DR_TPAGE));
-    setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
-    sort_prim(tpage, OTZ_LAYER_LEVEL_FG_FRONT);
+    /* tpage = get_next_prim(); */
+    /* increment_prim(sizeof(DR_TPAGE)); */
+    /* setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty)); */
+    /* sort_prim(tpage, OTZ_LAYER_LEVEL_FG_FRONT); */
 
     // Render objects on nearest window
     _render_obj_window(lvl, tbl, cx, cy);
