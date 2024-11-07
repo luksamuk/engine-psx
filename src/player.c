@@ -709,7 +709,7 @@ player_draw(Player *player, VECTOR *pos)
         chara_render_frame(&player->chara,
                            player->anim_frame,
                            (int16_t)(pos->vx >> 12),
-                           (int16_t)(pos->vy >> 12) - 8,
+                           (int16_t)(pos->vy >> 12) - 9,
                            player->anim_dir < 0);
 }
 
