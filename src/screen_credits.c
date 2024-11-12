@@ -8,6 +8,7 @@
 #include "input.h"
 #include "sound.h"
 #include "util.h"
+#include "timer.h"
 
 extern int debug_mode;
 
@@ -124,6 +125,7 @@ static const char *creditstxt[] = {
     "The Spriters Resource",
     "Schnappy",
     "Lameguy64",
+    "spicyjpeg",
     "\r",
 
     "Thanks for Playing",

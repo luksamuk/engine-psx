@@ -66,20 +66,17 @@ load_object_table(const char *filename, ObjectTable *tbl)
         entry->num_animations = get_short_be(bytes, &b);
 
         if(entry->num_animations > 0) {
-            printf("Start reading animations...\n");
             entry->animations = alloc_arena_malloc(
                 &_level_arena,
                 sizeof(ObjectAnim) * entry->num_animations);
 
             for(uint16_t j = 0; j < entry->num_animations; j++) {
-                printf("Reading animation %d.\n", j);
                 ObjectAnim *animation = &entry->animations[j];
                 _load_animation(animation, bytes, &b);
             }
         }
 
         if(has_fragment) {
-            printf("Start reading fragment...\n");
             ObjectFrag *fragment = alloc_arena_malloc(
                 &_level_arena,
                 sizeof(ObjectFrag));
@@ -93,7 +90,6 @@ load_object_table(const char *filename, ObjectTable *tbl)
                 sizeof(ObjectAnim) * fragment->num_animations);
             
             for(uint16_t j = 0; j < fragment->num_animations; j++) {
-                printf("Reading fragment animation %d.\n", j);
                 ObjectAnim *animation = &fragment->animations[j];
                 _load_animation(animation, bytes, &b);
             }
