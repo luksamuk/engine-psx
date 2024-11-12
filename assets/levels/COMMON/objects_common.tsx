@@ -50,4 +50,5 @@
  <tile id="11" type="goal_sign"/>
  <tile id="12" type="startpos"/>
  <tile id="13" type="explosion"/>
+ <tile id="14" type="monitor_image"/>
 </tileset>

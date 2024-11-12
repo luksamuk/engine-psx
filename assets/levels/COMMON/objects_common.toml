@@ -340,6 +340,63 @@ frames = [
 loopback = -1
 
 # ============
+
+[monitor_image]
+
+[[monitor_image.animations]]
+id = 0
+name = "none"
+duration = 3
+frames = [
+    [168, 0, 16, 16],
+    [184, 0, 16, 16],
+    [200, 0, 16, 16],
+]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 1
+name = "ring"
+duration = 2
+frames = [[216, 0, 16, 16]]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 2
+name = "speedshoes"
+duration = 2
+frames = [[232, 0, 16, 16]]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 3
+name = "shield"
+duration = 2
+frames = [[168, 16, 16, 16]]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 4
+name = "invincibility"
+duration = 2
+frames = [[184, 16, 16, 16]]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 5
+name = "1up"
+duration = 2
+frames = [[200, 16, 16, 16]]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 6
+name = "super"
+duration = 2
+frames = [[216, 16, 16, 16]]
+loopback = 0
+
+# ============
 # Dummy objects
 # ============
 

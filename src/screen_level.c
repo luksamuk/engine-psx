@@ -135,9 +135,14 @@ screen_level_update(void *d)
 {
     screen_level_data *data = (screen_level_data *)d;
 
-    if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
-       (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
-        debug_mode = (debug_mode + 1) % 3;
+    // Debug mode cycling
+    {
+        if(pad_pressing(PAD_L1) && pad_pressed(PAD_R1))
+            debug_mode++;
+        else if(pad_pressed(PAD_L1) && pad_pressing(PAD_R1))
+            debug_mode--;
+        if(debug_mode > 2) debug_mode = 0;
+        else if(debug_mode < 0) debug_mode = 2;
     }
 
     level_set_clearcolor();
@@ -311,7 +316,7 @@ screen_level_draw(void *d)
     }
 
     // Heads-up display
-    if(debug_mode <= 1) {
+    if(!debug_mode) {
         font_set_color(
             LERPC(level_fade, 0xc8),
             LERPC(level_fade, 0xc8),
@@ -362,35 +367,40 @@ screen_level_draw(void *d)
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC", get_frame_rate());
         font_draw_sm(buffer, 248, 12);
 
-        if(debug_mode > 1) {
-            // Sound debug
-            uint32_t elapsed_sectors;
-            sound_xa_get_elapsed_sectors(&elapsed_sectors);
-            snprintf(buffer, 255, "%08u", elapsed_sectors);
-            font_draw_sm(buffer, 248, 20);
+        // Sound debug
+        uint32_t elapsed_sectors;
+        sound_xa_get_elapsed_sectors(&elapsed_sectors);
+        snprintf(buffer, 255, "%08u", elapsed_sectors);
+        font_draw_sm(buffer, 248, 20);
 
-            // Free object debug
-            snprintf(buffer, 255, "OBJS %3d", object_pool_get_count());
-            font_draw_sm(buffer, 248, 28);
+        // Free object debug
+        snprintf(buffer, 255, "OBJS %3d", object_pool_get_count());
+        font_draw_sm(buffer, 248, 28);
 
-            // Player debug
-            snprintf(buffer, 255,
-                     "GSP %08x\n"
-                     "SPD %08x %08x\n"
-                     "ANG %04x\n"
-                     "POS %08x %08x\n"
-                     "ACT %02u\n"
-                     "REV %08x\n"
-                     ,
-                     player.vel.vz,
-                     player.vel.vx, player.vel.vy,
-                     player.angle,
-                     player.pos.vx, player.pos.vy,
-                     player.action,
-                     player.spinrev
-                );
-            font_draw_sm(buffer, 8, 12);
-        }
+        // Rings and time, for convenience
+        snprintf(buffer, 255, "RING %03d", level_ring_count);
+        font_draw_sm(buffer, 248, 36);
+
+        snprintf(buffer, 255, "TIME %03d", (get_elapsed_frames() / 60));
+        font_draw_sm(buffer, 248, 44);
+
+        // Player debug
+        snprintf(buffer, 255,
+                 "GSP %08x\n"
+                 "SPD %08x %08x\n"
+                 "ANG %04x\n"
+                 "POS %08x %08x\n"
+                 "ACT %02u\n"
+                 "REV %08x\n"
+                 ,
+                 player.vel.vz,
+                 player.vel.vx, player.vel.vy,
+                 player.angle,
+                 player.pos.vx, player.pos.vy,
+                 player.action,
+                 player.spinrev
+            );
+        font_draw_sm(buffer, 8, 12);
     }
 }
 

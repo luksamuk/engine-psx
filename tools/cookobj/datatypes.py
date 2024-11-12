@@ -41,6 +41,7 @@ class ObjectId(Enum):
     # This happens when the object in question is a particle
     # or effect.
     EXPLOSION = 0x0a
+    MONITOR_IMAGE = 0x0b
 
     @staticmethod
     def get(name):
@@ -56,6 +57,7 @@ class ObjectId(Enum):
             "goal_sign": ObjectId.GOAL_SIGN,
             "switch": ObjectId.SWITCH,
             "explosion": ObjectId.EXPLOSION,
+            "monitor_image": ObjectId.MONITOR_IMAGE,
         }
         result = switch.get(name.lower())
         assert result is not None, f"Unknown common object {name}"

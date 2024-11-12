@@ -43,6 +43,7 @@ static void _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECT
 static void _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos);
 static void _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos);
 static void _explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Player hitbox information. Calculated once per frame.
 static int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -102,6 +103,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_CHECKPOINT:             _checkpoint_update(state, typedata, pos);         break;
     case OBJ_SPIKES:                 _spikes_update(state, typedata, pos);             break;
     case OBJ_EXPLOSION:              _explosion_update(state, typedata, pos);          break;
+    case OBJ_MONITOR_IMAGE:          _monitor_image_update(state, typedata, pos);      break;
     }
 }
 
@@ -226,7 +228,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 }
 
 static void
-_monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
     if(state->anim_state.animation == 0) {
         // Calculate solidity
@@ -255,13 +257,12 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 explosion->freepos.vy = (pos->vy << 12);
                 explosion->state.anim_state.animation = 0; // Small explosion
 
-                // TODO: This should be the behaviour of our monitor particles
-                switch(((MonitorExtra *)state->extra)->kind) {
-                case MONITOR_KIND_RING:
-                    level_ring_count += 10;
-                    break;
-                default: break;
-                }
+                // Create monitor image object.
+                // Account for fragment offset as well.
+                PoolObject *image = object_pool_create(OBJ_MONITOR_IMAGE);
+                image->freepos.vx = (pos->vx << 12) + ((int32_t)entry->fragment->offsetx << 12);
+                image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
+                image->state.anim_state.animation = ((MonitorExtra *)state->extra)->kind;
 
                 if(!player.grnd && player.vel.vy > 0) {
                     player.vel.vy *= -1;
@@ -512,4 +513,25 @@ _explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
     // If so, destroy.
     if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION)
         state->props |= OBJ_FLAG_DESTROYED;
+}
+
+
+static void
+_monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+{
+    state->timer++;
+
+    // Monitor images ascend for 15 frames, then stay still for 15 more
+    if(state->timer <= 15) state->freepos->vy -= (ONE << 1);
+    if(state->timer > 30) {
+        state->props |= OBJ_FLAG_DESTROYED;
+
+        switch(state->anim_state.animation) {
+        case MONITOR_KIND_RING:
+            sound_play_vag(sfx_ring, 0);
+            level_ring_count += 10;
+            break;
+        default: break;
+        }
+    }
 }
