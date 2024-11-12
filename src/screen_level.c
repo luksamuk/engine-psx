@@ -219,6 +219,7 @@ screen_level_update(void *d)
 
     camera_update(&camera, &player);
     update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
+    object_pool_update(&obj_table_common);
     player_update(&player);
 
 
@@ -251,6 +252,7 @@ screen_level_draw(void *d)
     /* render_model(&data->ring); */
 
     render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
+    object_pool_render(&obj_table_common, camera.pos.vx, camera.pos.vy);
     parallax_draw(&data->parallax, &camera);
 
     // Gouraud-shaded cube
@@ -332,10 +334,8 @@ screen_level_draw(void *d)
         // Video debug
         snprintf(buffer, 255,
                  "%4s %3d",
-                 GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
-                 get_frame_rate());
+                 GetVideoMode() == MODE_PAL ? "PAL" : "NTSC", get_frame_rate());
         font_draw_sm(buffer, 248, 12);
-        /* draw_text(248, 12, 0, buffer); */
 
         if(debug_mode > 1) {
             // Sound debug
@@ -343,7 +343,10 @@ screen_level_draw(void *d)
             sound_xa_get_elapsed_sectors(&elapsed_sectors);
             snprintf(buffer, 255, "%08u", elapsed_sectors);
             font_draw_sm(buffer, 248, 20);
-            /* draw_text(248, 20, 0, buffer); */
+
+            // Free object debug
+            snprintf(buffer, 255, "OBJS %3d", object_pool_get_count());
+            font_draw_sm(buffer, 248, 28);
 
             // Player debug
             snprintf(buffer, 255,
@@ -513,6 +516,10 @@ level_load_level(screen_level_data *data)
     // Load object positioning on level
     snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, (level & 0x01) + 1);
     load_object_placement(filename0, &leveldata);
+
+
+    /* === OBJECT POOL / FREE OBJECTS === */
+    object_pool_init();
 
 
     /* === RENDERING PREPARATION === */

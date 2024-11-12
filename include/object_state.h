@@ -12,12 +12,18 @@
 
 #define MAX_OBJECTS_PER_CHUNK 15
 
+// Enumeration describing useful flags for objects.
+// Notice that these flags may overlap for different objects.
+// LSB is always reserved for object system flags; MSB is for object-specific values.
+// ...this might enable arbitrary code execution somewhere...
 typedef enum {
-    OBJ_FLAG_DESTROYED = 0x1,
-    OBJ_FLAG_INVISIBLE = 0x2,
-    OBJ_FLAG_ANIM_LOCK = 0x4,
+    OBJ_FLAG_DESTROYED   = 0x01, // Object is destroyed
+    OBJ_FLAG_INVISIBLE   = 0x02, // Object is visible but doesn't render
+    OBJ_FLAG_ANIM_LOCK   = 0x04, // Object animation is locked with level timer
+    OBJ_FLAG_FREE_OBJECT = 0x08, // Object has free position (is from object pool)
 
-    OBJ_FLAG_CHECKPOINT_ACTIVE = 0x8,
+    // Checkpoint-only flags
+    OBJ_FLAG_CHECKPOINT_ACTIVE = 0x10, // Checkpoint is active
 } ObjectGeneralFlag;
 
 typedef struct {
@@ -31,15 +37,26 @@ typedef struct {
 } ObjectAnimState;
 
 typedef struct {
-    uint16_t id;
+    // World XY position
+    int32_t vx;
+    int32_t vy;
+
+    // XY velocity
+    int32_t spdx;
+    int32_t spdy;
+} ObjectFreePos;
+
+typedef struct {
+    uint8_t props; // IMPORTANT: DO NOT MOVE THIS FIELD.
     uint8_t flipmask;
-    uint8_t props;
+    uint16_t id;
     int16_t rx, ry; // Positions relative to chunk top-left corner
-    int16_t timer;
     void    *extra;
+    int16_t timer;
 
     ObjectAnimState anim_state;
     ObjectAnimState *frag_anim_state; // Only exists if fragment also exists
+    ObjectFreePos *freepos; // Only exists if object lives in object pool
 } ObjectState;
 
 typedef struct {
@@ -53,6 +70,37 @@ typedef struct {
 void object_render(ObjectState *state, ObjectTableEntry *typedata,
                    int16_t vx, int16_t vy);
 
+// ATTENTION: "pos" does not influence in object position, ever.
+// If the current object lives in object pool and can freely be moved, alter
+// its position and speed by using the 'freepos' field.
 void object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
+
+
+/* ============================== */
+/* OBJECTS OWNED BY OBJECT POOL */
+/* ============================== */
+
+// A single ring loss is at least 32 rings, so this is our minimum!
+// Also, notice that, even if we don't have any objects on the screen,
+// object initialization, update and even creation is O(n), so it is
+// inefficient by design. Be careful here.
+#define OBJECT_POOL_SIZE 128
+
+// This represents an object owned by the memory pool.
+// If state.props & OBJ_FLAG_DESTROYED, the object is never
+// updated.
+typedef struct {
+    union {
+        uint8_t props; // IMPORTANT: DO NOT MOVE THIS FIELD.
+        ObjectState state;
+    };
+    ObjectFreePos freepos;
+} PoolObject;
+
+void       object_pool_init();
+void       object_pool_update();
+void       object_pool_render(ObjectTable *tbl, int32_t camera_x, int32_t camera_y);
+PoolObject *object_pool_create(ObjectType t); // ...you should probably not create objects with extra data.
+uint32_t   object_pool_get_count();
 
 #endif

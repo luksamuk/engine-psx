@@ -38,6 +38,10 @@ _emplace_object(
     state->anim_state = (ObjectAnimState){ 0 };
     state->frag_anim_state = NULL;
 
+    // None of these objects have FREE positioning, so none of them have
+    // a "freepos" field either
+    state->freepos = NULL;
+
     // Initialize animation state if this object
     // has a fragment
     if(state->id == OBJ_MONITOR || state->id == OBJ_CHECKPOINT) {
