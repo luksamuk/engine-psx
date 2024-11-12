@@ -83,10 +83,13 @@ camera_update(Camera *c, Player *player)
         if(c->lag == 0) {
             // Extended camera
             if(abs(player->vel.vz) >= 0x6000) {
-                if(abs(c->extension_x) < CAMERA_EXTEND_X_MAX)
-                    c->extension_x += SIGNUM(player->vel.vz) * CAMERA_STEP;
-                else c->extension_x = SIGNUM(c->extension_x) * CAMERA_EXTEND_X_MAX;
+                // Extend...
+                if((player->vel.vz < 0) && (c->extension_x > -CAMERA_EXTEND_X_MAX))
+                    c->extension_x -= CAMERA_STEP;
+                else if((player->vel.vz > 0) && (c->extension_x < CAMERA_EXTEND_X_MAX))
+                    c->extension_x += CAMERA_STEP;
             } else if(abs(c->extension_x) > 0) {
+                // ...Retract
                 c->extension_x -= SIGNUM(c->extension_x) * CAMERA_STEP;
             }
         }
