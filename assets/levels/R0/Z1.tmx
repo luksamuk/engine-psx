@@ -45,7 +45,7 @@
    <object id="7" gid="57" x="2464" y="384" width="64" height="64"/>
    <object id="9" gid="50" x="2002" y="576" width="64" height="64">
     <properties>
-     <property name="Kind" value="SHIELD"/>
+     <property name="Kind" value="RING"/>
     </properties>
    </object>
    <object id="10" gid="50" x="1972" y="576" width="64" height="64">
@@ -202,7 +202,7 @@
    <object id="181" gid="51" x="2576" y="832" width="64" height="64"/>
    <object id="182" gid="51" x="2608" y="832" width="64" height="64"/>
    <object id="183" gid="51" x="2639" y="832" width="64" height="64"/>
-   <object id="184" gid="50" x="5586" y="896" width="64" height="64">
+   <object id="184" gid="50" x="6009" y="704" width="64" height="64">
     <properties>
      <property name="Kind" value="SHIELD"/>
     </properties>
