@@ -532,10 +532,12 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
             level_ring_count += 10;
             break;
         case MONITOR_KIND_SHIELD:
-            player.shield = 1;
-            newobj = object_pool_create(OBJ_SHIELD);
-            newobj->freepos.vx = player.pos.vx;
-            newobj->freepos.vy = player.pos.vy + (20 << 12);
+            if(player.shield != 1) {
+                player.shield = 1;
+                newobj = object_pool_create(OBJ_SHIELD);
+                newobj->freepos.vx = player.pos.vx;
+                newobj->freepos.vy = player.pos.vy + (20 << 12);
+            }
             sound_play_vag(sfx_shield, 0);
             break;
         default: break;
@@ -548,7 +550,7 @@ static void
 _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 {
     // Just stay with the player and disappear if player gets hurt
-    if(!player.shield)  {
+    if(player.shield != 1)  {
         state->props |= OBJ_FLAG_DESTROYED;
         return;
     }
