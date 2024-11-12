@@ -254,18 +254,18 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 level_score_count += 10;
                 sound_play_vag(sfx_pop, 0);
 
-                // Create explosion effect
-                PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
-                explosion->freepos.vx = (pos->vx << 12);
-                explosion->freepos.vy = (pos->vy << 12);
-                explosion->state.anim_state.animation = 0; // Small explosion
-
                 // Create monitor image object.
                 // Account for fragment offset as well.
                 PoolObject *image = object_pool_create(OBJ_MONITOR_IMAGE);
                 image->freepos.vx = (pos->vx << 12) + ((int32_t)entry->fragment->offsetx << 12);
                 image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
                 image->state.anim_state.animation = ((MonitorExtra *)state->extra)->kind;
+
+                // Create explosion effect
+                PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+                explosion->freepos.vx = (pos->vx << 12);
+                explosion->freepos.vy = (pos->vy << 12);
+                explosion->state.anim_state.animation = 0; // Small explosion
 
                 if(!player.grnd && player.vel.vy > 0) {
                     player.vel.vy *= -1;
