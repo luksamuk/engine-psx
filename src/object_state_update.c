@@ -23,6 +23,7 @@ extern SoundEffect sfx_sprn;
 extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
+extern SoundEffect sfx_shield;
 extern int debug_mode;
 
 extern uint8_t  level_ring_count;
@@ -44,6 +45,7 @@ static void _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *p
 static void _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos);
 static void _explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Player hitbox information. Calculated once per frame.
 static int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -104,6 +106,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_SPIKES:                 _spikes_update(state, typedata, pos);             break;
     case OBJ_EXPLOSION:              _explosion_update(state, typedata, pos);          break;
     case OBJ_MONITOR_IMAGE:          _monitor_image_update(state, typedata, pos);      break;
+    case OBJ_SHIELD:                 _shield_update(state, typedata, pos);             break;
     }
 }
 
@@ -473,14 +476,7 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
            ((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32)))
         {
             if(player.action != ACTION_HURT && player.iframes == 0) {
-                if(level_ring_count > 0) {
-                    player_set_ring_loss(&player, (solidity_vx + 16) << 12, level_ring_count);
-                    level_ring_count = 0;
-                    sound_play_vag(sfx_ringl, 0);
-                } else {
-                    player_set_hurt(&player, (solidity_vx + 16) << 12);
-                    sound_play_vag(sfx_death, 0);
-                }
+                player_do_damage(&player, (solidity_vx + 16) << 12);
                 return;
             }
 
@@ -520,6 +516,7 @@ static void
 _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 {
     state->timer++;
+    PoolObject *newobj;
 
     // Monitor images ascend for 15 frames, then stay still for 15 more
     if(state->timer <= 15) state->freepos->vy -= (ONE << 1);
@@ -527,11 +524,39 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
         state->props |= OBJ_FLAG_DESTROYED;
 
         switch(state->anim_state.animation) {
+        case MONITOR_KIND_NONE:
+            sound_play_vag(sfx_death, 0);
+            break;
         case MONITOR_KIND_RING:
             sound_play_vag(sfx_ring, 0);
             level_ring_count += 10;
             break;
+        case MONITOR_KIND_SHIELD:
+            player.shield = 1;
+            newobj = object_pool_create(OBJ_SHIELD);
+            newobj->freepos.vx = player.pos.vx;
+            newobj->freepos.vy = player.pos.vy + (20 << 12);
+            sound_play_vag(sfx_shield, 0);
+            break;
         default: break;
         }
     }
+}
+
+
+static void
+_shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+{
+    // Just stay with the player and disappear if player gets hurt
+    if(!player.shield)  {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
+
+    state->freepos->vx = player.pos.vx;
+    state->freepos->vy = player.pos.vy + (20 << 12);
+
+    // Compensate position since it is drawn before player update
+    state->freepos->vx += player.vel.vx;
+    state->freepos->vy += player.vel.vy;
 }

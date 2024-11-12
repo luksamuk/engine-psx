@@ -244,6 +244,9 @@
 	<file name="RINGLOSS.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/RINGLOSS.VAG" />
+	<file name="SHIELD.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SHIELD.VAG" />
       </dir>
 
       <dir name="BGM">

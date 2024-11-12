@@ -42,6 +42,7 @@ class ObjectId(Enum):
     # or effect.
     EXPLOSION = 0x0a
     MONITOR_IMAGE = 0x0b
+    SHIELD = 0x0c
 
     @staticmethod
     def get(name):
@@ -58,6 +59,7 @@ class ObjectId(Enum):
             "switch": ObjectId.SWITCH,
             "explosion": ObjectId.EXPLOSION,
             "monitor_image": ObjectId.MONITOR_IMAGE,
+            "shield": ObjectId.SHIELD,
         }
         result = switch.get(name.lower())
         assert result is not None, f"Unknown common object {name}"

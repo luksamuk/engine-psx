@@ -75,6 +75,7 @@ typedef struct {
     uint8_t   framecount;
     uint8_t   holding_jump;
     uint16_t  iframes;
+    uint8_t   shield;
 
     PlayerAction action;
 
@@ -102,7 +103,6 @@ CharaAnim *player_get_animation_by_name(Player *player, const char *name);
 void player_update(Player *player);
 void player_draw(Player *player, VECTOR *screen_pos);
 
-void player_set_hurt(Player *player, int32_t hazard_x);
-void player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings);
+void player_do_damage(Player *player, int32_t hazard_x);
 
 #endif

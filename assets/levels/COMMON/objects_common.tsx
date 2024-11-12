@@ -51,4 +51,5 @@
  <tile id="12" type="startpos"/>
  <tile id="13" type="explosion"/>
  <tile id="14" type="monitor_image"/>
+ <tile id="15" type="shield"/>
 </tileset>

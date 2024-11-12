@@ -30,24 +30,26 @@
 
 extern int debug_mode;
 
-SoundEffect sfx_jump  = { 0 };
-SoundEffect sfx_skid  = { 0 };
-SoundEffect sfx_roll  = { 0 };
-SoundEffect sfx_dash  = { 0 };
-SoundEffect sfx_relea = { 0 };
-SoundEffect sfx_dropd = { 0 };
-SoundEffect sfx_ring  = { 0 };
-SoundEffect sfx_pop   = { 0 };
-SoundEffect sfx_sprn  = { 0 };
-SoundEffect sfx_chek  = { 0 };
-SoundEffect sfx_death = { 0 };
-SoundEffect sfx_ringl = { 0 };
+SoundEffect sfx_jump   = { 0 };
+SoundEffect sfx_skid   = { 0 };
+SoundEffect sfx_roll   = { 0 };
+SoundEffect sfx_dash   = { 0 };
+SoundEffect sfx_relea  = { 0 };
+SoundEffect sfx_dropd  = { 0 };
+SoundEffect sfx_ring   = { 0 };
+SoundEffect sfx_pop    = { 0 };
+SoundEffect sfx_sprn   = { 0 };
+SoundEffect sfx_chek   = { 0 };
+SoundEffect sfx_death  = { 0 };
+SoundEffect sfx_ringl  = { 0 };
+SoundEffect sfx_shield = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
 extern TileMap128 map128;
 extern LevelData  leveldata;
 extern Camera     camera;
+extern uint8_t    level_ring_count;
 
 void
 load_player(Player *player,
@@ -64,6 +66,7 @@ load_player(Player *player,
     player->airdirlock = 0;
     player->framecount = 0;
     player->iframes = 0;
+    player->shield = 0;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -80,18 +83,19 @@ load_player(Player *player,
 
     player->action = ACTION_NONE;
 
-    if(sfx_jump.addr == 0)  sfx_jump  = sound_load_vag("\\SFX\\JUMP.VAG;1");
-    if(sfx_skid.addr == 0)  sfx_skid  = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
-    if(sfx_roll.addr == 0)  sfx_roll  = sound_load_vag("\\SFX\\ROLL.VAG;1");
-    if(sfx_dash.addr == 0)  sfx_dash  = sound_load_vag("\\SFX\\DASH.VAG;1");
-    if(sfx_relea.addr == 0) sfx_relea = sound_load_vag("\\SFX\\RELEA.VAG;1");
-    if(sfx_dropd.addr == 0) sfx_dropd = sound_load_vag("\\SFX\\DROPD.VAG;1");
-    if(sfx_ring.addr == 0)  sfx_ring  = sound_load_vag("\\SFX\\RING.VAG;1");
-    if(sfx_pop.addr == 0)   sfx_pop   = sound_load_vag("\\SFX\\POP.VAG;1");
-    if(sfx_sprn.addr == 0)  sfx_sprn  = sound_load_vag("\\SFX\\SPRN.VAG;1");
-    if(sfx_chek.addr == 0)  sfx_chek  = sound_load_vag("\\SFX\\CHEK.VAG;1");
-    if(sfx_death.addr == 0) sfx_death = sound_load_vag("\\SFX\\DEATH.VAG;1");
-    if(sfx_ringl.addr == 0) sfx_ringl = sound_load_vag("\\SFX\\RINGLOSS.VAG;1");
+    if(sfx_jump.addr == 0)  sfx_jump    = sound_load_vag("\\SFX\\JUMP.VAG;1");
+    if(sfx_skid.addr == 0)  sfx_skid    = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
+    if(sfx_roll.addr == 0)  sfx_roll    = sound_load_vag("\\SFX\\ROLL.VAG;1");
+    if(sfx_dash.addr == 0)  sfx_dash    = sound_load_vag("\\SFX\\DASH.VAG;1");
+    if(sfx_relea.addr == 0) sfx_relea   = sound_load_vag("\\SFX\\RELEA.VAG;1");
+    if(sfx_dropd.addr == 0) sfx_dropd   = sound_load_vag("\\SFX\\DROPD.VAG;1");
+    if(sfx_ring.addr == 0)  sfx_ring    = sound_load_vag("\\SFX\\RING.VAG;1");
+    if(sfx_pop.addr == 0)   sfx_pop     = sound_load_vag("\\SFX\\POP.VAG;1");
+    if(sfx_sprn.addr == 0)  sfx_sprn    = sound_load_vag("\\SFX\\SPRN.VAG;1");
+    if(sfx_chek.addr == 0)  sfx_chek    = sound_load_vag("\\SFX\\CHEK.VAG;1");
+    if(sfx_death.addr == 0) sfx_death   = sound_load_vag("\\SFX\\DEATH.VAG;1");
+    if(sfx_ringl.addr == 0) sfx_ringl   = sound_load_vag("\\SFX\\RINGLOSS.VAG;1");
+    if(sfx_shield.addr == 0) sfx_shield = sound_load_vag("\\SFX\\SHIELD.VAG;1");
 }
 
 void
@@ -715,8 +719,28 @@ player_draw(Player *player, VECTOR *pos)
                            player->anim_dir < 0);
 }
 
+void _player_set_hurt(Player *player, int32_t hazard_x);
+void _player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings);
+
 void
-player_set_hurt(Player *player, int32_t hazard_x)
+player_do_damage(Player *player, int32_t hazard_x)
+{
+    // TODO: Missing death routine
+    if((player->shield > 0)
+       || (level_ring_count == 0)) { // TODO: Remove this in favor of a death
+        player->shield = 0;
+        _player_set_hurt(player, hazard_x);
+        sound_play_vag(sfx_death, 0);
+        return;
+    }
+
+    _player_set_ring_loss(player, hazard_x, level_ring_count);
+    level_ring_count = 0;
+    sound_play_vag(sfx_ringl, 0);
+}
+
+void
+_player_set_hurt(Player *player, int32_t hazard_x)
 {
     player->action = ACTION_HURT;
     player->grnd = 0;
@@ -733,9 +757,9 @@ player_set_hurt(Player *player, int32_t hazard_x)
 #define RING_START_SPD_DIRECT        4
 
 void
-player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings)
+_player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings)
 {
-    player_set_hurt(player, hazard_x);
+    _player_set_hurt(player, hazard_x);
 
     num_rings = num_rings > 32 ? 32 : num_rings;
 

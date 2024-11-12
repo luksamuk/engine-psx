@@ -397,6 +397,22 @@ frames = [[216, 16, 16, 16]]
 loopback = 0
 
 # ============
+
+[shield]
+
+[[shield.animations]]
+id = 0
+name = "default"
+duration = 4
+frames = [
+    [50, 200, 48, 48],
+    [98, 200, 48, 48],
+    [50, 200, 48, 48, 1, 0],
+    [98, 200, 48, 48],
+]
+loopback = 0
+
+# ============
 # Dummy objects
 # ============
 
