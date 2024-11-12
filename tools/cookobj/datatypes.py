@@ -26,16 +26,21 @@ class DummyObjectId(Enum):
 
 
 class ObjectId(Enum):
-    RING = 0
-    MONITOR = 1
-    SPIKES = 2
-    CHECKPOINT = 3
-    SPRING_YELLOW = 4
-    SPRING_RED = 5
-    SPRING_YELLOW_DIAGONAL = 6
-    SPRING_RED_DIAGONAL = 7
-    SWITCH = 8
-    GOAL_SIGN = 9
+    RING = 0x00
+    MONITOR = 0x01
+    SPIKES = 0x02
+    CHECKPOINT = 0x03
+    SPRING_YELLOW = 0x04
+    SPRING_RED = 0x05
+    SPRING_YELLOW_DIAGONAL = 0x06
+    SPRING_RED_DIAGONAL = 0x07
+    SWITCH = 0x08
+    GOAL_SIGN = 0x09
+
+    # Certain objects simply cannot be placed.
+    # This happens when the object in question is a particle
+    # or effect.
+    EXPLOSION = 0x0a
 
     @staticmethod
     def get(name):
@@ -50,6 +55,7 @@ class ObjectId(Enum):
             "spring_red_diagonal": ObjectId.SPRING_RED_DIAGONAL,
             "goal_sign": ObjectId.GOAL_SIGN,
             "switch": ObjectId.SWITCH,
+            "explosion": ObjectId.EXPLOSION,
         }
         result = switch.get(name.lower())
         assert result is not None, f"Unknown common object {name}"

@@ -42,6 +42,7 @@ static void _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, 
 static void _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red);
 static void _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos);
 static void _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos);
+static void _explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Player hitbox information. Calculated once per frame.
 static int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -100,6 +101,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_SPRING_RED_DIAGONAL:    _spring_diagonal_update(state, typedata, pos, 1); break;
     case OBJ_CHECKPOINT:             _checkpoint_update(state, typedata, pos);         break;
     case OBJ_SPIKES:                 _spikes_update(state, typedata, pos);             break;
+    case OBJ_EXPLOSION:              _explosion_update(state, typedata, pos);          break;
     }
 }
 
@@ -246,6 +248,12 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
                 level_score_count += 10;
                 sound_play_vag(sfx_pop, 0);
+
+                // Create explosion effect
+                PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+                explosion->freepos.vx = (pos->vx << 12);
+                explosion->freepos.vy = (pos->vy << 12);
+                explosion->state.anim_state.animation = 0; // Small explosion
 
                 // TODO: This should be the behaviour of our monitor particles
                 switch(((MonitorExtra *)state->extra)->kind) {
@@ -494,4 +502,14 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             }
         }
     }
+}
+
+
+static void
+_explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+{
+    // Explosions are simple particles: their animation is finished?
+    // If so, destroy.
+    if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION)
+        state->props |= OBJ_FLAG_DESTROYED;
 }

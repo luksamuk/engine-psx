@@ -60,6 +60,7 @@ load_object_table(const char *filename, ObjectTable *tbl)
 
         // Entry ID, always sequential; discarded for now
         uint8_t _id = get_byte(bytes, &b);                          (void)(_id);
+        /* printf("Load object 0x%04x\n", _id); */
 
         uint8_t has_fragment = get_byte(bytes, &b);
         entry->num_animations = get_short_be(bytes, &b);

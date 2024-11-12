@@ -26,7 +26,7 @@
   Locations of common textures on frame buffer:
   ================================================
   Player 1:       320x0;     CLUT: 0x480
-  Common objects: 576x0;     CLUT: 0x481
+  Common objects: 576x0;     CLUT: 0x481 (8-bit only)
   Level tiles:    448x0;     CLUT: 0x482 (if exists)
   Level BG0:      448x256;   CLUT: 0x483 (4-bit only)
   Level BG1:      512x256;   CLUT: 0x484 (4-bit only)

@@ -11,6 +11,7 @@ enum CommonId: s8 {
     SPRING_RED_DIAGONAL = 7,
     GOAL_SIGN = 8,
     SWITCH = 9,
+    EXPLOSION = 10,
 };
 
 bitfield FlipMask {

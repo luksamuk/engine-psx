@@ -262,8 +262,8 @@ screen_level_draw(void *d)
         
     /* render_model(&data->ring); */
 
-    render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
     object_pool_render(&obj_table_common, camera.pos.vx, camera.pos.vy);
+    render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
     parallax_draw(&data->parallax, &camera);
 
     // Gouraud-shaded cube

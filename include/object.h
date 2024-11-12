@@ -24,6 +24,7 @@ typedef enum {
     OBJ_SPRING_RED_DIAGONAL    = 0x07,
     OBJ_SWITCH                 = 0x08,
     OBJ_GOAL_SIGN              = 0x09,
+    OBJ_EXPLOSION              = 0x0a,
 } ObjectType;
 
 #define MASK_FLIP_FLIPX  0x1 // Flip on X axis

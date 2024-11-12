@@ -272,7 +272,7 @@ begin_render_routine:
     // Sprites: 576x0
     // CLUT: 0x481
     
-    poly->tpage = getTPage(0, 0, 576, 0);
+    poly->tpage = getTPage(1, 0, 576, 0);
     poly->clut = getClut(0, 481);
 
     sort_prim(poly, state->id == OBJ_RING ? OTZ_LAYER_OBJECTS : OTZ_LAYER_PLAYER);

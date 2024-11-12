@@ -308,6 +308,37 @@ duration = 0
 frames = [[144, 72, 32, 8]]
 loopback = 0
 
+
+# ============
+
+[explosion]
+
+[[explosion.animations]]
+name = "small"
+id = 0
+duration = 4
+frames = [
+       [48, 136, 32, 32],
+       [80, 136, 32, 32],
+       [112, 136, 32, 32],
+       [144, 136, 48, 48],
+       [192, 136, 48, 48],
+]
+loopback = -1
+
+[[explosion.animations]]
+name = "big"
+id = 0
+duration = 4
+frames = [
+       [48, 136, 32, 32],
+       [80, 168, 32, 32],
+       [112, 168, 32, 32],
+       [144, 136, 48, 48],
+       [192, 136, 48, 48],
+]
+loopback = -1
+
 # ============
 # Dummy objects
 # ============
