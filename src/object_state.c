@@ -153,7 +153,6 @@ void
 object_render(ObjectState *state, ObjectTableEntry *typedata,
               int16_t ovx, int16_t ovy)
 {
-    // TODO: This should be part of an update
     ObjectAnimState *anim = &state->anim_state;
     if(anim->animation >= typedata->num_animations) return;
     ObjectAnim *an = &typedata->animations[anim->animation];
@@ -227,6 +226,10 @@ begin_render_routine:
     increment_prim(sizeof(POLY_FT4));
     setPolyFT4(poly);
     setRGB0(poly, level_fade, level_fade, level_fade);
+
+    // Clip object if not within screen
+    if((vx < -64) || (vx > SCREEN_XRES + 64)) goto after_render;
+    if((vy < -64) || (vy > SCREEN_YRES + 64)) goto after_render;
     
     if((flipmask & MASK_FLIP_FLIPX) && (flipmask & MASK_FLIP_FLIPY)) {
         setXYWH(poly, vx, vy, frame->w, frame->h);
@@ -281,6 +284,8 @@ begin_render_routine:
               ((state->id == OBJ_RING) || (state->id == OBJ_SHIELD))
               ? OTZ_LAYER_OBJECTS
               : OTZ_LAYER_PLAYER);
+
+after_render:
 
     if(!in_fragment && (typedata->fragment != NULL)) {
         in_fragment = 1;

@@ -65,11 +65,6 @@ object_pool_render(ObjectTable *tbl, int32_t camera_x, int32_t camera_y)
         int16_t px = (obj->freepos.vx >> 12) - camera_x;
         int16_t py = (obj->freepos.vy >> 12) - camera_y;
 
-
-        // Clip object if not within screen
-        if((px < -64) || (px > SCREEN_XRES + 64)) continue;
-        if((py < -64) || (py > SCREEN_YRES + 64)) continue;
-
         object_render(&obj->state, &tbl->entries[obj->state.id], px, py);
     }
 }
