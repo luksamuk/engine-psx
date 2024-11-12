@@ -98,21 +98,12 @@
    <object id="44" gid="2147483711" x="2768" y="576" width="64" height="64"/>
    <object id="45" gid="2147483711" x="2768" y="368.5" width="64" height="64"/>
    <object id="46" gid="2147483711" x="2768" y="160" width="64" height="64"/>
-   <object id="48" gid="57" x="2576.5" y="429" width="64" height="64"/>
-   <object id="49" gid="57" x="2594.5" y="410" width="64" height="64"/>
-   <object id="50" gid="57" x="2613.5" y="392" width="64" height="64"/>
    <object id="51" gid="57" x="2574" y="241.5" width="64" height="64"/>
    <object id="52" gid="57" x="2592" y="222.5" width="64" height="64"/>
    <object id="53" gid="57" x="2611" y="204.5" width="64" height="64"/>
    <object id="57" gid="57" x="2705.5" y="529.5" width="64" height="64"/>
    <object id="58" gid="57" x="2723.5" y="547.5" width="64" height="64"/>
    <object id="59" gid="57" x="2742.5" y="566.5" width="64" height="64"/>
-   <object id="60" gid="57" x="2705.5" y="320.75" width="64" height="64"/>
-   <object id="61" gid="57" x="2723.5" y="338.75" width="64" height="64"/>
-   <object id="62" gid="57" x="2742.5" y="357.75" width="64" height="64"/>
-   <object id="63" gid="57" x="2704.75" y="112" width="64" height="64"/>
-   <object id="64" gid="57" x="2722.75" y="130" width="64" height="64"/>
-   <object id="65" gid="57" x="2741.75" y="149" width="64" height="64"/>
    <object id="66" gid="1073741885" x="4991.67" y="1280.33" width="64" height="64"/>
    <object id="68" gid="1073741885" x="5023.67" y="1280.33" width="64" height="64"/>
    <object id="69" gid="1073741885" x="5055.67" y="1280.33" width="64" height="64"/>
