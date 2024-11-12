@@ -190,7 +190,7 @@ sound_play_xa(const char *filename, int double_speed,
     cd_set_callbacks(PLAYBACK_XA);
 
     // Set read mode for XA streaming (send XA to SPU, enable filter)
-    uint32_t mode = CdlModeRT | CdlModeSF;
+    uint32_t mode = CdlModeRT | CdlModeSF | CdlModeAP;
     if(double_speed) mode |= CdlModeSpeed;
     CdControl(CdlSetmode, &mode, 0);
 
@@ -203,7 +203,7 @@ sound_play_xa(const char *filename, int double_speed,
     _cd_elapsed_sectors = 0;
     _xa_loopback_sector = loopback_sector;
     CdControl(CdlSetfilter, &filter, 0);
-    CdControl(CdlReadS, (const void *)&_xa_loc, 0);
+    CdControlF(CdlReadS, (const void *)&_xa_loc);
     _xa_should_play = 1;
 }
 
@@ -220,7 +220,7 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
             // Loop back to beginning
             _cd_err_threshold = 0;
             _cd_elapsed_sectors = 0;
-            CdControl(CdlReadS, (const void *)&_xa_loc, 0);
+            CdControlF(CdlReadS, (const void *)&_xa_loc);
         }
         break;
     case CdlDiskError:
@@ -228,12 +228,10 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
         _cd_err_threshold++;
         if(_cd_err_threshold > CD_MAX_ERR_THRESHOLD) {
             // Reset music if too many errs
-            CdControl(CdlPause, 0, 0);
-            CdSync(0, 0);
             _cd_err_threshold = 0;
             _cd_elapsed_sectors = 0;
             printf("Resetting playback\n");
-            CdControl(CdlReadS, (const void *)&_xa_loc, 0);
+            CdControlF(CdlReadS, (const void *)&_xa_loc);
         }
         break;
     default:
@@ -250,8 +248,7 @@ sound_stop_xa(void)
     // of a full stop. Halting the playback completely also
     // stops CD from spinning and may increase time until
     // next playback
-    if(_xa_should_play)
-        CdControl(CdlPause, 0, 0);
+    if(_xa_should_play) CdControl(CdlPause, 0, 0);
     _xa_should_play = 0;
     _xa_loopback_sector = 0;
 }
