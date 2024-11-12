@@ -22,11 +22,17 @@ extern SoundEffect sfx_pop;
 extern SoundEffect sfx_sprn;
 extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
+extern SoundEffect sfx_ringl;
 extern int debug_mode;
 
 extern uint8_t  level_ring_count;
 extern uint32_t level_score_count;
 extern uint8_t  level_finished;
+
+
+// Object-specific definitions
+#define RING_GRAVITY 0x00000180
+
 
 // Update functions
 static void _ring_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
@@ -109,14 +115,45 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         // Calculate actual top left corner of ring AABB
         pos->vx -= 8;    pos->vy -= (8 + 32);
 
-        if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                           pos->vx, pos->vy, 16, 16))
-        {
-            state->anim_state.animation = 1;
-            state->anim_state.frame = 0;
-            state->props ^= OBJ_FLAG_ANIM_LOCK; // Unlock from global timer
-            level_ring_count++;
-            sound_play_vag(sfx_ring, 0);
+        // Hey -- if this is a moving ring (ring loss behaviour), only
+        // allow the player to collect it if its action is not ACTION_HURT
+        if(!((state->props & OBJ_FLAG_RING_MOVING) && (player.action == ACTION_HURT))) {
+            // Ring collision
+            if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                               pos->vx, pos->vy, 16, 16))
+            {
+                state->anim_state.animation = 1;
+                state->anim_state.frame = 0;
+                state->props ^= OBJ_FLAG_ANIM_LOCK; // Unlock from global timer
+                level_ring_count++;
+                sound_play_vag(sfx_ring, 0);
+                return;
+            }
+        }
+
+        // If ring is moving, we will not proceed to move it!
+        if(state->props & OBJ_FLAG_RING_MOVING) {
+            state->timer++;
+            
+            // If the ring is way too far from camera, just destroy it
+            // By "too far", I mean two screens apart.
+            // Also, moving rings only live for 256 frames
+            if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))
+               || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 13))
+               || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 13))
+               || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 13))
+               || (state->timer >= 256)) {
+                state->props |= OBJ_FLAG_DESTROYED;
+                return;
+            }
+
+
+            // Apply gravity
+            state->freepos->spdy += RING_GRAVITY;
+
+            // Transform ring position wrt. speed
+            state->freepos->vx += state->freepos->spdx;
+            state->freepos->vy += state->freepos->spdy;
         }
     } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION
               && !(state->props & OBJ_FLAG_DESTROYED))
@@ -210,10 +247,10 @@ _monitor_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 level_score_count += 10;
                 sound_play_vag(sfx_pop, 0);
 
+                // TODO: This should be the behaviour of our monitor particles
                 switch(((MonitorExtra *)state->extra)->kind) {
                 case MONITOR_KIND_RING:
                     level_ring_count += 10;
-                    sound_play_vag(sfx_ring, 0);
                     break;
                 default: break;
                 }
@@ -427,8 +464,14 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
            ((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32)))
         {
             if(player.action != ACTION_HURT && player.iframes == 0) {
-                player_set_hurt(&player, (solidity_vx + 16) << 12);
-                sound_play_vag(sfx_death, 0); // TODO: SFX changes depending on situation
+                if(level_ring_count > 0) {
+                    player_set_ring_loss(&player, (solidity_vx + 16) << 12, level_ring_count);
+                    level_ring_count = 0;
+                    sound_play_vag(sfx_ringl, 0);
+                } else {
+                    player_set_hurt(&player, (solidity_vx + 16) << 12);
+                    sound_play_vag(sfx_death, 0);
+                }
                 return;
             }
 

@@ -103,5 +103,6 @@ void player_update(Player *player);
 void player_draw(Player *player, VECTOR *screen_pos);
 
 void player_set_hurt(Player *player, int32_t hazard_x);
+void player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings);
 
 #endif

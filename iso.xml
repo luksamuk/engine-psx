@@ -241,6 +241,9 @@
 	<file name="DEATH.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/DEATH.VAG" />
+	<file name="RINGLOSS.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/RINGLOSS.VAG" />
       </dir>
 
       <dir name="BGM">

@@ -197,6 +197,17 @@ screen_level_update(void *d)
         return;
     }
 
+    if(debug_mode > 0) {
+        // Create a little falling ring
+        if(pad_pressed(PAD_TRIANGLE)) {
+            PoolObject *ring = object_pool_create(OBJ_RING);
+            ring->freepos.vx = camera.pos.vx;
+            ring->freepos.vy = camera.pos.vy - (CENTERY << 12) + (20 << 12);
+            ring->props |= OBJ_FLAG_ANIM_LOCK;
+            ring->props |= OBJ_FLAG_RING_MOVING;
+        }
+    }
+
     /* data->ring.rot.vz += 36; */
     
     /* Rotating cube */
@@ -307,6 +318,20 @@ screen_level_draw(void *d)
             0);
         font_draw_big("SCORE", 10, 10);
         font_draw_big("TIME",  10, 24);
+
+        // Flash red every 8 frames
+        if(level_ring_count == 0
+           && ((get_elapsed_frames() >> 3) % 2 == 0)) {
+            font_set_color(
+                LERPC(level_fade, 0xc8),
+                0,
+                0);
+        } else {
+            font_set_color(
+                LERPC(level_fade, 0xc8),
+                LERPC(level_fade, 0xc8),
+                0);
+        }
         font_draw_big("RINGS", 10, 38);
         font_set_color(
             LERPC(level_fade, 0xc8),

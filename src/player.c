@@ -41,6 +41,7 @@ SoundEffect sfx_pop   = { 0 };
 SoundEffect sfx_sprn  = { 0 };
 SoundEffect sfx_chek  = { 0 };
 SoundEffect sfx_death = { 0 };
+SoundEffect sfx_ringl = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -90,6 +91,7 @@ load_player(Player *player,
     if(sfx_sprn.addr == 0)  sfx_sprn  = sound_load_vag("\\SFX\\SPRN.VAG;1");
     if(sfx_chek.addr == 0)  sfx_chek  = sound_load_vag("\\SFX\\CHEK.VAG;1");
     if(sfx_death.addr == 0) sfx_death = sound_load_vag("\\SFX\\DEATH.VAG;1");
+    if(sfx_ringl.addr == 0) sfx_ringl = sound_load_vag("\\SFX\\RINGLOSS.VAG;1");
 }
 
 void
@@ -722,4 +724,50 @@ player_set_hurt(Player *player, int32_t hazard_x)
     int32_t a = SIGNUM(player->pos.vx - hazard_x);
     player->vel.vx = X_HURT_FORCE * ((a == 0) ? 1 : a);
     player->ctrllock = 2;
+}
+
+// 101.25° = 0.28125 (normalized angle)
+#define RING_STARTING_ANGLE 0x00000480
+// 22.5° = 0.0625 (normalized angle)
+#define RING_ANGLE_STEP     0x00000100
+#define RING_START_SPD_DIRECT        4
+
+void
+player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings)
+{
+    player_set_hurt(player, hazard_x);
+
+    num_rings = num_rings > 32 ? 32 : num_rings;
+
+    uint32_t ring_counter = 0;
+    int32_t  ring_angle = RING_STARTING_ANGLE;
+    uint8_t  ring_flip = 0;
+    int32_t  ring_speed = RING_START_SPD_DIRECT;
+
+    while(ring_counter < num_rings) {
+        // Create ring object
+        PoolObject *ring = object_pool_create(OBJ_RING);
+        ring->freepos.vx = player->pos.vx;
+        ring->freepos.vy = player->pos.vy;
+        ring->props |= OBJ_FLAG_ANIM_LOCK;
+        ring->props |= OBJ_FLAG_RING_MOVING;
+
+        // Calculate ring speed.
+        // Notice that the speed is attributed directly to 4 since
+        // we would have to bit shift the result by 12 bits to the right anyway
+        ring->freepos.spdx = ring_speed * rcos(ring_angle);
+        ring->freepos.spdy = ring_speed * -rsin(ring_angle);
+
+        if(ring_flip) {
+            ring->freepos.spdx *= -1;
+            ring_angle = (ring_angle + RING_ANGLE_STEP) % ONE;
+        }
+        ring_flip = !ring_flip;
+        ring_counter++;
+
+        if(ring_counter == 16) {
+            ring_speed >>= 1; // Halve ring speed
+            ring_angle = RING_STARTING_ANGLE;
+        }
+    }
 }

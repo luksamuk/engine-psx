@@ -24,6 +24,9 @@ typedef enum {
 
     // Checkpoint-only flags
     OBJ_FLAG_CHECKPOINT_ACTIVE = 0x10, // Checkpoint is active
+
+    // Rings-only flags
+    OBJ_FLAG_RING_MOVING = 0x10, // Ring is moving (ring loss)
 } ObjectGeneralFlag;
 
 typedef struct {
