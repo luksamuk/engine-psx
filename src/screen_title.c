@@ -172,7 +172,9 @@ screen_title_update(void *d)
             data->rgb_count += 4;
         else {
             if(data->menu_option == 0 && pad_pressed(PAD_START)) {
-                data->menu_option = 2;
+                // TODO: Check for saved data
+                data->menu_option = 2; // New Game
+                //data->menu_option = 1; // Continue
             } else if(data->menu_option > 0) {
                 if(pad_pressed(PAD_LEFT) && (data->menu_option > 1))
                     data->menu_option--;
@@ -182,10 +184,15 @@ screen_title_update(void *d)
                 if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
                     data->selected = 1;
                     switch(data->menu_option) {
-                    case 2: // New Game
-                        //screen_level_setlevel(0);
-                        // Start at Green Hill Zone 1
+                    case 1: // Continue
+                        // For now, this redirects you to Green Hill Zone 1
                         screen_level_setlevel(4);
+                        data->next_scene = SCREEN_LEVEL;
+                        level_score_count = 0;
+                        break;
+                    case 2: // New Game
+                        // Use Playground Zone 1 as first level
+                        screen_level_setlevel(0);
                         data->next_scene = SCREEN_LEVEL;
                         level_score_count = 0;
                         break;
