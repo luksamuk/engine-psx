@@ -182,6 +182,10 @@ screen_level_update(void *d)
             player.anim_dir = 1;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
         }
+
+        if(pad_pressed(PAD_CIRCLE)) {
+            player_do_damage(&player, player.pos.vx);
+        }
     }
 
     camera_update(&camera, &player);
