@@ -79,6 +79,12 @@ static const char *creditstxt[] = {
     "By Richard Jacques",
     "\r",
 
+    /* SFX */
+    "Sound Effects Ripping",
+    "luksamuk",
+    "Mr. Lange",
+    "\r",
+
 
     /* Graphics credits */
     "Character Sprites Ripping",
@@ -115,12 +121,12 @@ static const char *creditstxt[] = {
 
 
     /* Ending */
-    "sonic the hedgehog owned by",
-    "sonic team",
-    "sega inc.",
+    "Sonic the Hedgehog owned by",
+    "SONIC TEAM",
+    "SEGA Inc.",
     "\r",
 
-    "special thanks",
+    "Special Thanks",
     "PSXDEV Network",
     "The Spriters Resource",
     "Schnappy",

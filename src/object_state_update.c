@@ -24,6 +24,8 @@ extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
+extern SoundEffect sfx_yea;
+
 extern int debug_mode;
 
 extern uint8_t  level_ring_count;
@@ -526,6 +528,9 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
         switch(state->anim_state.animation) {
         case MONITOR_KIND_NONE:
             sound_play_vag(sfx_death, 0);
+            break;
+        case MONITOR_KIND_1UP:
+            sound_play_vag(sfx_yea, 0);
             break;
         case MONITOR_KIND_RING:
             sound_play_vag(sfx_ring, 0);

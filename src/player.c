@@ -43,6 +43,7 @@ SoundEffect sfx_chek   = { 0 };
 SoundEffect sfx_death  = { 0 };
 SoundEffect sfx_ringl  = { 0 };
 SoundEffect sfx_shield = { 0 };
+SoundEffect sfx_yea    = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -83,19 +84,20 @@ load_player(Player *player,
 
     player->action = ACTION_NONE;
 
-    if(sfx_jump.addr == 0)  sfx_jump    = sound_load_vag("\\SFX\\JUMP.VAG;1");
-    if(sfx_skid.addr == 0)  sfx_skid    = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
-    if(sfx_roll.addr == 0)  sfx_roll    = sound_load_vag("\\SFX\\ROLL.VAG;1");
-    if(sfx_dash.addr == 0)  sfx_dash    = sound_load_vag("\\SFX\\DASH.VAG;1");
-    if(sfx_relea.addr == 0) sfx_relea   = sound_load_vag("\\SFX\\RELEA.VAG;1");
-    if(sfx_dropd.addr == 0) sfx_dropd   = sound_load_vag("\\SFX\\DROPD.VAG;1");
-    if(sfx_ring.addr == 0)  sfx_ring    = sound_load_vag("\\SFX\\RING.VAG;1");
-    if(sfx_pop.addr == 0)   sfx_pop     = sound_load_vag("\\SFX\\POP.VAG;1");
-    if(sfx_sprn.addr == 0)  sfx_sprn    = sound_load_vag("\\SFX\\SPRN.VAG;1");
-    if(sfx_chek.addr == 0)  sfx_chek    = sound_load_vag("\\SFX\\CHEK.VAG;1");
-    if(sfx_death.addr == 0) sfx_death   = sound_load_vag("\\SFX\\DEATH.VAG;1");
-    if(sfx_ringl.addr == 0) sfx_ringl   = sound_load_vag("\\SFX\\RINGLOSS.VAG;1");
-    if(sfx_shield.addr == 0) sfx_shield = sound_load_vag("\\SFX\\SHIELD.VAG;1");
+    if(sfx_jump.addr == 0)   sfx_jump    = sound_load_vag("\\SFX\\JUMP.VAG;1");
+    if(sfx_skid.addr == 0)   sfx_skid    = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
+    if(sfx_roll.addr == 0)   sfx_roll    = sound_load_vag("\\SFX\\ROLL.VAG;1");
+    if(sfx_dash.addr == 0)   sfx_dash    = sound_load_vag("\\SFX\\DASH.VAG;1");
+    if(sfx_relea.addr == 0)  sfx_relea   = sound_load_vag("\\SFX\\RELEA.VAG;1");
+    if(sfx_dropd.addr == 0)  sfx_dropd   = sound_load_vag("\\SFX\\DROPD.VAG;1");
+    if(sfx_ring.addr == 0)   sfx_ring    = sound_load_vag("\\SFX\\RING.VAG;1");
+    if(sfx_pop.addr == 0)    sfx_pop     = sound_load_vag("\\SFX\\POP.VAG;1");
+    if(sfx_sprn.addr == 0)   sfx_sprn    = sound_load_vag("\\SFX\\SPRN.VAG;1");
+    if(sfx_chek.addr == 0)   sfx_chek    = sound_load_vag("\\SFX\\CHEK.VAG;1");
+    if(sfx_death.addr == 0)  sfx_death   = sound_load_vag("\\SFX\\DEATH.VAG;1");
+    if(sfx_ringl.addr == 0)  sfx_ringl   = sound_load_vag("\\SFX\\RINGLOSS.VAG;1");
+    if(sfx_shield.addr == 0) sfx_shield  = sound_load_vag("\\SFX\\SHIELD.VAG;1");
+    if(sfx_yea.addr == 0)    sfx_yea     = sound_load_vag("\\SFX\\YEA.VAG;1");
 }
 
 void
