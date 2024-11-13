@@ -99,14 +99,12 @@ mdec_start(const char *filepath)
     str_ctx->sector_pending = 0;
     str_ctx->frame_ready    = 0;
 
-    CdSync(0, 0);
-
     // Read at 2x speed to play any XA-ADPCM sectors that could be
     // interleaved with the data
     // Start reading in real-time mode (doesn't retry in case of errors).
-    uint8_t mode = CdlModeRT | CdlModeSpeed;
+    uint8_t mode = CdlModeRT | CdlModeSpeed | CdlModeAP;
     CdControl(CdlSetmode, (const uint8_t *)&mode, 0);
-    CdControl(CdlReadS, (const void *)&file.pos, 0);
+    CdControlF(CdlReadS, (const void *)&file.pos);
 
     // Wait for first frame to be buffered.
     _mdec_get_next_frame();
@@ -118,7 +116,7 @@ mdec_stop()
     // Force playback end on context
     cd_detach_callbacks();
     str_ctx->frame_ready = -1;
-    CdControlB(CdlPause, 0, 0);
+    CdControl(CdlPause, 0, 0);
 
     if(str_ctx) {
         str_ctx = NULL;
