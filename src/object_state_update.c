@@ -17,6 +17,9 @@
 // Extern elements
 extern Player player;
 extern Camera camera;
+extern TileMap16  map16;
+extern TileMap128 map128;
+extern LevelData  leveldata;
 extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
 extern SoundEffect sfx_sprn;
@@ -156,9 +159,29 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 return;
             }
 
-
             // Apply gravity
             state->freepos->spdy += RING_GRAVITY;
+
+            /* Ring bouncing is interesting because:
+             * 1. It disregards walls, so they only collide downwards;
+             * 2. It only checks for collision every 4 frames;
+             * 3. It only checks for collision when falling.
+             *
+             * Since the level timer stops after touching the goal sign,
+             * I am going to use the ring state's own timer for collision
+             * checks. It's not like the player can be damaged when a level
+             * ends, but ehh, what the heck, might as well avoid it if I can.
+             */
+            if(!(state->timer % 4) && state->freepos->spdy > 0) {
+                // Use Sonic's own linecast algorithm, since it is aware of
+                // level geometry -- and oh, level data is stored in external
+                // variables as well. Check the file header.
+                if(linecast(&leveldata, &map128, &map16,
+                            pos->vx + 8, pos->vy + 8,
+                            CDIR_FLOOR, 10).collided)
+                    // Multiply Y speed by -0.75
+                    state->freepos->spdy = (state->freepos->spdy * -0x00000c00) >> 12;
+            }
 
             // Transform ring position wrt. speed
             state->freepos->vx += state->freepos->spdx;
