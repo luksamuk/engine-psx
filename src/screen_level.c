@@ -49,36 +49,6 @@ static uint32_t bgm_loop_sectors[] = {
 };
 
 
-/* Related to rotating cube on background */
-/* static int dx = 1,  dy = 1; */
-
-/* static SVECTOR vertices[] = { */
-/*     { -64, -64, -64, 0 }, */
-/*     {  64, -64, -64, 0 }, */
-/*     {  64, -64,  64, 0 }, */
-/*     { -64, -64,  64, 0 }, */
-/*     { -64,  64, -64, 0 }, */
-/*     {  64,  64, -64, 0 }, */
-/*     {  64,  64,  64, 0 }, */
-/*     { -64,  64,  64, 0 } */
-/* }; */
-
-/* static short faces[] = { */
-/*     2, 1, 3, 0, // top */
-/*     1, 5, 0, 4, // front */
-/*     5, 6, 4, 7, // bottomn */
-/*     2, 6, 1, 5, // right */
-/*     7, 6, 3, 2, // back */
-/*     7, 3, 4, 0  // left */
-/* }; */
-
-/* static SVECTOR rotation = { 0 }; */
-/* static VECTOR  pos      = { 0, 0, 450 }; */
-/* static VECTOR  scale    = { ONE >> 1, ONE >> 1, ONE >> 1 }; */
-/* static MATRIX  world    = { 0 }; */
-/* -------------------------------------- */
-
-
 // Forward function declarations
 static void level_load_player();
 static void level_load_level();
@@ -99,11 +69,6 @@ screen_level_load()
 {
     screen_level_data *data = screen_alloc(sizeof(screen_level_data));
     data->level_transition = 0;
-    /* load_model(&data->ring, "\\MODELS\\COMMON\\RING.MDL"); */
-
-    /* data->ring.pos.vz = 0x12c0; */
-    /* data->ring.rot.vx = 0x478; */
-    /* data->ring.scl.vx = data->ring.scl.vy = data->ring.scl.vz = 0x200; */
 
     camera_init(&camera);
 
@@ -116,7 +81,6 @@ screen_level_load()
     level_fade = 0;
 
     level_ring_count = 0;
-    /* level_score_count = 0; */
     level_finished = 0;
 }
 
@@ -211,41 +175,19 @@ screen_level_update(void *d)
             ring->props |= OBJ_FLAG_ANIM_LOCK;
             ring->props |= OBJ_FLAG_RING_MOVING;
         }
-    }
 
-    /* data->ring.rot.vz += 36; */
-    
-    /* Rotating cube */
-    /* if(pos.vx < -CENTERX || pos.vx > CENTERX) dx = -dx; */
-    /* if(pos.vy < -CENTERY || pos.vy > CENTERY) dy = -dy; */
-    /* pos.vx += dx; */
-    /* pos.vy += dy; */
-
-    /* rotation.vx += 6; */
-    /* rotation.vy -= 8; */
-    /* rotation.vz -= 12; */
-    /* --------- */
-
-    if(pad_pressed(PAD_SELECT) && !level_finished) {
-        player.pos = player.startpos;
-        player.grnd = 0;
-        player.anim_dir = 1;
-        player.vel.vx = player.vel.vy = player.vel.vz = 0;
+        if(pad_pressed(PAD_SELECT) && !level_finished) {
+            player.pos = player.startpos;
+            player.grnd = 0;
+            player.anim_dir = 1;
+            player.vel.vx = player.vel.vy = player.vel.vz = 0;
+        }
     }
 
     camera_update(&camera, &player);
     update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
     object_pool_update(&obj_table_common);
     player_update(&player);
-
-
-    /* // FAKE LEVEL TRANSITION!!! */
-    /* if(level < 4) { */
-    /*     if(player.pos.vx >= camera.max_x + (CENTERX << 12)) { */
-    /*         screen_level_setlevel(level + 1); */
-    /*         scene_change(SCREEN_LEVEL); */
-    /*     } */
-    /* } */
 }
 
 void
@@ -264,45 +206,9 @@ screen_level_draw(void *d)
         player_draw(&player, &player_canvas_pos);
     }
 
-        
-    /* render_model(&data->ring); */
-
     object_pool_render(&obj_table_common, camera.pos.vx, camera.pos.vy);
     render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
     parallax_draw(&data->parallax, &camera);
-
-    // Gouraud-shaded cube
-    /* RotMatrix(&rotation, &world); */
-    /* TransMatrix(&world, &pos); */
-    /* ScaleMatrix(&world, &scale); */
-    /* gte_SetRotMatrix(&world); */
-    /* gte_SetTransMatrix(&world); */
-
-    /* for(int i = 0; i < 24; i += 4) { */
-    /*     int nclip, otz; */
-    /*     POLY_G4 *poly = (POLY_G4 *) get_next_prim(); */
-    /*     setPolyG4(poly); */
-    /*     setRGB0(poly, 96,   0,   0); */
-    /*     setRGB1(poly,   0, 96,   0); */
-    /*     setRGB2(poly,   0,   0, 96); */
-    /*     setRGB3(poly, 96, 96,   0); */
-
-    /*     nclip = RotAverageNclip4( */
-    /*         &vertices[faces[i]], */
-    /*         &vertices[faces[i + 1]], */
-    /*         &vertices[faces[i + 2]], */
-    /*         &vertices[faces[i + 3]], */
-    /*         (uint32_t *)&poly->x0, */
-    /*         (uint32_t *)&poly->x1, */
-    /*         (uint32_t *)&poly->x2, */
-    /*         (uint32_t *)&poly->x3, */
-    /*         &otz); */
-
-    /*     if((nclip > 0) && (otz > 0) && (otz < OT_LENGTH)) { */
-    /*         sort_prim(poly, otz); */
-    /*         increment_prim(sizeof(POLY_G4)); */
-    /*     } */
-    /* } */
 
     // Pause text
     if(paused) {
