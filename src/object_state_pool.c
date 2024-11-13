@@ -44,7 +44,9 @@ object_pool_update(ObjectTable *tbl)
                           &tbl->entries[obj->state.id],
                           &pos);
 
-            if(obj->props & OBJ_FLAG_DESTROYED) _pool_count--;
+            if(obj->props & OBJ_FLAG_DESTROYED) {
+                _pool_count--;
+            }
         }
     }
 }

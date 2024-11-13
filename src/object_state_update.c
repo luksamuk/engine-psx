@@ -546,8 +546,6 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
     // Monitor images ascend for 15 frames, then stay still for 15 more
     if(state->timer <= 15) state->freepos->vy -= (ONE << 1);
     if(state->timer > 30) {
-        state->props |= OBJ_FLAG_DESTROYED;
-
         switch(state->anim_state.animation) {
         case MONITOR_KIND_NONE:
             sound_play_vag(sfx_death, 0);
@@ -570,6 +568,8 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
             break;
         default: break;
         }
+
+        state->props |= OBJ_FLAG_DESTROYED;
     }
 }
 
