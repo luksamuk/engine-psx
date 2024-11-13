@@ -222,14 +222,19 @@ begin_render_routine:
         break;
     }
 
+    // Clip object if not within screen
+    if((vx < -64) || (vx > SCREEN_XRES + 64)) goto after_render;
+    if((vy < -64) || (vy > SCREEN_YRES + 64)) goto after_render;
+
+    // If this is a shield, do not render it if current frame is the
+    // 3rd and 4th frame of an animation (note: shield has 3 frames with duration 4)
+    if((state->id == OBJ_SHIELD) && ((anim->counter >> 1) % 2))
+        goto after_render;
+
     POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
     increment_prim(sizeof(POLY_FT4));
     setPolyFT4(poly);
     setRGB0(poly, level_fade, level_fade, level_fade);
-
-    // Clip object if not within screen
-    if((vx < -64) || (vx > SCREEN_XRES + 64)) goto after_render;
-    if((vy < -64) || (vy > SCREEN_YRES + 64)) goto after_render;
     
     if((flipmask & MASK_FLIP_FLIPX) && (flipmask & MASK_FLIP_FLIPY)) {
         setXYWH(poly, vx, vy, frame->w, frame->h);
@@ -277,8 +282,6 @@ begin_render_routine:
     
     poly->tpage = getTPage(1, 0, 576, 0);
     poly->clut = getClut(0, 481);
-
-    setSemiTrans(poly, state->id == OBJ_SHIELD ? 1 : 0);
 
     sort_prim(poly,
               ((state->id == OBJ_RING) || (state->id == OBJ_SHIELD))
