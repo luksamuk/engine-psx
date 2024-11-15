@@ -224,7 +224,7 @@ screen_level_draw(void *d)
         POLY_G4 *poly = get_next_prim();
         increment_prim(sizeof(POLY_G4));
         setPolyG4(poly);
-        setXYWH(poly, 0, 0, SCREEN_XRES, SCREEN_YRES);
+        setXYWH(poly, 0, 0, SCREEN_XRES, CENTERY);
         setRGB0(poly,
                 LERPC(level_fade, 0x13),
                 LERPC(level_fade, 0x12),
