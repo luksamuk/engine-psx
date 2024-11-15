@@ -162,17 +162,14 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             // Apply gravity
             state->freepos->spdy += RING_GRAVITY;
 
-            /* Ring bouncing is interesting because:
-             * 1. It disregards walls, so they only collide downwards;
-             * 2. It only checks for collision every 4 frames;
-             * 3. It only checks for collision when falling.
-             *
-             * Since the level timer stops after touching the goal sign,
-             * I am going to use the ring state's own timer for collision
-             * checks. It's not like the player can be damaged when a level
-             * ends, but ehh, what the heck, might as well avoid it if I can.
+            /* In the original Sonic The Hedgehog for Sega Genesis, ring bouncing
+             * only occurred every 4 frames and disregarded walls, all for
+             * performance reasons. But we don't have to do this here, since
+             * our MIPS processor is about 4.5 times faster than the Motorola 68k
+             * (~7.6MHz vs ~33.87MHz).
+             * So we're checking for ground and wall collisions every frame.
              */
-            if(!(state->timer % 4) && state->freepos->spdy > 0) {
+            if(/*!(state->timer % 4) &&*/ state->freepos->spdy > 0) {
                 // Use Sonic's own linecast algorithm, since it is aware of
                 // level geometry -- and oh, level data is stored in external
                 // variables as well. Check the file header.
@@ -182,6 +179,16 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                     // Multiply Y speed by -0.75
                     state->freepos->spdy = (state->freepos->spdy * -0x00000c00) >> 12;
             }
+
+            if(/*!(state->timer % 4) &&*/
+                ((state->freepos->spdx < 0) && linecast(&leveldata, &map128, &map16,
+                                                       pos->vx + 8, pos->vy + 8,
+                                                       CDIR_LWALL, 10).collided)
+               || ((state->freepos->spdx > 0) && linecast(&leveldata, &map128, &map16,
+                                                          pos->vx + 8, pos->vy + 8,
+                                                          CDIR_RWALL, 10).collided))
+                // Multiply X speed by -0.75
+                state->freepos->spdx = (state->freepos->spdx * -0x00000c00) >> 12;
 
             // Transform ring position wrt. speed
             state->freepos->vx += state->freepos->spdx;
