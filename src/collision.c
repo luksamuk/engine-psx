@@ -135,6 +135,9 @@ CollisionEvent
 linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
          int32_t vx, int32_t vy, LinecastDirection direction, uint8_t magnitude)
 {
+    // No level data? No collision.
+    if(lvl->num_layers < 1) return (CollisionEvent){ 0 };
+
     const uint8_t layer = 0;
     assert(direction < 4);
 

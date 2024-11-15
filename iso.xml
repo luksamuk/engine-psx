@@ -120,12 +120,6 @@
 	  <file name="Z1.OMP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/Z1.OMP" />
-	  <file name="Z2.LVL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/Z2.LVL" />
-	  <file name="Z2.OMP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/Z2.OMP" />
 	  <file name="MAP128.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/MAP128.MAP" />
@@ -177,6 +171,18 @@
 	  <file name="PRL.PRL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/PRL.PRL" />
+	</dir>
+
+	<dir name="R4">
+	  <file name="BG0.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/BG0.TIM" />
+	  <file name="BG1.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/BG1.TIM" />
+	  <file name="PRL.PRL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/PRL.PRL" />
 	</dir>
 
       </dir> <!-- LEVELS -->

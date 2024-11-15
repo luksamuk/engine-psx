@@ -1,0 +1,67 @@
+# Background gradient:
+# 13123c (dark blue) -> 3066b5 (light blue)
+
+[stars_1]
+width = 256
+height = 32
+u0 = 0
+v0 = 0
+scrollx = 0.05
+y0 = 0
+single = false
+
+[stars_2]
+width = 256
+height = 32
+u0 = 0
+v0 = 0
+scrollx = 0.05
+y0 = 33
+single = false
+
+[stars_3]
+width = 256
+height = 32
+u0 = 0
+v0 = 0
+scrollx = 0.05
+y0 = 66
+single = false
+
+[clouds]
+width = 256
+height = 71
+u0 = 0
+v0 = 185
+scrollx = 0.14
+speedx  = 0.14
+y0 = 0
+single = false
+
+[distant_mountains]
+width = 256
+height = 142
+u0 = 0
+v0 = 256
+scrollx = 0.2
+y0 = 73
+single = false
+
+[paths]
+width = 64
+height = 89
+u0 = 0
+v0 = 422
+scrollx = 0.22
+y0 = 122
+single = false
+
+[close_mountains]
+width = 256
+height = 152
+u0 = 0
+v0 = 33
+scrollx = 0.25
+y0 = 88
+single = false
+

@@ -200,6 +200,7 @@ screen_level_draw(void *d)
     screen_level_data *data = (screen_level_data *)d;
     char buffer[255] = { 0 };
 
+    // Draw player
     if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
        && abs((player.pos.vy - camera.pos.vy) >> 12) <= SCREEN_YRES) {
         VECTOR player_canvas_pos = {
@@ -210,9 +211,38 @@ screen_level_draw(void *d)
         player_draw(&player, &player_canvas_pos);
     }
 
+    // Draw free objects
     object_pool_render(&obj_table_common, camera.pos.vx, camera.pos.vy);
+
+    // Draw level and level objects
     render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
+
+    // Draw background and parallax
     parallax_draw(&data->parallax, &camera);
+    // If we're in R4, draw a gradient on the background.
+    if(level == 8 || level == 9) {
+        POLY_G4 *poly = get_next_prim();
+        increment_prim(sizeof(POLY_G4));
+        setPolyG4(poly);
+        setXYWH(poly, 0, 0, SCREEN_XRES, SCREEN_YRES);
+        setRGB0(poly,
+                LERPC(level_fade, 0x13),
+                LERPC(level_fade, 0x12),
+                LERPC(level_fade, 0x3c));
+        setRGB1(poly,
+                LERPC(level_fade, 0x13),
+                LERPC(level_fade, 0x12),
+                LERPC(level_fade, 0x3c));
+        setRGB2(poly,
+                LERPC(level_fade, 0x30),
+                LERPC(level_fade, 0x66),
+                LERPC(level_fade, 0xb5));
+        setRGB3(poly,
+                LERPC(level_fade, 0x30),
+                LERPC(level_fade, 0x66),
+                LERPC(level_fade, 0xb5));
+        sort_prim(poly, OTZ_LAYER_LEVEL_BG);
+    }
 
     // Pause text
     if(paused) {
@@ -364,6 +394,8 @@ level_load_level(screen_level_data *data)
     TIM_IMAGE tim;
     uint32_t filelength;
 
+
+
     /* === LEVEL TILES === */
     // Load level tiles
     snprintf(filename0, 255, "%s\\TILES.TIM;1", basepath);
@@ -393,6 +425,8 @@ level_load_level(screen_level_data *data)
             free(timfile);
         }
     }
+
+
 
     /* === PARALLAX === */
     // Load level parallax textures
@@ -431,6 +465,8 @@ level_load_level(screen_level_data *data)
                   data->parallax_cx, data->parallax_cy);
     printf("Loaded parallax strips: %d\n", data->parallax.num_strips);
 
+
+    /* === TILE MAPPINGS === */
     snprintf(filename0, 255, "%s\\MAP16.MAP;1", basepath);
     snprintf(filename1, 255, "%s\\MAP16.COL;1", basepath);
     printf("Loading %s and %s...\n", filename0, filename1);
@@ -439,9 +475,14 @@ level_load_level(screen_level_data *data)
     printf("Loading %s...\n", filename0);
     load_map128(&map128, filename0);
 
+
+
+    /* === LEVEL LAYOUT === */
     snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, (level & 0x01) + 1);
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
+
+
 
     /* === OBJECTS === */
     // Load common objects
@@ -451,7 +492,6 @@ level_load_level(screen_level_data *data)
         load_texture(timfile, &tim);
         free(timfile);
     }
-
     printf("Loading common object table...\n");
     load_object_table("\\LEVELS\\COMMON\\OBJ.OTD;1", &obj_table_common);
 
@@ -489,11 +529,12 @@ level_load_level(screen_level_data *data)
     } else if(level == 4 || level == 5) { // GHZ1 / GHZ2
         snprintf(filename0, 255, "\\BGM\\BGM002.XA;1");
         music_channel = 1;
-    } else if(level == 6) { // SWZ1
+    } else if(level == 6 || level == 7) { // SWZ1
         // El Gato Battle 2 Vortex Remake by pkVortex
         // https://www.youtube.com/watch?v=ZU-MGiM5YlA
         snprintf(filename0, 255, "\\BGM\\BGM002.XA;1");
         music_channel = 2;
+    /* } else if(level == 8 || level == 9) { // R4 */
     } else {
         // Do not play anything
         return;

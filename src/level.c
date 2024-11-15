@@ -93,6 +93,9 @@ _load_collision(TileMap16 *mapping, const char *filename)
 void
 load_map16(TileMap16 *mapping, const char *filename, const char *collision_filename)
 {
+    // Prepare in case no valid file is found
+    mapping->num_tiles = 0;
+
     uint8_t *bytes;
     uint32_t b, length;
 
@@ -134,6 +137,9 @@ load_map16(TileMap16 *mapping, const char *filename, const char *collision_filen
 void
 load_map128(TileMap128 *mapping, const char *filename)
 {
+    // Prepare in case no valid file is found
+    mapping->num_tiles = 0;
+
     uint8_t *bytes;
     uint32_t b, length;
 
@@ -165,6 +171,9 @@ load_map128(TileMap128 *mapping, const char *filename)
 void
 load_lvl(LevelData *lvl, const char *filename)
 {
+    // Prepare in case no valid file is found
+    lvl->num_layers = 0;
+
     uint8_t *bytes;
     uint32_t b, length;
 
@@ -437,6 +446,9 @@ extern int player_hitbox_shown;
 void
 update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y)
 {
+    // If there is no level data, just forget it
+    if(lvl->num_layers < 1) return;
+
     cam_x = cam_x >> 12;
     cam_y = cam_y >> 12;
     player_hitbox_shown = 0;
