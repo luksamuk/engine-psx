@@ -14,12 +14,13 @@
 #include "timer.h"
 #include "basic_font.h"
 
-#define CHOICE_MODELTEST 10
-#define CHOICE_TITLE     11
-#define CHOICE_SONICT    12
-#define CHOICE_SOON      13
-#define CHOICE_CREDITS   14
+#define CHOICE_MODELTEST 14
+#define CHOICE_TITLE     15
+#define CHOICE_SONICT    16
+#define CHOICE_SOON      17
+#define CHOICE_CREDITS   18
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
+#define MAX_COLUMN_CHOICES 15
 
 extern uint32_t level_score_count;
 
@@ -37,18 +38,20 @@ typedef struct {
 extern int debug_mode;
 
 static const char *menutext[] = {
-    "PLAYGROUND  1",
-    "            2",
-    "            3",
-    "            4",
-    "GREEN HILL  1",
-    "            2",
-    "SURELY WOOD 1",
-    "            2",
-    "R4          1",
-    "            2",
-
-    "\n",
+    "PLAYGROUND    1",
+    "              2",
+    "              3",
+    "              4",
+    "GREEN HILL    1",
+    "              2",
+    "SURELY WOOD   1",
+    "              2",
+    "DAWN CANYON   1",
+    "              2",
+    "AMAZING OCEAN 1",
+    "              2",
+    "R6            1",
+    "              2",
 
     "MODELTEST",
     "TITLESCREEN",
@@ -142,6 +145,12 @@ screen_levelselect_update(void *d)
     else if(pad_pressed(PAD_UP)) {
         if(data->menu_choice == 0) data->menu_choice = MAX_LEVELS - 1;
         else data->menu_choice--;
+    } else if(pad_pressed(PAD_LEFT) || pad_pressed(PAD_RIGHT)) {
+        if(data->menu_choice < MAX_COLUMN_CHOICES - 1) {
+            data->menu_choice += MAX_COLUMN_CHOICES - 1;
+            if(data->menu_choice >= MAX_LEVELS)
+                data->menu_choice = MAX_LEVELS - 1;
+        } else data->menu_choice -= MAX_COLUMN_CHOICES - 1;
     }
 
     data->menu_choice = (data->menu_choice % MAX_LEVELS);
@@ -216,16 +225,23 @@ screen_levelselect_draw(void *d)
     x = SCREEN_XRES - (strlen(subtitle) * 8) - 8;
     font_draw_sm(subtitle, x, SCREEN_YRES - 24);
 
+    // Draw text
     uint8_t txtidx = 0;
     uint8_t cursel = 0;
     const char **txt = menutext;
+    int16_t vx = 8;
     int16_t vy = 40;
     while(*txt != NULL) {
         if((*txt)[0] == '\n') goto end_line;
         if(data->menu_choice == cursel) font_set_color(128, 128, 0);
-        font_draw_sm(*txt, 8, vy);
+        font_draw_sm(*txt, vx, vy);
         if(data->menu_choice == cursel) font_reset_color();
         cursel++;
+
+        if((cursel + 1) % MAX_COLUMN_CHOICES == 0) {
+            vx = CENTERX + 8;
+            vy = 40 - (GLYPH_SML_WHITE_HEIGHT + GLYPH_SML_GAP);
+        }
 
     end_line:
         vy += GLYPH_SML_WHITE_HEIGHT + GLYPH_SML_GAP;
