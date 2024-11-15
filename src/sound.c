@@ -227,11 +227,13 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
         printf("Caught CD error\n");
         _cd_err_threshold++;
         if(_cd_err_threshold > CD_MAX_ERR_THRESHOLD) {
-            // Reset music if too many errs
+            // Stop music if too many errs
             _cd_err_threshold = 0;
             _cd_elapsed_sectors = 0;
-            printf("Resetting playback\n");
-            CdControlF(CdlReadS, (const void *)&_xa_loc);
+            printf("Too many CD errors -- stop playback!\n");
+            CdControlF(CdlPause, 0);
+            _xa_should_play = 0;
+            _xa_loopback_sector = 0;
         }
         break;
     default:

@@ -136,18 +136,11 @@ mdec_loop()
         if(debug_mode) frame_start = TIMER_VALUE(1);
 
         // Wait for a full frame read from disc
-        uint8_t frame_attempts = 0;
-    try_fetch_frame:
         StreamBuffer *frame = _mdec_get_next_frame();
-        if(!frame) {
-            if(should_abort || (frame_attempts >= MAX_FRAME_BUFFER_ATTEMPTS)) {
-                printf("MDEC playback ended\n");
-                return;
-            }
-            printf("MDEC: Tried reading frame (attempt #%d), retrying...\n",
-                   frame_attempts);
-            frame_attempts++;
-            goto try_fetch_frame;
+        if(!frame) { // If no frame was fetched, assume that playback ended
+            should_abort = 1;
+            printf("MDEC playback ended\n");
+            return;
         }
 
         if(_mdec_should_abort()) {
