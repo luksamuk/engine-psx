@@ -238,7 +238,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             // Set animation according to character
             state->anim_state.animation = 2;
             state->timer = 360; // 6-seconds music
-            sound_play_xa("\\BGM\\EVENT001.XA;1", 0, 0, 0);
+            sound_bgm_play(BGM_LEVELCLEAR);
             _goal_sign_change_score();
         }
     } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {

@@ -34,7 +34,7 @@ screen_comingsoon_load()
     data->counter = 0;
     data->state = 0;
 
-    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 1, 0);
+    sound_bgm_play(BGM_TITLESCREEN);
 }
 
 void

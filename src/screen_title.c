@@ -125,11 +125,10 @@ screen_title_load()
     /*     data->planet.scl.vy = */
     /*     data->planet.scl.vz = 2048; */
 
-    printf("Commit: %s:%s\n", GIT_SHA1, GIT_REFSPEC);
-
-    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 1, 0);
-
     set_clear_color(0, 0, 0);
+
+    printf("Commit: %s:%s\n", GIT_SHA1, GIT_REFSPEC);
+    sound_bgm_play(BGM_TITLESCREEN);
 }
 
 void

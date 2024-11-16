@@ -89,8 +89,8 @@ screen_levelselect_load()
     // You're already cheating, I'm not going to allow you
     // to have any points. :)
     level_score_count = 0;
-    
-    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 0, 0);
+
+    sound_bgm_play(BGM_LEVELSELECT);
 }
 
 void

@@ -73,4 +73,30 @@ void     sound_xa_get_pos(uint8_t *minute, uint8_t *second, uint8_t *sector);
 void     sound_xa_get_elapsed_sectors(uint32_t *out);
 void     sound_xa_set_volume(uint8_t vol);
 
+
+
+/* BGM audio table */
+typedef enum {
+    BGM_LEVELSELECT = 0,
+    BGM_TITLESCREEN = 1,
+    BGM_CREDITS     = 2,
+    BGM_LEVELCLEAR  = 3,
+    BGM_PLAYGROUND1 = 4,
+    BGM_PLAYGROUND2 = 5,
+    BGM_PLAYGROUND3 = 6,
+    BGM_PLAYGROUND4 = 7,
+    BGM_GREENHILL   = 8,
+    BGM_SURELYWOOD  = 9,
+    BGM_NUM_SONGS   = BGM_SURELYWOOD + 1,
+} BGMOption;
+
+typedef struct {
+    char *filename;
+    uint8_t channel;
+    uint16_t loopback_sector;
+} BGMTableEntry;
+
+void                sound_bgm_play(BGMOption);
+const BGMTableEntry *sound_bgm_get_data(BGMOption);
+
 #endif

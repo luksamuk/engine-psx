@@ -127,6 +127,7 @@ static const char *creditstxt[] = {
     "\r",
 
     "Special Thanks",
+    "Gustavo Pezzi",
     "PSXDEV Network",
     "The Spriters Resource",
     "Schnappy",
@@ -161,7 +162,7 @@ screen_credits_load()
     data->countdown = FADE_FRAMES;
     data->state = 0;
 
-    sound_play_xa("\\BGM\\MNU001.XA;1", 0, 2, 0);
+    sound_bgm_play(BGM_CREDITS);
 }
 
 void
