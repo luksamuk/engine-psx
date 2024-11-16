@@ -265,6 +265,9 @@
 	<file name="BGM002.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM002.XA" />
+	<file name="BGM003.XA"
+	      type="xa"
+	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM003.XA" />
 	<file name="MNU001.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/MNU001.XA" />

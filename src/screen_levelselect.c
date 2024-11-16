@@ -150,7 +150,19 @@ screen_levelselect_update(void *d)
             }
         }
     }
-    
+
+    // Sound test movement
+    if(data->menu_choice == CHOICE_SOUNDTEST) {
+        if(pad_pressed(PAD_LEFT)) {
+            if(data->soundtest_selection == 0)
+                data->soundtest_selection = BGM_NUM_SONGS - 1;
+            else data->soundtest_selection--;
+        } else if(pad_pressed(PAD_RIGHT)) {
+            if(data->soundtest_selection == BGM_NUM_SONGS - 1)
+                data->soundtest_selection = 0;
+            else data->soundtest_selection++;
+        }
+    }
 
     if(pad_pressed(PAD_DOWN))
             data->menu_choice++;
@@ -188,19 +200,6 @@ screen_levelselect_update(void *d)
         } else {
             screen_level_setlevel(data->menu_choice);
             scene_change(SCREEN_LEVEL);
-        }
-    }
-
-    // Sound test movement
-    if(data->menu_choice == CHOICE_SOUNDTEST) {
-        if(pad_pressed(PAD_LEFT)) {
-            if(data->soundtest_selection == 0)
-                data->soundtest_selection = BGM_NUM_SONGS - 1;
-            else data->soundtest_selection--;
-        } else if(pad_pressed(PAD_RIGHT)) {
-            if(data->soundtest_selection == BGM_NUM_SONGS - 1)
-                data->soundtest_selection = 0;
-            else data->soundtest_selection++;
         }
     }
 

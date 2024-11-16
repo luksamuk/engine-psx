@@ -22,7 +22,6 @@
 extern int debug_mode;
 
 static uint8_t level = 0;
-static uint8_t music_channel = 0;
 
 // Accessible in other source
 Player      player;
@@ -514,6 +513,8 @@ level_load_level(screen_level_data *data)
     case 5: sound_bgm_play(BGM_GREENHILL);   break;
     case 6:
     case 7: sound_bgm_play(BGM_SURELYWOOD);  break;
+    case 8:
+    case 9: sound_bgm_play(BGM_DAWNCANYON);  break;
     default: break;
     }
 }

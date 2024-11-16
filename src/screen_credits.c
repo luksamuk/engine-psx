@@ -67,6 +67,12 @@ static const char *creditstxt[] = {
     "By pkVortex",
     "\r",
 
+    "Dawn Canyon Zone",
+    "Chaos Island Act 2",
+    "From Sonic x Shadow Generations",
+    "By Sonic Team",
+    "\r",
+
     "Level Select Theme",
     "Sonic 3D Blast Main Title:",
     "Youre My Hero",
