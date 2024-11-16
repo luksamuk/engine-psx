@@ -488,6 +488,8 @@ update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y
 void
 _render_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cx, int32_t cy)
 {
+    if(lvl->num_layers < 1) return;
+
     int32_t chunk;
     int32_t w = lvl->layers[0].width;
     int32_t h = lvl->layers[0].height;
