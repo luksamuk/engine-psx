@@ -30,7 +30,7 @@ static int32_t next_channel = 0;
 // sectors read from the CD. Due to DMA limitations, it can't
 // be allocated on the stack -- especially not in the interrupt
 // callback's stack, whose size is very limited.
-/* static XACDSector _sector; */
+/* static volatile XACDSector _sector; */
 
 // Current .XA audio data start location.
 static volatile CdlLOC   _xa_loc;
@@ -222,6 +222,8 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
             _cd_elapsed_sectors = 0;
             CdControlF(CdlReadS, (const void *)&_xa_loc);
         }
+
+        /* CdGetSector((void*)(&_sector), sizeof(XACDSector) / 4); */
         break;
     case CdlDiskError:
         printf("Caught CD error\n");
@@ -307,4 +309,11 @@ sound_xa_set_volume(uint8_t vol)
     
     CdMix(&v);
     CdSync(0, 0);
+}
+
+int
+sound_xa_requested_play()
+{
+    // Sound is not necessarily playing, but is certainly not stopped
+    return _xa_should_play != 0;
 }

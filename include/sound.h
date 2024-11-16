@@ -48,13 +48,13 @@ typedef enum {
 } XASubmode;
 
 // CD-ROM Sector encoding (for .XA playback)
-typedef struct {
-    CdlLOC    pos;
-    XAHeader  xa_header[2];
-    uint8_t   data[2048];
-    uint32_t  edc;
-    uint8_t   ecc[276];
-} XACDSector;
+/* typedef struct { */
+/*     CdlLOC    pos; */
+/*     XAHeader  xa_header[2]; */
+/*     uint8_t   data[2048]; */
+/*     uint32_t  edc; */
+/*     uint8_t   ecc[276]; */
+/* } XACDSector; */
 
 void sound_init(void);
 void sound_reset_mem(void);
@@ -68,6 +68,7 @@ uint32_t sound_get_cd_status(void);
 void     sound_play_xa(const char *filename, int double_speed,
                        uint8_t channel, uint32_t loopback_sector);
 void     sound_stop_xa(void);
+int      sound_xa_requested_play();
 void     sound_xa_set_channel(uint8_t channel);
 void     sound_xa_get_pos(uint8_t *minute, uint8_t *second, uint8_t *sector);
 void     sound_xa_get_elapsed_sectors(uint32_t *out);
@@ -94,9 +95,11 @@ typedef struct {
     char *filename;
     uint8_t channel;
     uint16_t loopback_sector;
+    uint16_t stop_sector;
 } BGMTableEntry;
 
 void                sound_bgm_play(BGMOption);
 const BGMTableEntry *sound_bgm_get_data(BGMOption);
+void                sound_bgm_check_stop(BGMOption);
 
 #endif

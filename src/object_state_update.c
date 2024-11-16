@@ -243,6 +243,10 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         }
     } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {
         state->timer--;
+
+        // Doesn't hurt to not allow the CD reader to go berserk
+        sound_bgm_check_stop(BGM_LEVELCLEAR);
+
         if((state->timer < 0) && (screen_level_getstate() == 1)) {
             screen_level_setstate(2);
         } else if(screen_level_getstate() == 3) {

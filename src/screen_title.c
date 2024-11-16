@@ -148,11 +148,7 @@ screen_title_update(void *d)
 
     screen_title_data *data = (screen_title_data *)d;
 
-    uint32_t elapsed_sectors;
-    sound_xa_get_elapsed_sectors(&elapsed_sectors);
-    if(elapsed_sectors >= 450) sound_stop_xa();
-
-    /* data->planet.rot.vz -= 24; */
+    sound_bgm_check_stop(BGM_TITLESCREEN);
 
     data->pos.vx -= 1;
     if(data->pos.vx < -646) {

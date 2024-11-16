@@ -47,6 +47,8 @@ screen_comingsoon_unload(void *)
 void
 screen_comingsoon_update(void *d)
 {
+    sound_bgm_check_stop(BGM_TITLESCREEN);
+
     screen_comingsoon_data *data = (screen_comingsoon_data *)d;
     if(data->state == 0) {
         if(data->fade < 128) {

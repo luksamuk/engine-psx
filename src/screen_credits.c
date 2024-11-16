@@ -175,9 +175,7 @@ screen_credits_unload(void *)
 void
 screen_credits_update(void *d)
 {
-    uint32_t elapsed_sectors;
-    sound_xa_get_elapsed_sectors(&elapsed_sectors);
-    if(elapsed_sectors >= 4850) sound_stop_xa();
+    sound_bgm_check_stop(BGM_CREDITS);
 
     screen_credits_data *data = (screen_credits_data *)d;
     if(creditstxt[data->entry] != NULL

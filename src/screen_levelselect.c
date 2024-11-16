@@ -19,7 +19,8 @@
 #define CHOICE_SONICT    16
 #define CHOICE_SOON      17
 #define CHOICE_CREDITS   18
-#define MAX_LEVELS   (CHOICE_CREDITS + 1)
+#define CHOICE_SOUNDTEST 19
+#define MAX_LEVELS   (CHOICE_SOUNDTEST + 1)
 #define MAX_COLUMN_CHOICES 15
 
 extern uint32_t level_score_count;
@@ -33,6 +34,8 @@ typedef struct {
     uint8_t  bg_frame;
     uint8_t  bg_state;
     uint16_t bg_timer;
+    uint8_t  music_selected;
+    uint8_t  soundtest_selection;
 } screen_levelselect_data;
 
 extern int debug_mode;
@@ -58,6 +61,12 @@ static const char *menutext[] = {
     "SONICTEAM",
     "COMINGSOON",
     "CREDITS",
+
+
+    "\n",
+    "\n",
+    
+    "SOUND TEST  *??*",
     NULL,
 };
 
@@ -84,6 +93,9 @@ screen_levelselect_load()
     data->bg_frame = 0;
     data->bg_state = 0;
     data->bg_timer = BG_PAUSE;
+
+    data->music_selected = 0;
+    data->soundtest_selection = 0x00;
 
     // Regardless of the level, reset score.
     // You're already cheating, I'm not going to allow you
@@ -145,7 +157,9 @@ screen_levelselect_update(void *d)
     else if(pad_pressed(PAD_UP)) {
         if(data->menu_choice == 0) data->menu_choice = MAX_LEVELS - 1;
         else data->menu_choice--;
-    } else if(pad_pressed(PAD_LEFT) || pad_pressed(PAD_RIGHT)) {
+    } else if(
+        (data->menu_choice != CHOICE_SOUNDTEST)
+        && (pad_pressed(PAD_LEFT) || pad_pressed(PAD_RIGHT))) {
         if(data->menu_choice < MAX_COLUMN_CHOICES - 1) {
             data->menu_choice += MAX_COLUMN_CHOICES - 1;
             if(data->menu_choice >= MAX_LEVELS)
@@ -168,15 +182,29 @@ screen_levelselect_update(void *d)
             scene_change(SCREEN_COMINGSOON);
         } else if(data->menu_choice == CHOICE_CREDITS) {
             scene_change(SCREEN_CREDITS);
+        } else if(data->menu_choice == CHOICE_SOUNDTEST) {
+            sound_bgm_play(data->soundtest_selection);
+            data->music_selected = data->soundtest_selection;
         } else {
             screen_level_setlevel(data->menu_choice);
             scene_change(SCREEN_LEVEL);
         }
     }
 
-    uint32_t elapsed_sectors;
-    sound_xa_get_elapsed_sectors(&elapsed_sectors);
-    if(elapsed_sectors >= 1550) sound_stop_xa();
+    // Sound test movement
+    if(data->menu_choice == CHOICE_SOUNDTEST) {
+        if(pad_pressed(PAD_LEFT)) {
+            if(data->soundtest_selection == 0)
+                data->soundtest_selection = BGM_NUM_SONGS - 1;
+            else data->soundtest_selection--;
+        } else if(pad_pressed(PAD_RIGHT)) {
+            if(data->soundtest_selection == BGM_NUM_SONGS - 1)
+                data->soundtest_selection = 0;
+            else data->soundtest_selection++;
+        }
+    }
+
+    sound_bgm_check_stop(data->music_selected);
 }
 
 void
@@ -234,12 +262,19 @@ screen_levelselect_draw(void *d)
     while(*txt != NULL) {
         if((*txt)[0] == '\n') goto end_line;
         if(data->menu_choice == cursel) font_set_color(128, 128, 0);
-        font_draw_sm(*txt, vx, vy);
+
+        if(cursel == CHOICE_SOUNDTEST) {
+            char buffer[80];
+            snprintf(buffer, 80, "SOUND TEST  *%02X*",
+                     data->soundtest_selection);
+            font_draw_sm(buffer, vx, vy);
+        } else font_draw_sm(*txt, vx, vy);
+        
         if(data->menu_choice == cursel) font_reset_color();
         cursel++;
 
         if((cursel + 1) % MAX_COLUMN_CHOICES == 0) {
-            vx = CENTERX + 8;
+            vx = CENTERX + 16;
             vy = 40 - (GLYPH_SML_WHITE_HEIGHT + GLYPH_SML_GAP);
         }
 
