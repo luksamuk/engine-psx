@@ -14,12 +14,12 @@
 #include "timer.h"
 #include "basic_font.h"
 
-#define CHOICE_MODELTEST 14
-#define CHOICE_TITLE     15
-#define CHOICE_SONICT    16
-#define CHOICE_SOON      17
-#define CHOICE_CREDITS   18
-#define CHOICE_SOUNDTEST 19
+#define CHOICE_MODELTEST 19
+#define CHOICE_TITLE     20
+#define CHOICE_SONICT    21
+#define CHOICE_SOON      22
+#define CHOICE_CREDITS   23
+#define CHOICE_SOUNDTEST 24
 #define MAX_LEVELS   (CHOICE_SOUNDTEST + 1)
 #define MAX_COLUMN_CHOICES 15
 
@@ -55,17 +55,20 @@ static const char *menutext[] = {
     "              2",
     "R6            1",
     "              2",
+    "R7            1",
+    "              2",
+    "EGGMANLAND    1",
+    "              2",
+    "              3",
+    "\n",
+    "\n",
 
     "MODELTEST",
     "TITLESCREEN",
     "SONICTEAM",
     "COMINGSOON",
     "CREDITS",
-
-
     "\n",
-    "\n",
-    
     "SOUND TEST  *??*",
     NULL,
 };

@@ -73,6 +73,11 @@ static const char *creditstxt[] = {
     "By Sonic Team",
     "\r",
 
+    "Eggmanland Zone",
+    "Capital City: Eggmanland Day Final Mix",
+    "By ViosVibes",
+    "\r",
+
     "Level Select Theme",
     "Sonic 3D Blast Main Title:",
     "Youre My Hero",

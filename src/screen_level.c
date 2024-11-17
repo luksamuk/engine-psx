@@ -43,13 +43,15 @@ static void level_load_level();
 static void level_set_clearcolor();
 
 typedef struct {
-    uint8_t level_transition;
-    Parallax parallax;
-    uint8_t parallax_tx_mode;
-    int32_t parallax_px;
-    int32_t parallax_py;
-    int32_t parallax_cx;
-    int32_t parallax_cy;
+    uint8_t    level_transition;
+    Parallax   parallax;
+    uint8_t    parallax_tx_mode;
+    int32_t    parallax_px;
+    int32_t    parallax_py;
+    int32_t    parallax_cx;
+    int32_t    parallax_cy;
+    const char *level_name;
+    uint8_t    level_act;
 } screen_level_data;
 
 void
@@ -57,6 +59,8 @@ screen_level_load()
 {
     screen_level_data *data = screen_alloc(sizeof(screen_level_data));
     data->level_transition = 0;
+    data->level_name = "PLAYGROUND";
+    data->level_act  = 0;
 
     camera_init(&camera);
 
@@ -505,17 +509,45 @@ level_load_level(screen_level_data *data)
 
     // Start playback after we don't need the CD anymore.
     switch(level) {
-    case 0: sound_bgm_play(BGM_PLAYGROUND1); break;
-    case 1: sound_bgm_play(BGM_PLAYGROUND2); break;
-    case 2: sound_bgm_play(BGM_PLAYGROUND3); break;
-    case 3: sound_bgm_play(BGM_PLAYGROUND4); break;
+    case 0: sound_bgm_play(BGM_PLAYGROUND1); data->level_act = 0; break;
+    case 1: sound_bgm_play(BGM_PLAYGROUND2); data->level_act = 1; break;
+    case 2: sound_bgm_play(BGM_PLAYGROUND3); data->level_act = 2; break;
+    case 3: sound_bgm_play(BGM_PLAYGROUND4); data->level_act = 3; break;
     case 4:
-    case 5: sound_bgm_play(BGM_GREENHILL);   break;
+    case 5:
+        sound_bgm_play(BGM_GREENHILL);
+        data->level_name = "GREEN HILL";
+        data->level_act = level - 4;
+        break;
     case 6:
-    case 7: sound_bgm_play(BGM_SURELYWOOD);  break;
+    case 7:
+        sound_bgm_play(BGM_SURELYWOOD);
+        data->level_name = "SURELY WOOD";
+        data->level_act = level - 6;
+        break;
     case 8:
-    case 9: sound_bgm_play(BGM_DAWNCANYON);  break;
-    default: break;
+    case 9:
+        sound_bgm_play(BGM_DAWNCANYON);
+        data->level_name = "DAWN CANYON";
+        data->level_act = level - 8;
+        break;
+    /* case 10: */
+    /* case 11: break;   // Amazing Ocean */
+    /* case 12: */
+    /* case 13: break;   // R6 */
+    /* case 14: */
+    /* case 15: break;   // R7 */
+    case 16:
+    case 17:
+    case 18:
+        sound_bgm_play(BGM_EGGMANLAND);
+        data->level_name = "EGGMANLAND";
+        data->level_act = level - 16;
+        break;
+    default:
+        data->level_name = "TEST LEVEL";
+        data->level_act = 0;
+        break;
     }
 }
 
