@@ -310,17 +310,29 @@ screen_level_draw(void *d)
         font_draw_hg(buffer, data->tc_act_x, 70 + GLYPH_HG_WHITE_HEIGHT + 40);
 
         // Game text
+        font_set_color(0xc8, 0xc8, 0x00);
         uint16_t wt = font_measurew_sm("SONIC XA");
         font_draw_sm("SONIC XA", 50 + ((80 - wt) >> 1), data->tc_ribbon_y + 180);
+        font_reset_color();
 
         // Title card ribbon background
         {
-            POLY_F4 *poly = get_next_prim();
+            POLY_G4 *polyg = get_next_prim();
+            increment_prim(sizeof(POLY_G4));
+            setPolyG4(polyg);
+            setRGB0(polyg, 0x48, 0x48, 0xfc);
+            setRGB1(polyg, 0x48, 0x48, 0xfc);
+            setRGB2(polyg, 0xf0, 0xf0, 0xf0);
+            setRGB3(polyg, 0xf0, 0xf0, 0xf0);
+            setXYWH(polyg, 50, data->tc_ribbon_y, 80, 200);
+            sort_prim(polyg, OTZ_LAYER_HUD);
+
+            POLY_F4 *polyf = get_next_prim();
             increment_prim(sizeof(POLY_F4));
-            setPolyF4(poly);
-            setRGB0(poly, 0xe0, 0x0, 0x0);
-            setXYWH(poly, 50, data->tc_ribbon_y, 80, 200);
-            sort_prim(poly, OTZ_LAYER_HUD);
+            setPolyF4(polyf);
+            setRGB0(polyf, 0x1c, 0x1a, 0x1a);
+            setXYWH(polyf, 55, data->tc_ribbon_y, 80, 205);
+            sort_prim(polyf, OTZ_LAYER_HUD);
         }
     }
 
