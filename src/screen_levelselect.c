@@ -14,13 +14,13 @@
 #include "timer.h"
 #include "basic_font.h"
 
-#define CHOICE_MODELTEST 19
-#define CHOICE_TITLE     20
-#define CHOICE_SONICT    21
-#define CHOICE_SOON      22
-#define CHOICE_CREDITS   23
-#define CHOICE_SOUNDTEST 24
-#define MAX_LEVELS   (CHOICE_SOUNDTEST + 1)
+#define CHOICE_SOUNDTEST 19
+#define CHOICE_MODELTEST 20
+#define CHOICE_TITLE     21
+#define CHOICE_SONICT    22
+#define CHOICE_SOON      23
+#define CHOICE_CREDITS   24
+#define MAX_LEVELS   (CHOICE_CREDITS + 1)
 #define MAX_COLUMN_CHOICES 15
 
 extern uint32_t level_score_count;
@@ -61,15 +61,14 @@ static const char *menutext[] = {
     "              2",
     "              3",
     "\n",
+    "SOUND TEST  *??*",
     "\n",
-
+    "\n",
     "MODELTEST",
     "TITLESCREEN",
     "SONICTEAM",
     "COMINGSOON",
     "CREDITS",
-    "\n",
-    "SOUND TEST  *??*",
     NULL,
 };
 

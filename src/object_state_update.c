@@ -247,9 +247,9 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         // Doesn't hurt to not allow the CD reader to go berserk
         sound_bgm_check_stop(BGM_LEVELCLEAR);
 
-        if((state->timer < 0) && (screen_level_getstate() == 1)) {
-            screen_level_setstate(2);
-        } else if(screen_level_getstate() == 3) {
+        if((state->timer < 0) && (screen_level_getstate() == 2)) {
+            screen_level_setstate(3);
+        } else if(screen_level_getstate() == 4) {
             uint8_t lvl = screen_level_getlevel();
             // TODO: This is temporary and goes only upto R2Z1
             if(lvl < 6) {

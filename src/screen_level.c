@@ -52,6 +52,7 @@ typedef struct {
     int32_t    parallax_cy;
     const char *level_name;
     uint8_t    level_act;
+    uint16_t   level_counter;
 } screen_level_data;
 
 void
@@ -69,8 +70,10 @@ screen_level_load()
     camera_set(&camera, player.pos.vx, player.pos.vy);
 
     reset_elapsed_frames();
+    pause_elapsed_frames();
 
     level_fade = 0;
+    data->level_counter = 180;
 
     level_ring_count = 0;
     level_finished = 0;
@@ -104,20 +107,29 @@ screen_level_update(void *d)
     level_set_clearcolor();
 
     // Manage fade in and fade out
-    if(data->level_transition == 0) { // Fade in
+    if(data->level_transition == 0) { // Show title card
+        data->level_counter--;
+        if(data->level_counter == 0)
+            data->level_transition = 1;
+    } else if(data->level_transition == 1) { // Fade in
         level_fade += 2;
         if(level_fade >= 128) {
             level_fade = 128;
-            data->level_transition = 1;
+            data->level_transition = 2;
+
+            // Start level timer
+            reset_elapsed_frames();
         }
-    } else if(data->level_transition == 2) { // Fade out
+    } else if(data->level_transition == 3) { // Fade out
         level_fade -= 2;
         if(level_fade == 0) {
-            data->level_transition = 3;
+            data->level_transition = 4;
         }
     }
 
-    if(pad_pressed(PAD_START) && !level_finished) {
+    if(pad_pressed(PAD_START)
+       && !level_finished
+       && (data->level_transition == 2)) {
         paused = !paused;
         if(paused) sound_xa_set_volume(0x00);
         else sound_xa_set_volume(XA_DEFAULT_VOLUME);
@@ -180,10 +192,13 @@ screen_level_update(void *d)
         }
     }
 
-    camera_update(&camera, &player);
-    update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
-    object_pool_update(&obj_table_common);
-    player_update(&player);
+    // Only update these if past fade in!
+    if(data->level_transition > 0) {
+        camera_update(&camera, &player);
+        update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
+        object_pool_update(&obj_table_common);
+        player_update(&player);
+    }
 }
 
 void
@@ -247,6 +262,33 @@ screen_level_draw(void *d)
         font_draw_big(line1, x, CENTERY - 12);
     }
 
+    // Title card
+    if(data->level_transition <= 1) {
+        font_reset_color();
+        uint16_t wt = font_measurew_hg(data->level_name);
+        uint16_t wz = font_measurew_hg("ZONE");
+        uint16_t vx = CENTERX - (wt >> 1);
+        font_draw_hg(data->level_name, vx, 70);
+        font_draw_hg("ZONE", vx + wt - wz, 70 + GLYPH_HG_WHITE_HEIGHT + 5);
+        char buffer[5];
+        snprintf(buffer, 5, "*%d", data->level_act + 1);
+        font_draw_hg(buffer, vx + wt, 70 + GLYPH_HG_WHITE_HEIGHT + 5);
+
+        // Game text
+        wt = font_measurew_sm("SONIC XA");
+        font_draw_sm("SONIC XA", 50 + ((80 - wt) >> 1), 180);
+
+        // Title card rectangle background
+        {
+            POLY_F4 *poly = get_next_prim();
+            increment_prim(sizeof(POLY_F4));
+            setPolyF4(poly);
+            setRGB0(poly, 0xe0, 0x0, 0x0);
+            setXYWH(poly, 50, 0, 80, 200);
+            sort_prim(poly, OTZ_LAYER_HUD);
+        }
+    }
+
     // Heads-up display
     if(!debug_mode) {
         font_set_color(
@@ -258,7 +300,7 @@ screen_level_draw(void *d)
 
         // Flash red every 8 frames
         if(level_ring_count == 0
-           && ((get_elapsed_frames() >> 3) % 2 == 0)) {
+           && ((get_elapsed_frames() >> 3) % 2 == 1)) {
             font_set_color(
                 LERPC(level_fade, 0xc8),
                 0,
@@ -531,8 +573,12 @@ level_load_level(screen_level_data *data)
         data->level_name = "DAWN CANYON";
         data->level_act = level - 8;
         break;
-    /* case 10: */
-    /* case 11: break;   // Amazing Ocean */
+    case 10:
+    case 11:
+        // TODO: bgm
+        data->level_name = "AMAZING OCEAN";
+        data->level_act = level - 10;
+        break;
     /* case 12: */
     /* case 13: break;   // R6 */
     /* case 14: */
@@ -556,13 +602,19 @@ static void
 level_set_clearcolor()
 {
     if(level == 2 || level == 3) // R1
-        set_clear_color(LERPC(level_fade, 26), LERPC(level_fade, 104), LERPC(level_fade, 200));
+        set_clear_color(LERPC(level_fade, 26),
+                        LERPC(level_fade, 104),
+                        LERPC(level_fade, 200));
     else if(level == 4 || level == 5) // R2 (GHZ)
-        set_clear_color(LERPC(level_fade, 36), LERPC(level_fade, 0), LERPC(level_fade, 180));
+        set_clear_color(LERPC(level_fade, 36),
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 180));
     else if(level == 6 || level == 7)
         set_clear_color(0, 0, 0);
     // R0
-    else set_clear_color(LERPC(level_fade, 63), LERPC(level_fade, 0), LERPC(level_fade, 127));
+    else set_clear_color(LERPC(level_fade, 63),
+                         LERPC(level_fade, 0),
+                         LERPC(level_fade, 127));
 }
 
 void
