@@ -116,10 +116,15 @@ static const char *creditstxt[] = {
     "Fonts Ripping",
     "Flare",
     "Storice",
+    "1001",
+    "GameMaster12",
+    "SupaChao",
     "\r",
 
     "Original Fonts",
     "Mr. Alien",
+    "GameMaster12",
+    "Fred Bronze",
     "\r",
 
     "Objects Ripping",

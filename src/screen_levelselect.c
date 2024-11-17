@@ -249,7 +249,6 @@ screen_levelselect_draw(void *d)
     const char *title = "Level Select";
     x = CENTERX - (strlen(title) * 4);
     font_draw_big(title, x, 12);
-    
 
     const char *subtitle = "*luksamuk.codes*";
     x = SCREEN_XRES - (strlen(subtitle) * 8) - 8;

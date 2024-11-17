@@ -109,6 +109,58 @@ static uint8_t glyph_info_sm[] = {
     115, 29, 7, 7, // ?
 };
 
+static uint8_t glyph_info_hg[] = {
+    // u0, v0, w, h
+    // a-z
+    0, 36, 17, 24,
+    18, 36, 16, 24,
+    33, 36, 15, 24,
+    48, 36, 15, 24,
+    63, 36, 17, 24,
+    80, 36, 16, 24,
+    96, 36, 16, 24,
+    112, 36, 16, 24,
+    128, 36, 9, 24,
+    137, 36, 9, 24,
+    146, 36, 16, 24,
+    162, 36, 8, 24,
+    170, 36, 24, 24,
+    194, 36, 15, 24,
+    209, 36, 24, 24,
+    233, 36, 16, 24,
+    0, 60, 24, 24,
+    24, 60, 16, 24,
+    40, 60, 16, 24,
+    56, 60, 16, 24,
+    72, 60, 16, 24,
+    88, 60, 15, 24,
+    103, 60, 23, 24,
+    126, 60, 16, 24,
+    142, 60, 15, 24,
+    157, 60, 16, 24,
+
+    // 0-9 (Numbers 5-9 not added)
+    0xff, 0, 0, 0,
+    23, 84, 9, 32,
+    32, 84, 17, 32,
+    49, 84, 17, 32,
+    66, 84, 17, 32,
+    0xff, 0, 0, 0,
+    0xff, 0, 0, 0,
+    0xff, 0, 0, 0,
+    0xff, 0, 0, 0,
+    0xff, 0, 0, 0,
+
+    0, 84, 23, 32, // * (ACT text)
+    // Next symbols do not exist
+    0xff, 0, 0, 0, // .
+    0xff, 0, 0, 0, // :
+    0xff, 0, 0, 0, // -
+    0xff, 0, 0, 0, // =
+    0xff, 0, 0, 0, // !
+    0xff, 0, 0, 0, // ?
+};
+
 void
 font_init()
 {
@@ -230,6 +282,13 @@ font_measurew_sm(const char *text)
        text, GLYPH_SML_WHITE_WIDTH, GLYPH_SML_GAP, glyph_info_sm);
 }
 
+uint16_t
+font_measurew_hg(const char *text)
+{
+   return _font_measurew_generic(
+       text, GLYPH_HG_WHITE_WIDTH, GLYPH_HG_GAP, glyph_info_hg);
+}
+
 void
 _font_draw_generic(const char *text, int16_t vx, int16_t vy,
                    const uint8_t ws_w, const uint8_t ws_h,
@@ -306,6 +365,14 @@ font_draw_sm(const char *text, int16_t vx, int16_t vy)
     _font_draw_generic(text, vx, vy,
                        GLYPH_SML_WHITE_WIDTH, GLYPH_SML_WHITE_HEIGHT, GLYPH_SML_GAP,
                        glyph_info_sm);
+}
+
+void
+font_draw_hg(const char *text, int16_t vx, int16_t vy)
+{
+    _font_draw_generic(text, vx, vy,
+                       GLYPH_HG_WHITE_WIDTH, GLYPH_HG_WHITE_HEIGHT, GLYPH_HG_GAP,
+                       glyph_info_hg);
 }
 
 void
