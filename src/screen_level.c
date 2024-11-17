@@ -53,6 +53,17 @@ typedef struct {
     const char *level_name;
     uint8_t    level_act;
     uint16_t   level_counter;
+
+    // Title card variables
+    int16_t tc_ribbon_y;
+    int16_t tc_title_x;
+    int16_t tc_zone_x;
+    int16_t tc_act_x;
+
+    int16_t tc_ribbon_tgt_y;
+    int16_t tc_title_tgt_x;
+    int16_t tc_zone_tgt_x;
+    int16_t tc_act_tgt_x;
 } screen_level_data;
 
 void
@@ -124,6 +135,31 @@ screen_level_update(void *d)
         level_fade -= 2;
         if(level_fade == 0) {
             data->level_transition = 4;
+        }
+    }
+
+    // Manage title card depending on level transition
+    {
+        const uint16_t speed = 16;
+        if(data->level_transition == 0) {
+            data->tc_ribbon_y += speed;
+            data->tc_title_x -= speed;
+            data->tc_zone_x -= speed;
+            data->tc_act_x -= speed;
+
+            if(data->tc_ribbon_y > data->tc_ribbon_tgt_y)
+                data->tc_ribbon_y = data->tc_ribbon_tgt_y;
+            if(data->tc_title_x < data->tc_title_tgt_x)
+                data->tc_title_x = data->tc_title_tgt_x;
+            if(data->tc_zone_x < data->tc_zone_tgt_x)
+                data->tc_zone_x = data->tc_zone_tgt_x;
+            if(data->tc_act_x < data->tc_act_tgt_x)
+                data->tc_act_x = data->tc_act_tgt_x;
+        } else if(data->level_transition == 1) {
+            data->tc_ribbon_y -= speed;
+            data->tc_title_x += speed;
+            data->tc_zone_x += speed;
+            data->tc_act_x += speed;
         }
     }
 
@@ -265,26 +301,25 @@ screen_level_draw(void *d)
     // Title card
     if(data->level_transition <= 1) {
         font_reset_color();
-        uint16_t wt = font_measurew_hg(data->level_name);
-        uint16_t wz = font_measurew_hg("ZONE");
-        uint16_t vx = CENTERX - (wt >> 1);
-        font_draw_hg(data->level_name, vx, 70);
-        font_draw_hg("ZONE", vx + wt - wz, 70 + GLYPH_HG_WHITE_HEIGHT + 5);
+        font_draw_hg(data->level_name, data->tc_title_x, 70);
+        font_draw_hg("ZONE", data->tc_zone_x, 70 + GLYPH_HG_WHITE_HEIGHT + 5);
+
+        // ACT card
         char buffer[5];
         snprintf(buffer, 5, "*%d", data->level_act + 1);
-        font_draw_hg(buffer, vx + wt, 70 + GLYPH_HG_WHITE_HEIGHT + 5);
+        font_draw_hg(buffer, data->tc_act_x, 70 + GLYPH_HG_WHITE_HEIGHT + 40);
 
         // Game text
-        wt = font_measurew_sm("SONIC XA");
-        font_draw_sm("SONIC XA", 50 + ((80 - wt) >> 1), 180);
+        uint16_t wt = font_measurew_sm("SONIC XA");
+        font_draw_sm("SONIC XA", 50 + ((80 - wt) >> 1), data->tc_ribbon_y + 180);
 
-        // Title card rectangle background
+        // Title card ribbon background
         {
             POLY_F4 *poly = get_next_prim();
             increment_prim(sizeof(POLY_F4));
             setPolyF4(poly);
             setRGB0(poly, 0xe0, 0x0, 0x0);
-            setXYWH(poly, 50, 0, 80, 200);
+            setXYWH(poly, 50, data->tc_ribbon_y, 80, 200);
             sort_prim(poly, OTZ_LAYER_HUD);
         }
     }
@@ -594,6 +629,23 @@ level_load_level(screen_level_data *data)
         data->level_name = "TEST LEVEL";
         data->level_act = 0;
         break;
+    }
+
+    // Pre-calculate title card target X and Y positions
+    {
+        uint16_t wt = font_measurew_hg(data->level_name);
+        uint16_t wz = font_measurew_hg("ZONE");
+        uint16_t vx = CENTERX - (wt >> 1) + 20;
+
+        data->tc_ribbon_tgt_y = 0;
+        data->tc_title_tgt_x = vx;
+        data->tc_zone_tgt_x = vx + wt - wz;
+        data->tc_act_tgt_x = vx + wt - 40;
+
+        data->tc_ribbon_y = -200;
+        data->tc_title_x = SCREEN_XRES + wt;
+        data->tc_zone_x  = SCREEN_XRES + wt;
+        data->tc_act_x   = SCREEN_XRES + wt;
     }
 }
 
