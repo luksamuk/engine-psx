@@ -111,6 +111,7 @@ static const char *creditstxt[] = {
     "Original Level Graphics",
     "NiteShadow",
     "Techokami",
+    "Blue Frenzy",
     "\r",
 
     "Fonts Ripping",
