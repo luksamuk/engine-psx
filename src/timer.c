@@ -10,6 +10,7 @@ volatile int      frame_counter = 0;
 volatile int      frame_rate = 0;
 volatile uint8_t  counting_frames = 0;
 volatile uint32_t frame_count = 0;
+volatile uint32_t global_count = 0;
 
 void
 timer_tick()
@@ -42,6 +43,7 @@ timer_update()
     frame_counter++;
     if(counting_frames && !paused)
         frame_count++;
+    global_count++;
 }
 
 int
@@ -54,6 +56,12 @@ uint32_t
 get_elapsed_frames()
 {
     return frame_count;
+}
+
+uint32_t
+get_global_frames()
+{
+    return global_count;
 }
 
 void

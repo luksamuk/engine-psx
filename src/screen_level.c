@@ -84,7 +84,7 @@ screen_level_load()
     pause_elapsed_frames();
 
     level_fade = 0;
-    data->level_counter = 180;
+    data->level_counter = 120;
 
     level_ring_count = 0;
     level_finished = 0;
@@ -228,11 +228,11 @@ screen_level_update(void *d)
         }
     }
 
+    camera_update(&camera, &player);
+    update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
+    object_pool_update(&obj_table_common);
     // Only update these if past fade in!
     if(data->level_transition > 0) {
-        camera_update(&camera, &player);
-        update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
-        object_pool_update(&obj_table_common);
         player_update(&player);
     }
 }

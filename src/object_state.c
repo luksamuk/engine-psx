@@ -163,7 +163,10 @@ object_render(ObjectState *state, ObjectTableEntry *typedata,
 begin_render_routine:
 
     if(state->props & OBJ_FLAG_ANIM_LOCK) {
-        uint32_t frame = get_elapsed_frames();
+        // This is a weird fix for animation locks when the level
+        // timer is frozen, but hey, it works.
+        uint32_t frame = paused ? get_elapsed_frames() : get_global_frames();
+
         if(an->duration > 0) {
             frame = (frame / an->duration);
             if(an->loopback >= 0) frame %= an->num_frames;
