@@ -78,19 +78,20 @@ void     sound_xa_set_volume(uint8_t vol);
 
 /* BGM audio table */
 typedef enum {
-    BGM_LEVELSELECT = 0,
-    BGM_TITLESCREEN = 1,
-    BGM_CREDITS     = 2,
-    BGM_LEVELCLEAR  = 3,
-    BGM_PLAYGROUND1 = 4,
-    BGM_PLAYGROUND2 = 5,
-    BGM_PLAYGROUND3 = 6,
-    BGM_PLAYGROUND4 = 7,
-    BGM_GREENHILL   = 8,
-    BGM_SURELYWOOD  = 9,
-    BGM_DAWNCANYON  = 10,
-    BGM_EGGMANLAND  = 11,
-    BGM_NUM_SONGS   = BGM_EGGMANLAND + 1,
+    BGM_LEVELSELECT  = 0,
+    BGM_TITLESCREEN  = 1,
+    BGM_CREDITS      = 2,
+    BGM_LEVELCLEAR   = 3,
+    BGM_PLAYGROUND1  = 4,
+    BGM_PLAYGROUND2  = 5,
+    BGM_PLAYGROUND3  = 6,
+    BGM_PLAYGROUND4  = 7,
+    BGM_GREENHILL    = 8,
+    BGM_SURELYWOOD   = 9,
+    BGM_DAWNCANYON   = 10,
+    BGM_AMAZINGOCEAN = 11,
+    BGM_EGGMANLAND   = 12,
+    BGM_NUM_SONGS    = BGM_EGGMANLAND + 1,
 } BGMOption;
 
 typedef struct {

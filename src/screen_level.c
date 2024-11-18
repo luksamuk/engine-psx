@@ -622,7 +622,7 @@ level_load_level(screen_level_data *data)
         break;
     case 10:
     case 11:
-        // TODO: bgm
+        sound_bgm_play(BGM_AMAZINGOCEAN);
         data->level_name = "AMAZING OCEAN";
         data->level_act = level - 10;
         break;
