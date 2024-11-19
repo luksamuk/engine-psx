@@ -288,8 +288,7 @@ _render_16(
 void
 _render_128(
     TileMap128 *map128, TileMap16 *map16,
-    int16_t vx, int16_t vy, int16_t otz,
-    uint16_t frame)
+    int16_t vx, int16_t vy, uint16_t frame)
 {
     // Clipping
     TILECLIP(128);
@@ -310,7 +309,9 @@ _render_128(
             map16,
             vx + (deltax << 4),
             vy + (deltay << 4),
-            (tileframes[idx].props & MAP128_PROP_FRONT) ? OTZ_LAYER_LEVEL_FG_FRONT : otz,
+            (tileframes[idx].props & MAP128_PROP_FRONT)
+            ? OTZ_LAYER_LEVEL_FG_FRONT
+            : OTZ_LAYER_LEVEL_FG_BACK,
             tileframes[idx].index);
     }
 }
@@ -320,8 +321,7 @@ _render_128(
 void
 _render_layer(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
-    int16_t vx, int16_t vy, int16_t otz,
-    uint8_t layer)
+    int16_t vx, int16_t vy, uint8_t layer)
 {
     LevelLayerData *l = &lvl->layers[layer];
     // vx and vy are the camera center.
@@ -362,11 +362,9 @@ _render_layer(
             int16_t frame_idx = (iy * l->width) + ix;
             if(l->tiles[frame_idx] == 0) continue;
 
-            _render_128(//lvl,
-                        map128, map16,
+            _render_128(map128, map16,
                         ((ix - tilex) << 7) - deltax,
                         ((iy - tiley) << 7) - deltay,
-                        otz,
                         l->tiles[frame_idx]);
         }
     }
@@ -531,12 +529,7 @@ render_lvl(
         cy = (cam_y >> 12);
 
     if(lvl->num_layers > 0)
-        _render_layer(lvl, map128, map16, cx, cy, OTZ_LAYER_LEVEL_FG_BACK, 0);
-
-    // TODO: Add front layer rendered at OTZ_LAYER_LEVEL_FG_FRONT
-    // TODO: Fix level mapping tool to consider only mapping layers
-    /* if(lvl->num_layers > 1) */
-    /*     _render_layer(lvl, map128, map16, cx, cy, OTZ_LAYER_LEVEL_FG_FRONT, 1); */
+        _render_layer(lvl, map128, map16, cx, cy, 0);
 
     // Texture TPAGE info for level foreground (back tiles)
     DR_TPAGE *tpage = get_next_prim();
