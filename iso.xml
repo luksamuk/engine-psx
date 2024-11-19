@@ -286,6 +286,9 @@
 	<file name="YEA.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/YEA.VAG" />
+	<file name="SWITCH.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SWITCH.VAG" />
       </dir>
 
       <dir name="BGM">

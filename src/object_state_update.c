@@ -28,6 +28,7 @@ extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
 extern SoundEffect sfx_yea;
+extern SoundEffect sfx_switch;
 
 extern int debug_mode;
 
@@ -51,6 +52,7 @@ static void _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos);
 static void _explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Player hitbox information. Calculated once per frame.
 static int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -112,6 +114,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_EXPLOSION:              _explosion_update(state, typedata, pos);          break;
     case OBJ_MONITOR_IMAGE:          _monitor_image_update(state, typedata, pos);      break;
     case OBJ_SHIELD:                 _shield_update(state, typedata, pos);             break;
+    case OBJ_SWITCH:                 _switch_update(state, typedata, pos);             break;
     }
 }
 
@@ -600,4 +603,53 @@ _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
     // Compensate position since it is drawn before player update
     state->freepos->vx += player.vel.vx;
     state->freepos->vy += player.vel.vy;
+}
+
+
+static void
+_switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+{
+    // Switches are always solid at same size and change animation
+    // while being upon.
+    int32_t solidity_vx = pos->vx - 16;
+    int32_t solidity_vy = pos->vy - 8;
+
+    // Set as not pressed by default
+    state->anim_state.animation = 0;
+
+    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                           solidity_vx, solidity_vy, 32, 8))
+    {
+        // Check for intersection on left/right
+        if((player_vy + 36) > solidity_vy
+            && !((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32))) {
+
+            if((player_vx + 8) < pos->vx) {
+                player.ev_right.collided = 1;
+                player.ev_right.coord = (solidity_vx + 2);
+                player.ev_right.angle = 0;
+            } else {
+                player.ev_left.collided = 1;
+                player.ev_left.coord = solidity_vx + 16;
+                player.ev_right.angle = 0;
+            }
+        }
+        // Landing on top; pressing
+        else if(((player_vy + player_height) < solidity_vy + 16))
+        {
+            player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
+            player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
+            player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy;
+            state->anim_state.animation = 1;
+            if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
+                // Switch was just pressed; play "beep"
+                sound_play_vag(sfx_switch, 0);
+            }
+
+            state->props |= OBJ_FLAG_SWITCH_PRESSED;
+        }
+    } else {
+        // If button is pressed... un-press it
+        state->props &= ~OBJ_FLAG_SWITCH_PRESSED;
+    }
 }

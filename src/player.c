@@ -44,6 +44,7 @@ SoundEffect sfx_death  = { 0 };
 SoundEffect sfx_ringl  = { 0 };
 SoundEffect sfx_shield = { 0 };
 SoundEffect sfx_yea    = { 0 };
+SoundEffect sfx_switch = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -98,6 +99,7 @@ load_player(Player *player,
     if(sfx_ringl.addr == 0)  sfx_ringl   = sound_load_vag("\\SFX\\RINGLOSS.VAG;1");
     if(sfx_shield.addr == 0) sfx_shield  = sound_load_vag("\\SFX\\SHIELD.VAG;1");
     if(sfx_yea.addr == 0)    sfx_yea     = sound_load_vag("\\SFX\\YEA.VAG;1");
+    if(sfx_switch.addr == 0) sfx_switch  = sound_load_vag("\\SFX\\SWITCH.VAG;1");
 }
 
 void

@@ -27,6 +27,9 @@ typedef enum {
 
     // Rings-only flags
     OBJ_FLAG_RING_MOVING = 0x10, // Ring is moving (ring loss)
+
+    // Switch-only flags
+    OBJ_FLAG_SWITCH_PRESSED = 0x10,
 } ObjectGeneralFlag;
 
 typedef struct {
