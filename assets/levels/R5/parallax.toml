@@ -1,0 +1,80 @@
+[low_clouds]
+width = 256
+height = 37
+u0 = 0
+v0 = 25
+scrollx = 0
+speedx = 0.1
+y0 = 117
+single = false
+
+[water1]
+width = 256
+height = 6
+u0 = 0
+v0 = 0
+scrollx = 0
+speedx = 0.4
+y0 = 152
+single = false
+
+[water2]
+width = 256
+height = 5
+u0 = 0
+v0 = 6
+scrollx = 0
+speedx = 0.5
+y0 = 158
+single = false
+
+[water3]
+width = 248
+height = 5
+u0 = 0
+v0 = 11
+scrollx = 0
+speedx = 0.6
+y0 = 163
+single = false
+
+[water4]
+width = 256
+height = 5
+u0 = 0
+v0 = 16
+scrollx = 0
+speedx = 0.7
+y0 = 168
+single = false
+
+[water5]
+width = 198
+height = 4
+u0 = 0
+v0 = 20
+scrollx = 0
+speedx = 0.8
+y0 = 173
+single = false
+
+[island]
+width = 256
+height = 48
+u0 = 0
+v0 = 62
+scrollx = 0
+speedx = 0
+y0 = 106
+single = true
+
+
+[seabed1]
+width = 256
+height = 256
+u0 = 0
+v0 = 256
+scrollx = 0.2
+speedx = 0
+y0 = 177
+single = false

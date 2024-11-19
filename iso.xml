@@ -210,9 +210,9 @@
 	  <file name="BG1.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R5/BG1.TIM" />
-	  <!-- <file name="PRL.PRL" -->
-	  <!-- 	type="data" -->
-	  <!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R5/PRL.PRL" /> -->
+	  <file name="PRL.PRL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R5/PRL.PRL" />
 	</dir>
 
       </dir> <!-- LEVELS -->

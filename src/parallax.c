@@ -142,6 +142,9 @@ parallax_draw(Parallax *prl, Camera *camera)
             // Don't draw if strip is outside screen
             if((wx + strip->width) < 0) continue;
 
+            // If this is a single strip, adjust it and move it forward a bit
+            if(strip->is_single) wx += SCREEN_XRES >> 1;
+
             POLY_FT4 *poly = &prl_pols[prl_current_buffer][si][poly_n];
             setRGB0(poly, level_fade, level_fade, level_fade);
             setXYWH(poly, wx, strip->y0, strip->width, strip->height);

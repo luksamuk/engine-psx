@@ -673,8 +673,12 @@ level_set_clearcolor()
         set_clear_color(LERPC(level_fade, 36),
                         LERPC(level_fade, 0),
                         LERPC(level_fade, 180));
-    else if(level == 6 || level == 7)
+    else if(level == 6 || level == 7) // SWZ
         set_clear_color(0, 0, 0);
+    else if(level == 10 || level == 11) // AOZ
+        set_clear_color(LERPC(level_fade, 56),
+                        LERPC(level_fade, 104),
+                        LERPC(level_fade, 200));
     // R0
     else set_clear_color(LERPC(level_fade, 63),
                          LERPC(level_fade, 0),

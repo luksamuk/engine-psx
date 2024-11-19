@@ -36,6 +36,7 @@ height = 44
 u0 = 0
 v0 = 0
 scrollx = 0.2
+speedx = 0
 y0 = 36
 single = false
 
