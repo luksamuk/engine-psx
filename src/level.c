@@ -310,7 +310,7 @@ _render_128(
             map16,
             vx + (deltax << 4),
             vy + (deltay << 4),
-            otz,
+            (tileframes[idx].props & MAP128_PROP_FRONT) ? OTZ_LAYER_LEVEL_FG_FRONT : otz,
             tileframes[idx].index);
     }
 }
@@ -545,10 +545,10 @@ render_lvl(
     sort_prim(tpage, OTZ_LAYER_LEVEL_FG_BACK);
 
     // Texture TPAGE info for level foreground (front tiles)
-    /* tpage = get_next_prim(); */
-    /* increment_prim(sizeof(DR_TPAGE)); */
-    /* setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty)); */
-    /* sort_prim(tpage, OTZ_LAYER_LEVEL_FG_FRONT); */
+    tpage = get_next_prim();
+    increment_prim(sizeof(DR_TPAGE));
+    setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
+    sort_prim(tpage, OTZ_LAYER_LEVEL_FG_FRONT);
 
     // Render objects on nearest window
     _render_obj_window(lvl, tbl, cx, cy);

@@ -47,6 +47,7 @@ typedef struct {
 #define MAP128_PROP_SOLID  0
 #define MAP128_PROP_ONEWAY 1
 #define MAP128_PROP_NONE   2
+#define MAP128_PROP_FRONT  4
 
 typedef struct {
     uint8_t width;

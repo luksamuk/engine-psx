@@ -181,6 +181,7 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
 
             if((piece > 0) &&
                (piece_props != MAP128_PROP_NONE) &&
+               !(piece_props & MAP128_PROP_FRONT) &&
                !((direction != CDIR_FLOOR) && (piece_props & MAP128_PROP_ONEWAY))) {
                 uint8_t hpos;
                 uint8_t h;

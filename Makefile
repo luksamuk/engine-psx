@@ -120,7 +120,8 @@ cleancook:
 	       assets/levels/**/collision16.json \
 	       assets/levels/**/tilemap128.csv \
 	       assets/levels/**/tilemap128_solid.csv \
-	       assets/levels/**/tilemap128_oneway.csv
+	       assets/levels/**/tilemap128_oneway.csv \
+	       assets/levels/**/tilemap128_front.csv
 
 # Object models
 %.mdl: %.rsd %.ply %.mat
@@ -149,6 +150,7 @@ cleancook:
 	rm -f "$(basename $<)_solid.psxcsv"
 	rm -f "$(basename $<)_oneway.psxcsv"
 	rm -f "$(basename $<)_none.psxcsv"
+	rm -f "$(basename $<)_front.psxcsv"
 
 # Level maps
 # These maps should use a tileset generated from "128.png".

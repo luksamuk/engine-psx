@@ -62,7 +62,7 @@ def get_max_grid(df):
 #    4.1. Frames: Columns * Rows
 #         4.1.1 Tilenum: short (16 bits)
 #         4.1.2 Props:   byte  (8 bits)
-def export_binary(f, solid, oneway, nocol):
+def export_binary(f, solid, oneway, nocol, front):
     grid = get_max_grid(solid)
     f.write(c_ushort(128))
     f.write(c_ushort(grid[0] * grid[1]))
@@ -73,10 +73,13 @@ def export_binary(f, solid, oneway, nocol):
             chunk_solid = get_chunk(solid, cx, cy)
             chunk_oneway = None
             chunk_nocol = None
+            chunk_front = None
             if oneway is not None:
                 chunk_oneway = get_chunk(oneway, cx, cy)
             if nocol is not None:
                 chunk_nocol = get_chunk(nocol, cx, cy)
+            if front is not None:
+                chunk_front = get_chunk(front, cx, cy)
             # chunk_id = (cy * grid[0]) + cx
             # print(f"Exporting tile {chunk_id}...")
             # Loop for each piece within chunk
@@ -90,6 +93,9 @@ def export_binary(f, solid, oneway, nocol):
                     if index <= 0 and chunk_nocol is not None:
                         index = chunk_nocol.iloc[py, px]
                         props = 2 if index > 0 else 0
+                    if index <= 0 and chunk_front is not None:
+                        index = chunk_front.iloc[py, px]
+                        props = 4 if index > 0 else 0
                     f.write(c_ushort(max(index, 0)))
                     f.write(c_ubyte(props))
 
@@ -119,9 +125,10 @@ def main():
         solid_layer = load_data(f"{basepath}_solid.psxcsv")
         oneway_layer = load_data(f"{basepath}_oneway.psxcsv")
         none_layer = load_data(f"{basepath}_none.psxcsv")
+        front_layer = load_data(f"{basepath}_front.psxcsv")
 
     with open(out, "wb") as f:
-        export_binary(f, solid_layer, oneway_layer, none_layer)
+        export_binary(f, solid_layer, oneway_layer, none_layer, front_layer)
 
 
 if __name__ == "__main__":
