@@ -479,6 +479,7 @@ level_load_level(screen_level_data *data)
     char filename0[255], filename1[255];
 
     uint8_t round = level >> 1;
+    if(round == 9) round = 8; // Adjustment for Eggmanland
 
     level_set_clearcolor();
 

@@ -17,9 +17,9 @@ const BGMTableEntry bgm_table[] = {
     {"\\BGM\\BGM002.XA;1",   1, 4050, 0}, // GHZ
     {"\\BGM\\BGM002.XA;1",   2, 3250, 0}, // SWZ
 
-    {"\\BGM\\BGM003.XA;1",   0, 3350, 0}, // DCZ
-    {"\\BGM\\BGM003.XA;1",   2, 6100, 0}, // A0Z
-    {"\\BGM\\BGM003.XA;1",   1, 4900, 0}, // EZ
+    {"\\BGM\\BGM003.XA;1",   0, 3900, 0}, // DCZ
+    {"\\BGM\\BGM003.XA;1",   2, 7420, 0}, // A0Z
+    {"\\BGM\\BGM003.XA;1",   1, 2830, 0}, // EZ
 };
 
 void

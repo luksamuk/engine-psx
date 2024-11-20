@@ -74,8 +74,8 @@ static const char *creditstxt[] = {
     "\r",
 
     "Eggmanland Zone",
-    "Capital City: Eggmanland Day Final Mix",
-    "By ViosVibes",
+    "Eggmanland: 16 Bit Remix",
+    "By DRocca",
     "\r",
 
     "Level Select Theme",
@@ -106,12 +106,14 @@ static const char *creditstxt[] = {
     "Level and Menu Graphics Ripping",
     "Paraemon",
     "WarCR",
+    "PicsAndPixels",
     "\r",
 
     "Original Level Graphics",
     "NiteShadow",
     "Techokami",
     "Blue Frenzy",
+    "DerZocker",
     "\r",
 
     "Fonts Ripping",
