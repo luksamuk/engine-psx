@@ -286,6 +286,18 @@ screen_level_draw(void *d)
                 LERPC(level_fade, 0xb5));
         sort_prim(poly, OTZ_LAYER_LEVEL_BG);
     }
+    // If we're in R8, draw a gradient as well, but at a lower position.
+    else if(level == 16 || level == 17 || level == 18) {
+        POLY_G4 *poly = get_next_prim();
+        increment_prim(sizeof(POLY_G4));
+        setPolyG4(poly);
+        setXYWH(poly, 0, 120, SCREEN_XRES, SCREEN_YRES - 120);
+        setRGB0(poly, LERPC(level_fade, 0x21), 0x00, 0x00);
+        setRGB1(poly, LERPC(level_fade, 0x21), 0x00, 0x00);
+        setRGB2(poly, LERPC(level_fade, 0xbd), 0x00, LERPC(level_fade, 0xbd));
+        setRGB3(poly, LERPC(level_fade, 0xbd), 0x00, LERPC(level_fade, 0xbd));
+        sort_prim(poly, OTZ_LAYER_LEVEL_BG);
+    }
 
     // Pause text
     if(paused) {
@@ -673,12 +685,14 @@ level_set_clearcolor()
         set_clear_color(LERPC(level_fade, 36),
                         LERPC(level_fade, 0),
                         LERPC(level_fade, 180));
-    else if(level == 6 || level == 7) // SWZ
+    else if(level == 6 || level == 7) // R3 (SWZ)
         set_clear_color(0, 0, 0);
-    else if(level == 10 || level == 11) // AOZ
+    else if(level == 10 || level == 11) // R5 (AOZ)
         set_clear_color(LERPC(level_fade, 56),
                         LERPC(level_fade, 104),
                         LERPC(level_fade, 200));
+    else if(level == 16 || level == 17 || level == 18) // R8 (EZ)
+        set_clear_color(LERPC(level_fade, 0x21), 0x00, 0x00);
     // R0
     else set_clear_color(LERPC(level_fade, 63),
                          LERPC(level_fade, 0),

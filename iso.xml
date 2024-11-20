@@ -215,6 +215,15 @@
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R5/PRL.PRL" />
 	</dir>
 
+	<dir name="R8">
+	  <file name="BG0.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/BG0.TIM" />
+	  <file name="PRL.PRL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/PRL.PRL" />
+	</dir>
+	  
       </dir> <!-- LEVELS -->
 
       <dir name="MODELS">
