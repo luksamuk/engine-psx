@@ -42,7 +42,6 @@ sound_bgm_check_stop(BGMOption t)
     }
 }
 
-
 const BGMTableEntry *
 sound_bgm_get_data(BGMOption t)
 {
