@@ -141,7 +141,7 @@ screen_alloc(uint32_t size)
 void
 screen_free()
 {
-    printf("Scene: Disposing of %d / %d bytes\n",
+    printf("Scene: Disposing of %u / %u bytes\n",
            alloc_arena_bytes_used(&screen_arena),
            alloc_arena_bytes_free(&screen_arena));
     alloc_arena_free(&screen_arena);

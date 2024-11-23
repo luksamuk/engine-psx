@@ -5,6 +5,7 @@
 #include <psxgte.h>
 #include "level.h"
 #include "collision.h"
+#include "input.h"
 
 // Constants for running the game at a fixed 60 FPS.
 // These constants are also in a 12-scale format for fixed point math.
@@ -55,6 +56,8 @@ typedef enum {
 } PlayerAction;
 
 typedef struct {
+    InputState input;
+
     Chara     chara;
 
     CharaAnim *cur_anim;

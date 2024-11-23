@@ -201,6 +201,13 @@ screen_levelselect_update(void *d)
             data->music_selected = data->soundtest_selection;
         } else {
             screen_level_setlevel(data->menu_choice);
+            screen_level_setmode(LEVEL_MODE_NORMAL);
+            // Start auto-demo
+            if(pad_pressing(PAD_TRIANGLE)) {
+                screen_level_setmode(LEVEL_MODE_DEMO);
+            } else if(pad_pressing(PAD_CIRCLE)) {
+                screen_level_setmode(LEVEL_MODE_RECORD);
+            }
             scene_change(SCREEN_LEVEL);
         }
     }

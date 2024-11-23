@@ -14,8 +14,12 @@
 
 #include "screens/level.h"
 
+#define AUTODEMO_WAIT_FRAMES 1500
+
 extern int      debug_mode;
 extern uint32_t level_score_count;
+
+uint16_t demo_number = 0;
 
 typedef struct {
     int32_t prect_x;
@@ -71,6 +75,8 @@ typedef struct {
     VECTOR  scale;
     MATRIX  world;
 
+    uint32_t autodemo_timer;
+
     /* Model planet; */
 } screen_title_data;
 
@@ -111,6 +117,8 @@ screen_title_load()
     data->menu_option = 0;
     data->selected = 0;
     data->next_scene = 0;
+
+    data->autodemo_timer = 0;
 
     bzero(data->prl_pos, PRL_NUM_PIECES * sizeof(int32_t));
     data->prl_pos[0] = 32 << 12; // Island center
@@ -166,10 +174,19 @@ screen_title_update(void *d)
         if(data->rgb_count < 128)
             data->rgb_count += 4;
         else {
-            if(data->menu_option == 0 && pad_pressed(PAD_START)) {
-                // TODO: Check for saved data
-                data->menu_option = 2; // New Game
-                //data->menu_option = 1; // Continue
+            if(data->menu_option == 0) {
+                // Play AutoDemo if you took too long!
+                // Wait until music stops playing.
+                data->autodemo_timer++;
+                if(data->autodemo_timer > AUTODEMO_WAIT_FRAMES) {
+                    data->selected = 1;
+                }
+
+                if(pad_pressed(PAD_START)) {
+                    // TODO: Check for saved data
+                    data->menu_option = 2; // New Game
+                    //data->menu_option = 1; // Continue
+                }
             } else if(data->menu_option > 0) {
                 if(pad_pressed(PAD_LEFT) && (data->menu_option > 1))
                     data->menu_option--;
@@ -181,13 +198,17 @@ screen_title_update(void *d)
                     switch(data->menu_option) {
                     case 1: // Continue
                         // For now, this redirects you to Green Hill Zone 1
+                        screen_title_reset_demo();
                         screen_level_setlevel(4);
+                        screen_level_setmode(LEVEL_MODE_NORMAL);
                         data->next_scene = SCREEN_LEVEL;
                         level_score_count = 0;
                         break;
                     case 2: // New Game
                         // Use Playground Zone 1 as first level
+                        screen_title_reset_demo();
                         screen_level_setlevel(0);
+                        screen_level_setmode(LEVEL_MODE_NORMAL);
                         data->next_scene = SCREEN_LEVEL;
                         level_score_count = 0;
                         break;
@@ -204,7 +225,14 @@ screen_title_update(void *d)
 
     if(data->rgb_count > 0) data->rgb_count -= 4;
     else {
-        scene_change(data->next_scene);
+        if(data->autodemo_timer >= AUTODEMO_WAIT_FRAMES) {
+            screen_level_setlevel(demo_number);
+            screen_level_setmode(LEVEL_MODE_DEMO);
+            level_score_count = 0;
+            // Cycle to next demo if we ever come back here
+            screen_title_cycle_demo();
+            scene_change(SCREEN_LEVEL);
+        } else scene_change(data->next_scene);
     }
 }
 
@@ -413,4 +441,22 @@ screen_title_draw(void *d)
     snprintf(buffer, 255, "2024 luksamuk");
     x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
     font_draw_sm(buffer, x, SCREEN_YRES - 14);
+}
+
+void
+screen_title_reset_demo()
+{
+    demo_number = 0;
+}
+
+void
+screen_title_cycle_demo()
+{
+    switch(demo_number) {
+    case 0:  demo_number = 4;  break;
+    case 4:  demo_number = 6;  break;
+    case 6:  demo_number = 16; break;
+    case 16: demo_number = 0;  break;
+    default: demo_number = 0;  break;
+    }
 }

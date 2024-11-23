@@ -58,6 +58,7 @@ load_player(Player *player,
             const char *chara_filename,
             TIM_IMAGE  *sprites)
 {
+    player->input = (InputState){ 0 };
     load_chara(&player->chara, chara_filename, sprites);
     player->cur_anim = NULL;
     player->pos   = (VECTOR){ 0 };
@@ -406,10 +407,14 @@ _player_update_collision_tb(Player *player)
 void
 player_update(Player *player)
 {
+    // NOTE THAT PLAYER INPUT IS NOT UPDATED AUTOMATICALLY!
+    // One must call input_get_state on player->input so that
+    // player input is recognized. This is done in screen_level.c.
+
     _player_update_collision_lr(player);
     _player_update_collision_tb(player);
 
-    // Iframes
+    // i-frames
     if(player->iframes > 0) player->iframes--;
 
     // X movement
@@ -430,9 +435,9 @@ player_update(Player *player)
                 * angle_sin) >> 12;
 
             // Deceleration on input
-            if(player->vel.vz > 0 && pad_pressing(PAD_LEFT))
+            if(player->vel.vz > 0 && input_pressing(&player->input, PAD_LEFT))
                 player->vel.vz -= X_ROLL_DECEL + X_ROLL_FRICTION;
-            else if(player->vel.vz < 0 && pad_pressing(PAD_RIGHT))
+            else if(player->vel.vz < 0 && input_pressing(&player->input, PAD_RIGHT))
                 player->vel.vz += X_ROLL_DECEL + X_ROLL_FRICTION;
             else {
                 // Apply roll friction
@@ -444,7 +449,7 @@ player_update(Player *player)
                 player->action = ACTION_NONE;
         } else if(player->action == ACTION_SPINDASH) {
             // Release
-            if(!pad_pressing(PAD_DOWN)) {
+            if(!input_pressing(&player->input, PAD_DOWN)) {
                 player->vel.vz +=
                     (0x8000 + (floor12(player->spinrev) >> 1)) * player->anim_dir;
                 player->action = ACTION_ROLLING;
@@ -455,7 +460,7 @@ player_update(Player *player)
                 if(player->spinrev > 0) {
                     player->spinrev -= (div12(player->spinrev, 0x200) << 12) / 0x100000;
                 }
-                if(pad_pressed(PAD_CROSS)) {
+                if(input_pressed(&player->input, PAD_CROSS)) {
                     player->spinrev += 0x2000;
                     sound_play_vag(sfx_dash, 0);
                 }
@@ -464,7 +469,8 @@ player_update(Player *player)
             // Default physics
             player->action = ACTION_NONE;
 
-            if(pad_pressing(PAD_RIGHT) && (player->ctrllock == 0)) {
+            if(input_pressing(&player->input, PAD_RIGHT)
+               && (player->ctrllock == 0)) {
                 if(player->vel.vz < 0) {
                     player->action = ACTION_SKIDDING;
                     player->vel.vz += X_DECEL;
@@ -473,7 +479,8 @@ player_update(Player *player)
                         player->vel.vz += X_ACCEL;
                     player->anim_dir = 1;
                 }
-            } else if(pad_pressing(PAD_LEFT) && (player->ctrllock == 0)) {
+            } else if(input_pressing(&player->input, PAD_LEFT)
+                      && (player->ctrllock == 0)) {
                 if(player->vel.vz > 0) {
                     player->action = ACTION_SKIDDING;
                     player->vel.vz -= X_DECEL;
@@ -502,12 +509,13 @@ player_update(Player *player)
             }
 
             /* Action changers */
-            if(pad_pressing(PAD_DOWN)) {
+            if(input_pressing(&player->input, PAD_DOWN)) {
                 if(abs(player->vel.vz) >= X_MIN_ROLL_SPD) { // Rolling
                     player->action = ACTION_ROLLING;
                     player_set_animation_direct(player, ANIM_ROLLING);
                     sound_play_vag(sfx_roll, 0);
-                } else if(player->vel.vz == 0 && pad_pressed(PAD_CROSS)) { // Spindash
+                } else if(player->vel.vz == 0
+                          && input_pressed(&player->input, PAD_CROSS)) { // Spindash
                     player->action = ACTION_SPINDASH;
                     player_set_animation_direct(player, ANIM_ROLLING);
                     player->spinrev = 0;
@@ -526,12 +534,14 @@ player_update(Player *player)
         player->vel.vy = (player->vel.vz * -rsin(player->angle)) >> 12;
     } else {
         // Air X movement
-        if(pad_pressing(PAD_RIGHT) && (player->ctrllock == 0)) {
+        if(input_pressing(&player->input, PAD_RIGHT)
+           && (player->ctrllock == 0)) {
             if(player->vel.vx < X_TOP_SPD)
                 player->vel.vx += X_AIR_ACCEL;
             if(!player->airdirlock)
                 player->anim_dir = 1;
-        } else if(pad_pressing(PAD_LEFT) && (player->ctrllock == 0)) {
+        } else if(input_pressing(&player->input, PAD_LEFT)
+                  && (player->ctrllock == 0)) {
             if(player->vel.vx > -X_TOP_SPD)
                 player->vel.vx -= X_AIR_ACCEL;
             if(!player->airdirlock)
@@ -557,7 +567,7 @@ player_update(Player *player)
     // Y movement
     if(!player->grnd) {
         if(player->action == ACTION_JUMPING) {
-            if(!pad_pressing(PAD_CROSS)) {
+            if(!input_pressing(&player->input, PAD_CROSS)) {
                 // Short jump
                 if(player->vel.vy < -Y_MIN_JUMP)
                     player->vel.vy = -Y_MIN_JUMP;
@@ -578,7 +588,7 @@ player_update(Player *player)
             ? Y_HURT_GRAVITY
             : Y_GRAVITY;
     } else {
-        if(pad_pressed(PAD_CROSS) && player->action != ACTION_SPINDASH) {
+        if(input_pressed(&player->input, PAD_CROSS) && player->action != ACTION_SPINDASH) {
             player->vel.vx -= (Y_JUMP_STRENGTH * rsin(player->angle)) >> 12;
             player->vel.vy -= (Y_JUMP_STRENGTH * rcos(player->angle)) >> 12;
             player->grnd = 0;
@@ -597,18 +607,19 @@ player_update(Player *player)
         } else if(player->vel.vz == 0) {
             if(player->action == ACTION_SPINDASH) {
                 player_set_animation_direct(player, ANIM_ROLLING);
-            } else if(pad_pressing(PAD_UP)) {
+            } else if(input_pressing(&player->input, PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
                 player->action = ACTION_LOOKUP;
-            } else if(pad_pressing(PAD_DOWN)) {
+            } else if(input_pressing(&player->input, PAD_DOWN)) {
                 player_set_animation_direct(player, ANIM_CROUCHDOWN);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
                 player->action = ACTION_CROUCHDOWN;
             } else if(player->idle_timer == 0) {
                 player_set_animation_direct(player, ANIM_IDLE);
                 player->loopback_frame = 2;
-            } else if (!pad_pressing(PAD_LEFT) && !pad_pressing(PAD_RIGHT)) {
+            } else if (!input_pressing(&player->input, PAD_LEFT)
+                       && !input_pressing(&player->input, PAD_RIGHT)) {
                 player_set_animation_direct(player, ANIM_STOPPED);
                 if(player->idle_timer > 0) player->idle_timer--;
             }

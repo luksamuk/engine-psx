@@ -3,8 +3,7 @@
 #include <psxpad.h>
 
 static uint8_t  _padbuff[2][34];
-static uint16_t _cur_state = 0;
-static uint16_t _old_state = 0;
+static InputState _gstate = { 0 };
 
 void
 pad_init(void)
@@ -22,19 +21,43 @@ pad_update(void)
        ((pad->type == PAD_ID_DIGITAL)         // Digital
         || (pad->type == PAD_ID_ANALOG_STICK) // DualShock in digital mode
         || (pad->type == PAD_ID_ANALOG))) {   // DualShock in analog mode
-        _old_state = _cur_state;
-        _cur_state = ~pad->btn;
+        _gstate.old = _gstate.current;
+        _gstate.current = ~pad->btn;
     }
+}
+
+void
+input_get_state(InputState *s)
+{
+    *s = _gstate;
+}
+
+uint16_t
+input_pressing(InputState *s, PadButton b)
+{
+    return s->current & b;
+}
+
+uint16_t
+input_pressed(InputState *s, PadButton b)
+{
+    return !(s->old & b) && (s->current & b);
 }
 
 uint16_t
 pad_pressing(PadButton b)
 {
-    return _cur_state & b;
+    return input_pressing(&_gstate, b);
 }
 
 uint16_t
 pad_pressed(PadButton b)
 {
-    return !(_old_state & b) && (_cur_state & b);
+    return input_pressed(&_gstate, b);
+}
+
+uint16_t
+pad_pressed_any()
+{
+    return _gstate.current != 0x0000;
 }

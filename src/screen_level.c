@@ -18,6 +18,9 @@
 #include "object.h"
 #include "parallax.h"
 #include "basic_font.h"
+#include "demo.h"
+
+#include "screens/fmv.h"
 
 extern int debug_mode;
 
@@ -35,6 +38,7 @@ uint8_t     level_fade;
 uint8_t     level_ring_count;
 uint32_t    level_score_count;
 uint8_t     level_finished;
+LEVELMODE   level_mode;
 
 
 // Forward function declarations
@@ -88,6 +92,8 @@ screen_level_load()
 
     level_ring_count = 0;
     level_finished = 0;
+
+    demo_init();
 }
 
 void
@@ -163,12 +169,30 @@ screen_level_update(void *d)
         }
     }
 
-    if(pad_pressed(PAD_START)
-       && !level_finished
-       && (data->level_transition == 2)) {
-        paused = !paused;
-        if(paused) sound_xa_set_volume(0x00);
-        else sound_xa_set_volume(XA_DEFAULT_VOLUME);
+    // Toggle pause. But only if not playing a demo!
+    if(level_mode != LEVEL_MODE_DEMO) {
+        if(pad_pressed(PAD_START)
+           && !level_finished
+           && (data->level_transition == 2)) {
+            paused = !paused;
+            if(paused) sound_xa_set_volume(0x00);
+            else sound_xa_set_volume(XA_DEFAULT_VOLUME);
+        }
+    } else {
+        // If in demo mode, absolutely any button press will
+        // trigger its end!
+        uint32_t seconds = get_elapsed_frames() / 60;
+        if((pad_pressed_any() || (seconds >= 30))
+           && (screen_level_getstate() == 2)) {
+            screen_level_setstate(3);
+        }
+
+        if(screen_level_getstate() == 4) {
+            // Go back to SONICTEAM FMV
+            screen_fmv_set_next(SCREEN_TITLE);
+            screen_fmv_enqueue("\\SONICT.STR;1");
+            scene_change(SCREEN_FMV);
+        }
     }
     
     if(paused) {
@@ -226,6 +250,20 @@ screen_level_update(void *d)
         if(pad_pressed(PAD_CIRCLE)) {
             player_do_damage(&player, player.pos.vx);
         }
+    }
+
+    // Record level demo. Uncomment to print.
+    switch(level_mode) {
+    case LEVEL_MODE_DEMO:
+        demo_update_playback(level, &player.input);
+        break;
+    case LEVEL_MODE_RECORD:
+        demo_record();
+        input_get_state(&player.input);
+        break;
+    default:
+        input_get_state(&player.input);
+        break;
     }
 
     camera_update(&camera, &player);
@@ -712,4 +750,11 @@ screen_level_getstate()
 {
     screen_level_data *data = screen_get_data();
     return data->level_transition;
+}
+
+
+void
+screen_level_setmode(LEVELMODE mode)
+{
+    level_mode = mode;
 }
