@@ -544,7 +544,7 @@ level_load_level(screen_level_data *data)
         data->level_act = level - 10;
         break;
     case 12: case 13:
-        data->level_name = "BLAZING FORGE";
+        data->level_name = "BLAZING FORCE";
         data->level_round = 6;
         data->level_act = level - 12;
         break;

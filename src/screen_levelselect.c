@@ -53,7 +53,7 @@ static const char *menutext[] = {
     "              2",
     "AMAZING OCEAN 1",
     "              2",
-    "BLAZING FORGE 1",
+    "BLAZING FORCE 1",
     "              2",
     "RADIANT TOMB  1",
     "              2",
