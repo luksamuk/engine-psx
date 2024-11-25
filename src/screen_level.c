@@ -189,10 +189,8 @@ screen_level_update(void *d)
         }
 
         if(screen_level_getstate() == 4) {
-            // Go back to SONICTEAM FMV
-            screen_fmv_set_next(SCREEN_TITLE);
-            screen_fmv_enqueue("\\SONICT.STR;1");
-            scene_change(SCREEN_FMV);
+            // Go back to title screen
+            scene_change(SCREEN_TITLE);
         }
     }
     
