@@ -119,10 +119,9 @@
     </properties>
    </object>
    <object id="53" gid="63" x="1009" y="406" width="64" height="64"/>
-   <object id="54" gid="2147483711" x="336" y="448" width="64" height="64"/>
    <object id="56" gid="65" x="542" y="383" width="64" height="64"/>
    <object id="57" gid="65" x="1051" y="360" width="64" height="64"/>
-   <object id="58" gid="65" x="1206" y="267" width="64" height="64"/>
+   <object id="58" gid="65" x="1214" y="267" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>
