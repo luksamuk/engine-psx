@@ -20,6 +20,7 @@ void font_flush();
 void font_draw_big(const char *text, int16_t vx, int16_t vy);
 void font_draw_sm(const char *text, int16_t vx, int16_t vy);
 void font_draw_hg(const char *text, int16_t vx, int16_t vy);
+void font_draw_logo(int16_t vx, int16_t vy, uint16_t w, uint16_t h);
 
 uint16_t font_measurew_big(const char *text);
 uint16_t font_measurew_sm(const char *text);

@@ -151,7 +151,7 @@ static uint8_t glyph_info_hg[] = {
     0xff, 0, 0, 0,
     0xff, 0, 0, 0,
 
-    0, 84, 23, 32, // * (ACT text)
+    0, 84, 23, 32,  // * (ACT text)
     // Next symbols do not exist
     0xff, 0, 0, 0, // .
     0xff, 0, 0, 0, // :
@@ -202,6 +202,22 @@ _draw_glyph(
     setUV0(sprt, u0, v0);
     sprt->clut = getClut(0, 490);
     sort_prim(sprt, OTZ_LAYER_HUD);
+}
+
+void
+font_draw_logo(
+    int16_t vx, int16_t vy,
+    uint16_t w, uint16_t h)
+{
+    POLY_FT4 *poly = get_next_prim();
+    setPolyFT4(poly);
+    setRGB0(poly, font_color[0], font_color[1], font_color[2]);
+    increment_prim(sizeof(POLY_FT4));
+    setXYWH(poly, vx, vy, w, h);
+    setUVWH(poly, 0, 195, 160, 60);
+    poly->tpage = getTPage(font_mode & 0x3, 1, 960, 256);
+    poly->clut = getClut(0, 490);
+    sort_prim(poly, OTZ_LAYER_HUD);
 }
 
 uint16_t

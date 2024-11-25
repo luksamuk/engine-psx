@@ -391,6 +391,12 @@ screen_level_draw(void *d)
         }
     }
 
+    // Demo HUD. Only when playing AutoDemo!
+    if(level_mode == LEVEL_MODE_DEMO) {
+        // Uses HUD layer to draw!
+        font_draw_logo(20, SCREEN_YRES - 65, 120, 45);
+    }
+
     // Heads-up display
     if(!debug_mode && (level_mode != LEVEL_MODE_DEMO)) {
         font_set_color(
