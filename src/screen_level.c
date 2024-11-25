@@ -55,6 +55,7 @@ typedef struct {
     int32_t    parallax_cx;
     int32_t    parallax_cy;
     const char *level_name;
+    uint8_t    level_round;
     uint8_t    level_act;
     uint16_t   level_counter;
 
@@ -513,15 +514,65 @@ level_load_level(screen_level_data *data)
 {
     paused = 0;
 
+    switch(level) {
+    case 0: case 1: // Playground
+        data->level_name = "PLAYGROUND";
+        data->level_round = 0;
+        data->level_act = level;
+        break;
+    case 2: case 3: // Playground
+        data->level_name = "PLAYGROUND";
+        data->level_round = 1;
+        data->level_act = level - 2;
+        break;
+    case 4: case 5:
+        data->level_name = "GREEN HILL";
+        data->level_round = 2;
+        data->level_act = level - 4;
+        break;
+    case 6: case 7:
+        data->level_name = "SURELY WOOD";
+        data->level_round = 3;
+        data->level_act = level - 6;
+        break;
+    case 8: case 9:
+        data->level_name = "DAWN CANYON";
+        data->level_round = 4;
+        data->level_act = level - 8;
+        break;
+    case 10: case 11:
+        data->level_name = "AMAZING OCEAN";
+        data->level_round = 5;
+        data->level_act = level - 10;
+        break;
+    case 12: case 13:
+        data->level_name = "BLAZING FORGE";
+        data->level_round = 6;
+        data->level_act = level - 12;
+        break;
+    case 14: case 15:
+        data->level_name = "RADIANT TOMB";
+        data->level_round = 7;
+        data->level_act = level - 14;
+        break;
+    case 16: case 17: case 18:
+        data->level_name = "EGGMANLAND";
+        data->level_round = 8;
+        data->level_act = level - 16;
+        break;
+    default:
+        data->level_name = "TEST LEVEL";
+        data->level_round = 0xff;
+        data->level_act = 0;
+        break;
+    }
+
     char basepath[255];
     char filename0[255], filename1[255];
 
-    uint8_t round = level >> 1;
-    if(round == 9) round = 8; // Adjustment for Eggmanland
-
     level_set_clearcolor();
 
-    snprintf(basepath, 255, "\\LEVELS\\R%1u", round);
+    snprintf(basepath, 255, "\\LEVELS\\R%1u", data->level_round);
 
     TIM_IMAGE tim;
     uint32_t filelength;
@@ -610,7 +661,7 @@ level_load_level(screen_level_data *data)
 
 
     /* === LEVEL LAYOUT === */
-    snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, (level & 0x01) + 1);
+    snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, data->level_act + 1);
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
 
@@ -631,7 +682,7 @@ level_load_level(screen_level_data *data)
     // TODO
 
     // Load object positioning on level
-    snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, (level & 0x01) + 1);
+    snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, data->level_act + 1);
     load_object_placement(filename0, &leveldata);
 
 
@@ -648,50 +699,27 @@ level_load_level(screen_level_data *data)
     printf("Number of level layers: %d\n", leveldata.num_layers);
 
     // Start playback after we don't need the CD anymore.
-    switch(level) {
-    case 0: sound_bgm_play(BGM_PLAYGROUND1); data->level_act = 0; break;
-    case 1: sound_bgm_play(BGM_PLAYGROUND2); data->level_act = 1; break;
-    case 2: sound_bgm_play(BGM_PLAYGROUND3); data->level_act = 2; break;
-    case 3: sound_bgm_play(BGM_PLAYGROUND4); data->level_act = 3; break;
-    case 4:
-    case 5:
-        sound_bgm_play(BGM_GREENHILL);
-        data->level_name = "GREEN HILL";
-        data->level_act = level - 4;
+    switch(data->level_round) {
+    case 0:
+        switch(data->level_act) {
+        case 0: sound_bgm_play(BGM_PLAYGROUND1); break;
+        case 1: sound_bgm_play(BGM_PLAYGROUND2); break;
+        };
         break;
-    case 6:
-    case 7:
-        sound_bgm_play(BGM_SURELYWOOD);
-        data->level_name = "SURELY WOOD";
-        data->level_act = level - 6;
+    case 1:
+        switch(data->level_act) {
+        case 0: sound_bgm_play(BGM_PLAYGROUND3); break;
+        case 1: sound_bgm_play(BGM_PLAYGROUND4); break;
+        };
         break;
-    case 8:
-    case 9:
-        sound_bgm_play(BGM_DAWNCANYON);
-        data->level_name = "DAWN CANYON";
-        data->level_act = level - 8;
-        break;
-    case 10:
-    case 11:
-        sound_bgm_play(BGM_AMAZINGOCEAN);
-        data->level_name = "AMAZING OCEAN";
-        data->level_act = level - 10;
-        break;
-    /* case 12: */
-    /* case 13: break;   // R6 */
-    /* case 14: */
-    /* case 15: break;   // R7 */
-    case 16:
-    case 17:
-    case 18:
-        sound_bgm_play(BGM_EGGMANLAND);
-        data->level_name = "EGGMANLAND";
-        data->level_act = level - 16;
-        break;
-    default:
-        data->level_name = "TEST LEVEL";
-        data->level_act = 0;
-        break;
+    case 2: sound_bgm_play(BGM_GREENHILL);       break;
+    case 3: sound_bgm_play(BGM_SURELYWOOD);      break;
+    case 4: sound_bgm_play(BGM_DAWNCANYON);      break;
+    case 5: sound_bgm_play(BGM_AMAZINGOCEAN);    break;
+    case 6: break; // TODO
+    case 7: break; // TODO
+    case 8: sound_bgm_play(BGM_EGGMANLAND);      break;
+    default: break;
     }
 
     // Pre-calculate title card target X and Y positions
