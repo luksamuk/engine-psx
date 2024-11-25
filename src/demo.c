@@ -55,7 +55,7 @@ static DemoPlaybackSample _dummydemo[] = {
 };
 
 static DemoPlaybackSample _pz1demo[] = {
-    {.state = 0x0000, .num_frames = 155},
+    {.state = 0x0000, .num_frames = 45},
     {.state = 0x0020, .num_frames = 294},
     {.state = 0x0060, .num_frames = 3},
     {.state = 0x0040, .num_frames = 11},
@@ -115,7 +115,7 @@ static DemoPlaybackSample _pz1demo[] = {
 };
 
 static DemoPlaybackSample _ghz1demo[] = {
-    {.state = 0x0000, .num_frames = 165},
+    {.state = 0x0000, .num_frames = 45},
     {.state = 0x0020, .num_frames = 70},
     {.state = 0x4020, .num_frames = 3},
     {.state = 0x4000, .num_frames = 4},
@@ -199,7 +199,7 @@ static DemoPlaybackSample _ghz1demo[] = {
 };
 
 static DemoPlaybackSample _swz1demo[] = {
-    {.state = 0x0000, .num_frames = 207},
+    {.state = 0x0000, .num_frames = 45},
     {.state = 0x0020, .num_frames = 342},
     {.state = 0x0000, .num_frames = 14},
     {.state = 0x0020, .num_frames = 47},
@@ -290,7 +290,7 @@ static DemoPlaybackSample _swz1demo[] = {
 };
 
 static DemoPlaybackSample _ez1demo[] = {
-    {.state = 0x0000, .num_frames = 172},
+    {.state = 0x0000, .num_frames = 45},
     {.state = 0x0020, .num_frames = 220},
     {.state = 0x4020, .num_frames = 11},
     {.state = 0x0020, .num_frames = 74},

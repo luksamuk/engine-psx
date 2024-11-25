@@ -95,6 +95,12 @@ screen_level_load()
     level_finished = 0;
 
     demo_init();
+
+    // If it is a demo or we're recording, skip title card
+    if(level_mode == LEVEL_MODE_DEMO
+       || level_mode == LEVEL_MODE_RECORD) {
+        data->level_transition = 1;
+    }
 }
 
 void
@@ -386,7 +392,7 @@ screen_level_draw(void *d)
     }
 
     // Heads-up display
-    if(!debug_mode) {
+    if(!debug_mode && (level_mode != LEVEL_MODE_DEMO)) {
         font_set_color(
             LERPC(level_fade, 0xc8),
             LERPC(level_fade, 0xc8),
