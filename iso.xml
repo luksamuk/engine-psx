@@ -331,6 +331,9 @@
 	<file name="MNU001.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/MNU001.XA" />
+	<file name="MNU002.XA"
+	      type="xa"
+	      source="${PROJECT_SOURCE_DIR}/assets/bgm/MNU002.XA" />
 	<file name="EVENT001.XA"
 	      type="xa"
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/EVENT001.XA" />
