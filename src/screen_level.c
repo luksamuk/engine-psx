@@ -470,17 +470,34 @@ screen_level_draw(void *d)
         snprintf(buffer, 255,
                  "GSP %08x\n"
                  "SPD %08x %08x\n"
-                 "ANG %04x\n"
+                 "ANG %08x G.P %s %s %3d\n"
                  "POS %08x %08x\n"
                  "ACT %02u\n"
-                 "REV %08x\n"
                  ,
                  player.vel.vz,
                  player.vel.vx, player.vel.vy,
-                 player.angle,
+                 abs(player.angle),
+                 (player.gsmode == CDIR_FLOOR)
+                 ? "FL"
+                 : (player.gsmode == CDIR_RWALL)
+                 ? "RW"
+                 : (player.gsmode == CDIR_LWALL)
+                 ? "LW"
+                 : (player.gsmode == CDIR_CEILING)
+                 ? "CE"
+                 : "  ",
+                 (player.psmode == CDIR_FLOOR)
+                 ? "FL"
+                 : (player.psmode == CDIR_RWALL)
+                 ? "RW"
+                 : (player.psmode == CDIR_LWALL)
+                 ? "LW"
+                 : (player.psmode == CDIR_CEILING)
+                 ? "CE"
+                 : "  ",
+                 (int32_t)((player.angle * (360 << 12)) >> 24), // angle in deg
                  player.pos.vx, player.pos.vy,
-                 player.action,
-                 player.spinrev
+                 player.action
             );
         font_draw_sm(buffer, 8, 12);
     }

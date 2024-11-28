@@ -70,6 +70,8 @@ load_player(Player *player,
     player->framecount = 0;
     player->iframes = 0;
     player->shield = 0;
+    player->gsmode = CDIR_FLOOR;
+    player->psmode = CDIR_FLOOR;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -411,8 +413,40 @@ player_update(Player *player)
     // One must call input_get_state on player->input so that
     // player input is recognized. This is done in screen_level.c.
 
-    _player_update_collision_lr(player);
-    _player_update_collision_tb(player);
+    uint32_t p_angle = abs(player->angle);
+
+    /* GROUND SENSORS COLLISION MODES */
+    if((p_angle > 0x0e2d) || (p_angle <= 0x01bb))
+            player->gsmode = CDIR_FLOOR;
+    else if((p_angle > 0x01bb) && (p_angle <= 0x05d2))
+        player->gsmode = (player->angle >= 0)
+            ? CDIR_RWALL
+            : CDIR_LWALL;
+    else if((p_angle > 0x05d2) && (p_angle <= 0x0a22))
+        player->gsmode = CDIR_CEILING;
+    else if((p_angle > 0x0a22) && (p_angle <= 0x0e2d))
+        player->gsmode = (player->angle >= 0)
+            ? CDIR_LWALL
+            : CDIR_RWALL;
+
+    /* PUSH SENSORS COLLISION MODES */
+    // The logic here is basically subtract #x010 from each angle.
+    // Push sensors are supposed to turn later than ground sensors
+    if((p_angle > 0x0e1d) || (p_angle <= 0x01cb))
+        player->psmode = CDIR_FLOOR;
+    else if((p_angle > 0x01cb) && (p_angle <= 0x05c2))
+        player->psmode = (player->angle >= 0)
+            ? CDIR_RWALL
+            : CDIR_LWALL;
+    else if((p_angle > 0x05c2) && (p_angle <= 0x0a12))
+        player->psmode = CDIR_CEILING;
+    else if((p_angle > 0x0a12) && (p_angle <= 0x0e1d))
+        player->psmode = (player->angle >= 0)
+            ? CDIR_LWALL
+            : CDIR_RWALL;
+
+    _player_update_collision_lr(player); // Push sensor collision detection
+    _player_update_collision_tb(player); // Ground sensor collision detection
 
     // i-frames
     if(player->iframes > 0) player->iframes--;
