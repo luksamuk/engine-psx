@@ -55,6 +55,9 @@ typedef enum {
     ACTION_HURT,
 } PlayerAction;
 
+// Alias to make things look less weird
+typedef LinecastDirection CollMode;
+
 typedef struct {
     InputState input;
 
@@ -79,6 +82,10 @@ typedef struct {
     uint8_t   holding_jump;
     uint16_t  iframes;
     uint8_t   shield;
+
+    // Collision modes
+    CollMode  gsmode;
+    CollMode  psmode;
 
     PlayerAction action;
 

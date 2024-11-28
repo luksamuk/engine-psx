@@ -40,15 +40,15 @@ def normalize(v):
     return [c / norm for c in v]
 
 
-def fix_angle(x):
-    # This ensures that an angle in radians is always on their
-    # 1st or 4th quadrant equivalent, and also on the first lap.
-    fixed = x
-    if (x >= (np.pi / 2)) and (x < np.pi):
-        fixed = (2 * np.pi) - (np.pi - x)
-    if (x >= np.pi) and (x < (1.5 * np.pi)):
-        fixed = x - np.pi
-    return fixed % (2 * np.pi)
+# def fix_angle(x):
+#     # This ensures that an angle in radians is always on their
+#     # 1st or 4th quadrant equivalent, and also on the first lap.
+#     fixed = x
+#     if (x >= (np.pi / 2)) and (x < np.pi):
+#         fixed = (2 * np.pi) - (np.pi - x)
+#     if (x >= np.pi) and (x < (1.5 * np.pi)):
+#         fixed = x - np.pi
+#     return fixed % (2 * np.pi)
 
 
 def to_psx_angle(a):
@@ -59,7 +59,8 @@ def to_psx_angle(a):
     # our angle.
     # Final gsp->(xsp, ysp) conversions in-game are given as
     # {x: (gsp * cos(x) >> 12), y: (gsp * -sin(x)) >> 12}.
-    a = np.rad2deg(fix_angle(a))
+    # a = np.rad2deg(fix_angle(a))
+    a = round(np.rad2deg(a), 0)
     rat = a / 360
     return math.floor(rat * 4096)
 
@@ -98,7 +99,6 @@ def get_height_mask(d: Direction, points):
 
     # Build vector according to direction
     # and heightmask
-    # TODO: Maybe the referential dirvec is wrong?
     vector = [0, 0]
     dirvec = [0, 0]
     dirv = 0
@@ -126,6 +126,8 @@ def get_height_mask(d: Direction, points):
 
     vector = normalize(vector)
     angle = math.atan2(dirvec[1], dirvec[0]) - math.atan2(vector[1], vector[0])
+    # Angles are always converted to degrees and rounded
+    # to zero decimals
     angle = to_psx_angle(angle)
     return (heightmask, angle)
 
