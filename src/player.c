@@ -431,16 +431,16 @@ player_update(Player *player)
 
     /* PUSH SENSORS COLLISION MODES */
     // The logic here is basically subtract #x010 from each angle.
-    // Push sensors are supposed to turn later than ground sensors
-    if((p_angle > 0x0e1d) || (p_angle <= 0x01cb))
+    // Push sensors are supposed to turn EARLIER than ground sensors
+    if((p_angle > 0x0ec8) || (p_angle <= 0x0110))
         player->psmode = CDIR_FLOOR;
-    else if((p_angle > 0x01cb) && (p_angle <= 0x05c2))
+    else if((p_angle > 0x0110) && (p_angle <= 0x0527))
         player->psmode = (player->angle >= 0)
             ? CDIR_RWALL
             : CDIR_LWALL;
-    else if((p_angle > 0x05c2) && (p_angle <= 0x0a12))
+    else if((p_angle > 0x0527) && (p_angle <= 0x0acd))
         player->psmode = CDIR_CEILING;
-    else if((p_angle > 0x0a12) && (p_angle <= 0x0e1d))
+    else if((p_angle > 0x0acd) && (p_angle <= 0x0ec8))
         player->psmode = (player->angle >= 0)
             ? CDIR_LWALL
             : CDIR_RWALL;
