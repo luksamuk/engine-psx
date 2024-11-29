@@ -60,7 +60,8 @@ def to_psx_angle(a):
     # Final gsp->(xsp, ysp) conversions in-game are given as
     # {x: (gsp * cos(x) >> 12), y: (gsp * -sin(x)) >> 12}.
     # a = np.rad2deg(fix_angle(a))
-    a = round(np.rad2deg(a), 0)
+    a = np.rad2deg(a)
+    a = round(a, 0)
     rat = a / 360
     return math.floor(rat * 4096)
 
@@ -100,28 +101,28 @@ def get_height_mask(d: Direction, points):
     # Build vector according to direction
     # and heightmask
     vector = [0, 0]
-    dirvec = [0, 0]
+    dirvec = [1, 0]
     dirv = 0
     delta = heightmask[0] - heightmask[-1]
     if d == Direction.DOWN:
         # Vector points left to right
         vector = [16, delta]
-        dirvec = [1, 0]
+        # dirvec = [1, 0]
         dirv = 0
     elif d == Direction.UP:
         # Vector points right to left
         vector = [-16, -delta]
-        dirvec = [-1, 0]
+        # dirvec = [-1, 0]
         dirv = 0
     elif d == Direction.LEFT:
         # Vector points top to bottom
         vector = [-delta, 16]
-        dirvec = [0, 1]
+        # dirvec = [0, 1]
         dirv = 1
     elif d == Direction.RIGHT:
         # Vector points bottom to top
         vector = [delta, -16]
-        dirvec = [0, -1]
+        # dirvec = [0, -1]
         dirv = 1
 
     vector = normalize(vector)
