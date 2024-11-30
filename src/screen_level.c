@@ -251,6 +251,7 @@ screen_level_update(void *d)
             player.grnd = 0;
             player.anim_dir = 1;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
+            player.psmode = player.gsmode = CDIR_FLOOR;
         }
 
         if(pad_pressed(PAD_CIRCLE)) {

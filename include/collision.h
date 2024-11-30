@@ -26,7 +26,7 @@ typedef enum {
 
 CollisionEvent linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
                         int32_t vx, int32_t vy, LinecastDirection direction,
-                        uint8_t magnitude);
+                        uint8_t magnitude, LinecastDirection floor_direction);
 
 
 /* Simpler collision detection algorithms */
