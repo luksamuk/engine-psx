@@ -178,7 +178,7 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 // variables as well. Check the file header.
                 if(linecast(&leveldata, &map128, &map16,
                             pos->vx + 8, pos->vy + 8,
-                            CDIR_FLOOR, 10).collided)
+                            CDIR_FLOOR, 10, CDIR_FLOOR).collided)
                     // Multiply Y speed by -0.75
                     state->freepos->spdy = (state->freepos->spdy * -0x00000c00) >> 12;
             }
@@ -186,10 +186,10 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             if(/*!(state->timer % 4) &&*/
                 ((state->freepos->spdx < 0) && linecast(&leveldata, &map128, &map16,
                                                        pos->vx + 8, pos->vy + 8,
-                                                       CDIR_LWALL, 10).collided)
+                                                        CDIR_LWALL, 10, CDIR_FLOOR).collided)
                || ((state->freepos->spdx > 0) && linecast(&leveldata, &map128, &map16,
                                                           pos->vx + 8, pos->vy + 8,
-                                                          CDIR_RWALL, 10).collided))
+                                                          CDIR_RWALL, 10, CDIR_FLOOR).collided))
                 // Multiply X speed by -0.75
                 state->freepos->spdx = (state->freepos->spdx * -0x00000c00) >> 12;
 

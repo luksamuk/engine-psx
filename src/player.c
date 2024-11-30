@@ -268,7 +268,7 @@ _player_update_collision_lr(Player *player)
             if(player->vel.vx < 0) {
                 player->ev_left = linecast(&leveldata, &map128, &map16,
                                            anchorx, push_anchory,
-                                           ldir, left_mag);
+                                           ldir, left_mag, player->gsmode);
             }
         }
 
@@ -277,7 +277,7 @@ _player_update_collision_lr(Player *player)
             if(player->vel.vx > 0) {
                 player->ev_right = linecast(&leveldata, &map128, &map16,
                                             anchorx, push_anchory,
-                                            rdir, right_mag);
+                                            rdir, right_mag, player->gsmode);
             }
         }
     }
@@ -416,12 +416,12 @@ _player_update_collision_tb(Player *player)
     if(!player->ev_grnd1.collided) {
         player->ev_grnd1 = linecast(&leveldata, &map128, &map16,
                                     anchorx_left, anchory_left,
-                                    grndir, grn_mag);
+                                    grndir, grn_mag, player->gsmode);
     }
     if(!player->ev_grnd2.collided) {
         player->ev_grnd2 = linecast(&leveldata, &map128, &map16,
                                     anchorx_right, anchory_right,
-                                    grndir, grn_mag);
+                                    grndir, grn_mag, player->gsmode);
     }
 
     if(!player->grnd) {
@@ -429,12 +429,12 @@ _player_update_collision_tb(Player *player)
         if(!player->ev_ceil1.collided) {
             player->ev_ceil1 = linecast(&leveldata, &map128, &map16,
                                         anchorx_left, anchory_left,
-                                        ceildir, ceil_mag);
+                                        ceildir, ceil_mag, player->gsmode);
         }
         if(!player->ev_ceil2.collided) {
             player->ev_ceil2 = linecast(&leveldata, &map128, &map16,
                                         anchorx_right, anchory_right,
-                                        ceildir, ceil_mag);
+                                        ceildir, ceil_mag, player->gsmode);
         }
     }
 
@@ -576,14 +576,14 @@ _player_update_collision_tb(Player *player)
                 if((player->ev_grnd2.collided && (player->ev_grnd2.coord > new_coord))
                    || (new_coord == 0))
                     new_coord = player->ev_grnd2.coord;
-                player->pos.vx = (new_coord + 32) << 12;
+                player->pos.vx = (new_coord) << 12;
                 break;
             case CDIR_CEILING:
                 if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
                 if((player->ev_grnd2.collided && (player->ev_grnd2.coord > new_coord))
                    || (new_coord == 0))
                     new_coord = player->ev_grnd2.coord;
-                player->pos.vy = (new_coord + 32) << 12;
+                player->pos.vy = (new_coord) << 12;
                 break;
             case CDIR_FLOOR:
             default:

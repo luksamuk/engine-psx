@@ -80,11 +80,11 @@ _get_height_and_angle_from_mask(
         mask = collision->rwall;
         break;
     case CDIR_CEILING:
-        *out_angle = collision->ceiling_angle;
+        *out_angle = 0x1000 + collision->ceiling_angle;
         mask = collision->ceiling;
         break;
     case CDIR_LWALL:
-        *out_angle = collision->lwall_angle;
+        *out_angle = 0x1000 + collision->lwall_angle;
         mask = collision->lwall;
         break;
     default: goto abort_retrieve;
@@ -133,7 +133,8 @@ _get_tip_height(LinecastDirection direction,
 
 CollisionEvent
 linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
-         int32_t vx, int32_t vy, LinecastDirection direction, uint8_t magnitude)
+         int32_t vx, int32_t vy, LinecastDirection direction,
+         uint8_t magnitude, LinecastDirection floor_direction)
 {
     // No level data? No collision.
     if(lvl->num_layers < 1) return (CollisionEvent){ 0 };
@@ -194,7 +195,8 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
 
                 if(h > 0) {
                     int32_t tip_height = _get_tip_height(direction, lx, ly);
-                    if(direction == CDIR_FLOOR || (h >= tip_height)) {
+                    
+                    if(direction == floor_direction || (h >= tip_height)) {
                         int32_t coord = _get_new_position(direction, cx, cy, px, py, h);
                         ev = (CollisionEvent) {
                             .collided = 1,
