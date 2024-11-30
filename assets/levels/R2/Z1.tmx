@@ -194,7 +194,6 @@
    <object id="169" gid="146" x="4736" y="980" width="64" height="64" rotation="-90"/>
    <object id="170" gid="151" x="6161.33" y="718.667" width="64" height="64"/>
    <object id="171" gid="148" x="6256" y="928" width="64" height="64"/>
-   <object id="173" gid="145" x="6784" y="1152" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

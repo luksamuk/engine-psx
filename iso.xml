@@ -150,6 +150,12 @@
 	  <file name="Z1.OMP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/Z1.OMP" />
+	  <file name="Z2.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/Z2.LVL" />
+	  <file name="Z2.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/Z2.OMP" />
 	  <file name="MAP128.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/MAP128.MAP" />
@@ -222,6 +228,12 @@
 	  <file name="Z1.OMP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z1.OMP" />
+	  <file name="Z2.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z2.LVL" />
+	  <file name="Z2.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z2.OMP" />
 	  <file name="MAP128.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/MAP128.MAP" />
