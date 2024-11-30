@@ -247,6 +247,7 @@ screen_level_update(void *d)
 
         if(pad_pressed(PAD_SELECT) && !level_finished) {
             player.pos = player.startpos;
+            camera.pos = camera.realpos = player.startpos;
             player.grnd = 0;
             player.anim_dir = 1;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
