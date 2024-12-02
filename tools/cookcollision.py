@@ -61,7 +61,7 @@ def to_psx_angle(a):
     # {x: (gsp * cos(x) >> 12), y: (gsp * -sin(x)) >> 12}.
     # a = np.rad2deg(fix_angle(a))
     a = np.rad2deg(a)
-    a = round(a, 0)
+    a = round(a, 2)
     rat = a / 360
     return math.floor(rat * 4096)
 

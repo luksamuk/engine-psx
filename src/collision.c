@@ -80,11 +80,11 @@ _get_height_and_angle_from_mask(
         mask = collision->rwall;
         break;
     case CDIR_CEILING:
-        *out_angle = 0x1000 + collision->ceiling_angle;
+        *out_angle = collision->ceiling_angle;
         mask = collision->ceiling;
         break;
     case CDIR_LWALL:
-        *out_angle = 0x1000 + collision->lwall_angle;
+        *out_angle = collision->lwall_angle;
         mask = collision->lwall;
         break;
     default: goto abort_retrieve;
