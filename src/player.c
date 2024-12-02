@@ -9,6 +9,7 @@
 #include "sound.h"
 #include "camera.h"
 #include "collision.h"
+#include "basic_font.h"
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
@@ -218,6 +219,11 @@ _player_update_collision_lr(Player *player)
 {
     player->push = 0;
 
+    // NOTE: Push sensors are ONLY used when in floor mode OR when
+    // the angle in question is a multiple of 90 degrees.
+    if((player->gsmode != CDIR_FLOOR) && ((player->angle % 0x400) != 0))
+        return;
+
     /* Collider linecasts */
     uint16_t
         anchorx = (player->pos.vx >> 12),
@@ -282,80 +288,82 @@ _player_update_collision_lr(Player *player)
         }
     }
 
+    int32_t vel_x = player->grnd ? player->vel.vz : player->vel.vx;
+
     // Draw sensors
     if(debug_mode > 1) {
-        _draw_sensor(anchorx, push_anchory, ldir, left_mag, 0xff, 0x38, 0xff);
-        _draw_sensor(anchorx, push_anchory, rdir, right_mag, 0xff, 0x54, 0x54);
+        if(vel_x < 0) _draw_sensor(anchorx, push_anchory, ldir, left_mag, 0xff, 0x38, 0xff);
+        if(vel_x > 0) _draw_sensor(anchorx, push_anchory, rdir, right_mag, 0xff, 0x54, 0x54);
     }
 
 
     /* HANDLE COLLISION */
     switch(player->psmode) {
-    case CDIR_RWALL:
-        if(player->ev_right.collided && player->vel.vz > 0) {
-            player->grnd = 0;
-            player->angle = 0;
-            player->vel.vz = 0;
-            // TODO: Same as hitting the head. Adjust this to look like ceiling
-            player->pos.vy = (player->ev_right.coord + 10) << 12;
-        }
+    /* case CDIR_RWALL: */
+    /*     if(player->ev_right.collided && vel_x > 0) { */
+    /*         player->grnd = 0; */
+    /*         player->angle = 0; */
+    /*         player->vel.vz = 0; */
+    /*         // TODO: Same as hitting the head. Adjust this to look like ceiling */
+    /*         player->pos.vy = (player->ev_right.coord + 10) << 12; */
+    /*     } */
 
-        if(player->ev_left.collided && player->vel.vz < 0) {
-            player->grnd = 00;
-            player->angle = 0;
-            player->vel.vz = 0;
-            // TODO: Hit your ass down there, Adjust this to look like floor
-            player->pos.vy = (player->ev_left.coord - 25) << 12;
-        }
-        break;
-    case CDIR_LWALL:
-        if(player->ev_right.collided && player->vel.vz > 0) {
-            player->grnd = 0;
-            player->angle = 0;
-            player->vel.vz = 0;
-            // TODO: Hit your ass down there, Adjust this to look like floor
-            player->pos.vy = (player->ev_right.coord + 25) << 12;
-        }
+    /*     if(player->ev_left.collided && vel_x < 0) { */
+    /*         player->grnd = 00; */
+    /*         player->angle = 0; */
+    /*         player->vel.vz = 0; */
+    /*         // TODO: Hit your ass down there, Adjust this to look like floor */
+    /*         player->pos.vy = (player->ev_left.coord - 25) << 12; */
+    /*     } */
+    /*     break; */
+    /* case CDIR_LWALL: */
+    /*     if(player->ev_right.collided && vel_x > 0) { */
+    /*         player->grnd = 0; */
+    /*         player->angle = 0; */
+    /*         player->vel.vz = 0; */
+    /*         // TODO: Hit your ass down there, Adjust this to look like floor */
+    /*         player->pos.vy = (player->ev_right.coord + 25) << 12; */
+    /*     } */
 
-        if(player->ev_left.collided && player->vel.vz < 0) {
-            player->grnd = 00;
-            player->angle = 0;
-            player->vel.vz = 0;
-            // TODO: Same as hitting the head. Adjust this to look like ceiling
-            player->pos.vy = (player->ev_left.coord - 10) << 12;
-        }
-        break;
-    case CDIR_CEILING:
-        if(player->ev_right.collided && player->vel.vz > 0) {
-            player->grnd = 0;
-            player->angle = 0;
-            player->vel.vz = 0;
-            player->pos.vx = (player->ev_right.coord + 25) << 12;
-        }
+    /*     if(player->ev_left.collided && vel_x < 0) { */
+    /*         player->grnd = 00; */
+    /*         player->angle = 0; */
+    /*         player->vel.vz = 0; */
+    /*         // TODO: Same as hitting the head. Adjust this to look like ceiling */
+    /*         player->pos.vy = (player->ev_left.coord - 10) << 12; */
+    /*     } */
+    /*     break; */
+    /* case CDIR_CEILING: */
+    /*     if(player->ev_right.collided && vel_x > 0) { */
+    /*         player->grnd = 0; */
+    /*         player->angle = 0; */
+    /*         player->vel.vz = 0; */
+    /*         player->pos.vx = (player->ev_right.coord + 25) << 12; */
+    /*     } */
 
-        if(player->ev_left.collided && player->vel.vz > 0) {
-            player->grnd = 0;
-            player->angle = 0;
-            player->vel.vz = 0;
-            player->pos.vx = (player->ev_left.coord - 10) << 12;
-        }
-        break;
+    /*     if(player->ev_left.collided && vel_x > 0) { */
+    /*         player->grnd = 0; */
+    /*         player->angle = 0; */
+    /*         player->vel.vz = 0; */
+    /*         player->pos.vx = (player->ev_left.coord - 10) << 12; */
+    /*     } */
+    /*     break; */
     case CDIR_FLOOR:
-    default:
-        if(player->ev_right.collided && player->vel.vx > 0) {
+        if(player->ev_right.collided && vel_x > 0) {
             if(player->grnd) player->vel.vz = 0;
             else player->vel.vx = 0;
             player->pos.vx = (player->ev_right.coord - 10) << 12;
             if(player->grnd) player->push = 1;
         }
 
-        if(player->ev_left.collided && player->vel.vx < 0) {
+        if(player->ev_left.collided && vel_x < 0) {
             if(player->grnd) player->vel.vz = 0;
             else player->vel.vx = 0;
             player->pos.vx = (player->ev_left.coord + 25) << 12;
             if(player->grnd) player->push = 1;
         }
         break;
+    default: break;
     };
     
 }
@@ -576,14 +584,14 @@ _player_update_collision_tb(Player *player)
                 if((player->ev_grnd2.collided && (player->ev_grnd2.coord > new_coord))
                    || (new_coord == 0))
                     new_coord = player->ev_grnd2.coord;
-                player->pos.vx = (new_coord) << 12;
+                player->pos.vx = (new_coord + 4) << 12;
                 break;
             case CDIR_CEILING:
                 if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
                 if((player->ev_grnd2.collided && (player->ev_grnd2.coord > new_coord))
                    || (new_coord == 0))
                     new_coord = player->ev_grnd2.coord;
-                player->pos.vy = (new_coord) << 12;
+                player->pos.vy = (new_coord + 4) << 12;
                 break;
             case CDIR_FLOOR:
             default:
@@ -605,38 +613,62 @@ player_update(Player *player)
     // One must call input_get_state on player->input so that
     // player input is recognized. This is done in screen_level.c.
 
+    // NOTE: Relative to the Sonic Physics Guide, angles are offset
+    // by 43 units towards the direction that makes more sense for
+    // that region, so angles may be increased or decreased depending
+    // on convenience.
     uint32_t p_angle = abs(player->angle);
 
     /* GROUND SENSORS COLLISION MODES */
-    if((p_angle > 0x0e2d) || (p_angle <= 0x01bb))
-            player->gsmode = CDIR_FLOOR;
-    else if((p_angle > 0x01bb) && (p_angle <= 0x05d2))
+    // As a rule of thumb, only floor and ceiling min/max
+    // angles are well-defined. See:
+    // Floor: floor left <= x OR x <= floor right
+    // R.wall: floor right < x < ceiling min
+    // Ceiling: ceiling min <= x <= ceiling max
+    // L.wall: ceiling max < x < floor left
+#define GSMODE_ANGLE_FLOOR_RIGHT    0x01d5 // ~41° (original: 45°)
+#define GSMODE_ANGLE_CEIL_MIN       0x0600 // 135°
+#define GSMODE_ANGLE_CEIL_MAX       0x0a00 // 225°
+#define GSMODE_ANGLE_FLOOR_LEFT     0x0e2b // ~318° (original: 315°)
+    
+    // Original collision mode ranges
+    if((GSMODE_ANGLE_FLOOR_LEFT <= p_angle) || (p_angle <= GSMODE_ANGLE_FLOOR_RIGHT))
+        // floor
+        player->gsmode = CDIR_FLOOR;
+    else if((GSMODE_ANGLE_FLOOR_RIGHT < p_angle) && (p_angle < GSMODE_ANGLE_CEIL_MIN))
+        // r.wall (l.wall if angle is negative)
         player->gsmode = (player->angle >= 0)
             ? CDIR_RWALL
             : CDIR_LWALL;
-    else if((p_angle > 0x05d2) && (p_angle <= 0x0a22))
+    else if((GSMODE_ANGLE_CEIL_MIN <= p_angle) && (p_angle <= GSMODE_ANGLE_CEIL_MAX))
+        // ceiling
         player->gsmode = CDIR_CEILING;
-    else if((p_angle > 0x0a22) && (p_angle <= 0x0e2d))
+    else if((GSMODE_ANGLE_CEIL_MAX < p_angle) && (p_angle < GSMODE_ANGLE_FLOOR_LEFT))
+        // l.wall (r.wall if angle negative)
         player->gsmode = (player->angle >= 0)
             ? CDIR_LWALL
             : CDIR_RWALL;
 
     /* PUSH SENSORS COLLISION MODES */
-    // The logic here is basically subtract #x010 from each angle.
-    // Push sensors are supposed to turn EARLIER than ground sensors
-    /* if((p_angle > 0x0ec8) || (p_angle <= 0x0110)) */
-    /*     player->psmode = CDIR_FLOOR; */
-    /* else if((p_angle > 0x0110) && (p_angle <= 0x0527)) */
-    /*     player->psmode = (player->angle >= 0) */
-    /*         ? CDIR_RWALL */
-    /*         : CDIR_LWALL; */
-    /* else if((p_angle > 0x0527) && (p_angle <= 0x0acd)) */
-    /*     player->psmode = CDIR_CEILING; */
-    /* else if((p_angle > 0x0acd) && (p_angle <= 0x0ec8)) */
-    /*     player->psmode = (player->angle >= 0) */
-    /*         ? CDIR_LWALL */
-    /*         : CDIR_RWALL; */
-    player->psmode = player->gsmode;
+    // As opposed to ground sensors, here the L.Wall and R.Wall modes are
+    // well-defined.
+#define PSMODE_ANGLE_RWALL_MIN    0x01d5 // ~41°
+#define PSMODE_ANGLE_RWALL_MAX    0x0600 // 135°
+#define PSMODE_ANGLE_LWALL_MIN    0x0a00 // 225°
+#define PSMODE_ANGLE_LWALL_MAX    0x0e2b // ~318°
+
+    if((p_angle > PSMODE_ANGLE_LWALL_MAX) || (p_angle < PSMODE_ANGLE_RWALL_MIN))
+        player->psmode = CDIR_FLOOR;
+    else if((PSMODE_ANGLE_RWALL_MIN <= p_angle) && (p_angle <= PSMODE_ANGLE_RWALL_MAX))
+        player->psmode = (player->angle >= 0)
+            ? CDIR_RWALL
+            : CDIR_LWALL;
+    else if((p_angle > PSMODE_ANGLE_RWALL_MAX) && (PSMODE_ANGLE_LWALL_MIN < p_angle))
+        player->psmode = CDIR_CEILING;
+    else if((PSMODE_ANGLE_LWALL_MIN <= p_angle) && (p_angle <= PSMODE_ANGLE_LWALL_MAX))
+        player->psmode = (player->angle >= 0)
+            ? CDIR_LWALL
+            : CDIR_RWALL;
 
     _player_update_collision_lr(player); // Push sensor collision detection
     _player_update_collision_tb(player); // Ground sensor collision detection
@@ -942,6 +974,22 @@ player_update(Player *player)
     player->pos.vx += player->vel.vx;
     player->pos.vy += player->vel.vy;
 
+    // Print sensors state
+    if(debug_mode > 0) {
+        char buffer[255];
+        snprintf(buffer, 255,
+                 "COL %s%s.%s%s.%s.%s\n"
+                 ,
+                 // Collisions
+                 player->ev_ceil1.collided ? "C" : " ",
+                 player->ev_ceil2.collided ? "C" : " ",
+                 player->ev_grnd1.collided ? "G" : " ",
+                 player->ev_grnd2.collided ? "G" : " ",
+                 player->ev_left.collided ? "L" : " ",
+                 player->ev_right.collided ? "R" : " ");
+        font_draw_sm(buffer, 8, 67);
+    }
+
     // Reset sensors
     player->ev_left  = (CollisionEvent){ 0 };
     player->ev_right = (CollisionEvent){ 0 };
@@ -949,8 +997,6 @@ player_update(Player *player)
     player->ev_grnd2 = (CollisionEvent){ 0 };
     player->ev_ceil1 = (CollisionEvent){ 0 };
     player->ev_ceil2 = (CollisionEvent){ 0 };
-
-    
 }
 
 void
