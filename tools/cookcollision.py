@@ -102,28 +102,23 @@ def get_height_mask(d: Direction, points):
     # and heightmask
     vector = [0, 0]
     dirvec = [1, 0]
-    dirv = 0
     delta = heightmask[0] - heightmask[-1]
     if d == Direction.DOWN:
         # Vector points left to right
         vector = [16, delta]
         # dirvec = [1, 0]
-        dirv = 0
     elif d == Direction.UP:
         # Vector points right to left
         vector = [-16, -delta]
         # dirvec = [-1, 0]
-        dirv = 0
     elif d == Direction.LEFT:
         # Vector points top to bottom
         vector = [-delta, 16]
         # dirvec = [0, 1]
-        dirv = 1
     elif d == Direction.RIGHT:
         # Vector points bottom to top
         vector = [delta, -16]
         # dirvec = [0, -1]
-        dirv = 1
 
     vector = normalize(vector)
     angle = math.atan2(dirvec[1], dirvec[0]) - math.atan2(vector[1], vector[0])
