@@ -584,14 +584,14 @@ _player_update_collision_tb(Player *player)
                 if((player->ev_grnd2.collided && (player->ev_grnd2.coord > new_coord))
                    || (new_coord == 0))
                     new_coord = player->ev_grnd2.coord;
-                player->pos.vx = (new_coord + 4) << 12;
+                player->pos.vx = (new_coord + 16) << 12;
                 break;
             case CDIR_CEILING:
                 if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
                 if((player->ev_grnd2.collided && (player->ev_grnd2.coord > new_coord))
                    || (new_coord == 0))
                     new_coord = player->ev_grnd2.coord;
-                player->pos.vy = (new_coord + 4) << 12;
+                player->pos.vy = (new_coord + 16) << 12;
                 break;
             case CDIR_FLOOR:
             default:
