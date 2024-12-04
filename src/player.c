@@ -227,14 +227,14 @@ _player_update_collision_lr(Player *player)
     /* Collider linecasts */
     uint16_t
         anchorx = (player->pos.vx >> 12),
-        anchory = (player->pos.vy >> 12);
+        anchory = (player->pos.vy >> 12) - 8;
 
     // Adjust y anchor to y + 8 when on totally flat ground
     int32_t push_anchory = anchory
-        - ((player->grnd && player->angle == 0) ? 8 : 0) - 8;
+        + ((player->grnd && player->angle == 0) ? 8 : 0);
 
     uint16_t left_mag  = PUSH_RADIUS;
-    uint16_t right_mag = PUSH_RADIUS - 1;
+    uint16_t right_mag = PUSH_RADIUS;
 
     // Adjust modes
     LinecastDirection ldir = CDIR_LWALL;

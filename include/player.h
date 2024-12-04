@@ -34,11 +34,11 @@
 #define X_HURT_FORCE     0x02000
 
 // Constants for adjusting hitbox and sensors
-#define WIDTH_RADIUS_NORMAL      8
+#define WIDTH_RADIUS_NORMAL      9
 #define HEIGHT_RADIUS_NORMAL    19
 #define WIDTH_RADIUS_ROLLING     7
 #define HEIGHT_RADIUS_ROLLING   14
-#define PUSH_RADIUS             14
+#define PUSH_RADIUS             10
 
 #define PLAYER_HURT_IFRAMES     120
 
