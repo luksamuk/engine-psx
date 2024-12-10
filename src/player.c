@@ -474,7 +474,8 @@ _player_update_collision_tb(Player *player)
             // like this for now
             else player->angle = player->ev_grnd1.angle;
 
-            int32_t deg = (player->angle * (360 << 12) >> 24);
+            // TODO: FIX THIS!!!!!
+            int32_t deg = (abs(player->angle) * (360 << 12) >> 24);
 
             // Set ground speed according to X and Y velocity,
             // and plaform angle
@@ -629,7 +630,7 @@ player_update(Player *player)
 #define GSMODE_ANGLE_FLOOR_RIGHT    0x01d5 // ~41° (original: 45°)
 #define GSMODE_ANGLE_CEIL_MIN       0x0600 // 135°
 #define GSMODE_ANGLE_CEIL_MAX       0x0a00 // 225°
-#define GSMODE_ANGLE_FLOOR_LEFT     0x0e2b // ~318° (original: 315°)
+#define GSMODE_ANGLE_FLOOR_LEFT     0x0e40 // ~318° (original: 315°)
     
     // Original collision mode ranges
     if((GSMODE_ANGLE_FLOOR_LEFT <= p_angle) || (p_angle <= GSMODE_ANGLE_FLOOR_RIGHT))
@@ -652,10 +653,10 @@ player_update(Player *player)
     /* PUSH SENSORS COLLISION MODES */
     // As opposed to ground sensors, here the L.Wall and R.Wall modes are
     // well-defined.
-#define PSMODE_ANGLE_RWALL_MIN    0x01d5 // ~41°
-#define PSMODE_ANGLE_RWALL_MAX    0x0600 // 135°
-#define PSMODE_ANGLE_LWALL_MIN    0x0a00 // 225°
-#define PSMODE_ANGLE_LWALL_MAX    0x0e2b // ~318°
+#define PSMODE_ANGLE_RWALL_MIN    0x014e // ~41°
+#define PSMODE_ANGLE_RWALL_MAX    0x0579 // 135°
+#define PSMODE_ANGLE_LWALL_MIN    0x0a87 // 225°
+#define PSMODE_ANGLE_LWALL_MAX    0x0db9 // ~318°
 
     if((p_angle > PSMODE_ANGLE_LWALL_MAX) || (p_angle < PSMODE_ANGLE_RWALL_MIN))
         player->psmode = CDIR_FLOOR;
@@ -663,9 +664,9 @@ player_update(Player *player)
         player->psmode = (player->angle >= 0)
             ? CDIR_RWALL
             : CDIR_LWALL;
-    else if((p_angle > PSMODE_ANGLE_RWALL_MAX) && (PSMODE_ANGLE_LWALL_MIN < p_angle))
+    else if((p_angle > PSMODE_ANGLE_RWALL_MAX) && (p_angle < PSMODE_ANGLE_LWALL_MIN))
         player->psmode = CDIR_CEILING;
-    else if((PSMODE_ANGLE_LWALL_MIN <= p_angle) && (p_angle <= PSMODE_ANGLE_LWALL_MAX))
+    else if((PSMODE_ANGLE_LWALL_MIN >= p_angle) && (p_angle <= PSMODE_ANGLE_LWALL_MAX))
         player->psmode = (player->angle >= 0)
             ? CDIR_LWALL
             : CDIR_RWALL;
@@ -852,6 +853,7 @@ player_update(Player *player)
             : Y_GRAVITY;
     } else {
         if(input_pressed(&player->input, PAD_CROSS) && player->action != ACTION_SPINDASH) {
+            // TODO: Review jump according to angle
             player->vel.vx -= (Y_JUMP_STRENGTH * rsin(player->angle)) >> 12;
             player->vel.vy -= (Y_JUMP_STRENGTH * rcos(player->angle)) >> 12;
             player->grnd = 0;

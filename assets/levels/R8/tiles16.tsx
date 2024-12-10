@@ -1223,15 +1223,15 @@
  </tile>
  <tile id="444">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="16.087" y="2.91304">
-    <polygon points="0,0 -0.0869565,13.087 -9.08696,13.0435"/>
+   <object id="2" x="15.9565" y="4.95652">
+    <polygon points="0,0 0.0434783,11.0435 -8.95652,10.9565"/>
    </object>
   </objectgroup>
  </tile>
  <tile id="445">
   <objectgroup draworder="index" id="2">
-   <object id="1" x="3" y="0">
-    <polygon points="0,0 13,0 13,16 -3,16 -3,3.08696"/>
+   <object id="2" x="3.04348" y="-0.0434783">
+    <polygon points="0,0 12.9565,0.0434783 12.9565,16.0435 -3.04348,16.0435 -3,4.26087"/>
    </object>
   </objectgroup>
  </tile>

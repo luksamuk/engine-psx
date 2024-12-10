@@ -478,7 +478,7 @@ screen_level_draw(void *d)
                  ,
                  player.vel.vz,
                  player.vel.vx, player.vel.vy,
-                 abs(player.angle),
+                 player.angle,
                  (player.gsmode == CDIR_FLOOR)
                  ? "FL"
                  : (player.gsmode == CDIR_RWALL)
@@ -497,7 +497,7 @@ screen_level_draw(void *d)
                  : (player.psmode == CDIR_CEILING)
                  ? "CE"
                  : "  ",
-                 (int32_t)((player.angle * (360 << 12)) >> 24), // angle in deg
+                 (int32_t)(((int32_t)player.angle * (int32_t)(360 << 12)) >> 24), // angle in deg
                  player.pos.vx, player.pos.vy,
                  player.action
             );

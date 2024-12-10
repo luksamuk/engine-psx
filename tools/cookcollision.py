@@ -74,6 +74,7 @@ def get_height_mask(d: Direction, points):
     # Of course, if pointing downwards, we go from left to right, top to bottom.
     # If using any other direction... flip it accordingly.
     heightmask = []
+    last_pos = 0
     angle = 0
     for pos in range(16):
         found = False
@@ -94,15 +95,25 @@ def get_height_mask(d: Direction, points):
             if point_in_geometry([x, y], points):
                 found = True
                 heightmask.append(height)
+                if (pos > 0) and (heightmask[pos - 1] != height):
+                    last_pos = pos
                 break
         if not found:
             heightmask.append(0)
 
     # Build vector according to direction
-    # and heightmask
+    # and heightmask.
+    # We have a somewhat naive approach here to determine angle: when we have
+    # a platform that, at some point, keeps its height, we ignore said height
+    # change and only consider the steep part.
+    # This is necessary because some tiles have a really steep angle in a
+    # certain direction; angles are a property of the entire tile on a specific
+    # mode.
+    # This was causing some almost-square tiles with really steep angles to
+    # have very small angles (see R3, tile 76).
     vector = [0, 0]
     dirvec = [1, 0]
-    delta = heightmask[0] - heightmask[-1]
+    delta = heightmask[0] - heightmask[last_pos]
     if d == Direction.DOWN:
         # Vector points left to right
         vector = [16, delta]
@@ -124,6 +135,9 @@ def get_height_mask(d: Direction, points):
     angle = math.atan2(dirvec[1], dirvec[0]) - math.atan2(vector[1], vector[0])
     # Angles are always converted to degrees and rounded
     # to zero decimals
+    if angle < 0:
+        angle += math.tau
+
     angle = to_psx_angle(angle)
     return (heightmask, angle)
 
