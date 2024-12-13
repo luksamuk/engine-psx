@@ -330,7 +330,7 @@ _player_update_collision_lr(Player *player)
     /*         player->angle = 0; */
     /*         player->vel.vz = 0; */
     /*         // TODO: Same as hitting the head. Adjust this to look like ceiling */
-    /*         player->pos.vy = (player->ev_left.coord - 10) << 12; */
+       /*         player->pos.vy = (player->ev_left.coord - 10) << 12; */
     /*     } */
     /*     break; */
     /* case CDIR_CEILING: */
@@ -469,10 +469,18 @@ _player_update_collision_tb(Player *player)
                 player->angle = player->ev_grnd1.angle;
             else if(!player->ev_grnd1.collided && player->ev_grnd2.collided)
                 player->angle = player->ev_grnd2.angle;
-            // In case both are available, get the angle on the left.
-            // This introduces certain collision bugs but let's leave it
-            // like this for now
-            else player->angle = player->ev_grnd1.angle;
+            /* // In case both are available, get the angle on the left. */
+            /* // This introduces certain collision bugs but let's leave it */
+            /* // like this for now */
+            /* else player->angle = player->ev_grnd1.angle; */
+
+            // In case both are available, get the lowest angle always
+            else {
+                player->angle =
+                    (player->ev_grnd1.angle < player->ev_grnd2.angle)
+                    ? player->ev_grnd1.angle
+                    : player->ev_grnd2.angle;
+            }
 
             // TODO: FIX THIS!!!!!
             int32_t deg = (abs(player->angle) * (360 << 12) >> 24);
@@ -608,9 +616,9 @@ _player_update_collision_tb(Player *player)
 }
 
 void
-player_update(Player *player)
+_player_resolve_collision_modes(Player *player)
 {
-    // NOTE THAT PLAYER INPUT IS NOT UPDATED AUTOMATICALLY!
+        // NOTE THAT PLAYER INPUT IS NOT UPDATED AUTOMATICALLY!
     // One must call input_get_state on player->input so that
     // player input is recognized. This is done in screen_level.c.
 
@@ -618,7 +626,7 @@ player_update(Player *player)
     // by 43 units towards the direction that makes more sense for
     // that region, so angles may be increased or decreased depending
     // on convenience.
-    uint32_t p_angle = abs(player->angle);
+    int32_t p_angle = player->angle;
 
     /* GROUND SENSORS COLLISION MODES */
     // As a rule of thumb, only floor and ceiling min/max
@@ -630,21 +638,21 @@ player_update(Player *player)
 #define GSMODE_ANGLE_FLOOR_RIGHT    0x01d5 // ~41° (original: 45°)
 #define GSMODE_ANGLE_CEIL_MIN       0x0600 // 135°
 #define GSMODE_ANGLE_CEIL_MAX       0x0a00 // 225°
-#define GSMODE_ANGLE_FLOOR_LEFT     0x0e40 // ~318° (original: 315°)
+#define GSMODE_ANGLE_FLOOR_LEFT     0x0e94 // ~318° (original: 315°)
     
     // Original collision mode ranges
-    if((GSMODE_ANGLE_FLOOR_LEFT <= p_angle) || (p_angle <= GSMODE_ANGLE_FLOOR_RIGHT))
+    if((p_angle >= GSMODE_ANGLE_FLOOR_LEFT) || (p_angle <= GSMODE_ANGLE_FLOOR_RIGHT))
         // floor
         player->gsmode = CDIR_FLOOR;
-    else if((GSMODE_ANGLE_FLOOR_RIGHT < p_angle) && (p_angle < GSMODE_ANGLE_CEIL_MIN))
+    else if((p_angle > GSMODE_ANGLE_FLOOR_RIGHT) && (p_angle < GSMODE_ANGLE_CEIL_MIN))
         // r.wall (l.wall if angle is negative)
         player->gsmode = (player->angle >= 0)
             ? CDIR_RWALL
             : CDIR_LWALL;
-    else if((GSMODE_ANGLE_CEIL_MIN <= p_angle) && (p_angle <= GSMODE_ANGLE_CEIL_MAX))
+    else if((p_angle >= GSMODE_ANGLE_CEIL_MIN) && (p_angle <= GSMODE_ANGLE_CEIL_MAX))
         // ceiling
         player->gsmode = CDIR_CEILING;
-    else if((GSMODE_ANGLE_CEIL_MAX < p_angle) && (p_angle < GSMODE_ANGLE_FLOOR_LEFT))
+    else if((p_angle > GSMODE_ANGLE_CEIL_MAX) && (p_angle < GSMODE_ANGLE_FLOOR_LEFT))
         // l.wall (r.wall if angle negative)
         player->gsmode = (player->angle >= 0)
             ? CDIR_LWALL
@@ -670,6 +678,12 @@ player_update(Player *player)
         player->psmode = (player->angle >= 0)
             ? CDIR_LWALL
             : CDIR_RWALL;
+}
+
+void
+player_update(Player *player)
+{
+    //_player_resolve_collision_modes(player);
 
     _player_update_collision_lr(player); // Push sensor collision detection
     _player_update_collision_tb(player); // Ground sensor collision detection
