@@ -7,9 +7,9 @@
 #define BLOCK_SIZE 16
 
 typedef struct {
-	uint16_t width, height;
-	uint32_t bs_data[0x2000];   // Bitstream data read from the disc
-	uint32_t mdec_data[0x8000]; // Decompressed data to be fed to the MDEC
+    uint16_t width, height;
+    uint32_t bs_data[0x2000];   // Bitstream data read from the disc
+    uint32_t mdec_data[0x8000]; // Decompressed data to be fed to the MDEC
 } StreamBuffer;
 
 typedef struct {

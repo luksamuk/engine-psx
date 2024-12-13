@@ -351,13 +351,14 @@
 	      source="${PROJECT_SOURCE_DIR}/assets/bgm/EVENT001.XA" />
       </dir>
 
-      <dummy sectors="1024"/>
-      <file name="SONICT.STR"
-	    type="mixed"
-	    source="${PROJECT_SOURCE_DIR}/assets/fmv/SONICT.STR" />
-      <file name="PS30YRS.STR"
-	    type="mixed"
-	    source="${PROJECT_SOURCE_DIR}/assets/fmv/PS30YRS.STR" />
+      <dir name="FMV">
+	<file name="SONICT.STR"
+	      type="mixed"
+	      source="${PROJECT_SOURCE_DIR}/assets/fmv/SONICT.STR" />
+	<file name="PS30YRS.STR"
+	      type="mixed"
+	      source="${PROJECT_SOURCE_DIR}/assets/fmv/PS30YRS.STR" />
+      </dir>
 
       <dummy sectors="1024"/>
     </directory_tree>

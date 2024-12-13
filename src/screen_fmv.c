@@ -11,7 +11,7 @@
 // Can't wait for hackers using ACE to manipulate this someday :)
 static ScreenIndex next_screen = SCREEN_LEVELSELECT;
 
-static const char *fmv_queue[FMV_QUEUE_MAX];
+static FMVOption fmv_queue[FMV_QUEUE_MAX];
 static uint8_t fmv_count = 0;
 
 void screen_fmv_load() {}
@@ -28,8 +28,17 @@ screen_fmv_unload(void *)
 void
 screen_fmv_update(void *)
 {
-    for(uint8_t i = 0; i < fmv_count; i++)
-        mdec_play(fmv_queue[i]);
+    for(uint8_t i = 0; i < fmv_count; i++) {
+        const char *fmvpath = NULL;
+
+        switch(fmv_queue[i]) {
+        case FMV_SONICTEAM: fmvpath = "\\FMV\\SONICT.STR;1";  break;
+        case FMV_PS30YRS:   fmvpath = "\\FMV\\PS30YRS.STR;1"; break;
+        default: break;
+        }
+
+        if(fmvpath) mdec_play(fmvpath);
+    }
     scene_change(next_screen);
 }
 
@@ -43,10 +52,10 @@ screen_fmv_set_next(ScreenIndex next)
 }
 
 void
-screen_fmv_enqueue(const char *filepath)
+screen_fmv_enqueue(FMVOption option)
 {
     if(fmv_count < FMV_QUEUE_MAX) {
-        fmv_queue[fmv_count] = filepath;
+        fmv_queue[fmv_count] = option;
         fmv_count++;
     }
 }
