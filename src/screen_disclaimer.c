@@ -54,7 +54,7 @@ screen_disclaimer_update(void *d)
         } else {
             // Prepare intro, but also prepare level
             screen_fmv_set_next(SCREEN_TITLE);
-            screen_fmv_enqueue("\\PS30YRS.STR;1");
+            screen_fmv_enqueue(FMV_PS30YRS);
             scene_change(SCREEN_FMV);
         }
     }
