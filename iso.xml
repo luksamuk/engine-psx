@@ -60,6 +60,18 @@
 	  <file name="Z2.OMP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z2.OMP" />
+	  <file name="Z3.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z3.LVL" />
+	  <file name="Z4.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z4.OMP" />
+	  <file name="Z4.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z4.LVL" />
+	  <file name="Z3.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z3.OMP" />
 	  <file name="MAP128.MAP"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/MAP128.MAP" />
@@ -78,39 +90,6 @@
 	  <file name="PRL.PRL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/PRL.PRL" />
-	</dir>
-
-	<dir name="R1">
-	  <file name="Z1.LVL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/Z1.LVL" />
-	  <file name="Z1.OMP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/Z1.OMP" />
-	  <file name="Z2.LVL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/Z2.LVL" />
-	  <file name="Z2.OMP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/Z2.OMP" />
-	  <file name="MAP128.MAP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/MAP128.MAP" />
-	  <file name="MAP16.COL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/MAP16.COL" />
-	  <file name="MAP16.MAP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/MAP16.MAP" />
-	  <file name="TILES.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/TILES.TIM" />
-	  <file name="BG0.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/BG0.TIM" />
-	  <file name="PRL.PRL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R1/PRL.PRL" />
 	</dir>
 
 	<dir name="R2">

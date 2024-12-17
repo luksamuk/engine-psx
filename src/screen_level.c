@@ -544,15 +544,10 @@ level_load_level(screen_level_data *data)
     paused = 0;
 
     switch(level) {
-    case 0: case 1: // Playground
+    case 0: case 1: case 2: case 3: // Playground
         data->level_name = "PLAYGROUND";
         data->level_round = 0;
         data->level_act = level;
-        break;
-    case 2: case 3: // Playground
-        data->level_name = "PLAYGROUND";
-        data->level_round = 1;
-        data->level_act = level - 2;
         break;
     case 4: case 5:
         data->level_name = "GREEN HILL";
@@ -733,12 +728,8 @@ level_load_level(screen_level_data *data)
         switch(data->level_act) {
         case 0: sound_bgm_play(BGM_PLAYGROUND1); break;
         case 1: sound_bgm_play(BGM_PLAYGROUND2); break;
-        };
-        break;
-    case 1:
-        switch(data->level_act) {
-        case 0: sound_bgm_play(BGM_PLAYGROUND3); break;
-        case 1: sound_bgm_play(BGM_PLAYGROUND4); break;
+        case 2: sound_bgm_play(BGM_PLAYGROUND3); break;
+        case 3: sound_bgm_play(BGM_PLAYGROUND4); break;
         };
         break;
     case 2: sound_bgm_play(BGM_GREENHILL);       break;
