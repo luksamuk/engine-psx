@@ -119,3 +119,24 @@ scrollx = 0.3
 speedx = 0
 y0 = 274
 single = false
+
+[water_stream1]
+width = 256
+height = 130
+u0 = 0
+v0 = 110
+scrollx = 0
+speedx = 0.8
+y0 = 180
+single = false
+
+
+[water_stream2]
+width = 256
+height = 130
+u0 = 0
+v0 = 110
+scrollx = 0
+speedx = 0.8
+y0 = 310
+single = false

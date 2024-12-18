@@ -284,6 +284,105 @@ screen_level_update(void *d)
 }
 
 void
+_screen_level_draw_water(screen_level_data *)
+{
+    if(level_water_y >= 0) {
+        int32_t camera_bottom = camera.pos.vy + (CENTERY << 12);
+
+        if(camera_bottom > level_water_y) {
+            int32_t water_vh = camera_bottom - level_water_y;
+            uint16_t water_rh = water_vh >> 12;
+            uint16_t water_h = MIN(water_rh, SCREEN_YRES);
+            int16_t water_y = MAX(0, SCREEN_YRES - water_h);
+            int16_t water_ry = SCREEN_YRES - water_rh;
+
+            // Draw water overlay
+            {
+                POLY_G4 *poly = get_next_prim();
+                increment_prim(sizeof(POLY_G4));
+                setPolyG4(poly);
+                setXYWH(poly, 0, water_y, SCREEN_XRES, water_h);
+                setSemiTrans(poly, 1);
+                setRGB0(poly,
+                        LERPC(level_fade, 31),
+                        LERPC(level_fade, 36),
+                        LERPC(level_fade, 121));
+                setRGB1(poly,
+                        LERPC(level_fade, 31),
+                        LERPC(level_fade, 36),
+                        LERPC(level_fade, 121));
+                setRGB2(poly,
+                        LERPC(level_fade, 25),
+                        LERPC(level_fade, 12),
+                        LERPC(level_fade, 64));
+                setRGB3(poly,
+                        LERPC(level_fade, 25),
+                        LERPC(level_fade, 12),
+                        LERPC(level_fade, 64));
+            
+                /* POLY_F4 *poly = get_next_prim(); */
+                /* increment_prim(sizeof(POLY_F4)); */
+                /* setPolyF4(poly); */
+                /* setXYWH(poly, 0, water_y, SCREEN_XRES, water_h); */
+                /* setSemiTrans(poly, 1); */
+                /* setRGB0(poly, */
+                /*         LERPC(level_fade, 31), */
+                /*         LERPC(level_fade, 36), */
+                /*         LERPC(level_fade, 121)); */
+
+                sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
+            }
+
+            // Draw water waves
+            {
+                static uint8_t wave_dir = 0;
+                static uint8_t wave_visible = 1;
+
+                uint32_t frame = get_global_frames();
+
+                if(!(frame % 6)) wave_dir = !wave_dir;
+                if(!(frame % 3)) wave_visible = !wave_visible;
+                
+                // Water wave sprites is within common objects texture.
+                // uv0 = (146, 183); wh=(64, 9)
+                // Sprite plays for 20 frames and then flips direction
+                for(uint16_t i = 0; i < 6; i++) {
+                    uint16_t x = i * 64;
+
+                    uint8_t current_visible = (i + wave_visible) % 2;
+
+                    POLY_FT4 *poly = get_next_prim();
+                    increment_prim(sizeof(POLY_FT4));
+                    setPolyFT4(poly);
+                    setRGB0(poly, level_fade, level_fade, level_fade);
+                    // There is some sort of trickery here.
+                    // Rendering the waves actually influence on
+                    // water color. We render the waves as a fully
+                    // transparent pixel when invisible so
+                    // the body of water doesn't blink
+                    if(!current_visible)
+                        setUVWH(poly, 0, 0, 0, 0);
+                    else if(wave_dir)
+                        setUVWH(poly, 146, 183, 64, 9);
+                    else setUV4(poly,
+                                146 + 63, 183,
+                                146, 183,
+                                146 + 63, 183 + 9,
+                                146, 183 + 9);
+                    setXYWH(poly, x, water_ry - 6, 64, 9);
+                    // tpage and clut same as common objects
+                    poly->tpage = getTPage(1, 0, 576, 0);
+                    poly->clut = getClut(0, 481);
+                    setSemiTrans(poly, 1);
+                    sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
+                }
+            }
+        }
+        
+    }
+}
+
+void
 screen_level_draw(void *d)
 {
     screen_level_data *data = (screen_level_data *)d;
@@ -293,50 +392,7 @@ screen_level_draw(void *d)
     // When things are drawn on the same otz, anything drawn first
     // is shown on front, as the ordering table is drawn backwards.
 
-    // Draw water
-    if(level_water_y >= 0) {
-        int32_t camera_bottom = camera.pos.vy + (CENTERY << 12);
-
-        if(camera_bottom > level_water_y) {
-            int32_t water_vh = camera_bottom - level_water_y;
-            uint16_t water_h = MIN(water_vh >> 12, SCREEN_YRES);
-            uint16_t water_y = MAX(0, SCREEN_YRES - water_h);
-
-            POLY_G4 *poly = get_next_prim();
-            increment_prim(sizeof(POLY_G4));
-            setPolyG4(poly);
-            setXYWH(poly, 0, water_y, SCREEN_XRES, water_h);
-            setSemiTrans(poly, 1);
-            setRGB0(poly,
-                    LERPC(level_fade, 31),
-                    LERPC(level_fade, 36),
-                    LERPC(level_fade, 121));
-            setRGB1(poly,
-                    LERPC(level_fade, 31),
-                    LERPC(level_fade, 36),
-                    LERPC(level_fade, 121));
-            setRGB2(poly,
-                    LERPC(level_fade, 25),
-                    LERPC(level_fade, 12),
-                    LERPC(level_fade, 64));
-            setRGB3(poly,
-                    LERPC(level_fade, 25),
-                    LERPC(level_fade, 12),
-                    LERPC(level_fade, 64));
-            
-            /* POLY_F4 *poly = get_next_prim(); */
-            /* increment_prim(sizeof(POLY_F4)); */
-            /* setPolyF4(poly); */
-            /* setXYWH(poly, 0, water_y, SCREEN_XRES, water_h); */
-            /* setSemiTrans(poly, 1); */
-            /* setRGB0(poly, */
-            /*         LERPC(level_fade, 31), */
-            /*         LERPC(level_fade, 36), */
-            /*         LERPC(level_fade, 121)); */
-            
-            sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
-        }
-    }
+    _screen_level_draw_water(data);
 
     // Draw player
     if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
