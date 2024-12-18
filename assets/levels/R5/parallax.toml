@@ -117,7 +117,7 @@ u0 = 0
 v0 = 256
 scrollx = 0.3
 speedx = 0
-y0 = 274
+y0 = 242
 single = false
 
 [water_stream1]
