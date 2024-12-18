@@ -69,6 +69,37 @@ y0 = 106
 single = true
 
 
+[seabed_wall1]
+width = 256
+height = 63
+u0 = 0
+v0 = 449
+scrollx = 0.1
+speedx = 0
+y0 = 177
+single = false
+
+[seabed_wall2]
+width = 256
+height = 63
+u0 = 0
+v0 = 449
+scrollx = 0.1
+speedx = 0
+y0 = 240
+single = false
+
+[seabed_wall3]
+width = 256
+height = 63
+u0 = 0
+v0 = 449
+scrollx = 0.1
+speedx = 0
+y0 = 303
+single = false
+
+
 [seabed1]
 width = 256
 height = 256

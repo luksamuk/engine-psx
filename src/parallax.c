@@ -7,8 +7,11 @@
 #include "camera.h"
 #include "render.h"
 
+#include "screens/level.h"
+
 extern ArenaAllocator _level_arena;
 extern uint8_t level_fade;
+extern int32_t level_water_y;
 
 // Pre-allocated parallax polygons
 uint8_t prl_current_buffer = 0;
@@ -110,6 +113,25 @@ load_parallax(Parallax *parallax, const char *filename,
 void
 parallax_draw(Parallax *prl, Camera *camera)
 {
+    int32_t start_y = 0;
+
+    {
+        uint8_t level = screen_level_getlevel();
+        if(level == 10 || level == 11) {
+            // This is R5, and the water surface is at y = 177.
+            // Compensate that, but do not allow the background to
+            // go much beyond that
+            // Use level_water_y.
+
+            int32_t ymin = -(SCREEN_YRES << 12) + (CENTERY << 11);
+
+            start_y = level_water_y - camera->pos.vy - (CENTERY << 11);
+            start_y = MAX(start_y, ymin);
+        }
+    }
+
+    start_y = start_y >> 12;
+    
     // Camera left boundary (fixed 20.12 format)
     int32_t camera_vx = (camera->pos.vx - (CENTERX << 12));
 
@@ -130,6 +152,10 @@ parallax_draw(Parallax *prl, Camera *camera)
 
         // Calculate part X position based on factor and camera (int format)
         int32_t vx = stripx + (strip->rposx >> 12);
+        int32_t vy = strip->y0 + start_y;
+
+        if((vy + strip->height < 0) || (vy > SCREEN_YRES))
+            continue;
 
         // Given that each part is a horizontal piece of a strip, we assume
         // that these parts repeat at every (strip width), so just draw
@@ -147,7 +173,7 @@ parallax_draw(Parallax *prl, Camera *camera)
 
             POLY_FT4 *poly = &prl_pols[prl_current_buffer][si][poly_n];
             setRGB0(poly, level_fade, level_fade, level_fade);
-            setXYWH(poly, wx, strip->y0, strip->width, strip->height);
+            setXYWH(poly, wx, vy, strip->width, strip->height);
             sort_prim(poly, OTZ_LAYER_LEVEL_BG);
 
             poly_n++;

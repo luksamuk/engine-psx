@@ -38,6 +38,7 @@ uint8_t     level_fade;
 uint8_t     level_ring_count;
 uint32_t    level_score_count;
 uint8_t     level_finished;
+int32_t     level_water_y;
 LEVELMODE   level_mode;
 
 
@@ -288,6 +289,55 @@ screen_level_draw(void *d)
     screen_level_data *data = (screen_level_data *)d;
     char buffer[255] = { 0 };
 
+    // As a rule of thumb, things are drawn in specific otz's.
+    // When things are drawn on the same otz, anything drawn first
+    // is shown on front, as the ordering table is drawn backwards.
+
+    // Draw water
+    if(level_water_y >= 0) {
+        int32_t camera_bottom = camera.pos.vy + (CENTERY << 12);
+
+        if(camera_bottom > level_water_y) {
+            int32_t water_vh = camera_bottom - level_water_y;
+            uint16_t water_h = MIN(water_vh >> 12, SCREEN_YRES);
+            uint16_t water_y = MAX(0, SCREEN_YRES - water_h);
+
+            POLY_G4 *poly = get_next_prim();
+            increment_prim(sizeof(POLY_G4));
+            setPolyG4(poly);
+            setXYWH(poly, 0, water_y, SCREEN_XRES, water_h);
+            setSemiTrans(poly, 1);
+            setRGB0(poly,
+                    LERPC(level_fade, 31),
+                    LERPC(level_fade, 36),
+                    LERPC(level_fade, 121));
+            setRGB1(poly,
+                    LERPC(level_fade, 31),
+                    LERPC(level_fade, 36),
+                    LERPC(level_fade, 121));
+            setRGB2(poly,
+                    LERPC(level_fade, 25),
+                    LERPC(level_fade, 12),
+                    LERPC(level_fade, 64));
+            setRGB3(poly,
+                    LERPC(level_fade, 25),
+                    LERPC(level_fade, 12),
+                    LERPC(level_fade, 64));
+            
+            /* POLY_F4 *poly = get_next_prim(); */
+            /* increment_prim(sizeof(POLY_F4)); */
+            /* setPolyF4(poly); */
+            /* setXYWH(poly, 0, water_y, SCREEN_XRES, water_h); */
+            /* setSemiTrans(poly, 1); */
+            /* setRGB0(poly, */
+            /*         LERPC(level_fade, 31), */
+            /*         LERPC(level_fade, 36), */
+            /*         LERPC(level_fade, 121)); */
+            
+            sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
+        }
+    }
+
     // Draw player
     if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
        && abs((player.pos.vy - camera.pos.vy) >> 12) <= SCREEN_YRES) {
@@ -330,6 +380,9 @@ screen_level_draw(void *d)
                 LERPC(level_fade, 0x66),
                 LERPC(level_fade, 0xb5));
         sort_prim(poly, OTZ_LAYER_LEVEL_BG);
+    }
+    else if(data->level_round == 5) {
+        // If we're in R5, draw a dark gradient on 
     }
     // If we're in R8, draw a gradient as well, but at a lower position.
     else if(level == 16 || level == 17 || level == 18) {
@@ -543,6 +596,9 @@ level_load_level(screen_level_data *data)
 {
     paused = 0;
 
+    // Negative water means no water
+    level_water_y = -1;
+
     switch(level) {
     case 0: case 1: case 2: case 3: // Playground
         data->level_name = "PLAYGROUND";
@@ -568,6 +624,7 @@ level_load_level(screen_level_data *data)
         data->level_name = "AMAZING OCEAN";
         data->level_round = 5;
         data->level_act = level - 10;
+        level_water_y = 0x2b0000;
         break;
     case 12: case 13:
         data->level_name = "BLAZING FORCE";
