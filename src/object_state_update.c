@@ -367,7 +367,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
         if(collision_side == OBJ_SIDE_NONE)
             return;
         else if(state->flipmask & MASK_FLIP_ROTCT) { // Left-pointing spring
-            player.pos.vx = (solidity_vx - player_width) << 12;
+            //player.pos.vx = (solidity_vx - player_width) << 12;
             player.ev_right.collided = 0; // Detach player from right wall if needed
             player.vel.vz = is_red ? -0x10000 : -0xa000;
             if(!player.grnd) player.vel.vx = is_red ? -0x10000 : -0xa000;
@@ -376,7 +376,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
         } else if(state->flipmask & MASK_FLIP_ROTCW) { // Right-pointing spring
-            player.pos.vx = (solidity_vx + solidity_w + player_width + 8) << 12;
+            //player.pos.vx = (solidity_vx + solidity_w + player_width + 8) << 12;
             player.ev_left.collided = 0; // Detach player from left wall if needed
             player.vel.vz = is_red ? 0x10000 : 0xa000;
             if(!player.grnd) player.vel.vx = is_red ? 0x10000 : 0xa000;
