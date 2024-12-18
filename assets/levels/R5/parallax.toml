@@ -109,3 +109,13 @@ scrollx = 0.2
 speedx = 0
 y0 = 177
 single = false
+
+[seabed2]
+width = 256
+height = 256
+u0 = 0
+v0 = 256
+scrollx = 0.3
+speedx = 0
+y0 = 274
+single = false
