@@ -304,32 +304,21 @@ _screen_level_draw_water(screen_level_data *)
                 setXYWH(poly, 0, water_y, SCREEN_XRES, water_h);
                 setSemiTrans(poly, 1);
                 setRGB0(poly,
-                        LERPC(level_fade, 31),
-                        LERPC(level_fade, 36),
-                        LERPC(level_fade, 121));
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 0xb8));
                 setRGB1(poly,
-                        LERPC(level_fade, 31),
-                        LERPC(level_fade, 36),
-                        LERPC(level_fade, 121));
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 0xb8));
                 setRGB2(poly,
-                        LERPC(level_fade, 25),
-                        LERPC(level_fade, 12),
-                        LERPC(level_fade, 64));
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 0x18));
                 setRGB3(poly,
-                        LERPC(level_fade, 25),
-                        LERPC(level_fade, 12),
-                        LERPC(level_fade, 64));
-            
-                /* POLY_F4 *poly = get_next_prim(); */
-                /* increment_prim(sizeof(POLY_F4)); */
-                /* setPolyF4(poly); */
-                /* setXYWH(poly, 0, water_y, SCREEN_XRES, water_h); */
-                /* setSemiTrans(poly, 1); */
-                /* setRGB0(poly, */
-                /*         LERPC(level_fade, 31), */
-                /*         LERPC(level_fade, 36), */
-                /*         LERPC(level_fade, 121)); */
-
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 0),
+                        LERPC(level_fade, 0x18));
                 sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
             }
 
