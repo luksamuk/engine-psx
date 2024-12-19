@@ -307,6 +307,9 @@
 	<file name="SWITCH.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SWITCH.VAG" />
+	<file name="SPLASH.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SPLASH.VAG" />
       </dir>
 
       <dir name="BGM">

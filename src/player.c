@@ -46,6 +46,7 @@ SoundEffect sfx_ringl  = { 0 };
 SoundEffect sfx_shield = { 0 };
 SoundEffect sfx_yea    = { 0 };
 SoundEffect sfx_switch = { 0 };
+SoundEffect sfx_splash = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -53,6 +54,7 @@ extern TileMap128 map128;
 extern LevelData  leveldata;
 extern Camera     camera;
 extern uint8_t    level_ring_count;
+extern int32_t    level_water_y;
 
 void
 load_player(Player *player,
@@ -71,6 +73,7 @@ load_player(Player *player,
     player->framecount = 0;
     player->iframes = 0;
     player->shield = 0;
+    player->underwater = 0;
     player->gsmode = CDIR_FLOOR;
     player->psmode = CDIR_FLOOR;
 
@@ -104,6 +107,7 @@ load_player(Player *player,
     if(sfx_shield.addr == 0) sfx_shield  = sound_load_vag("\\SFX\\SHIELD.VAG;1");
     if(sfx_yea.addr == 0)    sfx_yea     = sound_load_vag("\\SFX\\YEA.VAG;1");
     if(sfx_switch.addr == 0) sfx_switch  = sound_load_vag("\\SFX\\SWITCH.VAG;1");
+    if(sfx_splash.addr == 0) sfx_splash  = sound_load_vag("\\SFX\\SPLASH.VAG;1");
 }
 
 void
@@ -984,6 +988,19 @@ player_update(Player *player)
             if(player->anim_frame > player->cur_anim->end)
                 player->anim_frame = player->cur_anim->start + player->loopback_frame;
         } else player->anim_timer--;
+    }
+
+    if(level_water_y >= 0) {
+        // Underwater state update
+        if(((player->pos.vy > level_water_y) && !player->underwater)
+           || ((player->pos.vy < level_water_y) && player->underwater)) {
+            player->underwater = !player->underwater;
+            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+            explosion->freepos.vx = player->pos.vx;
+            explosion->freepos.vy = level_water_y;
+            explosion->state.anim_state.animation = 2; // Water splash
+            sound_play_vag(sfx_splash, 0);
+        }
     }
 
     // Screen transform

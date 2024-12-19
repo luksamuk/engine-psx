@@ -287,7 +287,9 @@ begin_render_routine:
     poly->clut = getClut(0, 481);
 
     sort_prim(poly,
-              ((state->id == OBJ_RING) || (state->id == OBJ_SHIELD))
+              ((state->id == OBJ_RING)
+               || (state->id == OBJ_SHIELD)
+               || (state->id == OBJ_EXPLOSION))
               ? OTZ_LAYER_OBJECTS
               : OTZ_LAYER_PLAYER);
 

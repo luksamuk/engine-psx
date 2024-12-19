@@ -253,6 +253,7 @@ screen_level_update(void *d)
             player.anim_dir = 1;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
             player.psmode = player.gsmode = CDIR_FLOOR;
+            player.underwater = 0;
         }
 
         if(pad_pressed(PAD_CIRCLE)) {
@@ -669,7 +670,7 @@ level_load_level(screen_level_data *data)
         data->level_name = "AMAZING OCEAN";
         data->level_round = 5;
         data->level_act = level - 10;
-        level_water_y = 0x2b0000;
+        level_water_y = 0x2c0000;
         break;
     case 12: case 13:
         data->level_name = "BLAZING FORCE";

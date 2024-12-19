@@ -598,7 +598,7 @@ _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
     }
 
     state->freepos->vx = player.pos.vx;
-    state->freepos->vy = player.pos.vy + (20 << 12);
+    state->freepos->vy = player.pos.vy + (16 << 12);
 
     // Compensate position since it is drawn before player update
     state->freepos->vx += player.vel.vx;
