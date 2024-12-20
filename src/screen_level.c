@@ -97,6 +97,9 @@ screen_level_load()
 
     demo_init();
 
+    // init proper RNG per level
+    srand(get_global_frames());
+
     // If it is a demo or we're recording, skip title card
     if(level_mode == LEVEL_MODE_DEMO
        || level_mode == LEVEL_MODE_RECORD) {

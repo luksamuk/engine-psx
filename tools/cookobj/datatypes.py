@@ -36,13 +36,11 @@ class ObjectId(Enum):
     SPRING_RED_DIAGONAL = 0x07
     SWITCH = 0x08
     GOAL_SIGN = 0x09
-
-    # Certain objects simply cannot be placed.
-    # This happens when the object in question is a particle
-    # or effect.
-    EXPLOSION = 0x0a
-    MONITOR_IMAGE = 0x0b
-    SHIELD = 0x0c
+    EXPLOSION = 0x0A
+    MONITOR_IMAGE = 0x0B
+    SHIELD = 0x0C
+    BUBBLE_PATCH = 0x0D
+    BUBBLE = 0x0E
 
     @staticmethod
     def get(name):
@@ -60,6 +58,8 @@ class ObjectId(Enum):
             "explosion": ObjectId.EXPLOSION,
             "monitor_image": ObjectId.MONITOR_IMAGE,
             "shield": ObjectId.SHIELD,
+            "bubble_patch": ObjectId.BUBBLE_PATCH,
+            "bubble": ObjectId.BUBBLE,
         }
         result = switch.get(name.lower())
         assert result is not None, f"Unknown common object {name}"
@@ -230,7 +230,15 @@ class MonitorProperties:
         f.write(c_ubyte(self.kind))
 
 
-ObjectProperties = MonitorProperties | None
+@dataclass
+class BubblePatchProperties:
+    frequency: int = 0
+
+    def write_to(self, f):
+        f.write(c_ubyte(self.frequency))
+
+
+ObjectProperties = MonitorProperties | BubblePatchProperties | None
 
 
 @dataclass

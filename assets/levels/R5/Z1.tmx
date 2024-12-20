@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="4" nextobjectid="109">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="4" nextobjectid="112">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="57" source="../COMMON/objects_common.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
@@ -115,6 +115,16 @@
    <object id="105" gid="65" x="2961.5" y="834" width="64" height="64"/>
    <object id="106" gid="61" x="3888" y="1104" width="64" height="64"/>
    <object id="108" gid="61" x="1024" y="848" width="64" height="64" rotation="90"/>
+   <object id="109" gid="73" x="1767" y="960" width="64" height="64">
+    <properties>
+     <property name="frequency" type="int" value="0"/>
+    </properties>
+   </object>
+   <object id="111" gid="73" x="1097" y="896" width="64" height="64">
+    <properties>
+     <property name="frequency" type="int" value="1"/>
+    </properties>
+   </object>
   </objectgroup>
  </group>
 </map>

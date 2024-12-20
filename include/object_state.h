@@ -37,6 +37,20 @@ typedef struct {
 } MonitorExtra;
 
 typedef struct {
+    // Defined during design
+    uint8_t frequency;
+
+    // Runtime variables
+    uint8_t timer; // Decrementing random timer. idle=[128, 255]; producing=[0, 31]
+    uint8_t state; // 0 = idle, 1 = producing
+    uint8_t num_bubbles; // num=[1, 6] at every producing delay end
+    uint8_t bubble_set; // bubble set picked at random=[0, 3]
+    uint8_t cycle; // large bubble cycle counter
+    uint8_t bubble_idx;
+    uint8_t produced_big; // Whether a big bubble was produced this cycle
+} BubblePatchExtra;
+
+typedef struct {
     uint16_t animation;
     uint8_t  frame;
     uint8_t  counter;

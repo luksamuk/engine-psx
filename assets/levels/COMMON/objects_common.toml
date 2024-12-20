@@ -426,6 +426,60 @@ frames = [
 ]
 loopback = 0
 
+
+# ============
+
+[bubble_patch]
+
+[[bubble_patch.animations]]
+id = 0
+name = "default"
+duration = 16
+frames = [
+       [16, 206, 16, 16],
+       [32, 206, 16, 16],
+]
+loopback = 0
+
+# ============
+
+[bubble]
+
+[[bubble.animations]]
+id = 0
+name = "small"
+duration = 8
+frames = [
+       [ 2, 194,  4,  4],
+       [ 8, 192,  8,  8],
+]
+loopback = 1
+
+[[bubble.animations]]
+id = 1
+name = "medium"
+duration = 8
+frames = [
+       [ 2, 194,  4,  4],
+       [ 8, 192,  8,  8],
+       [18, 194, 12, 12],
+]
+loopback = 2
+
+[[bubble.animations]]
+id = 2
+name = "big"
+duration = 8
+frames = [
+       [ 2, 194,  4,  4],
+       [ 8, 192,  8,  8],
+       [18, 194, 12, 12],
+       [ 0, 200, 16, 16],
+       [ 0, 222, 23, 23],
+       [48, 172, 32, 32],
+]
+loopback = 5
+
 # ============
 # Dummy objects
 # ============

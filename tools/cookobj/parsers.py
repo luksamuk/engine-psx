@@ -170,7 +170,12 @@ def parse_object_group(
                 m = MonitorProperties()
                 m.kind = MonitorKind.get(prop.get("value")).value
                 p.properties = m
-            pass
+            elif p.otype == ObjectId.BUBBLE_PATCH.value:
+                prop = props.find("property")
+                bp = BubblePatchProperties()
+                # Get first available value
+                bp.frequency = int(prop.get("value"))
+                p.properties = bp
         # print(
         #     f"Object type {current_ts.object_types[p.otype + current_ts.firstgid].name if p.otype >= 0 else 'DUMMY'}"
         # )

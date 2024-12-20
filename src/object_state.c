@@ -99,6 +99,13 @@ load_object_placement(const char *filename, void *lvl_data)
             extra = alloc_arena_malloc(&_level_arena, sizeof(MonitorExtra));
             ((MonitorExtra *)extra)->kind = get_byte(bytes, &b);
             break;
+        case OBJ_BUBBLE_PATCH:
+            extra = alloc_arena_malloc(&_level_arena, sizeof(BubblePatchExtra));
+            ((BubblePatchExtra *)extra)->frequency = get_byte(bytes, &b);
+
+            // Start timer at a low timer so we start with idle instead of producing
+            ((BubblePatchExtra *)extra)->timer = 8;
+            break;
         }
 
         // Get chunk at position
@@ -289,7 +296,8 @@ begin_render_routine:
     sort_prim(poly,
               ((state->id == OBJ_RING)
                || (state->id == OBJ_SHIELD)
-               || (state->id == OBJ_EXPLOSION))
+               || (state->id == OBJ_EXPLOSION)
+                  || (state->id == OBJ_BUBBLE))
               ? OTZ_LAYER_OBJECTS
               : OTZ_LAYER_PLAYER);
 

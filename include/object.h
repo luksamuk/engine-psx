@@ -27,6 +27,8 @@ typedef enum {
     OBJ_EXPLOSION              = 0x0a,
     OBJ_MONITOR_IMAGE          = 0x0b,
     OBJ_SHIELD                 = 0x0c,
+    OBJ_BUBBLE_PATCH           = 0x0d,
+    OBJ_BUBBLE                 = 0x0e,
 } ObjectType;
 
 #define MASK_FLIP_FLIPX  0x1 // Flip on X axis

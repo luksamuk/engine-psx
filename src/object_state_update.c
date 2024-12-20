@@ -35,6 +35,7 @@ extern int debug_mode;
 extern uint8_t  level_ring_count;
 extern uint32_t level_score_count;
 extern uint8_t  level_finished;
+extern int32_t  level_water_y;
 
 
 // Object-specific definitions
@@ -53,6 +54,8 @@ static void _explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Player hitbox information. Calculated once per frame.
 static int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -115,6 +118,8 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_MONITOR_IMAGE:          _monitor_image_update(state, typedata, pos);      break;
     case OBJ_SHIELD:                 _shield_update(state, typedata, pos);             break;
     case OBJ_SWITCH:                 _switch_update(state, typedata, pos);             break;
+    case OBJ_BUBBLE_PATCH:           _bubble_patch_update(state, typedata, pos);       break;
+    case OBJ_BUBBLE:                 _bubble_update(state, typedata, pos);             break;
     }
 }
 
@@ -651,5 +656,117 @@ _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     } else {
         // If button is pressed... un-press it
         state->props &= ~OBJ_FLAG_SWITCH_PRESSED;
+    }
+}
+
+
+static void
+_bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+{
+    // Fixed bubble patch sets
+    static const uint8_t bubble_size_sets[4][6] = {
+        {0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 1, 0, 0},
+        {1, 0, 1, 0, 0, 0},
+        {0, 1, 0, 0, 1, 0},
+    };
+    
+    BubblePatchExtra *extra = state->extra;
+
+    extra->timer--;
+
+    if(extra->timer == 0) {
+        // Flip production state between idle/producing.
+        // Since num_bubbles is always 0 when idle, we use this as shortcut
+        if(extra->num_bubbles == 0) {
+            extra->state = (extra->state + 1) % 2;
+            if(extra->state == 0) {
+                // Flipped from producing to idle. Pick a random delay [128; 255]
+                extra->timer = 128 + (rand() % 128);
+                extra->cycle = (extra->cycle + 1) % (extra->frequency + 1);
+                extra->produced_big = 0;
+            } else {
+                // Flipped from idle to producing
+                extra->num_bubbles = 1 + (rand() % 6); // Random [1; 6] bubbles
+                extra->bubble_set = rand() % 4; // Random bubble set [0; 4]
+                extra->bubble_idx = 0;
+                extra->timer = rand() % 32; // Random [0; 31] frames
+            }
+        } else {
+            // Produce a bubble according to constants
+            PoolObject *bubble = object_pool_create(OBJ_BUBBLE);
+            if(bubble) {
+                bubble->state.anim_state.animation =
+                    bubble_size_sets[extra->bubble_set][extra->bubble_idx++];
+                bubble->freepos.vx = (pos->vx << 12) - (8 << 12) + ((rand() % 16) << 12);
+                bubble->freepos.vy = (pos->vy << 12);
+
+                // If this is a big bubble cycle, however, we may want to turn
+                // the current bubble into a big one
+                if((extra->cycle == extra->frequency) && !extra->produced_big) {
+                    // Roll a dice with 1/4 of chance, but if this is a big
+                    // bubble cycle and we're at the last bubble, make it big
+                    // regardless!
+                    if((extra->num_bubbles == 1) || !(rand() % 4)) {
+                        extra->produced_big = 1;
+                        bubble->state.anim_state.animation = 2;
+                    }
+                }
+            }
+            
+            extra->timer = rand() % 32; // Random [0; 31] frames
+            extra->num_bubbles--;
+        }
+    }
+
+    
+    
+}
+
+static void
+_bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+{
+    // NOTE: this object can only exist as a free object. Do not insist.
+
+    // FIRST OFF: If way too far from camera, destroy it
+    if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))
+       || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 13))
+       || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 13))
+       || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 13))
+       || (state->timer >= 256)) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
+
+    // A bubble can be of three diameters: small (8), medium (12) or big (32).
+    // Animation dictates object diameter.
+    int32_t diameter = 0;
+    switch(state->anim_state.animation) {
+    default:
+    case 0: diameter = 8;  break; // small (breath)
+    case 1: diameter = 12; break; // medium
+    case 2: diameter = 32; break; // big
+    }
+
+    // Bubbles should always be ascending with a 0.5 speed (-0x800).
+    state->freepos->vy -= 0x800;
+
+    // Bubbles also sway back-and-forth in a sine-like movement.
+    // x = initial_x + 8 * sin(timer / 128.0)
+
+    // When the bubble's top interact with water surface, destroy it
+    if(state->freepos->vy - (diameter << 12) <= level_water_y) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
+
+    
+    // Bubbles can also only be interacted when big and on last animation frame.
+    // There is no destruction animation because of VRAM constraints; we still
+    // technically have a whole area available to add it, but I felt like I
+    // shouldn't create a whole new texture this time just because of a single
+    // bubble frame.
+    if(state->anim_state.animation == 2 && state->anim_state.frame == 5) {
+        // TODO
     }
 }

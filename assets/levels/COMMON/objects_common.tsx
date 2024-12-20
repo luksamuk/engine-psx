@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.0" name="objects_common" tilewidth="64" tileheight="64" tilecount="16" columns="4">
- <image source="obj_common_designtiles.png" width="256" height="256"/>
+<tileset version="1.10" tiledversion="1.11.0" name="objects_common" tilewidth="64" tileheight="64" tilecount="20" columns="4">
+ <image source="obj_common_designtiles.png" width="256" height="320"/>
  <tile id="0" type="ring"/>
  <tile id="1" type="monitor">
   <properties>
@@ -52,4 +52,10 @@
  <tile id="13" type="explosion"/>
  <tile id="14" type="monitor_image"/>
  <tile id="15" type="shield"/>
+ <tile id="16" type="bubble_patch">
+  <properties>
+   <property name="frequency" type="int" value="0"/>
+  </properties>
+ </tile>
+ <tile id="17" type="bubble"/>
 </tileset>
