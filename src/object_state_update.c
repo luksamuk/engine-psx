@@ -673,7 +673,7 @@ _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     
     BubblePatchExtra *extra = state->extra;
 
-    extra->timer--;
+    if(extra->timer > 0) extra->timer--;
 
     if(extra->timer == 0) {
         // Flip production state between idle/producing.
@@ -698,7 +698,9 @@ _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             if(bubble) {
                 bubble->state.anim_state.animation =
                     bubble_size_sets[extra->bubble_set][extra->bubble_idx++];
-                bubble->freepos.vx = (pos->vx << 12) - (8 << 12) + ((rand() % 16) << 12);
+                bubble->freepos.vx = (pos->vx << 12)
+                    - (8 << 12)
+                    + ((rand() % 16) << 12);
                 bubble->freepos.vy = (pos->vy << 12);
 
                 // If this is a big bubble cycle, however, we may want to turn
@@ -738,6 +740,18 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
         return;
     }
 
+    // INITIALIZATION: if the bubble has no X speed, initialize it and
+    // set the timer
+    if(state->freepos->spdx == 0) {
+        // 8 pixels every 128 frames
+        // 0.0625 pixel per frame
+        state->freepos->spdx = 0x100;
+        state->timer = 128;
+
+        // Start with a 50% chance random direction
+        state->timer *= ((rand() % 2) * 2) - 1;
+    }
+
     // A bubble can be of three diameters: small (8), medium (12) or big (32).
     // Animation dictates object diameter.
     int32_t diameter = 0;
@@ -753,6 +767,12 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 
     // Bubbles also sway back-and-forth in a sine-like movement.
     // x = initial_x + 8 * sin(timer / 128.0)
+    state->timer--;
+    if(state->timer == 0) {
+        state->freepos->spdx *= -1;
+        state->timer = 128;
+    }
+    state->freepos->vx += state->freepos->spdx;
 
     // When the bubble's top interact with water surface, destroy it
     if(state->freepos->vy - (diameter << 12) <= level_water_y) {
