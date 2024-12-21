@@ -86,7 +86,8 @@ typedef struct {
     // TODO: Change this to player value modes.
     // For now we're only storing info on whether
     // player is underwater
-    uint8_t underwater;
+    uint8_t  underwater;
+    uint16_t remaining_air_frames;
 
     // Collision modes
     CollMode  gsmode;

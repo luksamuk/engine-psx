@@ -47,6 +47,8 @@ SoundEffect sfx_shield = { 0 };
 SoundEffect sfx_yea    = { 0 };
 SoundEffect sfx_switch = { 0 };
 SoundEffect sfx_splash = { 0 };
+SoundEffect sfx_count  = { 0 };
+SoundEffect sfx_bubble = { 0 };
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -76,6 +78,7 @@ load_player(Player *player,
     player->underwater = 0;
     player->gsmode = CDIR_FLOOR;
     player->psmode = CDIR_FLOOR;
+    player->remaining_air_frames = 1800; // 30 seconds
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -108,6 +111,8 @@ load_player(Player *player,
     if(sfx_yea.addr == 0)    sfx_yea     = sound_load_vag("\\SFX\\YEA.VAG;1");
     if(sfx_switch.addr == 0) sfx_switch  = sound_load_vag("\\SFX\\SWITCH.VAG;1");
     if(sfx_splash.addr == 0) sfx_splash  = sound_load_vag("\\SFX\\SPLASH.VAG;1");
+    if(sfx_count.addr == 0)  sfx_count   = sound_load_vag("\\SFX\\COUNT.VAG;1");
+    if(sfx_bubble.addr == 0) sfx_bubble  = sound_load_vag("\\SFX\\BUBBLE.VAG;1");
 }
 
 void
@@ -1000,6 +1005,50 @@ player_update(Player *player)
             explosion->freepos.vy = level_water_y;
             explosion->state.anim_state.animation = 2; // Water splash
             sound_play_vag(sfx_splash, 0);
+        }
+
+        if(!player->underwater)
+            // Reset to 30 secs of air
+            player->remaining_air_frames = 1800;
+        else {
+            if(player->remaining_air_frames > 0) player->remaining_air_frames--;
+
+            uint8_t emit_bubble = !((player->remaining_air_frames + 1) % 120)
+                && (player->remaining_air_frames > 0);
+            switch(player->remaining_air_frames) {
+            case (25 * 60):
+            case (20 * 60):
+            case (15 * 60):
+                // TODO: Warning chime
+                sound_play_vag(sfx_count, 0);
+                break;
+            case (12 * 60):
+                // TODO: Start drowning music
+                // TODO: Warning bubble "5"
+                emit_bubble = 1;
+                break;
+            case (10 * 60): emit_bubble = 1; break; // TODO: Warning bubble "4"
+            case (8 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "3"
+            case (6 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "2"
+            case (4 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "1"
+            case (2 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "0"
+            case 0: break; // TODO: DROWNED!
+            }
+
+            // Bubble emission
+            if(emit_bubble) {
+                // TODO: Either emit 1 or 2 bubbles. In case of 2,
+                // First one has 1/4 chance of being a number bubble,
+                // and the second is definitely a number bubble if not emitted
+                // previously.
+                // For now we emit a single small bubble.
+                PoolObject *bubble = object_pool_create(OBJ_BUBBLE);
+                if(bubble) {
+                    bubble->state.anim_state.animation = 0;
+                    bubble->freepos.vx = player->pos.vx + (0x6000 * player->anim_dir);
+                    bubble->freepos.vy = player->pos.vy;
+                }
+            }
         }
     }
 

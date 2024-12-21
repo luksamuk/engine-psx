@@ -14,6 +14,8 @@
 #include "screen.h"
 #include "screens/level.h"
 
+#define ANIM_WALKING          0x0854020e
+
 // Extern elements
 extern Player player;
 extern Camera camera;
@@ -29,6 +31,7 @@ extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
 extern SoundEffect sfx_yea;
 extern SoundEffect sfx_switch;
+extern SoundEffect sfx_bubble;
 
 extern int debug_mode;
 
@@ -726,7 +729,7 @@ _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 }
 
 static void
-_bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+_bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
     // NOTE: this object can only exist as a free object. Do not insist.
 
@@ -786,7 +789,21 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
     // technically have a whole area available to add it, but I felt like I
     // shouldn't create a whole new texture this time just because of a single
     // bubble frame.
-    if(state->anim_state.animation == 2 && state->anim_state.frame == 5) {
-        // TODO
+    if((state->anim_state.animation == 2) && (state->anim_state.frame == 5)) {
+        // Bubble has an active trigger area of 32x16 at its bottom so we
+        // always overlap Sonic's mouth.
+        if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                           pos->vx - 16, pos->vy - 16, 32, 16)) {
+            state->props |= OBJ_FLAG_DESTROYED;
+            player.remaining_air_frames = 1800;
+            // TODO: Cancel any drowning music.
+            // TODO: Setup proper action.
+            player.action = ACTION_NONE;
+            player_set_animation_direct(&player, ANIM_WALKING); // TODO!!!
+            player.grnd = 0;
+            player.vel.vy = 0;
+            sound_play_vag(sfx_bubble, 0);
+            return;
+        }
     }
 }

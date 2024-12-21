@@ -310,6 +310,12 @@
 	<file name="SPLASH.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SPLASH.VAG" />
+	<file name="COUNT.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/COUNT.VAG" />
+	<file name="BUBBLE.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/BUBBLE.VAG" />
       </dir>
 
       <dir name="BGM">
