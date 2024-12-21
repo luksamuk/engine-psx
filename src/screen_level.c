@@ -502,7 +502,7 @@ screen_level_draw(void *d)
     }
 
     // Heads-up display
-    if(!debug_mode && (level_mode != LEVEL_MODE_DEMO)) {
+    if((debug_mode <= 1) && (level_mode != LEVEL_MODE_DEMO)) {
         font_set_color(
             LERPC(level_fade, 0xc8),
             LERPC(level_fade, 0xc8),
@@ -563,48 +563,52 @@ screen_level_draw(void *d)
         snprintf(buffer, 255, "OBJS %3d", object_pool_get_count());
         font_draw_sm(buffer, 248, 28);
 
-        // Rings and time, for convenience
+        // Rings, time and air for convenience
         snprintf(buffer, 255, "RING %03d", level_ring_count);
         font_draw_sm(buffer, 248, 36);
 
         snprintf(buffer, 255, "TIME %03d", (get_elapsed_frames() / 60));
         font_draw_sm(buffer, 248, 44);
 
+        snprintf(buffer, 255, "AIR   %02d", player.remaining_air_frames / 60);
+        font_draw_sm(buffer, 248, 52);
+
         // Player debug
-        snprintf(buffer, 255,
-                 "GSP %08x\n"
-                 "SPD %08x %08x\n"
-                 "ANG %08x G.P %s %s %3d\n"
-                 "POS %08x %08x\n"
-                 "ACT %02u   AIR %02u\n"
-                 ,
-                 player.vel.vz,
-                 player.vel.vx, player.vel.vy,
-                 player.angle,
-                 (player.gsmode == CDIR_FLOOR)
-                 ? "FL"
-                 : (player.gsmode == CDIR_RWALL)
-                 ? "RW"
-                 : (player.gsmode == CDIR_LWALL)
-                 ? "LW"
-                 : (player.gsmode == CDIR_CEILING)
-                 ? "CE"
-                 : "  ",
-                 (player.psmode == CDIR_FLOOR)
-                 ? "FL"
-                 : (player.psmode == CDIR_RWALL)
-                 ? "RW"
-                 : (player.psmode == CDIR_LWALL)
-                 ? "LW"
-                 : (player.psmode == CDIR_CEILING)
-                 ? "CE"
-                 : "  ",
-                 (int32_t)(((int32_t)player.angle * (int32_t)(360 << 12)) >> 24), // angle in deg
-                 player.pos.vx, player.pos.vy,
-                 player.action,
-                 player.remaining_air_frames / 60
-            );
-        font_draw_sm(buffer, 8, 12);
+        if(debug_mode > 1) {
+            snprintf(buffer, 255,
+                     "GSP %08x\n"
+                     "SPD %08x %08x\n"
+                     "ANG %08x G.P %s %s %3d\n"
+                     "POS %08x %08x\n"
+                     "ACT %02u\n"
+                     ,
+                     player.vel.vz,
+                     player.vel.vx, player.vel.vy,
+                     player.angle,
+                     (player.gsmode == CDIR_FLOOR)
+                     ? "FL"
+                     : (player.gsmode == CDIR_RWALL)
+                     ? "RW"
+                     : (player.gsmode == CDIR_LWALL)
+                     ? "LW"
+                     : (player.gsmode == CDIR_CEILING)
+                     ? "CE"
+                     : "  ",
+                     (player.psmode == CDIR_FLOOR)
+                     ? "FL"
+                     : (player.psmode == CDIR_RWALL)
+                     ? "RW"
+                     : (player.psmode == CDIR_LWALL)
+                     ? "LW"
+                     : (player.psmode == CDIR_CEILING)
+                     ? "CE"
+                     : "  ",
+                     (int32_t)(((int32_t)player.angle * (int32_t)(360 << 12)) >> 24), // angle in deg
+                     player.pos.vx, player.pos.vy,
+                     player.action
+                );
+            font_draw_sm(buffer, 8, 12);
+        }
     }
 }
 

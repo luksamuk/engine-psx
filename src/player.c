@@ -1013,20 +1013,33 @@ player_update(Player *player)
         else {
             if(player->remaining_air_frames > 0) player->remaining_air_frames--;
 
-            uint8_t emit_bubble = !((player->remaining_air_frames + 1) % 120)
-                && (player->remaining_air_frames > 0);
+            // Warning chime control
             switch(player->remaining_air_frames) {
             case (25 * 60):
             case (20 * 60):
             case (15 * 60):
-                // TODO: Warning chime
                 sound_play_vag(sfx_count, 0);
                 break;
-            case (12 * 60):
-                // TODO: Start drowning music
-                // TODO: Warning bubble "5"
-                emit_bubble = 1;
+            default:
+                // Start with a countdown of 8.
+                // By now the player should've already seen the "5" and "4"
+                // bubbles.
+                if((player->remaining_air_frames > 0)
+                   && (player->remaining_air_frames <= (8 * 60))
+                   && !(player->remaining_air_frames % 60)) {
+                    // Play sample every second.
+                    // Notice that warning bubbles are actually emitted
+                    // every two seconds.
+                    sound_play_vag(sfx_count, 0);
+                }
                 break;
+            }
+
+            uint8_t emit_bubble = !((player->remaining_air_frames + 1) % 120)
+                && (player->remaining_air_frames > 0);
+
+            switch(player->remaining_air_frames) {
+            case (12 * 60): emit_bubble = 1; break; // TODO: Warning bubble "5"
             case (10 * 60): emit_bubble = 1; break; // TODO: Warning bubble "4"
             case (8 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "3"
             case (6 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "2"
@@ -1057,7 +1070,7 @@ player_update(Player *player)
     player->pos.vy += player->vel.vy;
 
     // Print sensors state
-    if(debug_mode > 0) {
+    if(debug_mode > 1) {
         char buffer[255];
         snprintf(buffer, 255,
                  "COL %s%s.%s%s.%s.%s\n"
