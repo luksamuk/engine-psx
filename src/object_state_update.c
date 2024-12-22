@@ -801,7 +801,7 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             player.action = ACTION_NONE;
             player_set_animation_direct(&player, ANIM_WALKING); // TODO!!!
             player.grnd = 0;
-            player.vel.vy = 0;
+            player.vel.vx = player.vel.vy = player.vel.vz = 0;
             sound_play_vag(sfx_bubble, 0);
             return;
         }

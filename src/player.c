@@ -11,6 +11,9 @@
 #include "collision.h"
 #include "basic_font.h"
 
+extern PlayerConstants CNST_DEFAULT;
+extern PlayerConstants CNST_UNDERWATER;
+
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
 
@@ -66,6 +69,7 @@ load_player(Player *player,
     player->input = (InputState){ 0 };
     load_chara(&player->chara, chara_filename, sprites);
     player->cur_anim = NULL;
+    player->cnst  = &CNST_DEFAULT;
     player->pos   = (VECTOR){ 0 };
     player->vel   = (VECTOR){ 0 };
     player->angle = 0;
@@ -541,18 +545,27 @@ _player_update_collision_tb(Player *player)
                     || (player->vel.vx < 0 && player->anim_dir == 1);
                 if(!moving_backwards) {
                     // gsp = (gsp / 4) + (drpspd * dir)
-                    player->vel.vz = (player->vel.vz >> 2) + (X_DRPSPD * player->anim_dir);
+                    player->vel.vz = (player->vel.vz >> 2)
+                        + (player->cnst->x_drpspd * player->anim_dir);
                     if(player->vel.vz > 0)
-                        player->vel.vz = (player->vel.vz > X_DRPMAX) ? X_DRPMAX : player->vel.vz;
-                    else player->vel.vz = (player->vel.vz < X_DRPMAX) ? -X_DRPMAX : player->vel.vz;
+                        player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
+                            ? player->cnst->x_drpmax
+                            : player->vel.vz;
+                    else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
+                             ? -player->cnst->x_drpmax : player->vel.vz;
                 } else {
-                    if(player->angle == 0) player->vel.vz = X_DRPSPD * player->anim_dir;
+                    if(player->angle == 0)
+                        player->vel.vz = player->cnst->x_drpspd * player->anim_dir;
                     else {
-                        // gsp = (gsp / 2) + (drpspd * dir)
-                        player->vel.vz = (player->vel.vz >> 1) + (X_DRPSPD * player->anim_dir);
+                        player->vel.vz = (player->vel.vz >> 1)
+                            + (player->cnst->x_drpspd * player->anim_dir);
                         if(player->vel.vz > 0)
-                            player->vel.vz = (player->vel.vz > X_DRPMAX) ? X_DRPMAX : player->vel.vz;
-                        else player->vel.vz = (player->vel.vz < X_DRPMAX) ? -X_DRPMAX : player->vel.vz;
+                            player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
+                                ? player->cnst->x_drpmax
+                                : player->vel.vz;
+                        else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
+                                 ? -player->cnst->x_drpmax
+                                 : player->vel.vz;
                     }
                 }
                 sound_play_vag(sfx_relea, 0);
@@ -713,22 +726,27 @@ player_update(Player *player)
             int32_t angle_sin = rsin(player->angle);
             player->vel.vz -= (
                 (SIGNUM(player->vel.vz) == SIGNUM(angle_sin)
-                 ? X_SLOPE_ROLLUP
-                 : X_SLOPE_ROLLDOWN)
+                 ? player->cnst->x_slope_rollup
+                 : player->cnst->x_slope_rolldown)
                 * angle_sin) >> 12;
 
             // Deceleration on input
             if(player->vel.vz > 0 && input_pressing(&player->input, PAD_LEFT))
-                player->vel.vz -= X_ROLL_DECEL + X_ROLL_FRICTION;
+                player->vel.vz -=
+                    player->cnst->x_roll_decel + player->cnst->x_roll_friction;
             else if(player->vel.vz < 0 && input_pressing(&player->input, PAD_RIGHT))
-                player->vel.vz += X_ROLL_DECEL + X_ROLL_FRICTION;
+                player->vel.vz +=
+                    player->cnst->x_roll_decel + player->cnst->x_roll_friction;
             else {
                 // Apply roll friction
-                player->vel.vz -= (player->vel.vz > 0 ? X_ROLL_FRICTION : -X_ROLL_FRICTION);
+                player->vel.vz -=
+                    (player->vel.vz > 0
+                     ? player->cnst->x_roll_friction
+                     : -player->cnst->x_roll_friction);
             }
 
             // Uncurl if too slow
-            if(abs(player->vel.vz) < X_MIN_UNCURL_SPD)
+            if(abs(player->vel.vz) < player->cnst->x_min_uncurl_spd)
                 player->action = ACTION_NONE;
         } else if(player->action == ACTION_SPINDASH) {
             // Release
@@ -756,31 +774,35 @@ player_update(Player *player)
                && (player->ctrllock == 0)) {
                 if(player->vel.vz < 0) {
                     player->action = ACTION_SKIDDING;
-                    player->vel.vz += X_DECEL;
+                    player->vel.vz += player->cnst->x_decel;
                 } else {
-                    if(player->vel.vz < X_TOP_SPD)
-                        player->vel.vz += X_ACCEL;
+                    if(player->vel.vz < player->cnst->x_top_spd)
+                        player->vel.vz += player->cnst->x_accel;
                     player->anim_dir = 1;
                 }
             } else if(input_pressing(&player->input, PAD_LEFT)
                       && (player->ctrllock == 0)) {
                 if(player->vel.vz > 0) {
                     player->action = ACTION_SKIDDING;
-                    player->vel.vz -= X_DECEL;
+                    player->vel.vz -= player->cnst->x_decel;
                 } else {
-                    if(player->vel.vz > -X_TOP_SPD)
-                        player->vel.vz -= X_ACCEL;
+                    if(player->vel.vz > -player->cnst->x_top_spd)
+                        player->vel.vz -= player->cnst->x_accel;
                     player->anim_dir = -1;
                 }
             } else {
                 // Apply friction
-                player->vel.vz -= (player->vel.vz > 0 ? X_FRICTION : -X_FRICTION);
-                if(abs(player->vel.vz) <= X_FRICTION) player->vel.vz = 0;
+                player->vel.vz -=
+                    (player->vel.vz > 0
+                     ? player->cnst->x_friction
+                     : -player->cnst->x_friction);
+                if(abs(player->vel.vz) <= player->cnst->x_friction)
+                    player->vel.vz = 0;
             }
 
-            // Slope factor application. Should only not work when in ceiling
-            if(abs(player->vel.vz) >= X_SLOPE_MIN_SPD)
-                player->vel.vz -= (X_SLOPE_NORMAL * rsin(player->angle)) >> 12;
+            // Slope factor application. TODO: Should only not work when in ceiling
+            if(abs(player->vel.vz) >= player->cnst->x_slope_min_spd)
+                player->vel.vz -= (player->cnst->x_slope_normal * rsin(player->angle)) >> 12;
 
             // Slip down slopes if they are too steep
             // TODO: FIX THIS!
@@ -797,7 +819,7 @@ player_update(Player *player)
 
             /* Action changers */
             if(input_pressing(&player->input, PAD_DOWN)) {
-                if(abs(player->vel.vz) >= X_MIN_ROLL_SPD) { // Rolling
+                if(abs(player->vel.vz) >= player->cnst->x_min_roll_spd) { // Rolling
                     player->action = ACTION_ROLLING;
                     player_set_animation_direct(player, ANIM_ROLLING);
                     sound_play_vag(sfx_roll, 0);
@@ -813,8 +835,10 @@ player_update(Player *player)
         }
 
         // Ground speed cap
-        if(player->vel.vz > X_MAX_SPD) player->vel.vz = X_MAX_SPD;
-        else if(player->vel.vz < -X_MAX_SPD) player->vel.vz = -X_MAX_SPD;
+        if(player->vel.vz > player->cnst->x_max_spd)
+            player->vel.vz = player->cnst->x_max_spd;
+        else if(player->vel.vz < -player->cnst->x_max_spd)
+            player->vel.vz = -player->cnst->x_max_spd;
 
         // Distribute ground speed onto X and Y components
         player->vel.vx = (player->vel.vz * rcos(player->angle)) >> 12;
@@ -823,20 +847,20 @@ player_update(Player *player)
         // Air X movement
         if(input_pressing(&player->input, PAD_RIGHT)
            && (player->ctrllock == 0)) {
-            if(player->vel.vx < X_TOP_SPD)
-                player->vel.vx += X_AIR_ACCEL;
+            if(player->vel.vx < player->cnst->x_top_spd)
+                player->vel.vx += player->cnst->x_air_accel;
             if(!player->airdirlock)
                 player->anim_dir = 1;
         } else if(input_pressing(&player->input, PAD_LEFT)
                   && (player->ctrllock == 0)) {
-            if(player->vel.vx > -X_TOP_SPD)
-                player->vel.vx -= X_AIR_ACCEL;
+            if(player->vel.vx > -player->cnst->x_top_spd)
+                player->vel.vx -= player->cnst->x_air_accel;
             if(!player->airdirlock)
                 player->anim_dir = -1;
         }
 
         // Air drag. Calculated before applying gravity.
-        if((player->vel.vy < 0 && player->vel.vy > -Y_MIN_JUMP)
+        if((player->vel.vy < 0 && player->vel.vy > -player->cnst->y_min_jump)
            && (player->action != ACTION_HURT)) {
             // xsp -= (xsp div 0.125) / 256
             int32_t air_drag = (div12(abs(player->vel.vx), 0x200) << 12) / 0x100000;
@@ -847,8 +871,10 @@ player_update(Player *player)
         }
 
         // Air speed cap
-        if(player->vel.vx > X_MAX_SPD) player->vel.vx = X_MAX_SPD;
-        else if(player->vel.vx < -X_MAX_SPD) player->vel.vx = -X_MAX_SPD;
+        if(player->vel.vx > player->cnst->x_max_spd)
+            player->vel.vx = player->cnst->x_max_spd;
+        else if(player->vel.vx < -player->cnst->x_max_spd)
+            player->vel.vx = -player->cnst->x_max_spd;
     }
 
     // Y movement
@@ -856,8 +882,8 @@ player_update(Player *player)
         if(player->action == ACTION_JUMPING) {
             if(!input_pressing(&player->input, PAD_CROSS)) {
                 // Short jump
-                if(player->vel.vy < -Y_MIN_JUMP)
-                    player->vel.vy = -Y_MIN_JUMP;
+                if(player->vel.vy < -player->cnst->y_min_jump)
+                    player->vel.vy = -player->cnst->y_min_jump;
                 player->holding_jump = 0;
             } else {
                 // Drop dash charge wait
@@ -872,13 +898,13 @@ player_update(Player *player)
             }
         }
         player->vel.vy += (player->action == ACTION_HURT)
-            ? Y_HURT_GRAVITY
-            : Y_GRAVITY;
+            ? player->cnst->y_hurt_gravity
+            : player->cnst->y_gravity;
     } else {
         if(input_pressed(&player->input, PAD_CROSS) && player->action != ACTION_SPINDASH) {
             // TODO: Review jump according to angle
-            player->vel.vx -= (Y_JUMP_STRENGTH * rsin(player->angle)) >> 12;
-            player->vel.vy -= (Y_JUMP_STRENGTH * rcos(player->angle)) >> 12;
+            player->vel.vx -= (player->cnst->y_jump_strength * rsin(player->angle)) >> 12;
+            player->vel.vy -= (player->cnst->y_jump_strength * rcos(player->angle)) >> 12;
             player->grnd = 0;
             player_set_animation_direct(player, ANIM_ROLLING);
             sound_play_vag(sfx_jump, 0);
@@ -1000,6 +1026,22 @@ player_update(Player *player)
         if(((player->pos.vy > level_water_y) && !player->underwater)
            || ((player->pos.vy < level_water_y) && player->underwater)) {
             player->underwater = !player->underwater;
+
+            // Change constants accordingly!
+            if(player->underwater) { // Entered underwater state
+                player->cnst = &CNST_UNDERWATER;
+                // Halve player's X speed
+                if(player->grnd) player->vel.vz = player->vel.vz >> 1;
+                else player->vel.vx = player->vel.vx >> 1;
+                // Quarter player's Y speed
+                player->vel.vy = player->vel.vy >> 2;
+            } else {
+                // TODO: Check for speed shoes
+                player->cnst = &CNST_DEFAULT;
+                // Double Y speed, limiting it to -16.0 (0x00010000)
+                player->vel.vy = MAX(player->vel.vy << 1, -0x10000);
+            }
+            
             PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
             explosion->freepos.vx = player->pos.vx;
             explosion->freepos.vy = level_water_y;
@@ -1131,9 +1173,9 @@ _player_set_hurt(Player *player, int32_t hazard_x)
 {
     player->action = ACTION_HURT;
     player->grnd = 0;
-    player->vel.vy = -Y_HURT_FORCE;
+    player->vel.vy = -player->cnst->y_hurt_force;
     int32_t a = SIGNUM(player->pos.vx - hazard_x);
-    player->vel.vx = X_HURT_FORCE * ((a == 0) ? 1 : a);
+    player->vel.vx = player->cnst->x_hurt_force * ((a == 0) ? 1 : a);
     player->ctrllock = 2;
 }
 
