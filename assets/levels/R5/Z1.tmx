@@ -90,7 +90,7 @@
    <object id="50" gid="57" x="4241" y="426" width="64" height="64"/>
    <object id="52" gid="58" x="4528" y="448" width="64" height="64">
     <properties>
-     <property name="Kind" value="NONE"/>
+     <property name="Kind" value="SPEEDSHOES"/>
     </properties>
    </object>
    <object id="62" gid="65" x="3082" y="493" width="64" height="64"/>

@@ -81,6 +81,7 @@ typedef struct {
     uint8_t   holding_jump;
     uint16_t  iframes;
     uint8_t   shield;
+    int32_t   speedshoes_frames;
 
     // TODO: Change this to player value modes.
     // For now we're only storing info on whether

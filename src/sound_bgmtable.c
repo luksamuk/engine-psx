@@ -7,7 +7,7 @@ const BGMTableEntry bgm_table[] = {
     {"\\BGM\\MNU001.XA;1",   1, 0, 450},  // Title
     {"\\BGM\\MNU001.XA;1",   2, 0, 4850}, // Credits
 
-    {"\\BGM\\MNU002.XA;1",   0, 0, 1300}, // Speed shoes
+    {"\\BGM\\MNU002.XA;1",   0, 1300, 0}, // Speed shoes
 
     {"\\BGM\\EVENT001.XA;1", 0, 0, 300},  // Level clear
 

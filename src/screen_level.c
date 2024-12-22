@@ -46,6 +46,7 @@ LEVELMODE   level_mode;
 static void level_load_player();
 static void level_load_level();
 static void level_set_clearcolor();
+static void level_play_music(uint8_t round, uint8_t act);
 
 typedef struct {
     uint8_t    level_transition;
@@ -134,7 +135,13 @@ screen_level_update(void *d)
 
     level_set_clearcolor();
 
-    // Manage fade in and fade out
+    // Manage fade in and fade out.
+    // States:
+    // 0: Showing title card
+    // 1: Fade in
+    // 2: Gameplay (differentiate if level is finished with level_finished global)
+    // 3: Fade out
+    // 4: Go to next level (managed by goal sign object)
     if(data->level_transition == 0) { // Show title card
         data->level_counter--;
         if(data->level_counter == 0)
@@ -284,6 +291,15 @@ screen_level_update(void *d)
     // Only update these if past fade in!
     if(data->level_transition > 0) {
         player_update(&player);
+    }
+
+    // If speed shoes are finished, we use the player's values
+    // as a flag to resume music playback.
+    // Player constants are managed within player update
+    if(player.speedshoes_frames == 0) {
+        if(!level_finished)
+            level_play_music(data->level_round, data->level_act);
+        player.speedshoes_frames = -1;
     }
 }
 
@@ -834,24 +850,7 @@ level_load_level(screen_level_data *data)
     printf("Number of level layers: %d\n", leveldata.num_layers);
 
     // Start playback after we don't need the CD anymore.
-    switch(data->level_round) {
-    case 0:
-        switch(data->level_act) {
-        case 0: sound_bgm_play(BGM_PLAYGROUND1); break;
-        case 1: sound_bgm_play(BGM_PLAYGROUND2); break;
-        case 2: sound_bgm_play(BGM_PLAYGROUND3); break;
-        case 3: sound_bgm_play(BGM_PLAYGROUND4); break;
-        };
-        break;
-    case 2: sound_bgm_play(BGM_GREENHILL);       break;
-    case 3: sound_bgm_play(BGM_SURELYWOOD);      break;
-    case 4: sound_bgm_play(BGM_DAWNCANYON);      break;
-    case 5: sound_bgm_play(BGM_AMAZINGOCEAN);    break;
-    case 6: break; // TODO
-    case 7: break; // TODO
-    case 8: sound_bgm_play(BGM_EGGMANLAND);      break;
-    default: break;
-    }
+    level_play_music(data->level_round, data->level_act);
 
     // Pre-calculate title card target X and Y positions
     {
@@ -916,4 +915,28 @@ void
 screen_level_setmode(LEVELMODE mode)
 {
     level_mode = mode;
+}
+
+
+static void
+level_play_music(uint8_t round, uint8_t act)
+{
+    switch(round) {
+    case 0:
+        switch(act) {
+        case 0: sound_bgm_play(BGM_PLAYGROUND1); break;
+        case 1: sound_bgm_play(BGM_PLAYGROUND2); break;
+        case 2: sound_bgm_play(BGM_PLAYGROUND3); break;
+        case 3: sound_bgm_play(BGM_PLAYGROUND4); break;
+        };
+        break;
+    case 2: sound_bgm_play(BGM_GREENHILL);       break;
+    case 3: sound_bgm_play(BGM_SURELYWOOD);      break;
+    case 4: sound_bgm_play(BGM_DAWNCANYON);      break;
+    case 5: sound_bgm_play(BGM_AMAZINGOCEAN);    break;
+    case 6: break; // TODO
+    case 7: break; // TODO
+    case 8: sound_bgm_play(BGM_EGGMANLAND);      break;
+    default: break;
+    }
 }

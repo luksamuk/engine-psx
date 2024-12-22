@@ -13,6 +13,7 @@
 
 extern PlayerConstants CNST_DEFAULT;
 extern PlayerConstants CNST_UNDERWATER;
+extern PlayerConstants CNST_SPEEDSHOES;
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
@@ -83,6 +84,7 @@ load_player(Player *player,
     player->gsmode = CDIR_FLOOR;
     player->psmode = CDIR_FLOOR;
     player->remaining_air_frames = 1800; // 30 seconds
+    player->speedshoes_frames = -1; // Start inactive
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -1021,6 +1023,17 @@ player_update(Player *player)
         } else player->anim_timer--;
     }
 
+    // Speed shoes
+    // Constant values are modified by monitor behaviour.
+    if(player->speedshoes_frames > 0)
+        player->speedshoes_frames--;
+    if(player->speedshoes_frames == 0) {
+        // Reset constants.
+        // Notice that speedshoes_frames is set to -1 by general level update.
+        player->cnst = &CNST_DEFAULT;
+    }
+
+    // Underwater / leaving water
     if(level_water_y >= 0) {
         // Underwater state update
         if(((player->pos.vy > level_water_y) && !player->underwater)
@@ -1036,8 +1049,9 @@ player_update(Player *player)
                 // Quarter player's Y speed
                 player->vel.vy = player->vel.vy >> 2;
             } else {
-                // TODO: Check for speed shoes
-                player->cnst = &CNST_DEFAULT;
+                player->cnst = (player->speedshoes_frames > 0)
+                    ? &CNST_SPEEDSHOES
+                    : &CNST_DEFAULT;
                 // Double Y speed, limiting it to -16.0 (0x00010000)
                 player->vel.vy = MAX(player->vel.vy << 1, -0x10000);
             }
