@@ -1,6 +1,6 @@
-#+title: engine-psx / Sonic The Hedgehog XA
+#+title: Sonic The Hedgehog XA
 
-Open source platformer engine built for the PlayStation 1.
+Open source Sonic fangame built for the PlayStation 1 (formerly =engine-psx=).
 
 This  engine is  focused on  building  the fangame  Sonic The  Hedgehog XA,  and
 therefore is not dissociated with said project.
@@ -13,16 +13,17 @@ Heavily inspired by Sonic The Hedgehog. Uses [[https://github.com/Lameguy64/PSn0
 
 /Game title screen running on PCSX-Redux, dated [2024-10-04]./
 
-*GET THE LATEST BUILD HERE (.CHD FORMAT)*: [[https://luksamuk.codes/static/psx/ENGINEPSX.CHD]]
+*GET BUILDS AND BETAS ON THE RELEASES SECTION!!!!*
+
+*Also get a build on my website:*: [[https://luksamuk.codes/]]
 
 * About
 
-This is a  platformer game engine build for the  PlayStation 1, heavily inspired
-by Sonic The Hedgehog. The focus here is on experimentation, attempting to build
-a sane 2D engine in pure C while taking advantage of what the PlayStation has to
-offer in terms of hardware.
+This is a Sonic The Hedgehog fangame built for the PlayStation 1. The focus here
+is on  experimentation: I'm studying  the PlayStation hardware  and capabilities
+while building a 2D sonic game in pure C.
 
-This  engine is  opensource and  can be  built by  anyone. Also,  since it  uses
+This  game is  opensource and  can be  built by  anyone. Also,  since it  uses
 Psn00bSDK, the source  code can be freely distributed.
 
 Some assets use different formats than  common formats. This is because I needed
@@ -42,6 +43,9 @@ development has been targeted for Linux environments.
 - Aseprite (for  handling sprite sheets  and tilemaps), plus some  useful [[https://github.com/Gabinou/tilemap_scripts_aseprite][script
   files]] (tweak =export_tileset.lua= so it only exports with a =row_len= of =32=,
   since all tiles are 8x8);
+- Tiled, for  anything relating to levels  and object positioning. You  may also
+  want to install custom exporters  that are in =tools/tiled_exporter/= and also
+  enable Tiled's Python scripting format.
 - =mkpsxiso=, to build the ISO files;
 - =gcc-mipsel= compiler toolchain;
 - =timedit=, to import images and convert them to .TIM format;
@@ -143,22 +147,23 @@ tochd -d . -- ./build/engine.cue
 
 * Gallery
 
-| Screenshot                                            | Description                                                                                     |
-|-------------------------------------------------------+-------------------------------------------------------------------------------------------------|
-| [[file:./screenshots/sonicxa-110424-swz.gif]]             | Beta engine [2024-11-04]. Like below. Showcasing Surely Wood Zone, springs, background, etc.    |
-| [[file:./screenshots/sonicxa-110424-ghz.gif]]             | Beta engine [2024-11-04]. Many changes, notably a HUD, improved collision, spikes and damage.   |
-| [[file:./screenshots/sonicxa-100424-gh.gif]]              | Beta engine [2024-10-04]. Same as below, showcasing Green Hill Zone.                            |
-| [[file:./screenshots/sonicxa-100424.gif]]                 | Beta engine [2024-10-04]. Includes object rendering, and monitors and rings can be interacted.  |
-| [[file:./screenshots/sonicxa-092224-gh.gif]]              | Beta engine [2024-09-22]. Same as below, but showcasing an initial Green Hill Zone.             |
-| [[file:./screenshots/sonicxa-092224.gif]]                 | Beta engine [2024-09-22]. Modifications of test level, collision layout and much more.          |
-| [[file:./screenshots/engine-psx-081924-realhardware.gif]] | Alpha engine [2024-08-19]. Same as below, on a physical SCPH-5501.                              |
-| [[file:./screenshots/engine-psx-081924.gif]]              | Alpha engine [2024-08-19]. New tilesets, animation with variable speed, extended camera.        |
-| [[file:./screenshots/engine-psx-081624-realhardware.gif]] | Alpha engine [2024-08-16]. Same as below, on a physical SCPH-5501.                              |
-| [[file:./screenshots/engine-psx-081624.gif]]              | Alpha engine [2024-08-16]. First working implementation of slope collision.                     |
-| [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine [2024-08-05]. Same as screenshot below, but on a physical PlayStation (SCPH-5501). |
-| [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine [2024-08-05]. First implementation of collision, camera and level data.            |
-| [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine [2024-07-22]. Running on DuckStation.                                              |
-| [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine [2024-07-21]. Running on a physical PlayStation (SCPH-5501).                       |
+| Screenshot                                            | Description                                                                                             |
+|-------------------------------------------------------+---------------------------------------------------------------------------------------------------------|
+| [[file:./screenshots/sonicxa-122224-aoz.gif]]             | Beta engine [2024-12-22]. Amazing Ocean Zone. Much more mature with many objects and water implemented. |
+| [[file:./screenshots/sonicxa-110424-swz.gif]]             | Beta engine [2024-11-04]. Like below. Showcasing Surely Wood Zone, springs, background, etc.            |
+| [[file:./screenshots/sonicxa-110424-ghz.gif]]             | Beta engine [2024-11-04]. Many changes, notably a HUD, improved collision, spikes and damage.           |
+| [[file:./screenshots/sonicxa-100424-gh.gif]]              | Beta engine [2024-10-04]. Same as below, showcasing Green Hill Zone.                                    |
+| [[file:./screenshots/sonicxa-100424.gif]]                 | Beta engine [2024-10-04]. Includes object rendering, and monitors and rings can be interacted.          |
+| [[file:./screenshots/sonicxa-092224-gh.gif]]              | Beta engine [2024-09-22]. Same as below, but showcasing an initial Green Hill Zone.                     |
+| [[file:./screenshots/sonicxa-092224.gif]]                 | Beta engine [2024-09-22]. Modifications of test level, collision layout and much more.                  |
+| [[file:./screenshots/engine-psx-081924-realhardware.gif]] | Alpha engine [2024-08-19]. Same as below, on a physical SCPH-5501.                                      |
+| [[file:./screenshots/engine-psx-081924.gif]]              | Alpha engine [2024-08-19]. New tilesets, animation with variable speed, extended camera.                |
+| [[file:./screenshots/engine-psx-081624-realhardware.gif]] | Alpha engine [2024-08-16]. Same as below, on a physical SCPH-5501.                                      |
+| [[file:./screenshots/engine-psx-081624.gif]]              | Alpha engine [2024-08-16]. First working implementation of slope collision.                             |
+| [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine [2024-08-05]. Same as screenshot below, but on a physical PlayStation (SCPH-5501).         |
+| [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine [2024-08-05]. First implementation of collision, camera and level data.                    |
+| [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine [2024-07-22]. Running on DuckStation.                                                      |
+| [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine [2024-07-21]. Running on a physical PlayStation (SCPH-5501).                               |
 
 * License
 
