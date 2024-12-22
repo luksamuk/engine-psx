@@ -64,6 +64,10 @@ typedef struct {
     // XY velocity
     int32_t spdx;
     int32_t spdy;
+
+    // Relative XY position (if needed)
+    int32_t rx;
+    int32_t ry;
 } ObjectFreePos;
 
 typedef struct {

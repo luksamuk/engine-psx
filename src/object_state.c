@@ -293,13 +293,21 @@ begin_render_routine:
     poly->tpage = getTPage(1, 0, 576, 0);
     poly->clut = getClut(0, 481);
 
-    sort_prim(poly,
-              ((state->id == OBJ_RING)
-               || (state->id == OBJ_SHIELD)
-               || (state->id == OBJ_EXPLOSION)
-                  || (state->id == OBJ_BUBBLE))
-              ? OTZ_LAYER_OBJECTS
-              : OTZ_LAYER_PLAYER);
+    uint32_t layer = ((state->id == OBJ_RING)
+                      || (state->id == OBJ_SHIELD)
+                      || (state->id == OBJ_EXPLOSION)
+                      || (state->id == OBJ_BUBBLE))
+        ? OTZ_LAYER_OBJECTS
+        : OTZ_LAYER_PLAYER;
+
+    // NOTABLE EXCEPTION: if this is a bubble object which animation has gone
+    // beyond the first digit display, it should be rendered on text layer
+    if((state->id == OBJ_BUBBLE)
+       && (state->anim_state.animation >= 3)
+       && (state->anim_state.frame >= 5))
+        layer = OTZ_LAYER_HUD;
+
+    sort_prim(poly, layer);
 
 after_render:
 

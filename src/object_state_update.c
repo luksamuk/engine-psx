@@ -760,6 +760,14 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 
         // Start with a 50% chance random direction
         state->timer *= ((rand() % 2) * 2) - 1;
+
+        // If this is a number bubble, we need to initialize its position
+        // relative to screen center, because it will hang around at the same
+        // X and Y position on screen.
+        if(state->anim_state.animation >= 3) {
+            state->freepos->rx = state->freepos->vx - camera.pos.vx;
+            state->freepos->ry = state->freepos->vy - camera.pos.vy;
+        }
     }
 
     // A bubble can be of three diameters: small (8), medium (12) or big (32).
@@ -776,7 +784,9 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     // on number bubbles before the actual number frames show up
     if(!((state->anim_state.animation >= 3) && (state->anim_state.frame >= 5))) {
         // Bubbles should always be ascending with a 0.5 speed (-0x800)
-        state->freepos->vy -= 0x800;
+        if(state->anim_state.animation < 3)
+            state->freepos->vy -= 0x800;
+        else state->freepos->ry -= 0x800;
 
         // Bubbles also sway back-and-forth in a sine-like movement.
         // x = initial_x + 8 * sin(timer / 128.0)
@@ -785,7 +795,16 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             state->freepos->spdx *= -1;
             state->timer = 128;
         }
-        state->freepos->vx += state->freepos->spdx;
+        if(state->anim_state.animation < 3)
+            state->freepos->vx += state->freepos->spdx;
+        else state->freepos->rx += state->freepos->spdx;
+    }
+
+    // Again: if this is a stick-around bubble (number bubble), our free position
+    // should be relative to camera center
+    if(state->anim_state.animation >= 3) {
+        state->freepos->vx = state->freepos->rx + camera.pos.vx;
+        state->freepos->vy = state->freepos->ry + camera.pos.vy;
     }
 
     // When a normal bubble's top interact with water surface, destroy it.
@@ -820,6 +839,4 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             return;
         }
     }
-
-    
 }
