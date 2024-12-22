@@ -772,20 +772,27 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     case 2: diameter = 32; break; // big
     }
 
-    // Bubbles should always be ascending with a 0.5 speed (-0x800).
-    state->freepos->vy -= 0x800;
+    // The following movement logic should only work on common bubbles, and
+    // on number bubbles before the actual number frames show up
+    if(!((state->anim_state.animation >= 3) && (state->anim_state.frame >= 5))) {
+        // Bubbles should always be ascending with a 0.5 speed (-0x800)
+        state->freepos->vy -= 0x800;
 
-    // Bubbles also sway back-and-forth in a sine-like movement.
-    // x = initial_x + 8 * sin(timer / 128.0)
-    state->timer--;
-    if(state->timer == 0) {
-        state->freepos->spdx *= -1;
-        state->timer = 128;
+        // Bubbles also sway back-and-forth in a sine-like movement.
+        // x = initial_x + 8 * sin(timer / 128.0)
+        state->timer--;
+        if(state->timer == 0) {
+            state->freepos->spdx *= -1;
+            state->timer = 128;
+        }
+        state->freepos->vx += state->freepos->spdx;
     }
-    state->freepos->vx += state->freepos->spdx;
 
-    // When the bubble's top interact with water surface, destroy it
-    if(state->freepos->vy - (diameter << 12) <= level_water_y) {
+    // When a normal bubble's top interact with water surface, destroy it.
+    // When a number bubble finishes its animation, destroy it.
+    if(((state->freepos->vy - (diameter << 12) <= level_water_y)
+         && (state->anim_state.animation < 3))
+       || (state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION)) {
         state->props |= OBJ_FLAG_DESTROYED;
         return;
     }
@@ -813,4 +820,6 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             return;
         }
     }
+
+    
 }

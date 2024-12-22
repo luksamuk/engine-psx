@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="6" nextobjectid="233">
  <tileset firstgid="1" source="128x128.tsx"/>
- <tileset firstgid="53" source="../COMMON/objects_common.tsx"/>
+ <tileset firstgid="61" source="../COMMON/objects_common.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
   <data encoding="csv">
 12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -39,39 +39,39 @@
  </layer>
  <group id="3" name="OBJECTS">
   <objectgroup id="4" name="COMMON">
-   <object id="208" gid="64" x="16160" y="3200.03" width="64" height="64"/>
-   <object id="209" gid="54" x="112.031" y="320.031" width="64" height="64">
+   <object id="208" gid="72" x="16160" y="3200.03" width="64" height="64"/>
+   <object id="209" gid="62" x="112.031" y="320.031" width="64" height="64">
     <properties>
-     <property name="Kind" value="NONE"/>
+     <property name="Kind" value="SPEEDSHOES"/>
     </properties>
    </object>
-   <object id="210" gid="61" x="735.531" y="447.531" width="64" height="64"/>
-   <object id="211" gid="61" x="2077.03" y="768.031" width="64" height="64"/>
-   <object id="212" gid="61" x="2332.53" y="829.031" width="64" height="64"/>
-   <object id="213" gid="61" x="3357.53" y="765.031" width="64" height="64"/>
-   <object id="214" gid="61" x="4001.53" y="830.031" width="64" height="64"/>
-   <object id="215" gid="61" x="5535.53" y="894.031" width="64" height="64"/>
-   <object id="216" gid="61" x="6304.03" y="1214.53" width="64" height="64"/>
-   <object id="217" gid="61" x="6572.03" y="1095.86" width="64" height="64"/>
-   <object id="218" gid="61" x="6572.03" y="1115.36" width="64" height="64"/>
-   <object id="219" gid="61" x="12066.3" y="3083.03" width="64" height="64"/>
-   <object id="220" gid="61" x="12066.3" y="3105.03" width="64" height="64"/>
-   <object id="221" gid="61" x="13151.5" y="3205.53" width="64" height="64"/>
-   <object id="222" gid="61" x="13919" y="3073.03" width="64" height="64"/>
-   <object id="223" gid="61" x="14104" y="3071.03" width="64" height="64"/>
-   <object id="224" gid="61" x="14491" y="2939.03" width="64" height="64"/>
-   <object id="225" gid="61" x="15004" y="2941.53" width="64" height="64"/>
-   <object id="226" gid="61" x="14766" y="2947.03" width="64" height="64"/>
-   <object id="227" gid="61" x="14881" y="3908.53" width="64" height="64"/>
-   <object id="228" gid="54" x="14464" y="3712.03" width="64" height="64">
+   <object id="210" gid="69" x="735.531" y="447.531" width="64" height="64"/>
+   <object id="211" gid="69" x="2077.03" y="768.031" width="64" height="64"/>
+   <object id="212" gid="69" x="2332.53" y="829.031" width="64" height="64"/>
+   <object id="213" gid="69" x="3357.53" y="765.031" width="64" height="64"/>
+   <object id="214" gid="69" x="4001.53" y="830.031" width="64" height="64"/>
+   <object id="215" gid="69" x="5535.53" y="894.031" width="64" height="64"/>
+   <object id="216" gid="69" x="6304.03" y="1214.53" width="64" height="64"/>
+   <object id="217" gid="69" x="6572.03" y="1095.86" width="64" height="64"/>
+   <object id="218" gid="69" x="6572.03" y="1115.36" width="64" height="64"/>
+   <object id="219" gid="69" x="12066.3" y="3083.03" width="64" height="64"/>
+   <object id="220" gid="69" x="12066.3" y="3105.03" width="64" height="64"/>
+   <object id="221" gid="69" x="13151.5" y="3205.53" width="64" height="64"/>
+   <object id="222" gid="69" x="13919" y="3073.03" width="64" height="64"/>
+   <object id="223" gid="69" x="14104" y="3071.03" width="64" height="64"/>
+   <object id="224" gid="69" x="14491" y="2939.03" width="64" height="64"/>
+   <object id="225" gid="69" x="15004" y="2941.53" width="64" height="64"/>
+   <object id="226" gid="69" x="14766" y="2947.03" width="64" height="64"/>
+   <object id="227" gid="69" x="14881" y="3908.53" width="64" height="64"/>
+   <object id="228" gid="62" x="14464" y="3712.03" width="64" height="64">
     <properties>
      <property name="Kind" value="SHIELD"/>
     </properties>
    </object>
-   <object id="229" gid="65" x="350.031" y="384.031" width="64" height="64"/>
-   <object id="230" gid="61" x="9904.64" y="2246.61" width="64" height="64"/>
-   <object id="231" gid="61" x="9904.64" y="2268.61" width="64" height="64"/>
-   <object id="232" gid="58" x="128.031" y="336.031" width="64" height="64" rotation="90"/>
+   <object id="229" gid="73" x="350.031" y="384.031" width="64" height="64"/>
+   <object id="230" gid="69" x="9904.64" y="2246.61" width="64" height="64"/>
+   <object id="231" gid="69" x="9904.64" y="2268.61" width="64" height="64"/>
+   <object id="232" gid="66" x="128.031" y="336.031" width="64" height="64" rotation="90"/>
   </objectgroup>
  </group>
 </map>

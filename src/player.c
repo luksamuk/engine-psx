@@ -1094,13 +1094,15 @@ player_update(Player *player)
             uint8_t emit_bubble = !((player->remaining_air_frames + 1) % 120)
                 && (player->remaining_air_frames > 0);
 
+            static uint8_t bubbletype = 0;
+
             switch(player->remaining_air_frames) {
-            case (12 * 60): emit_bubble = 1; break; // TODO: Warning bubble "5"
-            case (10 * 60): emit_bubble = 1; break; // TODO: Warning bubble "4"
-            case (8 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "3"
-            case (6 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "2"
-            case (4 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "1"
-            case (2 * 60):  emit_bubble = 1; break; // TODO: Warning bubble "0"
+            case (12 * 60): bubbletype = 3; break; // TODO: Warning bubble "5"
+            case (10 * 60): bubbletype = 4; break; // TODO: Warning bubble "4"
+            case (8 * 60):  bubbletype = 5; break; // TODO: Warning bubble "3"
+            case (6 * 60):  bubbletype = 6; break; // TODO: Warning bubble "2"
+            case (4 * 60):  bubbletype = 7; break; // TODO: Warning bubble "1"
+            case (2 * 60):  bubbletype = 8; break; // TODO: Warning bubble "0"
             case 0: break; // TODO: DROWNED!
             }
 
@@ -1113,7 +1115,8 @@ player_update(Player *player)
                 // For now we emit a single small bubble.
                 PoolObject *bubble = object_pool_create(OBJ_BUBBLE);
                 if(bubble) {
-                    bubble->state.anim_state.animation = 0;
+                    bubble->state.anim_state.animation = bubbletype;
+                    if(bubbletype > 0) bubbletype = 0;
                     bubble->freepos.vx = player->pos.vx + (0x6000 * player->anim_dir);
                     bubble->freepos.vy = player->pos.vy;
                 }
