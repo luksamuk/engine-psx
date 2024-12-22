@@ -127,6 +127,7 @@ parallax_draw(Parallax *prl, Camera *camera)
 
             start_y = level_water_y - camera->pos.vy - (CENTERY << 11);
             start_y = MAX(start_y, ymin);
+            start_y = MIN(start_y, (95 << 12)); // Discovered by hand...
         }
     }
 

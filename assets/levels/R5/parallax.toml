@@ -1,3 +1,36 @@
+[clouds1]
+width = 256
+height = 36
+u0 = 0
+v0 = 164
+scrollx = 0
+speedx = 0.6
+y0 = -96
+single = false
+
+[clouds2]
+width = 256
+height = 21
+u0 = 0
+v0 = 200
+scrollx = 0
+speedx = 0.5
+y0 = -60
+single = false
+
+[clouds3]
+width = 256
+height = 34
+u0 = 0
+v0 = 221
+scrollx = 0
+speedx = 0.4
+y0 = -39
+single = false
+
+
+# =========
+
 [low_clouds]
 width = 256
 height = 37
@@ -122,7 +155,7 @@ single = false
 
 [water_stream1]
 width = 256
-height = 130
+height = 53
 u0 = 0
 v0 = 110
 scrollx = 0
@@ -133,10 +166,40 @@ single = false
 
 [water_stream2]
 width = 256
-height = 130
+height = 53
 u0 = 0
 v0 = 110
 scrollx = 0
-speedx = 0.8
-y0 = 310
+speedx = 0.7
+y0 = 233
+single = false
+
+[water_stream3]
+width = 256
+height = 53
+u0 = 0
+v0 = 110
+scrollx = 0
+speedx = 0.6
+y0 = 286
+single = false
+
+[water_stream4]
+width = 256
+height = 53
+u0 = 0
+v0 = 110
+scrollx = 0
+speedx = 0.5
+y0 = 339
+single = false
+
+[water_stream5]
+width = 256
+height = 53
+u0 = 0
+v0 = 110
+scrollx = 0
+speedx = 0.4
+y0 = 392
 single = false
