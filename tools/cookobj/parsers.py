@@ -164,18 +164,19 @@ def parse_object_group(
         p.rotcw = int(float(obj.get("rotation", 0))) == 90
         p.rotct = int(float(obj.get("rotation", 0))) == -90
         props = obj.find("properties")
-        if props:
-            if p.otype == ObjectId.MONITOR.value:
+        if p.otype == ObjectId.MONITOR.value:
+            m = MonitorProperties()
+            if props:
                 prop = props.find("property")
-                m = MonitorProperties()
                 m.kind = MonitorKind.get(prop.get("value")).value
-                p.properties = m
-            elif p.otype == ObjectId.BUBBLE_PATCH.value:
+            p.properties = m
+        elif p.otype == ObjectId.BUBBLE_PATCH.value:
+            bp = BubblePatchProperties()
+            if props:
                 prop = props.find("property")
-                bp = BubblePatchProperties()
                 # Get first available value
                 bp.frequency = int(prop.get("value"))
-                p.properties = bp
+            p.properties = bp
         # print(
         #     f"Object type {current_ts.object_types[p.otype + current_ts.firstgid].name if p.otype >= 0 else 'DUMMY'}"
         # )

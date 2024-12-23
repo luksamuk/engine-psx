@@ -4,16 +4,21 @@ enum ObjectType: s8 {
     RING_3V = 0xfe, // -2
     RING_3H = 0xff, // -1
 
-    RING = 0,
-    MONITOR = 1,
-    SPIKES = 2,
-    CHECKPOINT = 3,
-    SPRING_YELLOW = 4,
-    SPRING_RED = 5,
-    SPRING_YELLOW_DIAGONAL = 6,
-    SPRING_RED_DIAGONAL = 7,
-    GOAL_SIGN = 8,
-    SWITCH = 9,
+    RING = 0x0,
+    MONITOR = 0x1,
+    SPIKES = 0x2,
+    CHECKPOINT = 0x3,
+    SPRING_YELLOW = 0x4,
+    SPRING_RED = 0x5,
+    SPRING_YELLOW_DIAGONAL = 0x6,
+    SPRING_RED_DIAGONAL = 0x7,
+    SWITCH = 0x8,
+    GOAL_SIGN = 0x9,
+    EXPLOSION = 0xa,
+    MONITOR_IMAGE = 0xb,
+    SHIELD = 0xc,
+    BUBBLE_PATCH = 0xd,
+    BUBBLE = 0xe
 };
 
 enum MonitorKind: u8 {
@@ -38,6 +43,10 @@ struct MonitorProperties {
     MonitorKind kind;
 };
 
+struct BubblePatchProperties {
+    u8 frequency;
+};
+
 struct ObjectPlacement {
     u8 is_level_specific;
     ObjectType type;
@@ -48,6 +57,8 @@ struct ObjectPlacement {
     // Properties, type-dependent
     if(type == ObjectType::MONITOR) {
         MonitorProperties properties;
+    } else if(type == ObjectType::BUBBLE_PATCH) {
+        BubblePatchProperties properties;
     }
 };
 
