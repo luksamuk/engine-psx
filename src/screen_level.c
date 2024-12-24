@@ -73,11 +73,10 @@ typedef struct {
     int16_t tc_act_tgt_x;
 
     // Water overlay primitives
-    POLY_F4 waterquad[2];
+    TILE     waterquad[2];
     POLY_FT4 wavequad[2][5];
-    uint8_t waterbuffer;
-    uint8_t water_last_fade;
-    uint8_t wave_last_fade;
+    uint8_t  waterbuffer;
+    uint8_t  water_last_fade[2];
 } screen_level_data;
 
 void
@@ -105,11 +104,12 @@ screen_level_load()
 
     // Init water quads
     for(int i = 0; i < 2; i++) {
-        POLY_F4 *poly = &data->waterquad[i];
-        setPolyF4(poly);
+        TILE *poly = &data->waterquad[i];
+        setTile(poly);
         setSemiTrans(poly, 1);
         setRGB0(poly, 0, 0, 0);
-        setXYWH(poly, 0, 0, SCREEN_XRES, 0);
+        setXY0(poly, 0, 0);
+        setWH(poly, SCREEN_XRES, 0);
 
         for(int j = 0; j < 5; j++) {
             POLY_FT4 *tx = &data->wavequad[i][j];
@@ -122,8 +122,8 @@ screen_level_load()
         }
     }
     data->waterbuffer = 0;
-    data->water_last_fade = 0;
-    data->wave_last_fade = 0;
+    data->water_last_fade[0] = 0;
+    data->water_last_fade[1] = 0;
 
     // Init water wave quads
 
@@ -373,27 +373,18 @@ _screen_level_draw_water(screen_level_data *data)
                 /*         LERPC(level_fade, 0x18)); */
                 /* sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT); */
 
-                /* FLAT SHADE */
-                /* POLY_F4 *poly = get_next_prim(); */
-                /* increment_prim(sizeof(POLY_F4)); */
-                /* setPolyF4(poly); */
-                /* setXYWH(poly, 0, water_y, SCREEN_XRES, water_h); */
-                /* setSemiTrans(poly, 1); */
-                /* setRGB0(poly, */
-                /*         LERPC(level_fade, 0), */
-                /*         LERPC(level_fade, 0), */
-                /*         LERPC(level_fade, 0xb8)); */
-                /* sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT); */
-
                 /* FLAT SHADE, STATIC BUFFERS */
-                POLY_F4 *poly = &data->waterquad[data->waterbuffer];
-                poly->y0 = poly->y1 = water_y;
-                poly->y2 = poly->y3 = water_y + water_h;
+                TILE *poly = &data->waterquad[data->waterbuffer];
+                poly->y0 = water_y;
+                poly->h = water_h;
 
-                // CLEVER TRICK: r0 is always equal to level_fade anyway
-                if(data->water_last_fade != level_fade) {
-                    data->water_last_fade = level_fade;
+                if(data->water_last_fade[data->waterbuffer] != level_fade) {
+                    data->water_last_fade[data->waterbuffer] = level_fade;
                     setRGB0(poly,
+                            LERPC(level_fade, 0),
+                            LERPC(level_fade, 0),
+                            LERPC(level_fade, 0xb8));
+                    setRGB0(&data->waterquad[data->waterbuffer ^ 1],
                             LERPC(level_fade, 0),
                             LERPC(level_fade, 0),
                             LERPC(level_fade, 0xb8));
@@ -410,47 +401,12 @@ _screen_level_draw_water(screen_level_data *data)
 
                 if(!(frame % 6)) wave_dir = !wave_dir;
                 if(!(frame % 3)) wave_visible = !wave_visible;
-                
-                // Water wave sprites is within common objects texture.
-                // uv0 = (146, 183); wh=(64, 9)
-                // Sprite plays for 20 frames and then flips direction
-                /* for(uint8_t i = 0; i < 5; i++) { */
-                /*     uint16_t x = i * 64; */
-
-                /*     uint8_t current_visible = (i + wave_visible) % 2; */
-
-                /*     POLY_FT4 *poly = get_next_prim(); */
-                /*     increment_prim(sizeof(POLY_FT4)); */
-                /*     setPolyFT4(poly); */
-                /*     setRGB0(poly, level_fade, level_fade, level_fade); */
-                /*     // There is some sort of trickery here. */
-                /*     // Rendering the waves actually influence on */
-                /*     // water color. We render the waves as a fully */
-                /*     // transparent pixel when invisible so */
-                /*     // the body of water doesn't blink */
-                /*     if(!current_visible) */
-                /*         setUVWH(poly, 0, 0, 0, 0); */
-                /*     else if(wave_dir) */
-                /*         setUVWH(poly, 146, 183, 64, 9); */
-                /*     else setUV4(poly, */
-                /*                 146 + 63, 183, */
-                /*                 146, 183, */
-                /*                 146 + 63, 183 + 9, */
-                /*                 146, 183 + 9); */
-                /*     setXYWH(poly, x, water_ry - 6, 64, 9); */
-                /*     // tpage and clut same as common objects */
-                /*     poly->tpage = getTPage(1, 0, 576, 0); */
-                /*     poly->clut = getClut(0, 481); */
-                /*     setSemiTrans(poly, 1); */
-                /*     sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT); */
-                /* } */
 
                 for(uint8_t i = 0; i < 5; i++) {
                     uint8_t current_visible = (i + wave_visible) % 2;
                     POLY_FT4 *poly = &data->wavequad[data->waterbuffer][i];
-                    if(data->wave_last_fade != level_fade) {
+                    if(poly->r0 != level_fade)
                         setRGB0(poly, level_fade, level_fade, level_fade);
-                    }
                     if(!current_visible)
                         setUVWH(poly, 0, 0, 0, 0);
                     else if(wave_dir)
