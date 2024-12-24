@@ -26,8 +26,12 @@ setup_context()
     set_clear_color(0, 0, 0);
     ctx.buffers[0].draw_env.isbg = 1;
     ctx.buffers[1].draw_env.isbg = 1;
-    ctx.buffers[0].draw_env.dtd = 0;
-    ctx.buffers[1].draw_env.dtd = 0;
+    // Allow dithering
+    ctx.buffers[0].draw_env.dtd = 1;
+    ctx.buffers[1].draw_env.dtd = 1;
+    // Allow drawing to display area
+    ctx.buffers[0].draw_env.dfe = 1;
+    ctx.buffers[1].draw_env.dfe = 1;
 
     // Initialize the first buffer and clear its OT so that it can be used for
     // drawing.
@@ -169,10 +173,6 @@ render_mdec_prepare(void)
 {
     using_mdec = 1;
 
-    // Enable dithering processing
-    ctx.buffers[0].draw_env.dtd  = 1;
-    ctx.buffers[1].draw_env.dtd  = 1;
-
     // Disable buffer clearing to prevent flickering
     ctx.buffers[0].draw_env.isbg = 0;
     ctx.buffers[1].draw_env.isbg = 0;
@@ -186,10 +186,6 @@ void
 render_mdec_dispose(void)
 {
     using_mdec = 0;
-
-    // Disable dithering processing
-    ctx.buffers[0].draw_env.dtd  = 0;
-    ctx.buffers[1].draw_env.dtd  = 0;
 
     // Enable buffer clearing
     ctx.buffers[0].draw_env.isbg = 1;
