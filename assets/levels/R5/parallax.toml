@@ -141,12 +141,12 @@ single = false
 
 [seabed1]
 width = 256
-height = 255
+height = 235
 u0 = 0
-v0 = 257
+v0 = 277
 scrollx = 0.2
 speedx = 0
-y0 = 167
+y0 = 177
 single = false
 
 [seabed2]
