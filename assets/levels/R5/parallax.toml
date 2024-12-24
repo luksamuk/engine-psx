@@ -41,6 +41,8 @@ speedx = 0.1
 y0 = 117
 single = false
 
+# =========
+
 [water1]
 width = 256
 height = 6
@@ -91,6 +93,8 @@ speedx = 0.8
 y0 = 173
 single = false
 
+# =========
+
 [island]
 width = 256
 height = 48
@@ -101,12 +105,13 @@ speedx = 0
 y0 = 106
 single = true
 
+# =========
 
 [seabed_wall1]
 width = 256
-height = 63
+height = 91
 u0 = 0
-v0 = 449
+v0 = 421
 scrollx = 0.1
 speedx = 0
 y0 = 177
@@ -119,28 +124,29 @@ u0 = 0
 v0 = 449
 scrollx = 0.1
 speedx = 0
-y0 = 240
+y0 = 268
 single = false
 
-[seabed_wall3]
-width = 256
-height = 63
-u0 = 0
-v0 = 449
-scrollx = 0.1
-speedx = 0
-y0 = 303
-single = false
+# [seabed_wall3]
+# width = 256
+# height = 63
+# u0 = 0
+# v0 = 449
+# scrollx = 0.1
+# speedx = 0
+# y0 = 303
+# single = false
 
+# =========
 
 [seabed1]
 width = 256
-height = 256
+height = 255
 u0 = 0
-v0 = 256
+v0 = 257
 scrollx = 0.2
 speedx = 0
-y0 = 177
+y0 = 167
 single = false
 
 [seabed2]
@@ -153,53 +159,54 @@ speedx = 0
 y0 = 242
 single = false
 
-[water_stream1]
-width = 256
-height = 53
-u0 = 0
-v0 = 110
-scrollx = 0
-speedx = 0.8
-y0 = 180
-single = false
+# =========
 
+# [water_stream1]
+# width = 256
+# height = 53
+# u0 = 0
+# v0 = 110
+# scrollx = 0
+# speedx = 0.8
+# y0 = 180
+# single = false
 
-[water_stream2]
-width = 256
-height = 53
-u0 = 0
-v0 = 110
-scrollx = 0
-speedx = 0.7
-y0 = 233
-single = false
+# [water_stream2]
+# width = 256
+# height = 53
+# u0 = 0
+# v0 = 110
+# scrollx = 0
+# speedx = 0.7
+# y0 = 233
+# single = false
 
-[water_stream3]
-width = 256
-height = 53
-u0 = 0
-v0 = 110
-scrollx = 0
-speedx = 0.6
-y0 = 286
-single = false
+# [water_stream3]
+# width = 256
+# height = 53
+# u0 = 0
+# v0 = 110
+# scrollx = 0
+# speedx = 0.6
+# y0 = 286
+# single = false
 
-[water_stream4]
-width = 256
-height = 53
-u0 = 0
-v0 = 110
-scrollx = 0
-speedx = 0.5
-y0 = 339
-single = false
+# [water_stream4]
+# width = 256
+# height = 53
+# u0 = 0
+# v0 = 110
+# scrollx = 0
+# speedx = 0.5
+# y0 = 339
+# single = false
 
-[water_stream5]
-width = 256
-height = 53
-u0 = 0
-v0 = 110
-scrollx = 0
-speedx = 0.4
-y0 = 392
-single = false
+# [water_stream5]
+# width = 256
+# height = 53
+# u0 = 0
+# v0 = 110
+# scrollx = 0
+# speedx = 0.4
+# y0 = 392
+# single = false

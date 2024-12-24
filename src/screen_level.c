@@ -71,6 +71,13 @@ typedef struct {
     int16_t tc_title_tgt_x;
     int16_t tc_zone_tgt_x;
     int16_t tc_act_tgt_x;
+
+    // Water overlay primitives
+    POLY_F4 waterquad[2];
+    POLY_FT4 wavequad[2][5];
+    uint8_t waterbuffer;
+    uint8_t water_last_fade;
+    uint8_t wave_last_fade;
 } screen_level_data;
 
 void
@@ -95,6 +102,30 @@ screen_level_load()
 
     level_ring_count = 0;
     level_finished = 0;
+
+    // Init water quads
+    for(int i = 0; i < 2; i++) {
+        POLY_F4 *poly = &data->waterquad[i];
+        setPolyF4(poly);
+        setSemiTrans(poly, 1);
+        setRGB0(poly, 0, 0, 0);
+        setXYWH(poly, 0, 0, SCREEN_XRES, 0);
+
+        for(int j = 0; j < 5; j++) {
+            POLY_FT4 *tx = &data->wavequad[i][j];
+            setPolyFT4(tx);
+            setSemiTrans(tx, 1);
+            tx->tpage = getTPage(1, 0, 576, 0);
+            tx->clut = getClut(0, 481);
+            setRGB0(tx, 0, 0, 0);
+            setXYWH(tx, j * 64, 0, 64, 9);
+        }
+    }
+    data->waterbuffer = 0;
+    data->water_last_fade = 0;
+    data->wave_last_fade = 0;
+
+    // Init water wave quads
 
     demo_init();
 
@@ -304,7 +335,7 @@ screen_level_update(void *d)
 }
 
 void
-_screen_level_draw_water(screen_level_data *)
+_screen_level_draw_water(screen_level_data *data)
 {
     if(level_water_y >= 0) {
         int32_t camera_bottom = camera.pos.vy + (CENTERY << 12);
@@ -318,27 +349,55 @@ _screen_level_draw_water(screen_level_data *)
 
             // Draw water overlay
             {
-                POLY_G4 *poly = get_next_prim();
-                increment_prim(sizeof(POLY_G4));
-                setPolyG4(poly);
-                setXYWH(poly, 0, water_y, SCREEN_XRES, water_h);
-                setSemiTrans(poly, 1);
-                setRGB0(poly,
-                        LERPC(level_fade, 0),
-                        LERPC(level_fade, 0),
-                        LERPC(level_fade, 0xb8));
-                setRGB1(poly,
-                        LERPC(level_fade, 0),
-                        LERPC(level_fade, 0),
-                        LERPC(level_fade, 0xb8));
-                setRGB2(poly,
-                        LERPC(level_fade, 0),
-                        LERPC(level_fade, 0),
-                        LERPC(level_fade, 0x18));
-                setRGB3(poly,
-                        LERPC(level_fade, 0),
-                        LERPC(level_fade, 0),
-                        LERPC(level_fade, 0x18));
+                /* GOURAUD SHADE */
+                /* POLY_G4 *poly = get_next_prim(); */
+                /* increment_prim(sizeof(POLY_G4)); */
+                /* setPolyG4(poly); */
+                /* setXYWH(poly, 0, water_y, SCREEN_XRES, water_h); */
+                /* setSemiTrans(poly, 1); */
+                /* setRGB0(poly, */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0xb8)); */
+                /* setRGB1(poly, */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0xb8)); */
+                /* setRGB2(poly, */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0x18)); */
+                /* setRGB3(poly, */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0x18)); */
+                /* sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT); */
+
+                /* FLAT SHADE */
+                /* POLY_F4 *poly = get_next_prim(); */
+                /* increment_prim(sizeof(POLY_F4)); */
+                /* setPolyF4(poly); */
+                /* setXYWH(poly, 0, water_y, SCREEN_XRES, water_h); */
+                /* setSemiTrans(poly, 1); */
+                /* setRGB0(poly, */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0), */
+                /*         LERPC(level_fade, 0xb8)); */
+                /* sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT); */
+
+                /* FLAT SHADE, STATIC BUFFERS */
+                POLY_F4 *poly = &data->waterquad[data->waterbuffer];
+                poly->y0 = poly->y1 = water_y;
+                poly->y2 = poly->y3 = water_y + water_h;
+
+                // CLEVER TRICK: r0 is always equal to level_fade anyway
+                if(data->water_last_fade != level_fade) {
+                    data->water_last_fade = level_fade;
+                    setRGB0(poly,
+                            LERPC(level_fade, 0),
+                            LERPC(level_fade, 0),
+                            LERPC(level_fade, 0xb8));
+                }
                 sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
             }
 
@@ -355,20 +414,43 @@ _screen_level_draw_water(screen_level_data *)
                 // Water wave sprites is within common objects texture.
                 // uv0 = (146, 183); wh=(64, 9)
                 // Sprite plays for 20 frames and then flips direction
-                for(uint16_t i = 0; i < 6; i++) {
-                    uint16_t x = i * 64;
+                /* for(uint8_t i = 0; i < 5; i++) { */
+                /*     uint16_t x = i * 64; */
 
+                /*     uint8_t current_visible = (i + wave_visible) % 2; */
+
+                /*     POLY_FT4 *poly = get_next_prim(); */
+                /*     increment_prim(sizeof(POLY_FT4)); */
+                /*     setPolyFT4(poly); */
+                /*     setRGB0(poly, level_fade, level_fade, level_fade); */
+                /*     // There is some sort of trickery here. */
+                /*     // Rendering the waves actually influence on */
+                /*     // water color. We render the waves as a fully */
+                /*     // transparent pixel when invisible so */
+                /*     // the body of water doesn't blink */
+                /*     if(!current_visible) */
+                /*         setUVWH(poly, 0, 0, 0, 0); */
+                /*     else if(wave_dir) */
+                /*         setUVWH(poly, 146, 183, 64, 9); */
+                /*     else setUV4(poly, */
+                /*                 146 + 63, 183, */
+                /*                 146, 183, */
+                /*                 146 + 63, 183 + 9, */
+                /*                 146, 183 + 9); */
+                /*     setXYWH(poly, x, water_ry - 6, 64, 9); */
+                /*     // tpage and clut same as common objects */
+                /*     poly->tpage = getTPage(1, 0, 576, 0); */
+                /*     poly->clut = getClut(0, 481); */
+                /*     setSemiTrans(poly, 1); */
+                /*     sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT); */
+                /* } */
+
+                for(uint8_t i = 0; i < 5; i++) {
                     uint8_t current_visible = (i + wave_visible) % 2;
-
-                    POLY_FT4 *poly = get_next_prim();
-                    increment_prim(sizeof(POLY_FT4));
-                    setPolyFT4(poly);
-                    setRGB0(poly, level_fade, level_fade, level_fade);
-                    // There is some sort of trickery here.
-                    // Rendering the waves actually influence on
-                    // water color. We render the waves as a fully
-                    // transparent pixel when invisible so
-                    // the body of water doesn't blink
+                    POLY_FT4 *poly = &data->wavequad[data->waterbuffer][i];
+                    if(data->wave_last_fade != level_fade) {
+                        setRGB0(poly, level_fade, level_fade, level_fade);
+                    }
                     if(!current_visible)
                         setUVWH(poly, 0, 0, 0, 0);
                     else if(wave_dir)
@@ -378,14 +460,14 @@ _screen_level_draw_water(screen_level_data *)
                                 146, 183,
                                 146 + 63, 183 + 9,
                                 146, 183 + 9);
-                    setXYWH(poly, x, water_ry - 6, 64, 9);
-                    // tpage and clut same as common objects
-                    poly->tpage = getTPage(1, 0, 576, 0);
-                    poly->clut = getClut(0, 481);
-                    setSemiTrans(poly, 1);
+                    poly->y0 = poly->y1 = water_ry - 6;
+                    poly->y2 = poly->y3 = water_ry - 6 + 9;
                     sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
                 }
             }
+
+            // Flip buffers
+            data->waterbuffer ^= 1;
         }
         
     }
