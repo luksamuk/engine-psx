@@ -230,6 +230,8 @@ static uint16_t _numsprites = 0;
 static uint8_t  _current_spritebuf = 0;
 static SPRT_8   _sprites[2][MAX_TILES];
 
+uint16_t level_get_num_sprites() { return _numsprites; }
+
 void
 _render_8(
     int16_t vx, int16_t vy, int16_t otz,

@@ -503,7 +503,9 @@ screen_level_draw(void *d)
     render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
 
     // Draw background and parallax
-    parallax_draw(&data->parallax, &camera);
+    if(level_get_num_sprites() < 1312)
+        parallax_draw(&data->parallax, &camera);
+
     // If we're in R4, draw a gradient on the background.
     if(level == 8 || level == 9) {
         POLY_G4 *poly = get_next_prim();
@@ -670,6 +672,9 @@ screen_level_draw(void *d)
 
         snprintf(buffer, 255, "AIR   %02d", player.remaining_air_frames / 60);
         font_draw_sm(buffer, 248, 52);
+
+        snprintf(buffer, 255, "SPR %4d", level_get_num_sprites());
+        font_draw_sm(buffer, 248, 60);
 
         // Player debug
         if(debug_mode > 1) {

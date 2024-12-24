@@ -73,6 +73,7 @@ void level_debrief();
 void load_map16(TileMap16 *mapping, const char *filename, const char *collision_filename);
 void load_map128(TileMap128 *mapping, const char *filename);
 void load_lvl(LevelData *lvl, const char *filename);
+uint16_t level_get_num_sprites();
 
 void prepare_renderer(LevelData *lvl);
 void render_lvl(
