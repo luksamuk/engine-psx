@@ -65,8 +65,11 @@ uint32_t    sound_upload_vag(const uint32_t *data, uint32_t size);
 void        sound_play_vag(SoundEffect sfx, uint8_t loops);
 
 uint32_t sound_get_cd_status(void);
+CdlLOC   sound_find_xa(const char *filename);
 void     sound_play_xa(const char *filename, int double_speed,
                        uint8_t channel, uint32_t loopback_sector);
+void     sound_play_xa_immediate(CdlLOC *loc, int double_speed,
+                                 uint8_t channel, uint32_t loopback_sector);
 void     sound_stop_xa(void);
 int      sound_xa_requested_play();
 void     sound_xa_set_channel(uint8_t channel);
@@ -102,6 +105,7 @@ typedef struct {
     uint16_t stop_sector;
 } BGMTableEntry;
 
+void                sound_bgm_init();
 void                sound_bgm_play(BGMOption);
 const BGMTableEntry *sound_bgm_get_data(BGMOption);
 void                sound_bgm_check_stop(BGMOption);

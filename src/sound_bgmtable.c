@@ -24,11 +24,22 @@ const BGMTableEntry bgm_table[] = {
     {"\\BGM\\BGM003.XA;1",   1, 2830, 0}, // EZ
 };
 
+static CdlLOC bgm_table_locs[BGM_NUM_SONGS];
+
+void
+sound_bgm_init()
+{
+    // Find location of all songs on bgm table and store them
+    for(int i = 0; i < BGM_NUM_SONGS; i++) {
+        bgm_table_locs[i] = sound_find_xa(bgm_table[i].filename);
+    }
+}
+
 void
 sound_bgm_play(BGMOption t)
 {
-    sound_play_xa(
-        bgm_table[t].filename,
+    sound_play_xa_immediate(
+        &bgm_table_locs[t],
         0,
         bgm_table[t].channel,
         bgm_table[t].loopback_sector);

@@ -56,8 +56,8 @@ main(void)
 {
     // Engine initialization
     setup_context();
-    sound_init();
     CdInit();
+    sound_init();
     pad_init();
     timer_init();
     fastalloc_init();

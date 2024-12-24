@@ -65,6 +65,8 @@ sound_init(void)
     sound_reset_mem();
     _sound_reset_channels();
     sound_xa_set_volume(XA_DEFAULT_VOLUME);
+
+    sound_bgm_init();
 }
 
 void
@@ -163,28 +165,47 @@ sound_play_vag(SoundEffect sfx, uint8_t loops)
 
 void _xacd_event_callback(CdlIntrResult, uint8_t *);
 
+CdlLOC
+sound_find_xa(const char *filename)
+{
+    CdlFILE file = { 0 };
+    if(!CdSearchFile(&file, filename)) {
+        printf("WARNING: Could not find .XA file %s.\n", filename);
+        return (CdlLOC){ 0 };
+    }
+    return file.pos;
+}
+
 void
 sound_play_xa(const char *filename, int double_speed,
               uint8_t channel, uint32_t loopback_sector)
 {
-    CdlFILE file;
+    sound_stop_xa();
+    CdlLOC loc = sound_find_xa(filename);
+    /* int sectorn = CdPosToInt(&loc); */
+    /* int numsectors = (file.size + 2047) / 2048; */
+    /* printf("%s: Sector %d (size: %d => %d sectors).\n", */
+    /*        filename, sectorn, file.size, numsectors); */
+    sound_play_xa_immediate(&loc, double_speed, channel, loopback_sector);
+}
+
+void
+sound_play_xa_immediate(
+    CdlLOC *loc, int double_speed,
+    uint8_t channel, uint32_t loopback_sector)
+{
     CdlFILTER filter;
 
     // Stop sound if playing. We'll need the CD right now
     sound_stop_xa();
-    
-    if(!CdSearchFile(&file, filename)) {
-        printf("Could not find .XA file %s.\n", filename);
-        return;
-    }
 
-    int sectorn = CdPosToInt(&file.pos);
-    int numsectors = (file.size + 2047) / 2048;
-    printf("%s: Sector %d (size: %d => %d sectors).\n",
-           filename, sectorn, file.size, numsectors);
+    /* int sectorn = CdPosToInt(&file.pos); */
+    /* int numsectors = (file.size + 2047) / 2048; */
+    /* printf("%s: Sector %d (size: %d => %d sectors).\n", */
+    /*        filename, sectorn, file.size, numsectors); */
 
     // Save current file location
-    _xa_loc = file.pos;
+    _xa_loc = *loc;
 
     // Hook .XA callback for auto stop/loop
     cd_set_callbacks(PLAYBACK_XA);
