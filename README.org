@@ -102,10 +102,10 @@ Have fun.
 * Running on real hardware
 
 #+html: <center>
-[[file:./screenshots/engine-psx-081924-realhardware.gif]]
+[[file:./screenshots/sonicxa-realhardware-xmas-24.gif]]
 #+html: </center>
 
-/Engine short video running on a PlayStation SCPH-5501, dated [2024-08-19]./
+/Amazing Ocean Zone autodemo running on a PlayStation SCPH-5501, dated [2024-12-25]./
 
 In theory,  to burn the  disc, you  would need a  Sony license file  which comes
 bundled with the Psy-Q SDK (which *I  AM NOT* using). I *WILL NOT* provide these
@@ -149,6 +149,7 @@ tochd -d . -- ./build/engine.cue
 
 | Screenshot                                            | Description                                                                                             |
 |-------------------------------------------------------+---------------------------------------------------------------------------------------------------------|
+| [[file:/screenshots/sonicxa-realhardware-xmas-24.gif]]    | Beta engine [2024-12-25]. Christmas build. Showcasing Amazing Ocean running on AutoDemo.                |
 | [[file:./screenshots/sonicxa-122224-aoz.gif]]             | Beta engine [2024-12-22]. Amazing Ocean Zone. Much more mature with many objects and water implemented. |
 | [[file:./screenshots/sonicxa-110424-swz.gif]]             | Beta engine [2024-11-04]. Like below. Showcasing Surely Wood Zone, springs, background, etc.            |
 | [[file:./screenshots/sonicxa-110424-ghz.gif]]             | Beta engine [2024-11-04]. Many changes, notably a HUD, improved collision, spikes and damage.           |
