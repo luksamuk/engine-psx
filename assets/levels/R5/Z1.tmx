@@ -145,7 +145,7 @@
      <property name="frequency" type="int" value="1"/>
     </properties>
    </object>
-   <object id="116" gid="86" x="6702" y="799" width="64" height="64">
+   <object id="116" gid="86" x="6702" y="800" width="64" height="64">
     <properties>
      <property name="Kind" value="RING"/>
     </properties>
