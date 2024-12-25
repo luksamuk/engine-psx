@@ -1,6 +1,7 @@
 #include "screens/fmv.h"
 
 #include <stdlib.h>
+#include <psxcd.h>
 
 #include "screen.h"
 #include "mdec.h"
@@ -29,15 +30,7 @@ void
 screen_fmv_update(void *)
 {
     for(uint8_t i = 0; i < fmv_count; i++) {
-        const char *fmvpath = NULL;
-
-        switch(fmv_queue[i]) {
-        case FMV_SONICTEAM: fmvpath = "\\FMV\\SONICT.STR;1";  break;
-        case FMV_PS30YRS:   fmvpath = "\\FMV\\PS30YRS.STR;1"; break;
-        default: break;
-        }
-
-        if(fmvpath) mdec_play(fmvpath);
+        mdec_play(fmv_queue[i]);
     }
     scene_change(next_screen);
 }

@@ -29,9 +29,6 @@ static volatile VLC_TableV2   *lookup_table;
 // Accessed by DMA, therefore must not be on heap
 static volatile STR_Header    sector_header;
 
-// STR file location on CD
-static volatile CdlFILE       file;
-
 static int decode_errors;
 static int frame_time;
 static volatile int should_abort;
@@ -50,16 +47,44 @@ StreamBuffer *_mdec_get_next_frame(void);
 int          _mdec_should_abort();
 void         _mdec_swap_buffers();
 
+// FMV table register
+typedef struct {
+    const char *filename;
+    CdlLOC     loc;
+} FMVTableEntry;
+
+static volatile FMVTableEntry fmv_table[] = {
+    { "\\FMV\\SONICT.STR;1",  (CdlLOC){ 0 } },
+    { "\\FMV\\PS30YRS.STR;1", (CdlLOC){ 0 } },
+};
+
 void
-mdec_play(const char *filepath)
+mdec_fmv_init()
 {
-    mdec_start(filepath);
+    CdlFILE file;
+    for(int i = 0; i < FMV_NUM_VIDEOS; i++) {
+        // Find file on CD.
+        // We won't be using the util.h library since we need to find
+        // the actual file position to stream
+        if(!CdSearchFile((CdlFILE *)&file, fmv_table[i].filename)) {
+            printf("Could not find .STR file %s.\n", fmv_table[i].filename);
+            fmv_table[i].loc = (CdlLOC){ 0 };
+        }
+        fmv_table[i].loc = file.pos;
+    }
+}
+
+
+void
+mdec_play(FMVOption option)
+{
+    mdec_start(&fmv_table[option].loc);
     mdec_loop();
     mdec_stop();
 }
 
 void
-mdec_start(const char *filepath)
+mdec_start(volatile CdlLOC *loc)
 {
     printf("Preparing MDEC playback.\n");
     should_abort = 0;
@@ -83,15 +108,6 @@ mdec_start(const char *filepath)
 
     decode_errors = 0;
     frame_time    = 1;
-    
-    // Find file on CD.
-    // We won't be using the util.h library since we need to find
-    // the actual file position to stream
-    if(!CdSearchFile((CdlFILE *)&file, filepath)) {
-        printf("Could not find .STR file %s.\n", filepath);
-        // TODO: Halt forever?
-        return;
-    }
 
     // Prepare context
     str_ctx->frame_id       = -1;
@@ -104,7 +120,7 @@ mdec_start(const char *filepath)
     // Start reading in real-time mode (doesn't retry in case of errors).
     uint8_t mode = CdlModeRT | CdlModeSpeed | CdlModeAP;
     CdControl(CdlSetmode, (const uint8_t *)&mode, 0);
-    CdControlF(CdlReadS, (const void *)&file.pos);
+    CdControlF(CdlReadS, (const void *)loc);
 
     // Wait for first frame to be buffered.
     _mdec_get_next_frame();

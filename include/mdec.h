@@ -2,6 +2,7 @@
 #define MDEC_H
 
 #include "render.h"
+#include <psxcd.h>
 
 //#define BLOCK_SIZE 24
 #define BLOCK_SIZE 16
@@ -39,13 +40,21 @@ typedef struct {
     uint32_t _reserved;
 } STR_Header;
 
+typedef enum {
+    FMV_SONICTEAM  = 0,
+    FMV_PS30YRS    = 1,
+    FMV_NUM_VIDEOS = FMV_PS30YRS + 1,
+} FMVOption;
+
+// Load all locations of FMVs on disc
+void mdec_fmv_init();
 
 // Use this function as main playback entrypoint.
 // It will override the game loop and be stuck in a playback loop.
 // Do not call the other functions directly unless you know what you're doing.
-void mdec_play(const char *filepath);
+void mdec_play(FMVOption);
 
-void mdec_start(const char *filepath);
+void mdec_start(volatile CdlLOC *loc);
 void mdec_stop();
 void mdec_loop();
 

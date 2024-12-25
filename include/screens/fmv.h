@@ -2,12 +2,7 @@
 #define SCREENS_FMV_H
 
 #include "screen.h"
-
-typedef enum {
-    FMV_SONICTEAM  = 0,
-    FMV_PS30YRS    = 1,
-    FMV_NUM_VIDEOS = FMV_PS30YRS + 1,
-} FMVOption;
+#include "mdec.h"
 
 void screen_fmv_load();
 void screen_fmv_unload(void *);
