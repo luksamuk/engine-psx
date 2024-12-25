@@ -180,6 +180,7 @@ void
 sound_play_xa(const char *filename, int double_speed,
               uint8_t channel, uint32_t loopback_sector)
 {
+    // Stop sound if playing. We'll need the CD right now
     sound_stop_xa();
     CdlLOC loc = sound_find_xa(filename);
     /* int sectorn = CdPosToInt(&loc); */
@@ -195,9 +196,6 @@ sound_play_xa_immediate(
     uint8_t channel, uint32_t loopback_sector)
 {
     CdlFILTER filter;
-
-    // Stop sound if playing. We'll need the CD right now
-    sound_stop_xa();
 
     /* int sectorn = CdPosToInt(&file.pos); */
     /* int numsectors = (file.size + 2047) / 2048; */
