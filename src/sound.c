@@ -65,8 +65,6 @@ sound_init(void)
     sound_reset_mem();
     _sound_reset_channels();
     sound_xa_set_volume(XA_DEFAULT_VOLUME);
-
-    sound_bgm_init();
 }
 
 void
@@ -196,11 +194,6 @@ sound_play_xa_immediate(
     uint8_t channel, uint32_t loopback_sector)
 {
     CdlFILTER filter;
-
-    /* int sectorn = CdPosToInt(&file.pos); */
-    /* int numsectors = (file.size + 2047) / 2048; */
-    /* printf("%s: Sector %d (size: %d => %d sectors).\n", */
-    /*        filename, sectorn, file.size, numsectors); */
 
     // Save current file location
     _xa_loc = *loc;

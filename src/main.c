@@ -63,9 +63,13 @@ main(void)
     fastalloc_init();
     level_init();
     font_init();
+    scene_init();
+
+    // Initial loads from disc
+    render_loading_logo();
+    sound_bgm_init();
 
     // Set first scene
-    scene_init();
     scene_change(SCREEN_DISCLAIMER);
 
     while(1) {

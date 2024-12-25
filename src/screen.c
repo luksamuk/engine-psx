@@ -39,7 +39,7 @@ scene_init()
     free(file);
 }
 
-static void
+void
 render_loading_logo()
 {
     TIM_IMAGE tim;
