@@ -13,9 +13,11 @@ Heavily inspired by Sonic The Hedgehog. Uses [[https://github.com/Lameguy64/PSn0
 
 /Game title screen running on PCSX-Redux, dated [2024-10-04]./
 
+*VIEW GAME ON ITCH.IO:* https://luksamuk.itch.io/sonic-the-hedgehog-xa
+
 *GET BUILDS AND BETAS ON THE RELEASES SECTION!!!!*
 
-*Also get a build on my website:*: [[https://luksamuk.codes/]]
+*Also visit my website:*: [[https://luksamuk.codes/]]
 
 * About
 
