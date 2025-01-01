@@ -249,12 +249,19 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         state->timer--;
         if(state->timer < 0) {
             // Set animation according to character
-            state->anim_state.animation = 2;
             state->timer = 360; // 6-seconds music
-            sound_bgm_play(BGM_LEVELCLEAR);
+            state->anim_state.animation = 2;
+            screen_level_setmode(LEVEL_MODE_FINISHED);
             _goal_sign_change_score();
         }
+    } else if((state->anim_state.animation == 2)
+              && (player.pos.vx < camera.pos.vx + (CENTERX << 12))) {
+        state->timer = 360; // 6-seconds music
     } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {
+        if(state->timer == 360) {
+            // First frame
+            sound_bgm_play(BGM_LEVELCLEAR);
+        }
         state->timer--;
 
         // Doesn't hurt to not allow the CD reader to go berserk

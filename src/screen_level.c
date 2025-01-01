@@ -136,6 +136,10 @@ screen_level_load()
        || level_mode == LEVEL_MODE_RECORD) {
         data->level_transition = 1;
     }
+
+    // Recover control if mode is "hold forward"
+    if(level_mode == LEVEL_MODE_FINISHED)
+        level_mode = LEVEL_MODE_NORMAL;
 }
 
 void
@@ -312,6 +316,9 @@ screen_level_update(void *d)
     case LEVEL_MODE_RECORD:
         demo_record();
         input_get_state(&player.input);
+        break;
+    case LEVEL_MODE_FINISHED:
+        player.input.current = player.input.old = 0x0020;
         break;
     default:
         input_get_state(&player.input);

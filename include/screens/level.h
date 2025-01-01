@@ -7,6 +7,7 @@ typedef enum {
     LEVEL_MODE_NORMAL,
     LEVEL_MODE_RECORD,
     LEVEL_MODE_DEMO,
+    LEVEL_MODE_FINISHED,
 } LEVELMODE;
 
 void screen_level_load();

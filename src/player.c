@@ -642,7 +642,7 @@ _player_update_collision_tb(Player *player)
 void
 _player_resolve_collision_modes(Player *player)
 {
-        // NOTE THAT PLAYER INPUT IS NOT UPDATED AUTOMATICALLY!
+    // NOTE THAT PLAYER INPUT IS NOT UPDATED AUTOMATICALLY!
     // One must call input_get_state on player->input so that
     // player input is recognized. This is done in screen_level.c.
 

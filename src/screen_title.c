@@ -438,7 +438,7 @@ screen_title_draw(void *d)
     x = SCREEN_XRES - (strlen(GIT_VERSION) * 8) - 8;
     font_draw_sm(GIT_VERSION, x, SCREEN_YRES - 21);
 
-    snprintf(buffer, 255, "2024 luksamuk");
+    snprintf(buffer, 255, "2024-2025 luksamuk");
     x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
     font_draw_sm(buffer, x, SCREEN_YRES - 14);
 }
