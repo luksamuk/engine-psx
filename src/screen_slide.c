@@ -8,7 +8,9 @@
 #include "input.h"
 #include "sound.h"
 
-static SlideOption next_slide = -1;
+static SlideOption next_slide = 0xff;
+
+ScreenIndex slide_screen_override = 0xff;
 
 static volatile const struct {
     const char  *image;
@@ -66,6 +68,11 @@ screen_slide_load()
     data->next = slide_table[data->current].next;
     data->bgm = slide_table[data->current].bgm;
     data->counter = slide_table[data->current].duration;
+
+    if(slide_screen_override != 0xff) {
+        data->next = slide_screen_override;
+        slide_screen_override = 0xff;
+    }
 
     // Load image data
     uint32_t length;

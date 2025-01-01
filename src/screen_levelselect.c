@@ -25,6 +25,8 @@
 #define MAX_COLUMN_CHOICES 15
 
 extern uint32_t level_score_count;
+extern int debug_mode;
+extern ScreenIndex slide_screen_override;
 
 typedef struct {
     uint8_t menu_choice;
@@ -40,8 +42,6 @@ typedef struct {
     uint8_t  mdectest_selection;
     uint8_t  slidetest_selection;
 } screen_levelselect_data;
-
-extern int debug_mode;
 
 static const char *menutext[] = {
     "PLAYGROUND    1",
@@ -162,30 +162,30 @@ screen_levelselect_update(void *d)
     if(data->menu_choice == CHOICE_SOUNDTEST) {
         if(pad_pressed(PAD_LEFT)) {
             if(data->soundtest_selection == 0)
-                data->soundtest_selection = BGM_NUM_SONGS - 1;
+                data->soundtest_selection = BGM_NUM_SONGS;
             else data->soundtest_selection--;
         } else if(pad_pressed(PAD_RIGHT)) {
-            if(data->soundtest_selection == BGM_NUM_SONGS - 1)
+            if(data->soundtest_selection == BGM_NUM_SONGS)
                 data->soundtest_selection = 0;
             else data->soundtest_selection++;
         }
     } else if(data->menu_choice == CHOICE_MDEC) {
         if(pad_pressed(PAD_LEFT)) {
             if(data->mdectest_selection == 0)
-                data->mdectest_selection = FMV_NUM_VIDEOS - 1;
+                data->mdectest_selection = FMV_NUM_VIDEOS;
             else data->mdectest_selection--;
         } else if(pad_pressed(PAD_RIGHT)) {
-            if(data->mdectest_selection == FMV_NUM_VIDEOS - 1)
+            if(data->mdectest_selection == FMV_NUM_VIDEOS)
                 data->mdectest_selection = 0;
             else data->mdectest_selection++;
         }
     } else if(data->menu_choice == CHOICE_SLIDE) {
         if(pad_pressed(PAD_LEFT)) {
             if(data->slidetest_selection == 0)
-                data->slidetest_selection = SLIDE_NUM_SLIDES - 1;
+                data->slidetest_selection = SLIDE_NUM_SLIDES;
             else data->slidetest_selection--;
         } else if(pad_pressed(PAD_RIGHT)) {
-            if(data->slidetest_selection == SLIDE_NUM_SLIDES - 1)
+            if(data->slidetest_selection == SLIDE_NUM_SLIDES)
                 data->slidetest_selection = 0;
             else data->slidetest_selection++;
         }
@@ -214,19 +214,26 @@ screen_levelselect_update(void *d)
         if(data->menu_choice == CHOICE_TITLE) {
             scene_change(SCREEN_TITLE);
         } else if(data->menu_choice == CHOICE_MDEC) {
-            screen_fmv_set_next(SCREEN_LEVELSELECT);
-            screen_fmv_enqueue(data->mdectest_selection);
-            scene_change(SCREEN_FMV);
+            if(data->mdectest_selection > 0) {
+                screen_fmv_set_next(SCREEN_LEVELSELECT);
+                screen_fmv_enqueue(data->mdectest_selection - 1);
+                scene_change(SCREEN_FMV);
+            }
         } else if(data->menu_choice == CHOICE_MODELTEST) {
             scene_change(SCREEN_MODELTEST);
         } else if(data->menu_choice == CHOICE_SLIDE) {
-            screen_slide_set_next(data->slidetest_selection);
-            scene_change(SCREEN_SLIDE);
+            if(data->slidetest_selection > 0) {
+                screen_slide_set_next(data->slidetest_selection - 1);
+                slide_screen_override = SCREEN_LEVELSELECT;
+                scene_change(SCREEN_SLIDE);
+            }
         } else if(data->menu_choice == CHOICE_CREDITS) {
             scene_change(SCREEN_CREDITS);
         } else if(data->menu_choice == CHOICE_SOUNDTEST) {
-            sound_bgm_play(data->soundtest_selection);
-            data->music_selected = data->soundtest_selection;
+            if(data->soundtest_selection > 0) {
+                sound_bgm_play(data->soundtest_selection - 1);
+                data->music_selected = data->soundtest_selection;
+            }
         } else {
             screen_level_setlevel(data->menu_choice);
             screen_level_setmode(LEVEL_MODE_NORMAL);
