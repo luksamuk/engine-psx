@@ -397,8 +397,6 @@ screen_title_draw(void *d)
                     LERPC(data->rgb_count, 104),
                     LERPC(data->rgb_count, 200));
 
-    char buffer[255] = { 0 };
-
     if(debug_mode) {
         uint32_t elapsed_sectors;
         sound_xa_get_elapsed_sectors(&elapsed_sectors);
@@ -435,12 +433,14 @@ screen_title_draw(void *d)
         LERPC(data->rgb_count, 200),
         LERPC(data->rgb_count, 200));
 
-    x = SCREEN_XRES - (strlen(GIT_VERSION) * 8) - 8;
+    const char *text = GIT_VERSION;
+
+    x = SCREEN_XRES - font_measurew_sm(text) - 8;
     font_draw_sm(GIT_VERSION, x, SCREEN_YRES - 21);
 
-    snprintf(buffer, 255, "2024-2025 luksamuk");
-    x = SCREEN_XRES - (strlen(buffer) * 8) - 8;
-    font_draw_sm(buffer, x, SCREEN_YRES - 14);
+    text = "2025 luksamuk";
+    x = SCREEN_XRES - font_measurew_sm(text) - 8;
+    font_draw_sm(text, x, SCREEN_YRES - 14);
 }
 
 void
