@@ -22,7 +22,7 @@
 #define CHOICE_TITLE     23
 #define CHOICE_CREDITS   24
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
-#define MAX_COLUMN_CHOICES 15
+#define MAX_COLUMN_CHOICES 17
 
 extern uint32_t level_score_count;
 extern int debug_mode;
