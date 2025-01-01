@@ -69,6 +69,9 @@ static const char *menutext[] = {
     "SLIDE TEST  *??*",
     "\n",
     "\n",
+    "\n",
+    "\n",
+    "\n",
     "MODELTEST",
     "TITLESCREEN",
     "CREDITS",
@@ -290,10 +293,6 @@ screen_levelselect_draw(void *d)
     const char *title = "Level Select";
     x = CENTERX - (strlen(title) * 4);
     font_draw_big(title, x, 12);
-
-    const char *subtitle = "*luksamuk.codes*";
-    x = SCREEN_XRES - (strlen(subtitle) * 8) - 8;
-    font_draw_sm(subtitle, x, SCREEN_YRES - 24);
 
     // Draw text
     uint8_t txtidx = 0;

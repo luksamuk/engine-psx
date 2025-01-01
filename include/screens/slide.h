@@ -5,8 +5,9 @@ typedef enum {
     SLIDE_COMINGSOON = 0,
     SLIDE_PS30YRS = 1,
     SLIDE_SEGALOGO = 2,
+    SLIDE_CREATEDBY = 3,
 
-    SLIDE_NUM_SLIDES = (SLIDE_SEGALOGO + 1),
+    SLIDE_NUM_SLIDES = (SLIDE_CREATEDBY + 1),
 } SlideOption;
 
 void screen_slide_load();

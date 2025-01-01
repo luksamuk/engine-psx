@@ -262,6 +262,9 @@
 	<file name="SEGALOGO.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/SEGALOGO.TIM" />
+	<file name="CREATED.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/CREATED.TIM" />
 	<file name="LVLSEL.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/LVLSEL.TIM" />
