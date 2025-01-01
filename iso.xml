@@ -255,7 +255,7 @@
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/LOAD.TIM" />
 	<file name="SOON.TIM"
 	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/misc/SOON.TIM" />
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/SOON2.TIM" />
 	<file name="PS30YRS.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/PS30YRS.TIM" />
