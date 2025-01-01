@@ -256,6 +256,12 @@
 	<file name="SOON.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/SOON.TIM" />
+	<file name="PS30YRS.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/PS30YRS.TIM" />
+	<file name="SEGALOGO.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/SEGALOGO.TIM" />
 	<file name="LVLSEL.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/LVLSEL.TIM" />

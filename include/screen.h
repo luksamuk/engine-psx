@@ -10,7 +10,7 @@ typedef enum {
     SCREEN_FMV,
     SCREEN_TITLE,
     SCREEN_MODELTEST,
-    SCREEN_COMINGSOON,
+    SCREEN_SLIDE,
     SCREEN_CREDITS,
 } ScreenIndex;
 

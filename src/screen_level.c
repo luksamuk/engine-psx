@@ -20,8 +20,6 @@
 #include "basic_font.h"
 #include "demo.h"
 
-#include "screens/fmv.h"
-
 extern int debug_mode;
 extern PlayerConstants CNST_DEFAULT;
 

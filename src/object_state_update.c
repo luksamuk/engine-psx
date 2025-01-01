@@ -13,6 +13,7 @@
 
 #include "screen.h"
 #include "screens/level.h"
+#include "screens/slide.h"
 
 #define ANIM_WALKING          0x0854020e
 
@@ -276,7 +277,8 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 } else screen_level_setlevel(lvl + 1);
                 scene_change(SCREEN_LEVEL);
             } else {
-                scene_change(SCREEN_COMINGSOON);
+                screen_slide_set_next(SLIDE_COMINGSOON);
+                scene_change(SCREEN_SLIDE);
             }
         }
     }

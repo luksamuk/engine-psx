@@ -15,7 +15,7 @@
 #include "screens/fmv.h"
 #include "screens/title.h"
 #include "screens/modeltest.h"
-#include "screens/comingsoon.h"
+#include "screens/slide.h"
 #include "screens/credits.h"
 
 // Start with 64k until we make the actual level scene
@@ -58,7 +58,9 @@ void
 scene_change(ScreenIndex scr)
 {
     printf("Change scene: %d -> %d\n", current_scene, scr);
-    render_loading_logo();
+
+    if(!(scr == SCREEN_SLIDE && current_scene == SCREEN_SLIDE))
+        render_loading_logo();
 
     if(current_scene >= 0)
         scene_unload();
@@ -76,7 +78,7 @@ scene_load()
     case SCREEN_FMV:         screen_fmv_load();         break;
     case SCREEN_TITLE:       screen_title_load();       break;
     case SCREEN_MODELTEST:   screen_modeltest_load();   break;
-    case SCREEN_COMINGSOON:  screen_comingsoon_load();  break;
+    case SCREEN_SLIDE:       screen_slide_load();       break;
     case SCREEN_CREDITS:     screen_credits_load();     break;
     default: break; // Unknown scene???
     }
@@ -92,7 +94,7 @@ scene_unload()
     case SCREEN_FMV:         screen_fmv_unload(scene_data);         break;
     case SCREEN_TITLE:       screen_title_unload(scene_data);       break;
     case SCREEN_MODELTEST:   screen_modeltest_unload(scene_data);   break;
-    case SCREEN_COMINGSOON:  screen_comingsoon_unload(scene_data);  break;
+    case SCREEN_SLIDE:       screen_slide_unload(scene_data);       break;
     case SCREEN_CREDITS:     screen_credits_unload(scene_data);     break;
     default: break; // Unknown scene???
     }
@@ -108,7 +110,7 @@ scene_update()
     case SCREEN_FMV:         screen_fmv_update(scene_data);         break;
     case SCREEN_TITLE:       screen_title_update(scene_data);       break;
     case SCREEN_MODELTEST:   screen_modeltest_update(scene_data);   break;
-    case SCREEN_COMINGSOON:  screen_comingsoon_update(scene_data);  break;
+    case SCREEN_SLIDE:       screen_slide_update(scene_data);       break;
     case SCREEN_CREDITS:     screen_credits_update(scene_data);     break;
     default: break; // Unknown scene???
     }
@@ -125,7 +127,7 @@ scene_draw()
     case SCREEN_FMV:         screen_fmv_draw(scene_data);         break;
     case SCREEN_TITLE:       screen_title_draw(scene_data);       break;
     case SCREEN_MODELTEST:   screen_modeltest_draw(scene_data);   break;
-    case SCREEN_COMINGSOON:  screen_comingsoon_draw(scene_data);  break;
+    case SCREEN_SLIDE:       screen_slide_draw(scene_data);       break;
     case SCREEN_CREDITS:     screen_credits_draw(scene_data);     break;
     default: break; // Unknown scene???
     }
