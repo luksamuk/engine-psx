@@ -166,7 +166,7 @@
    <object id="150" gid="65" x="6304" y="1440" width="64" height="64"/>
    <object id="151" gid="65" x="6528" y="1680" width="64" height="64" rotation="-90"/>
    <object id="152" gid="65" x="6528" y="1840" width="64" height="64" rotation="-90"/>
-   <object id="153" gid="66" x="6016" y="1810" width="64" height="64" rotation="90"/>
+   <object id="153" gid="66" x="6016" y="1808" width="64" height="64" rotation="90"/>
    <object id="154" gid="2147483715" x="2128" y="1152" width="64" height="64"/>
    <object id="155" gid="62" x="112" y="608" width="64" height="64">
     <properties>
