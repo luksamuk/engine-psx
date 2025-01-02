@@ -8,7 +8,7 @@
 #include "screen.h"
 #include "render.h"
 #include "screens/level.h"
-#include "screens/fmv.h"
+/* #include "screens/fmv.h" */
 #include "screens/slide.h"
 #include "sound.h"
 #include "util.h"
@@ -16,11 +16,11 @@
 #include "basic_font.h"
 
 #define CHOICE_SOUNDTEST 19
-#define CHOICE_MDEC      20
-#define CHOICE_SLIDE     21
-#define CHOICE_MODELTEST 22
-#define CHOICE_TITLE     23
-#define CHOICE_CREDITS   24
+/* #define CHOICE_MDEC      20 */
+#define CHOICE_SLIDE     20
+#define CHOICE_MODELTEST 21
+#define CHOICE_TITLE     22
+#define CHOICE_CREDITS   23
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
 #define MAX_COLUMN_CHOICES 17
 
@@ -39,7 +39,7 @@ typedef struct {
     uint16_t bg_timer;
     uint8_t  music_selected;
     uint8_t  soundtest_selection;
-    uint8_t  mdectest_selection;
+    /* uint8_t  mdectest_selection; */
     uint8_t  slidetest_selection;
 } screen_levelselect_data;
 
@@ -65,7 +65,7 @@ static const char *menutext[] = {
     "              3",
     "\n",
     "SOUND TEST  *??*",
-    "MDEC TEST   *??*",
+    /* "MDEC TEST   *??*", */
     "SLIDE TEST  *??*",
     "\n",
     "\n",
@@ -104,7 +104,7 @@ screen_levelselect_load()
 
     data->music_selected = 0;
     data->soundtest_selection = 0x00;
-    data->mdectest_selection = 0x00;
+    /* data->mdectest_selection = 0x00; */
     data->slidetest_selection = 0x00;
 
     // Regardless of the level, reset score.
@@ -172,16 +172,16 @@ screen_levelselect_update(void *d)
                 data->soundtest_selection = 0;
             else data->soundtest_selection++;
         }
-    } else if(data->menu_choice == CHOICE_MDEC) {
-        if(pad_pressed(PAD_LEFT)) {
-            if(data->mdectest_selection == 0)
-                data->mdectest_selection = FMV_NUM_VIDEOS;
-            else data->mdectest_selection--;
-        } else if(pad_pressed(PAD_RIGHT)) {
-            if(data->mdectest_selection == FMV_NUM_VIDEOS)
-                data->mdectest_selection = 0;
-            else data->mdectest_selection++;
-        }
+    /* } else if(data->menu_choice == CHOICE_MDEC) { */
+    /*     if(pad_pressed(PAD_LEFT)) { */
+    /*         if(data->mdectest_selection == 0) */
+    /*             data->mdectest_selection = FMV_NUM_VIDEOS; */
+    /*         else data->mdectest_selection--; */
+    /*     } else if(pad_pressed(PAD_RIGHT)) { */
+    /*         if(data->mdectest_selection == FMV_NUM_VIDEOS) */
+    /*             data->mdectest_selection = 0; */
+    /*         else data->mdectest_selection++; */
+    /*     } */
     } else if(data->menu_choice == CHOICE_SLIDE) {
         if(pad_pressed(PAD_LEFT)) {
             if(data->slidetest_selection == 0)
@@ -201,7 +201,7 @@ screen_levelselect_update(void *d)
         else data->menu_choice--;
     } else if(
         (data->menu_choice != CHOICE_SOUNDTEST)
-        && (data->menu_choice != CHOICE_MDEC)
+        /* && (data->menu_choice != CHOICE_MDEC) */
         && (data->menu_choice != CHOICE_SLIDE)
         && (pad_pressed(PAD_LEFT) || pad_pressed(PAD_RIGHT))) {
         if(data->menu_choice < MAX_COLUMN_CHOICES - 1) {
@@ -216,12 +216,12 @@ screen_levelselect_update(void *d)
     if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
         if(data->menu_choice == CHOICE_TITLE) {
             scene_change(SCREEN_TITLE);
-        } else if(data->menu_choice == CHOICE_MDEC) {
-            if(data->mdectest_selection > 0) {
-                screen_fmv_set_next(SCREEN_LEVELSELECT);
-                screen_fmv_enqueue(data->mdectest_selection - 1);
-                scene_change(SCREEN_FMV);
-            }
+        /* } else if(data->menu_choice == CHOICE_MDEC) { */
+        /*     if(data->mdectest_selection > 0) { */
+        /*         screen_fmv_set_next(SCREEN_LEVELSELECT); */
+        /*         screen_fmv_enqueue(data->mdectest_selection - 1); */
+        /*         scene_change(SCREEN_FMV); */
+        /*     } */
         } else if(data->menu_choice == CHOICE_MODELTEST) {
             scene_change(SCREEN_MODELTEST);
         } else if(data->menu_choice == CHOICE_SLIDE) {
@@ -309,11 +309,11 @@ screen_levelselect_draw(void *d)
             snprintf(buffer, 80, "SOUND TEST  *%02X*",
                      data->soundtest_selection);
             font_draw_sm(buffer, vx, vy);
-        } else if(cursel == CHOICE_MDEC) {
-            char buffer[80];
-            snprintf(buffer, 80, "MDEC TEST   *%02X*",
-                     data->mdectest_selection);
-            font_draw_sm(buffer, vx, vy);
+        /* } else if(cursel == CHOICE_MDEC) { */
+        /*     char buffer[80]; */
+        /*     snprintf(buffer, 80, "MDEC TEST   *%02X*", */
+        /*              data->mdectest_selection); */
+        /*     font_draw_sm(buffer, vx, vy); */
         } else if(cursel == CHOICE_SLIDE) {
             char buffer[80];
             snprintf(buffer, 80, "SLIDE TEST  *%02X*",

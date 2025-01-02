@@ -4,8 +4,8 @@
 #include <psxetc.h>
 
 extern void _xa_cd_event_callback(CdlIntrResult, uint8_t *);
-extern void _mdec_cd_event_callback(CdlIntrResult, uint8_t *);
-extern void _mdec_dma_callback(void);
+/* extern void _mdec_cd_event_callback(CdlIntrResult, uint8_t *); */
+/* extern void _mdec_dma_callback(void); */
 
 void
 cd_set_callbacks(PlaybackType type)
@@ -16,8 +16,8 @@ cd_set_callbacks(PlaybackType type)
         CdReadyCallback(_xa_cd_event_callback);
         break;
     case PLAYBACK_STR:
-        DMACallback(1, &_mdec_dma_callback);
-        CdReadyCallback(_mdec_cd_event_callback);
+        /* DMACallback(1, &_mdec_dma_callback); */
+        /* CdReadyCallback(_mdec_cd_event_callback); */
         break;
     default: break; // ???????????
     }
