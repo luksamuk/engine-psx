@@ -251,6 +251,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             // Set animation according to character
             state->timer = 360; // 6-seconds music
             state->anim_state.animation = 2;
+            player.action = ACTION_NONE;
             screen_level_setmode(LEVEL_MODE_FINISHED);
             _goal_sign_change_score();
         }
