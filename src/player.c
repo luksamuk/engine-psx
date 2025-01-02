@@ -585,6 +585,12 @@ _player_update_collision_tb(Player *player)
             
             player->pos.vy = (new_coord + 32) << 12;
         }
+
+        // Cancel drop dash if not holding jump
+        if(player->action == ACTION_DROPDASH
+           && !input_pressing(&player->input, PAD_CROSS)) {
+            player->action = ACTION_JUMPING;
+        }
     } else {
         if(!player->ev_grnd1.collided && !player->ev_grnd2.collided) {
             player->grnd = 0;
