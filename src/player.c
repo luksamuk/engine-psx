@@ -1036,7 +1036,7 @@ player_update(Player *player)
     if(player->speedshoes_frames == 0) {
         // Reset constants.
         // Notice that speedshoes_frames is set to -1 by general level update.
-        player->cnst = &CNST_DEFAULT;
+        player->cnst = player->underwater ? &CNST_UNDERWATER : &CNST_DEFAULT;
     }
 
     // Underwater / leaving water
