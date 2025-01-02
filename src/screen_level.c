@@ -328,6 +328,16 @@ screen_level_update(void *d)
     camera_update(&camera, &player);
     update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
     object_pool_update(&obj_table_common);
+
+    // Limit player left position
+    if((player.pos.vx - (PUSH_RADIUS << 12)) < (camera.min_x - (CENTERX << 12))) {
+        player.pos.vx = camera.min_x - (CENTERX << 12) + (PUSH_RADIUS << 12);
+        if(player.vel.vx < 0) {
+            if(player.grnd) player.vel.vz = 0;
+            else player.vel.vx = 0;
+        }
+    }
+
     // Only update these if past fade in!
     if(data->level_transition > 0) {
         player_update(&player);

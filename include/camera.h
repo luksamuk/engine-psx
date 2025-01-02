@@ -6,8 +6,8 @@
 #include "player.h"
 
 typedef struct {
-    VECTOR pos;
-    VECTOR realpos;
+    VECTOR  pos;
+    VECTOR  realpos;
     int32_t extension_x;
     int32_t extension_y;
     uint8_t delay;
