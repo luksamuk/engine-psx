@@ -86,6 +86,8 @@ names = [
     "SPRING",
     "HURT",
     "DEATH",
+    "DROWN",
+    "GASP",
 ]
 
 def get_hash(name):
@@ -115,6 +117,8 @@ print_hashes(names)
 #define ANIM_SPRING           0x068e01d4
 #define ANIM_HURT             0x031b0144
 #define ANIM_DEATH            0x04200167
+#define ANIM_DROWN            0x048a018b
+#define ANIM_GASP             0x02d9012c
 #+end_example
 
 * Generating 8x8 tiles and their 16x16 mappings

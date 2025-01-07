@@ -10,3 +10,4 @@ build/
 /*.chd
 *.tiled-session
 /.pcsx
+temp/
