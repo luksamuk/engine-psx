@@ -95,6 +95,7 @@ typedef struct {
 
     PlayerAction action;
 
+    uint8_t        col_ledge;
     CollisionEvent ev_grnd1;
     CollisionEvent ev_grnd2;
     CollisionEvent ev_left;

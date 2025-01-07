@@ -104,6 +104,7 @@ load_player(Player *player,
     player->ev_right = (CollisionEvent){ 0 };
     player->ev_ceil1 = (CollisionEvent){ 0 };
     player->ev_ceil2 = (CollisionEvent){ 0 };
+    player->col_ledge = 0;
 
     player->action = ACTION_NONE;
 
@@ -451,6 +452,14 @@ _player_update_collision_tb(Player *player)
         player->ev_grnd2 = linecast(&leveldata, &map128, &map16,
                                     anchorx_right, anchory_right,
                                     grndir, grn_mag, player->gsmode);
+    }
+
+    // Ledge sensor
+    if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
+        CollisionEvent ev_ledge = linecast(&leveldata, &map128, &map16,
+                                           anchorx, anchory_left,
+                                           CDIR_FLOOR, grn_mag, CDIR_FLOOR);
+        player->col_ledge = ev_ledge.collided;
     }
 
     if(!player->grnd) {
@@ -948,8 +957,18 @@ player_update(Player *player)
                 player->loopback_frame = 2;
             } else if (!input_pressing(&player->input, PAD_LEFT)
                        && !input_pressing(&player->input, PAD_RIGHT)) {
-                player_set_animation_direct(player, ANIM_STOPPED);
-                if(player->idle_timer > 0) player->idle_timer--;
+                // Balance on ledges
+                if((player->ev_grnd1.collided ^ player->ev_grnd2.collided)
+                   && !player->col_ledge) {
+                    player->idle_timer = ANIM_IDLE_TIMER_MAX;
+                    if(((player->anim_dir < 0) && player->ev_grnd1.collided)
+                       || ((player->anim_dir > 0) && player->ev_grnd2.collided))
+                        player_set_animation_direct(player, ANIM_BALANCEHEAVY);
+                    else player_set_animation_direct(player, ANIM_BALANCELIGHT);
+                } else {
+                    player_set_animation_direct(player, ANIM_STOPPED);
+                    if(player->idle_timer > 0) player->idle_timer--;
+                }
             }
         } else {
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
@@ -1018,6 +1037,11 @@ player_update(Player *player)
 
         case ANIM_SPRING:
             player_set_frame_duration(player, 3);
+            break;
+
+        case ANIM_BALANCELIGHT:
+        case ANIM_BALANCEHEAVY:
+            player_set_frame_duration(player, 12);
             break;
 
             // Single-frame animations
