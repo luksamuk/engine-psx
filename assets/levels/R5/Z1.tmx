@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="4" nextobjectid="195">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="4" nextobjectid="196">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="85" source="../COMMON/objects_common.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
@@ -64,7 +64,6 @@
    <object id="14" gid="90" x="2992" y="848" width="64" height="64"/>
    <object id="15" gid="2147483739" x="3536" y="539" width="64" height="64"/>
    <object id="16" gid="89" x="4544" y="976" width="64" height="64" rotation="90"/>
-   <object id="17" gid="90" x="5424" y="1408" width="64" height="64"/>
    <object id="18" gid="86" x="5425" y="1408" width="64" height="64">
     <properties>
      <property name="Kind" value="1UP"/>
@@ -210,6 +209,7 @@
    <object id="190" gid="88" x="2380" y="512" width="64" height="64"/>
    <object id="192" gid="88" x="5421" y="672" width="64" height="64"/>
    <object id="193" gid="88" x="7278" y="288" width="64" height="64"/>
+   <object id="195" gid="89" x="5424" y="1408" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

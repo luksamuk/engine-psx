@@ -34,6 +34,10 @@ extern PlayerConstants CNST_SPEEDSHOES;
 #define ANIM_DEATH            0x04200167
 #define ANIM_DROWN            0x048a018b
 #define ANIM_GASP             0x02d9012c
+#define ANIM_WATERWALK        0x0da602b3
+#define ANIM_DROP             0x02f80136
+#define ANIM_BALANCELIGHT     0x156c035f
+#define ANIM_BALANCEHEAVY     0x15570364
 
 extern int debug_mode;
 
@@ -955,8 +959,9 @@ player_update(Player *player)
                         sound_play_vag(sfx_skid, 0);
                     }
                     player_set_animation_direct(player, ANIM_SKIDDING);
+                    player->loopback_frame = 3;
                 } if(player_get_current_animation_hash(player) != ANIM_SKIDDING) {
-                      player_set_animation_direct(player, ANIM_WALKING);
+                    player_set_animation_direct(player, ANIM_WALKING);
                 }
             } else if(player->action == ACTION_ROLLING
                       || player->action == ACTION_SPINDASH
@@ -966,6 +971,8 @@ player_update(Player *player)
                 player_set_animation_direct(player, ANIM_PEELOUT);
             } else if(abs(player->vel.vz) >= (6 << 12)) {
                 player_set_animation_direct(player, ANIM_RUNNING);
+            } else if(player->underwater && abs(player->vel.vz) >= (4 << 12)) {
+                player_set_animation_direct(player, ANIM_WATERWALK);
             } else player_set_animation_direct(player, ANIM_WALKING);
         }
     } else {
@@ -975,11 +982,12 @@ player_update(Player *player)
                 player_set_animation_direct(player, ANIM_SPRING);
             } else {
                 player->airdirlock = 0;
-                if(abs(player->vel.vz) >= (10 << 12)) {
-                    player_set_animation_direct(player, ANIM_PEELOUT);
-                } else if(abs(player->vel.vz) >= (6 << 12)) {
-                    player_set_animation_direct(player, ANIM_RUNNING);
-                } else player_set_animation_direct(player, ANIM_WALKING);
+                player_set_animation_direct(player, ANIM_DROP);
+                /* if(abs(player->vel.vz) >= (10 << 12)) { */
+                /*     player_set_animation_direct(player, ANIM_PEELOUT); */
+                /* } else if(abs(player->vel.vz) >= (6 << 12)) { */
+                /*     player_set_animation_direct(player, ANIM_RUNNING); */
+                /* } else player_set_animation_direct(player, ANIM_WALKING); */
             }
         } else if(player->action == ACTION_HURT) {
             player_set_animation_direct(player, ANIM_HURT);
@@ -990,6 +998,7 @@ player_update(Player *player)
     if(player->anim_timer == 0) {
         switch(player_get_current_animation_hash(player)) {
         case ANIM_WALKING:
+        case ANIM_WATERWALK:
         case ANIM_RUNNING:
             player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
             break;
