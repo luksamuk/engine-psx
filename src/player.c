@@ -846,7 +846,8 @@ player_update(Player *player)
                     player->action = ACTION_ROLLING;
                     player_set_animation_direct(player, ANIM_ROLLING);
                     sound_play_vag(sfx_roll, 0);
-                } else if(player->vel.vz == 0
+                } else if(player->col_ledge
+                          && player->vel.vz == 0
                           && input_pressed(&player->input, PAD_CROSS)) { // Spindash
                     player->action = ACTION_SPINDASH;
                     player_set_animation_direct(player, ANIM_ROLLING);
@@ -944,11 +945,11 @@ player_update(Player *player)
         } else if(player->vel.vz == 0) {
             if(player->action == ACTION_SPINDASH) {
                 player_set_animation_direct(player, ANIM_ROLLING);
-            } else if(input_pressing(&player->input, PAD_UP)) {
+            } else if(player->col_ledge && input_pressing(&player->input, PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
                 player->action = ACTION_LOOKUP;
-            } else if(input_pressing(&player->input, PAD_DOWN)) {
+            } else if(player->col_ledge && input_pressing(&player->input, PAD_DOWN)) {
                 player_set_animation_direct(player, ANIM_CROUCHDOWN);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
                 player->action = ACTION_CROUCHDOWN;
