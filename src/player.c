@@ -32,6 +32,8 @@ extern PlayerConstants CNST_SPEEDSHOES;
 #define ANIM_SPRING           0x068e01d4
 #define ANIM_HURT             0x031b0144
 #define ANIM_DEATH            0x04200167
+#define ANIM_DROWN            0x048a018b
+#define ANIM_GASP             0x02d9012c
 
 extern int debug_mode;
 
@@ -1003,6 +1005,10 @@ player_update(Player *player)
 
         case ANIM_PUSHING:
             player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)) << 2);
+            break;
+
+        case ANIM_SPRING:
+            player_set_frame_duration(player, 3);
             break;
 
             // Single-frame animations
