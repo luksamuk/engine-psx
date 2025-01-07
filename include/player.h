@@ -35,6 +35,7 @@
 // Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      9
 #define HEIGHT_RADIUS_NORMAL    19
+#define LEDGE_SENSOR_MAGNITUDE  26
 #define WIDTH_RADIUS_ROLLING     7
 #define HEIGHT_RADIUS_ROLLING   14
 #define PUSH_RADIUS             10

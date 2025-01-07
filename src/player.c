@@ -458,7 +458,8 @@ _player_update_collision_tb(Player *player)
     if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
         CollisionEvent ev_ledge = linecast(&leveldata, &map128, &map16,
                                            anchorx, anchory_left,
-                                           CDIR_FLOOR, grn_mag, CDIR_FLOOR);
+                                           CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
+                                           CDIR_FLOOR);
         player->col_ledge = ev_ledge.collided;
     }
 
@@ -485,6 +486,11 @@ _player_update_collision_tb(Player *player)
         _draw_sensor(anchorx_right, anchory_right,
                      grndir, grn_mag,
                      0x38, 0xff, 0xa2);
+        if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
+            _draw_sensor(anchorx, anchory_right,
+                         CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
+                         0x1c, 0xf7, 0x51);
+        }
     }
 
     /* HANDLE COLLISION */
