@@ -105,6 +105,7 @@ typedef struct {
     CollisionEvent ev_ceil2;
 
     VECTOR startpos;
+    VECTOR respawnpos;
 } Player;
 
 void load_player(Player *player, const char *chara_filename, TIM_IMAGE  *sprites);
