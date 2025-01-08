@@ -32,6 +32,12 @@ extern PlayerConstants CNST_SPEEDSHOES;
 #define ANIM_SPRING           0x068e01d4
 #define ANIM_HURT             0x031b0144
 #define ANIM_DEATH            0x04200167
+#define ANIM_DROWN            0x048a018b
+#define ANIM_GASP             0x02d9012c
+#define ANIM_WATERWALK        0x0da602b3
+#define ANIM_DROP             0x02f80136
+#define ANIM_BALANCELIGHT     0x156c035f
+#define ANIM_BALANCEHEAVY     0x15570364
 
 extern int debug_mode;
 
@@ -98,6 +104,7 @@ load_player(Player *player,
     player->ev_right = (CollisionEvent){ 0 };
     player->ev_ceil1 = (CollisionEvent){ 0 };
     player->ev_ceil2 = (CollisionEvent){ 0 };
+    player->col_ledge = 0;
 
     player->action = ACTION_NONE;
 
@@ -447,6 +454,15 @@ _player_update_collision_tb(Player *player)
                                     grndir, grn_mag, player->gsmode);
     }
 
+    // Ledge sensor
+    if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
+        CollisionEvent ev_ledge = linecast(&leveldata, &map128, &map16,
+                                           anchorx, anchory_left,
+                                           CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
+                                           CDIR_FLOOR);
+        player->col_ledge = ev_ledge.collided;
+    }
+
     if(!player->grnd) {
         // Ceiling sensors
         if(!player->ev_ceil1.collided) {
@@ -470,6 +486,11 @@ _player_update_collision_tb(Player *player)
         _draw_sensor(anchorx_right, anchory_right,
                      grndir, grn_mag,
                      0x38, 0xff, 0xa2);
+        if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
+            _draw_sensor(anchorx, anchory_right,
+                         CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
+                         0x1c, 0xf7, 0x51);
+        }
     }
 
     /* HANDLE COLLISION */
@@ -831,7 +852,8 @@ player_update(Player *player)
                     player->action = ACTION_ROLLING;
                     player_set_animation_direct(player, ANIM_ROLLING);
                     sound_play_vag(sfx_roll, 0);
-                } else if(player->vel.vz == 0
+                } else if(player->col_ledge
+                          && player->vel.vz == 0
                           && input_pressed(&player->input, PAD_CROSS)) { // Spindash
                     player->action = ACTION_SPINDASH;
                     player_set_animation_direct(player, ANIM_ROLLING);
@@ -929,11 +951,11 @@ player_update(Player *player)
         } else if(player->vel.vz == 0) {
             if(player->action == ACTION_SPINDASH) {
                 player_set_animation_direct(player, ANIM_ROLLING);
-            } else if(input_pressing(&player->input, PAD_UP)) {
+            } else if(player->col_ledge && input_pressing(&player->input, PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
                 player->action = ACTION_LOOKUP;
-            } else if(input_pressing(&player->input, PAD_DOWN)) {
+            } else if(player->col_ledge && input_pressing(&player->input, PAD_DOWN)) {
                 player_set_animation_direct(player, ANIM_CROUCHDOWN);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
                 player->action = ACTION_CROUCHDOWN;
@@ -942,8 +964,18 @@ player_update(Player *player)
                 player->loopback_frame = 2;
             } else if (!input_pressing(&player->input, PAD_LEFT)
                        && !input_pressing(&player->input, PAD_RIGHT)) {
-                player_set_animation_direct(player, ANIM_STOPPED);
-                if(player->idle_timer > 0) player->idle_timer--;
+                // Balance on ledges
+                if((player->ev_grnd1.collided ^ player->ev_grnd2.collided)
+                   && !player->col_ledge) {
+                    player->idle_timer = ANIM_IDLE_TIMER_MAX;
+                    if(((player->anim_dir < 0) && player->ev_grnd1.collided)
+                       || ((player->anim_dir > 0) && player->ev_grnd2.collided))
+                        player_set_animation_direct(player, ANIM_BALANCEHEAVY);
+                    else player_set_animation_direct(player, ANIM_BALANCELIGHT);
+                } else {
+                    player_set_animation_direct(player, ANIM_STOPPED);
+                    if(player->idle_timer > 0) player->idle_timer--;
+                }
             }
         } else {
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
@@ -953,8 +985,9 @@ player_update(Player *player)
                         sound_play_vag(sfx_skid, 0);
                     }
                     player_set_animation_direct(player, ANIM_SKIDDING);
+                    player->loopback_frame = 3;
                 } if(player_get_current_animation_hash(player) != ANIM_SKIDDING) {
-                      player_set_animation_direct(player, ANIM_WALKING);
+                    player_set_animation_direct(player, ANIM_WALKING);
                 }
             } else if(player->action == ACTION_ROLLING
                       || player->action == ACTION_SPINDASH
@@ -964,6 +997,8 @@ player_update(Player *player)
                 player_set_animation_direct(player, ANIM_PEELOUT);
             } else if(abs(player->vel.vz) >= (6 << 12)) {
                 player_set_animation_direct(player, ANIM_RUNNING);
+            } else if(player->underwater && abs(player->vel.vz) >= (4 << 12)) {
+                player_set_animation_direct(player, ANIM_WATERWALK);
             } else player_set_animation_direct(player, ANIM_WALKING);
         }
     } else {
@@ -973,11 +1008,12 @@ player_update(Player *player)
                 player_set_animation_direct(player, ANIM_SPRING);
             } else {
                 player->airdirlock = 0;
-                if(abs(player->vel.vz) >= (10 << 12)) {
-                    player_set_animation_direct(player, ANIM_PEELOUT);
-                } else if(abs(player->vel.vz) >= (6 << 12)) {
-                    player_set_animation_direct(player, ANIM_RUNNING);
-                } else player_set_animation_direct(player, ANIM_WALKING);
+                player_set_animation_direct(player, ANIM_DROP);
+                /* if(abs(player->vel.vz) >= (10 << 12)) { */
+                /*     player_set_animation_direct(player, ANIM_PEELOUT); */
+                /* } else if(abs(player->vel.vz) >= (6 << 12)) { */
+                /*     player_set_animation_direct(player, ANIM_RUNNING); */
+                /* } else player_set_animation_direct(player, ANIM_WALKING); */
             }
         } else if(player->action == ACTION_HURT) {
             player_set_animation_direct(player, ANIM_HURT);
@@ -988,6 +1024,7 @@ player_update(Player *player)
     if(player->anim_timer == 0) {
         switch(player_get_current_animation_hash(player)) {
         case ANIM_WALKING:
+        case ANIM_WATERWALK:
         case ANIM_RUNNING:
             player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
             break;
@@ -1003,6 +1040,15 @@ player_update(Player *player)
 
         case ANIM_PUSHING:
             player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)) << 2);
+            break;
+
+        case ANIM_SPRING:
+            player_set_frame_duration(player, 3);
+            break;
+
+        case ANIM_BALANCELIGHT:
+        case ANIM_BALANCEHEAVY:
+            player_set_frame_duration(player, 12);
             break;
 
             // Single-frame animations

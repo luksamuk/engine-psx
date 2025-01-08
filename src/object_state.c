@@ -141,7 +141,7 @@ load_object_placement(const char *filename, void *lvl_data)
             case OBJ_DUMMY_STARTPOS:
                 // Initialize player at position
                 player.startpos = (VECTOR){ .vx = vx << 12, .vy = (vy - 8) << 12, .vz = 0 };
-                player.pos = player.startpos;
+                player.pos = player.respawnpos = player.startpos;
                 break;
             default: break;
             }

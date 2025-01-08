@@ -14,7 +14,7 @@
     <!-- <license file="${PROJECT_SOURCE_DIR}/LCNSFILE/LICENSEJ.DAT" /> -->
     <directory_tree>
       <file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/system.cnf" />
-      <file name="ENGINE.EXE" type="data" source="engine.exe" />
+      <file name="SONIC.EXE" type="data" source="sonic.exe" />
 
       <dir name="SPRITES">
 	<file name="SONIC.TIM"

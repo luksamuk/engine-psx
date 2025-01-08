@@ -35,6 +35,7 @@
 // Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      9
 #define HEIGHT_RADIUS_NORMAL    19
+#define LEDGE_SENSOR_MAGNITUDE  26
 #define WIDTH_RADIUS_ROLLING     7
 #define HEIGHT_RADIUS_ROLLING   14
 #define PUSH_RADIUS             10
@@ -95,6 +96,7 @@ typedef struct {
 
     PlayerAction action;
 
+    uint8_t        col_ledge;
     CollisionEvent ev_grnd1;
     CollisionEvent ev_grnd2;
     CollisionEvent ev_left;
@@ -103,6 +105,7 @@ typedef struct {
     CollisionEvent ev_ceil2;
 
     VECTOR startpos;
+    VECTOR respawnpos;
 } Player;
 
 void load_player(Player *player, const char *chara_filename, TIM_IMAGE  *sprites);

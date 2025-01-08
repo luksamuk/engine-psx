@@ -16,6 +16,7 @@
 #include "screens/slide.h"
 
 #define ANIM_WALKING          0x0854020e
+#define ANIM_GASP             0x02d9012c
 
 // Extern elements
 extern Player player;
@@ -444,6 +445,11 @@ _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             state->props |= OBJ_FLAG_CHECKPOINT_ACTIVE;
             state->frag_anim_state->animation = 1;
             state->frag_anim_state->frame = 0;
+            player.respawnpos = (VECTOR){
+                .vx = pos->vx << 12,
+                .vy = (pos->vy - 8) << 12,
+                .vz = 0
+            };
             sound_play_vag(sfx_chek, 0);
         }
     }
@@ -846,7 +852,7 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             // TODO: Cancel any drowning music.
             // TODO: Setup proper action.
             player.action = ACTION_NONE;
-            player_set_animation_direct(&player, ANIM_WALKING); // TODO!!!
+            player_set_animation_direct(&player, ANIM_GASP);
             player.grnd = 0;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
             sound_play_vag(sfx_bubble, 0);

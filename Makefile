@@ -16,28 +16,28 @@ OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
 MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
 PRLOUT    := $(addsuffix PRL.PRL,$(dir $(PRLSRC)))
 
-.PHONY: clean ./build/engine.cue run configure chd cook iso elf debug cooktest purge rebuild repack packrun
+.PHONY: clean ./build/sonicxa.cue run configure chd cook iso elf debug cooktest purge rebuild repack packrun
 
 # Final product is CUE+BIN files
 all: iso
 
 # Targets for producing ELF, CUE+BIN and CHD files
-elf: ./build/engine.elf
-iso: ./build/engine.cue
-chd: engine.chd
+elf: ./build/sonic.elf
+iso: ./build/sonicxa.cue
+chd: sonicxa.chd
 
 # Target for running the image
-run: ./build/engine.cue
+run: ./build/sonicxa.cue
 	pcsx-redux-appimage \
 		-run -interpreter -fastboot -stdout \
 		-iso $<
 
 # Target for running the image on Mednafen
-run-mednafen: ./build/engine.cue
+run-mednafen: ./build/sonicxa.cue
 	mednafen $<
 
 # Target for running the image on PCSX-ReARMed
-run-rearmed: ./build/engine.cue
+run-rearmed: ./build/sonicxa.cue
 	pcsx -cdfile $<
 
 # Run debugger
@@ -48,7 +48,7 @@ debug:
 release: purge cook
 	cmake --preset release .
 	cd build && make iso
-	tochd -d . -- ./build/engine.cue
+	tochd -d . -- ./build/sonicxa.cue
 
 # =======================================
 #  Targets for executable building
@@ -58,15 +58,15 @@ release: purge cook
 ./build: configure
 
 # ELF PSX executable
-./build/engine.elf: ./build
-	cd build && make engine
+./build/sonic.elf: ./build
+	cd build && make sonic
 
 # .CUE + .BIN (needs ELF and cooked assets)
-./build/engine.cue: cook ./build/engine.elf
+./build/sonicxa.cue: cook ./build/sonic.elf
 	cd build && make iso
 
 # .CHD file (single-file CD image)
-engine.chd: ./build/engine.cue
+sonicxa.chd: ./build/sonicxa.cue
 	tochd -d . -- $<
 
 
