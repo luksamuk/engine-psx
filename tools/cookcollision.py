@@ -190,7 +190,10 @@ def parse_json(j):
                     points = []
                     for vertex in vertices:
                         points.append(
-                            [round(vertex.get("x") + x), round(vertex.get("y") + y)]
+                            [
+                                round(vertex.get("x") + x, 0),
+                                round(vertex.get("y") + y, 0),
+                            ]
                         )
                     res.append(
                         {
