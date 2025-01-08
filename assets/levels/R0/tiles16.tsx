@@ -590,6 +590,13 @@
    </object>
   </objectgroup>
  </tile>
+ <tile id="103">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0">
+    <polygon points="0,0 7.90909,-0.0909091 16,5.27273 16,16 0,16"/>
+   </object>
+  </objectgroup>
+ </tile>
  <tile id="104">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="6.1875">
