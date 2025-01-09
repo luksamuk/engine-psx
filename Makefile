@@ -34,7 +34,7 @@ run: ./build/sonicxa.cue
 
 # Target for running the image on Mednafen
 run-mednafen: ./build/sonicxa.cue
-	mednafen $<
+	mednafen -force_module psx $<
 
 # Target for running the image on PCSX-ReARMed
 run-rearmed: ./build/sonicxa.cue
