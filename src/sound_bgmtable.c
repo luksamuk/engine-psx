@@ -5,14 +5,14 @@ const BGMTableEntry bgm_table[] = {
     // Filename - Channel - Loop sector - Stop sector
     {"\\BGM\\MNU001.XA;1",   0, 0, 1550}, // Level select
     {"\\BGM\\MNU001.XA;1",   1, 0, 450},  // Title
-    {"\\BGM\\MNU001.XA;1",   2, 0, 4850}, // Credits
+    {"\\BGM\\MNU001.XA;1",   2, 0, 4500}, // Credits
 
     {"\\BGM\\MNU002.XA;1",   0, 1300, 0}, // Speed shoes
 
     {"\\BGM\\EVENT001.XA;1", 0, 0, 300},  // Level clear
 
-    {"\\BGM\\BGM001.XA;1",   0, 4000, 0}, // PZ1
-    {"\\BGM\\BGM001.XA;1",   1, 4800, 0}, // PZ2
+    {"\\BGM\\BGM001.XA;1",   0, 3850, 0}, // PZ1
+    {"\\BGM\\BGM001.XA;1",   1, 4650, 0}, // PZ2
     {"\\BGM\\BGM001.XA;1",   2, 3230, 0}, // PZ3
 
     {"\\BGM\\BGM002.XA;1",   0, 4050, 0}, // PZ4

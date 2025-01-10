@@ -7,6 +7,13 @@
 #include <assert.h>
 #include <stdlib.h>
 
+typedef enum {
+    CDXA_NONE,
+    CDXA_LOOP_BACK,
+    CDXA_STOP,
+} CDXAInternalCommand;
+
+
 // First 4KB of SPU RAM are reserved for capture buffers.
 // psxspu additionally uploads a dummy sample (16 bytes) at 0x1000
 // by default, so the samples must be placed after those.
@@ -32,11 +39,12 @@ static int32_t next_channel = 0;
 // callback's stack, whose size is very limited.
 /* static volatile XACDSector _sector; */
 
-// Current .XA audio data start location.
+// Current .XA audio data start location and other stuff
 static volatile CdlLOC   _xa_loc;
 static volatile int      _xa_should_play = 0;
 static volatile uint32_t _cd_status = 0;
 static volatile uint32_t _xa_loopback_sector = 0;
+static volatile CDXAInternalCommand _xa_command = CDXA_NONE;
 
 // Read error threshold. If surpasses the limit, restart the music.
 #define CD_MAX_ERR_THRESHOLD 10
@@ -78,6 +86,25 @@ sound_update(void)
 {
     CdControl(CdlNop, 0, 0);
     _cd_status = CdStatus();
+
+    EnterCriticalSection();
+    if(_xa_command != CDXA_NONE) {
+        switch(_xa_command) {
+        case CDXA_LOOP_BACK:
+            _cd_elapsed_sectors = 0;
+            CdControlF(CdlReadS, (const void *)&_xa_loc);
+            break;
+        case CDXA_STOP:
+            _xa_should_play = 0;
+            _xa_loopback_sector = 0;
+            _cd_elapsed_sectors = 0;
+            CdControlF(CdlPause, 0);
+            break;
+        default: break;
+        }
+        _xa_command = CDXA_NONE;
+    }
+    ExitCriticalSection();
 }
 
 uint32_t
@@ -231,11 +258,8 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
         if((_xa_loopback_sector > 0) && (_cd_elapsed_sectors > _xa_loopback_sector)) {
             // Loop back to beginning
             _cd_err_threshold = 0;
-            _cd_elapsed_sectors = 0;
-            CdControlF(CdlReadS, (const void *)&_xa_loc);
+            _xa_command = CDXA_LOOP_BACK;
         }
-
-        /* CdGetSector((void*)(&_sector), sizeof(XACDSector) / 4); */
         break;
     case CdlDiskError:
         printf("Caught CD error\n");
@@ -243,11 +267,8 @@ _xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
         if(_cd_err_threshold > CD_MAX_ERR_THRESHOLD) {
             // Stop music if too many errs
             _cd_err_threshold = 0;
-            _cd_elapsed_sectors = 0;
             printf("Too many CD errors -- stop playback!\n");
-            CdControlF(CdlPause, 0);
-            _xa_should_play = 0;
-            _xa_loopback_sector = 0;
+            _xa_command = CDXA_STOP;
         }
         break;
     default:

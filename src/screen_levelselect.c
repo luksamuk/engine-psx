@@ -235,7 +235,7 @@ screen_levelselect_update(void *d)
         } else if(data->menu_choice == CHOICE_SOUNDTEST) {
             if(data->soundtest_selection > 0) {
                 sound_bgm_play(data->soundtest_selection - 1);
-                data->music_selected = data->soundtest_selection;
+                data->music_selected = data->soundtest_selection - 1;
             }
         } else {
             screen_level_setlevel(data->menu_choice);
