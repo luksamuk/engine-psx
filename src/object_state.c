@@ -298,7 +298,7 @@ begin_render_routine:
                       || (state->id == OBJ_EXPLOSION)
                       || (state->id == OBJ_BUBBLE))
         ? OTZ_LAYER_OBJECTS
-        : OTZ_LAYER_PLAYER;
+        : OTZ_LAYER_UNDER_PLAYER;
 
     // NOTABLE EXCEPTION: if this is a bubble object which animation has gone
     // beyond the first digit display, it should be rendered on text layer

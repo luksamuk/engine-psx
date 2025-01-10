@@ -162,3 +162,101 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
     }
 }
 
+void
+chara_draw_gte(Chara *chara, int16_t framenum,
+               int16_t vx, int16_t vy,
+               uint8_t flipx, int32_t angle)
+{
+    // Prepare position
+    VECTOR pos = { .vx = vx, .vy = vy, .vz = 0 };
+    SVECTOR rotation = { 0, 0, angle, 0 };
+    /* VECTOR scale = { ONE, flipx ? -ONE : ONE, ONE }; */
+
+    MATRIX world = { 0 };
+    RotMatrix(&rotation, &world);
+    TransMatrix(&world, &pos);
+    /* ScaleMatrix(&world, &scale); */
+    gte_SetRotMatrix(&world);
+    gte_SetTransMatrix(&world);
+
+    CharaFrame *frame = &chara->frames[framenum];
+
+    // Render only one tile
+    uint16_t idx = frame->tiles[0];
+    if(idx == 0) {
+        printf("Bad choice, bro\n");
+        return;
+    }
+
+    // Get upper left UV from tile index on tileset
+    uint16_t v0idx = idx >> 5; // divide by 32
+    uint16_t u0idx = idx - (v0idx << 5);
+
+    uint8_t
+        u0 = (u0idx << 3),
+        v0 = (v0idx << 3);
+
+    /* SPRT_8 *sprite = (SPRT_8 *)get_next_prim(); */
+    /* increment_prim(sizeof(SPRT_8)); */
+    /* setSprt8(sprite); */
+    /* setUV0(sprite, u0, v0); */
+
+    
+    /* TILE *sprite = (TILE *)get_next_prim(); */
+    /* increment_prim(sizeof(TILE)); */
+    /* setTile(sprite); */
+    /* setRGB0(sprite, level_fade, level_fade, level_fade); */
+    /* sprite->w = 8; */
+    /* sprite->h = 8; */
+    /* //setXY0 */
+    /* SVECTOR p = { 0, 0, 8 << 12, 0 }; */
+    /* RotTransPers(&p, (uint32_t *)&sprite->x0); */
+    /* sort_prim(sprite, OTZ_LAYER_PLAYER); */
+
+
+    POLY_G4 *poly = (POLY_G4 *)get_next_prim();
+    increment_prim(sizeof(POLY_G4));
+    setPolyG4(poly);
+
+    if(flipx) {
+        setRGB1(poly, 128, 0, 0);
+        setRGB0(poly, 0, 128, 0);
+        setRGB3(poly, 0, 0, 128);
+        setRGB2(poly, 128, 128, 0);
+    } else {
+        setRGB0(poly, 128, 0, 0);
+        setRGB1(poly, 0, 128, 0);
+        setRGB2(poly, 0, 0, 128);
+        setRGB3(poly, 128, 128, 0);
+    }
+    /* setRGB0(poly, level_fade, level_fade, level_fade); */
+
+    
+    SVECTOR vertices[] = {
+        { -4, -4, 0, 0 },
+        {  4, -4, 0, 0 },
+        { -4,  4, 0, 0 },
+        {  4,  4, 0, 0 },
+    };
+
+    int otz;
+    RotAverageNclip4(
+        &vertices[0],
+        &vertices[1],
+        &vertices[2],
+        &vertices[3],
+        (uint32_t *)&poly->x0,
+        (uint32_t *)&poly->x1,
+        (uint32_t *)&poly->x2,
+        (uint32_t *)&poly->x3,
+        &otz);
+
+    sort_prim(poly, OTZ_LAYER_PLAYER);
+
+    printf("Position: (%4d, %4d)\n", poly->x0, poly->y0);
+
+    /* DR_TPAGE *tpage = get_next_prim(); */
+    /* increment_prim(sizeof(DR_TPAGE)); */
+    /* setDrawTPage(tpage, 0, 1, getTPage(1, 1, chara->prectx, chara->precty)); */
+    /* sort_prim(tpage, OTZ_LAYER_PLAYER); */
+}

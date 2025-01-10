@@ -16,6 +16,7 @@ typedef struct {
     VECTOR pos;
     int16_t frame;
     uint8_t play_frames;
+    uint8_t flipx;
     int32_t angle;
 } screen_sprite_test_data;
 
@@ -34,11 +35,13 @@ screen_sprite_test_load()
     
     load_chara(&data->chara, "\\SPRITES\\SONIC.CHARA;1", &tim);
 
-    data->pos = (VECTOR){ .vx = CENTERX, .vy = CENTERY, .vz = 0 };
+    data->pos = (VECTOR){ .vx = 0, .vy = 0, .vz = 0 };
     data->frame = 0;
     data->play_frames = 0;
     data->angle = 0;
+    data->flipx = 0;
     level_fade = 0x7f;
+    set_clear_color(36, 0, 180);
 }
 
 void
@@ -55,6 +58,7 @@ screen_sprite_test_update(void *d)
     screen_sprite_test_data *data = (screen_sprite_test_data *) d;
 
     const int32_t spd = 5;
+    const int32_t rotspd = 5;
 
     if(pad_pressing(PAD_UP)) {
         data->pos.vy -= spd;
@@ -76,6 +80,10 @@ screen_sprite_test_update(void *d)
         data->play_frames ^= 1;
     }
 
+    if(pad_pressed(PAD_TRIANGLE)) {
+        data->flipx ^= 1;
+    }
+
     if(pad_pressed(PAD_SELECT)) {
         scene_change(SCREEN_LEVELSELECT);
     }
@@ -88,14 +96,14 @@ screen_sprite_test_update(void *d)
         else if(pad_pressed(PAD_SQUARE)) data->frame--;
     }
 
-    if(pad_pressing(PAD_R1)) data->angle += spd;
-    else if(pad_pressing(PAD_L1)) data->angle -= spd;
+    if(pad_pressing(PAD_R1)) data->angle += rotspd;
+    else if(pad_pressing(PAD_L1)) data->angle -= rotspd;
 
     if(data->frame < 0) data->frame = data->chara.numframes - 1;
     else if(data->frame >= data->chara.numframes) data->frame = 0;
 
-    if(data->angle < 0) data->angle = ONE - spd;
-    else if(data->angle >= ONE) data->angle = 0;
+    //if(data->angle < 0) data->angle = ONE - spd;
+    //else if(data->angle >= ONE) data->angle = 0;
 }
 
 void
@@ -117,10 +125,15 @@ screen_sprite_test_draw(void *d)
     font_set_color(128, 128, 128);
     font_draw_sm(buffer, 10, 10);
     
-    chara_render_frame(&data->chara,
-                       data->frame,
-                       (int16_t)(data->pos.vx),
-                       (int16_t)(data->pos.vy),
-                       0 // flipx
-        );
+    /* chara_render_frame(&data->chara, */
+    /*                    data->frame, */
+    /*                    (int16_t)(data->pos.vx), */
+    /*                    (int16_t)(data->pos.vy), */
+    /*                    data->flipx); */
+    chara_draw_gte(&data->chara,
+                   data->frame,
+                   (int16_t)(data->pos.vx),
+                   (int16_t)(data->pos.vy),
+                   data->flipx,
+                   data->angle);
 }
