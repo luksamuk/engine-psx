@@ -15,12 +15,13 @@
 #include "timer.h"
 #include "basic_font.h"
 
-#define CHOICE_SOUNDTEST 19
-/* #define CHOICE_MDEC      20 */
-#define CHOICE_SLIDE     20
-#define CHOICE_MODELTEST 21
-#define CHOICE_TITLE     22
-#define CHOICE_CREDITS   23
+#define CHOICE_SOUNDTEST  19
+/* #define CHOICE_MDEC       20 */
+#define CHOICE_SLIDE      20
+#define CHOICE_SPRITETEST 21
+#define CHOICE_MODELTEST  22
+#define CHOICE_TITLE      23
+#define CHOICE_CREDITS    24
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
 #define MAX_COLUMN_CHOICES 17
 
@@ -72,7 +73,8 @@ static const char *menutext[] = {
     "\n",
     "\n",
     "\n",
-    "MODELTEST",
+    "SPRITE TEST",
+    "MODEL TEST",
     "TITLESCREEN",
     "CREDITS",
     NULL,
@@ -237,6 +239,8 @@ screen_levelselect_update(void *d)
                 sound_bgm_play(data->soundtest_selection - 1);
                 data->music_selected = data->soundtest_selection - 1;
             }
+        } else if(data->menu_choice == CHOICE_SPRITETEST) {
+            scene_change(SCREEN_SPRITETEST);
         } else {
             screen_level_setlevel(data->menu_choice);
             screen_level_setmode(LEVEL_MODE_NORMAL);

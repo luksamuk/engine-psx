@@ -17,6 +17,7 @@
 #include "screens/modeltest.h"
 #include "screens/slide.h"
 #include "screens/credits.h"
+#include "screens/sprite_test.h"
 
 // Start with 64k until we make the actual level scene
 // an object as well
@@ -80,6 +81,7 @@ scene_load()
     case SCREEN_MODELTEST:   screen_modeltest_load();   break;
     case SCREEN_SLIDE:       screen_slide_load();       break;
     case SCREEN_CREDITS:     screen_credits_load();     break;
+    case SCREEN_SPRITETEST:  screen_sprite_test_load(); break;
     default: break; // Unknown scene???
     }
 }
@@ -96,6 +98,7 @@ scene_unload()
     case SCREEN_MODELTEST:   screen_modeltest_unload(scene_data);   break;
     case SCREEN_SLIDE:       screen_slide_unload(scene_data);       break;
     case SCREEN_CREDITS:     screen_credits_unload(scene_data);     break;
+    case SCREEN_SPRITETEST:  screen_sprite_test_unload(scene_data); break;
     default: break; // Unknown scene???
     }
 }
@@ -112,6 +115,7 @@ scene_update()
     case SCREEN_MODELTEST:   screen_modeltest_update(scene_data);   break;
     case SCREEN_SLIDE:       screen_slide_update(scene_data);       break;
     case SCREEN_CREDITS:     screen_credits_update(scene_data);     break;
+    case SCREEN_SPRITETEST:  screen_sprite_test_update(scene_data); break;
     default: break; // Unknown scene???
     }
 }
@@ -129,6 +133,7 @@ scene_draw()
     case SCREEN_MODELTEST:   screen_modeltest_draw(scene_data);   break;
     case SCREEN_SLIDE:       screen_slide_draw(scene_data);       break;
     case SCREEN_CREDITS:     screen_credits_draw(scene_data);     break;
+    case SCREEN_SPRITETEST:  screen_sprite_test_draw(scene_data); break;
     default: break; // Unknown scene???
     }
 }
