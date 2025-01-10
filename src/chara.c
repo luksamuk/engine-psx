@@ -162,101 +162,107 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
     }
 }
 
+/* static SVECTOR vertices[] = { */
+/*     { -4, -4, 0, 0 }, */
+/*     {  4, -4, 0, 0 }, */
+/*     { -4,  4, 0, 0 }, */
+/*     {  4,  4, 0, 0 }, */
+/* }; */
+
 void
 chara_draw_gte(Chara *chara, int16_t framenum,
                int16_t vx, int16_t vy,
                uint8_t flipx, int32_t angle)
 {
+    CharaFrame *frame = &chara->frames[framenum];
+    int16_t left = frame->x >> 3;
+    int16_t right = 7 - (frame->width >> 3) - left;
+
     // Prepare position
-    VECTOR pos = { .vx = vx, .vy = vy, .vz = 0 };
+    VECTOR pos = {
+        .vx = vx - CENTERX,
+        .vy = vy - CENTERY,
+        .vz = SCREEN_Z,
+    };
     SVECTOR rotation = { 0, 0, angle, 0 };
-    /* VECTOR scale = { ONE, flipx ? -ONE : ONE, ONE }; */
+    int otz;
 
     MATRIX world = { 0 };
-    RotMatrix(&rotation, &world);
     TransMatrix(&world, &pos);
-    /* ScaleMatrix(&world, &scale); */
-    gte_SetRotMatrix(&world);
+    RotMatrix(&rotation, &world);
     gte_SetTransMatrix(&world);
+    gte_SetRotMatrix(&world);
 
-    CharaFrame *frame = &chara->frames[framenum];
+    for(uint16_t row = 0; row < frame->rows; row++) {
+        for(uint16_t colx = 0; colx < frame->cols; colx++) {
+            uint16_t col = flipx ? frame->cols - colx - 1 : colx;
+            uint16_t idx = (row * frame->cols) + col;
+            idx = frame->tiles[idx];
+            if(idx == 0) continue;
 
-    // Render only one tile
-    uint16_t idx = frame->tiles[0];
-    if(idx == 0) {
-        printf("Bad choice, bro\n");
-        return;
-    }
+            // Get upper left UV from tile index on tileset
+            uint16_t v0idx = idx >> 5; // divide by 32
+            uint16_t u0idx = idx - (v0idx << 5);
 
-    // Get upper left UV from tile index on tileset
-    uint16_t v0idx = idx >> 5; // divide by 32
-    uint16_t u0idx = idx - (v0idx << 5);
+            uint8_t
+                u0 = (u0idx << 3),
+                v0 = (v0idx << 3);
 
-    uint8_t
-        u0 = (u0idx << 3),
-        v0 = (v0idx << 3);
+            POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+            increment_prim(sizeof(POLY_FT4));
+            setPolyFT4(poly);
+            setRGB0(poly, level_fade, level_fade, level_fade);
+            // 8-bit CLUT
+            setTPage(poly, 1, 1, chara->prectx, chara->precty);
+            setClut(poly, chara->crectx, chara->crecty);
 
-    /* SPRT_8 *sprite = (SPRT_8 *)get_next_prim(); */
-    /* increment_prim(sizeof(SPRT_8)); */
-    /* setSprt8(sprite); */
-    /* setUV0(sprite, u0, v0); */
-
+            // I don't know why, but it works
+            uint8_t tw, th;
+            tw = (u0 < 248 ? 8 : 7);
+            th = (v0 < 248 ? 8 : 7);
+            if(flipx) {
+                if (u0 > 0) u0--;
+                if (u0 + tw >= 254) tw--;
+            }
     
-    /* TILE *sprite = (TILE *)get_next_prim(); */
-    /* increment_prim(sizeof(TILE)); */
-    /* setTile(sprite); */
-    /* setRGB0(sprite, level_fade, level_fade, level_fade); */
-    /* sprite->w = 8; */
-    /* sprite->h = 8; */
-    /* //setXY0 */
-    /* SVECTOR p = { 0, 0, 8 << 12, 0 }; */
-    /* RotTransPers(&p, (uint32_t *)&sprite->x0); */
-    /* sort_prim(sprite, OTZ_LAYER_PLAYER); */
+            if(flipx) {
+                setUV4(poly,
+                       u0 + tw, v0,
+                       u0,      v0,
+                       u0 + tw, v0 + th,
+                       u0,      v0 + th);
+            } else {
+                setUV4(poly,
+                       u0,      v0,
+                       u0 + tw, v0,
+                       u0,      v0 + th,
+                       u0 + tw, v0 + th);
+            }
 
+            int16_t tilex = (colx << 3) + (flipx ? (right << 3) : frame->x) - (chara->width >> 1) + 5;
+            int16_t tiley = (row << 3) + frame->y - (chara->height >> 1) - 5;
 
-    POLY_G4 *poly = (POLY_G4 *)get_next_prim();
-    increment_prim(sizeof(POLY_G4));
-    setPolyG4(poly);
+            SVECTOR vertices[] = {
+                { -4 + tilex, -4 + tiley, 0, 0 },
+                {  4 + tilex, -4 + tiley, 0, 0 },
+                { -4 + tilex,  4 + tiley, 0, 0 },
+                {  4 + tilex,  4 + tiley, 0, 0 },
+            };
 
-    if(flipx) {
-        setRGB1(poly, 128, 0, 0);
-        setRGB0(poly, 0, 128, 0);
-        setRGB3(poly, 0, 0, 128);
-        setRGB2(poly, 128, 128, 0);
-    } else {
-        setRGB0(poly, 128, 0, 0);
-        setRGB1(poly, 0, 128, 0);
-        setRGB2(poly, 0, 0, 128);
-        setRGB3(poly, 128, 128, 0);
+            RotAverageNclip4(
+                &vertices[0],
+                &vertices[1],
+                &vertices[2],
+                &vertices[3],
+                (uint32_t *)&poly->x0,
+                (uint32_t *)&poly->x1,
+                (uint32_t *)&poly->x2,
+                (uint32_t *)&poly->x3,
+                &otz);
+
+            sort_prim(poly, OTZ_LAYER_PLAYER);
+
+            //printf("Position: (%4d, %4d)\n", poly->x0, poly->y0);
+        }
     }
-    /* setRGB0(poly, level_fade, level_fade, level_fade); */
-
-    
-    SVECTOR vertices[] = {
-        { -4, -4, 0, 0 },
-        {  4, -4, 0, 0 },
-        { -4,  4, 0, 0 },
-        {  4,  4, 0, 0 },
-    };
-
-    int otz;
-    RotAverageNclip4(
-        &vertices[0],
-        &vertices[1],
-        &vertices[2],
-        &vertices[3],
-        (uint32_t *)&poly->x0,
-        (uint32_t *)&poly->x1,
-        (uint32_t *)&poly->x2,
-        (uint32_t *)&poly->x3,
-        &otz);
-
-    sort_prim(poly, OTZ_LAYER_PLAYER);
-
-    printf("Position: (%4d, %4d)\n", poly->x0, poly->y0);
-
-    /* DR_TPAGE *tpage = get_next_prim(); */
-    /* increment_prim(sizeof(DR_TPAGE)); */
-    /* setDrawTPage(tpage, 0, 1, getTPage(1, 1, chara->prectx, chara->precty)); */
-    /* sort_prim(tpage, OTZ_LAYER_PLAYER); */
 }

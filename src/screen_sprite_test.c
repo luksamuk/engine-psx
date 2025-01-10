@@ -35,7 +35,7 @@ screen_sprite_test_load()
     
     load_chara(&data->chara, "\\SPRITES\\SONIC.CHARA;1", &tim);
 
-    data->pos = (VECTOR){ .vx = 0, .vy = 0, .vz = 0 };
+    data->pos = (VECTOR){ .vx = CENTERX, .vy = CENTERY };
     data->frame = 0;
     data->play_frames = 0;
     data->angle = 0;
@@ -96,14 +96,14 @@ screen_sprite_test_update(void *d)
         else if(pad_pressed(PAD_SQUARE)) data->frame--;
     }
 
-    if(pad_pressing(PAD_R1)) data->angle += rotspd;
-    else if(pad_pressing(PAD_L1)) data->angle -= rotspd;
+    if(pad_pressing(PAD_R1)) data->angle -= rotspd;
+    else if(pad_pressing(PAD_L1)) data->angle += rotspd;
 
     if(data->frame < 0) data->frame = data->chara.numframes - 1;
     else if(data->frame >= data->chara.numframes) data->frame = 0;
 
-    //if(data->angle < 0) data->angle = ONE - spd;
-    //else if(data->angle >= ONE) data->angle = 0;
+    if(data->angle < 0) data->angle = ONE - spd;
+    else if(data->angle >= ONE) data->angle = 0;
 }
 
 void
