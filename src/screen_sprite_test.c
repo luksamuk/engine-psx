@@ -130,12 +130,7 @@ screen_sprite_test_draw(void *d)
     
     font_set_color(128, 128, 128);
     font_draw_sm(buffer, 10, 10);
-    
-    /* chara_render_frame(&data->chara, */
-    /*                    data->frame, */
-    /*                    (int16_t)(data->pos.vx), */
-    /*                    (int16_t)(data->pos.vy), */
-    /*                    data->flipx); */
+
     chara_draw_gte(&data->chara,
                    data->frame,
                    (int16_t)(data->pos.vx),
