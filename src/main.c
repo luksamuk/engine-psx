@@ -72,8 +72,7 @@ main(void)
     /* mdec_fmv_init(); */
 
     // Set first scene
-    //scene_change(SCREEN_DISCLAIMER);
-    scene_change(SCREEN_SPRITETEST);
+    scene_change(SCREEN_DISCLAIMER);
 
     while(1) {
         // Update systems
