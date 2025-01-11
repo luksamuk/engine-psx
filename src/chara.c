@@ -1,6 +1,7 @@
 #include "chara.h"
 #include "util.h"
 #include "render.h"
+#include "basic_font.h"
 #include <psxgpu.h>
 #include <inline_c.h>
 #include <stdlib.h>
@@ -162,12 +163,10 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
     }
 }
 
-/* static SVECTOR vertices[] = { */
-/*     { -4, -4, 0, 0 }, */
-/*     {  4, -4, 0, 0 }, */
-/*     { -4,  4, 0, 0 }, */
-/*     {  4,  4, 0, 0 }, */
-/* }; */
+
+
+// Extern variables
+uint8_t frame_debug = 0;
 
 void
 chara_draw_gte(Chara *chara, int16_t framenum,
@@ -182,7 +181,7 @@ chara_draw_gte(Chara *chara, int16_t framenum,
     VECTOR pos = {
         .vx = vx - CENTERX,
         .vy = vy - CENTERY,
-        .vz = SCREEN_Z,
+        .vz = frame_debug ? 0 : SCREEN_Z,
     };
     SVECTOR rotation = { 0, 0, angle, 0 };
     int otz;
@@ -200,43 +199,42 @@ chara_draw_gte(Chara *chara, int16_t framenum,
             idx = frame->tiles[idx];
             if(idx == 0) continue;
 
-            // Get upper left UV from tile index on tileset
-            uint16_t v0idx = idx >> 5; // divide by 32
-            uint16_t u0idx = idx - (v0idx << 5);
+            uint16_t precty = chara->precty;
 
-            uint8_t
-                u0 = (u0idx << 3),
-                v0 = (v0idx << 3);
+            // Get upper left UV from tile index on tileset
+            uint16_t v0idx = idx / 28;
+            uint16_t u0idx = idx - (v0idx * 28);
+            uint16_t
+                u0 = u0idx * 9,
+                v0 = v0idx * 9;
+            if((v0 + 9) >= 256) {
+                // Go to TPAGE right below
+                v0idx -= 28;
+                v0 = v0idx * 9;
+                precty = 256;
+            }
 
             POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
             increment_prim(sizeof(POLY_FT4));
             setPolyFT4(poly);
             setRGB0(poly, level_fade, level_fade, level_fade);
             // 8-bit CLUT
-            setTPage(poly, 1, 1, chara->prectx, chara->precty);
+            setTPage(poly, 1, 1, chara->prectx, precty);
             setClut(poly, chara->crectx, chara->crecty);
-
-            // I don't know why, but it works
-            uint8_t tw, th;
-            tw = (u0 < 248 ? 8 : 7);
-            th = (v0 < 248 ? 8 : 7);
-            if(flipx) {
-                if (u0 > 0) u0--;
-                if (u0 + tw >= 254) tw--;
-            }
     
             if(flipx) {
+                if(u0 > 0) u0--;
                 setUV4(poly,
-                       u0 + tw, v0,
-                       u0,      v0,
-                       u0 + tw, v0 + th,
-                       u0,      v0 + th);
+                       u0 + 8, v0,
+                       u0,     v0,
+                       u0 + 8, v0 + 8,
+                       u0,     v0 + 8);
             } else {
                 setUV4(poly,
-                       u0,      v0,
-                       u0 + tw, v0,
-                       u0,      v0 + th,
-                       u0 + tw, v0 + th);
+                       u0,     v0,
+                       u0 + 8, v0,
+                       u0,     v0 + 8,
+                       u0 + 8, v0 + 8);
             }
 
             int16_t tilex = (colx << 3) + (flipx ? (right << 3) : frame->x) - (chara->width >> 1) + 5;
@@ -262,7 +260,13 @@ chara_draw_gte(Chara *chara, int16_t framenum,
 
             sort_prim(poly, OTZ_LAYER_PLAYER);
 
-            //printf("Position: (%4d, %4d)\n", poly->x0, poly->y0);
+            if(frame_debug) {
+                char buffer[10];
+                sprintf(buffer, "%d\n", idx);
+                if(!(idx % 2)) font_set_color(0, 128, 0);
+                else font_set_color(0, 128, 128);
+                font_draw_sm(buffer, poly->x0 + 4, poly->y0 + 4);
+            }
         }
     }
 }

@@ -10,6 +10,7 @@
 #include "screens/sprite_test.h"
 
 extern uint8_t level_fade;
+extern uint8_t frame_debug;
 
 typedef struct {
     Chara chara;
@@ -50,6 +51,7 @@ screen_sprite_test_unload(void *d)
     screen_sprite_test_data *data = (screen_sprite_test_data *) d;
     free_chara(&data->chara);
     screen_free();
+    frame_debug = 0;
 }
 
 void
@@ -82,6 +84,10 @@ screen_sprite_test_update(void *d)
 
     if(pad_pressed(PAD_TRIANGLE)) {
         data->flipx ^= 1;
+    }
+
+    if(pad_pressed(PAD_CROSS)) {
+        frame_debug ^= 1;
     }
 
     if(pad_pressed(PAD_SELECT)) {
@@ -136,4 +142,12 @@ screen_sprite_test_draw(void *d)
                    (int16_t)(data->pos.vy),
                    data->flipx,
                    data->angle);
+
+    font_set_color(0xc8, 0xc8, 0xc8);
+
+    // Video debug
+    snprintf(buffer, 255,
+             "%4s %3d",
+             GetVideoMode() == MODE_PAL ? "PAL" : "NTSC", get_frame_rate());
+    font_draw_sm(buffer, 248, 12);
 }
