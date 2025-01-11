@@ -1208,14 +1208,15 @@ player_update(Player *player)
 void
 player_draw(Player *player, VECTOR *pos)
 {
+    uint8_t is_rolling = (player_get_current_animation_hash(player) == ANIM_ROLLING);
     // if iframes, do not show for every 4 frames
     if(player->cur_anim && ((player->iframes >> 2) % 2) == 0) {
         chara_draw_gte(&player->chara,
                        player->anim_frame,
                        (int16_t)(pos->vx >> 12),
-                       (int16_t)(pos->vy >> 12),
+                       (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : 0),
                        player->anim_dir < 0,
-                       -player->angle);
+                       (is_rolling ? 0 : -player->angle));
     }
     
 }
