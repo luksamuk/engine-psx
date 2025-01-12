@@ -41,14 +41,14 @@ run: ${CUESHEET}
 
 # Target for running the image on Mednafen
 run-mednafen: ${CUESHEET}
-	mednafen -force_module psx $<
+	mednafen -force_module psx "$<"
 
 # Target for running the image on PCSX-ReARMed
 run-rearmed: ${CUESHEET}
-	pcsx -cdfile $<
+	pcsx -cdfile "$<"
 
 run-duckstation: ${CUESHEET}
-	duckstation $<
+	duckstation "$<"
 
 # Run debugger
 debug:
