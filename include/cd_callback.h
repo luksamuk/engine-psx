@@ -3,7 +3,6 @@
 
 typedef enum {
     PLAYBACK_XA,
-    PLAYBACK_STR,
 } PlaybackType;
 
 void cd_set_callbacks(PlaybackType type);

@@ -12,7 +12,6 @@
 #include "screens/disclaimer.h"
 #include "screens/levelselect.h"
 #include "screens/level.h"
-/* #include "screens/fmv.h" */
 #include "screens/title.h"
 #include "screens/modeltest.h"
 #include "screens/slide.h"
@@ -76,7 +75,6 @@ scene_load()
     case SCREEN_DISCLAIMER:  screen_disclaimer_load();  break;
     case SCREEN_LEVELSELECT: screen_levelselect_load(); break;
     case SCREEN_LEVEL:       screen_level_load();       break;
-    /* case SCREEN_FMV:         screen_fmv_load();         break; */
     case SCREEN_TITLE:       screen_title_load();       break;
     case SCREEN_MODELTEST:   screen_modeltest_load();   break;
     case SCREEN_SLIDE:       screen_slide_load();       break;
@@ -93,7 +91,6 @@ scene_unload()
     case SCREEN_DISCLAIMER:  screen_disclaimer_unload(scene_data);  break;
     case SCREEN_LEVELSELECT: screen_levelselect_unload(scene_data); break;
     case SCREEN_LEVEL:       screen_level_unload(scene_data);       break;
-    /* case SCREEN_FMV:         screen_fmv_unload(scene_data);         break; */
     case SCREEN_TITLE:       screen_title_unload(scene_data);       break;
     case SCREEN_MODELTEST:   screen_modeltest_unload(scene_data);   break;
     case SCREEN_SLIDE:       screen_slide_unload(scene_data);       break;
@@ -110,7 +107,6 @@ scene_update()
     case SCREEN_DISCLAIMER:  screen_disclaimer_update(scene_data);  break;
     case SCREEN_LEVELSELECT: screen_levelselect_update(scene_data); break;
     case SCREEN_LEVEL:       screen_level_update(scene_data);       break;
-    /* case SCREEN_FMV:         screen_fmv_update(scene_data);         break; */
     case SCREEN_TITLE:       screen_title_update(scene_data);       break;
     case SCREEN_MODELTEST:   screen_modeltest_update(scene_data);   break;
     case SCREEN_SLIDE:       screen_slide_update(scene_data);       break;
@@ -128,7 +124,6 @@ scene_draw()
     case SCREEN_DISCLAIMER:  screen_disclaimer_draw(scene_data);  break;
     case SCREEN_LEVELSELECT: screen_levelselect_draw(scene_data); break;
     case SCREEN_LEVEL:       screen_level_draw(scene_data);       break;
-    /* case SCREEN_FMV:         screen_fmv_draw(scene_data);         break; */
     case SCREEN_TITLE:       screen_title_draw(scene_data);       break;
     case SCREEN_MODELTEST:   screen_modeltest_draw(scene_data);   break;
     case SCREEN_SLIDE:       screen_slide_draw(scene_data);       break;

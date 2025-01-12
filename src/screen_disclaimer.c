@@ -7,7 +7,6 @@
 #include "screen.h"
 #include "render.h"
 
-//#include "screens/fmv.h"
 #include "screens/slide.h"
 #include "screens/level.h"
 
@@ -53,9 +52,6 @@ screen_disclaimer_update(void *d)
             // Change to level select
             scene_change(SCREEN_LEVELSELECT);
         } else {
-            //screen_fmv_set_next(SCREEN_TITLE);
-            //screen_fmv_enqueue(FMV_PS30YRS);
-            //scene_change(SCREEN_FMV);
             screen_slide_set_next(SLIDE_SEGALOGO);
             scene_change(SCREEN_SLIDE);
         }

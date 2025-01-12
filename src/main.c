@@ -21,7 +21,6 @@
 #include "memalloc.h"
 #include "screen.h"
 #include "basic_font.h"
-/* #include "mdec.h" */
 
 /*
   Locations of common textures on frame buffer:
@@ -69,7 +68,6 @@ main(void)
     // Initial loads from disc
     render_loading_logo();
     sound_bgm_init();
-    /* mdec_fmv_init(); */
 
     // Set first scene
     scene_change(SCREEN_DISCLAIMER);
