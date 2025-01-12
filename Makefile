@@ -11,6 +11,7 @@ LVLSRC    := $(shell ls ./assets/levels/**/Z*.tmx)
 MDLSRC    := $(shell ls ./assets/models/**/*.rsd)
 PRLSRC    := $(shell ls ./assets/levels/**/parallax.toml)
 XASRC     := $(shell ls ./assets/bgm/*.txt)
+VAGSRC    := $(shell ls ./assets/sfx/*.ogg)
 
 MAP16OUT  := $(addsuffix MAP16.MAP,$(dir $(MAP16SRC)))
 COL16OUT  := $(addsuffix MAP16.COL,$(dir $(COL16SRC)))
@@ -20,6 +21,7 @@ OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
 MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
 PRLOUT    := $(addsuffix PRL.PRL,$(dir $(PRLSRC)))
 XAOUT     := $(addsuffix .XA,$(basename $(XASRC)))
+VAGOUT    := $(addsuffix .VAG,$(basename $(VAGSRC)))
 
 .PHONY: clean ${CUESHEET} run configure chd cook iso elf debug cooktest purge rebuild repack packrun
 
@@ -106,11 +108,12 @@ mdls:   $(MDLOUT)
 map16:  $(MAP16OUT) $(COL16OUT)
 map128: $(MAP128OUT)
 lvl:    $(LVLOUT)
-prl:	$(PRLOUT)
+prl:    $(PRLOUT)
 objs:   $(OMPOUT)
 xa:     $(XAOUT)
+vag:    $(VAGOUT)
 
-cook: mdls map16 map128 lvl objs prl xa
+cook: mdls map16 map128 lvl objs prl vag xa
 
 cleancook:
 	rm -rf assets/models/**/*.mdl \
@@ -125,26 +128,28 @@ cleancook:
 	       assets/levels/**/tilemap128_solid.csv \
 	       assets/levels/**/tilemap128_oneway.csv \
 	       assets/levels/**/tilemap128_front.csv \
+	       assets/sfx/*.WAV \
+	       assets/sfx/*.VAG \
 	       assets/bgm/*.XA \
 	       assets/bgm/*.xa
 
-# Object models
+# =========== Object models ===========
 %.mdl: %.rsd %.ply %.mat
 	./tools/convrsd/convrsd.py $<
 
-# 16x16 tile mapping
+# =========== 16x16 tile mapping ===========
 # (Depends on mapping generated on Aseprite)
 %/MAP16.MAP: %/map16.json
 	./tools/framepacker.py --tilemap $< $@
 
-# 16x16 collision
+# =========== 16x16 collision ===========
 # (Depends on tiles16.tsx tile map with collision data, generated on Tiled).
 %/MAP16.COL: %/tiles16.tsx
 	tiled --export-tileset $< "$(dir $<)collision16.json"
 	./tools/cookcollision.py "$(dir $<)collision16.json" $@
 	rm "$(dir $@)collision16.json"
 
-# 128x128 tile mapping
+# =========== 128x128 tile mapping ===========
 # Also generates 128.png to create a 128x128 tileset (should be done manually)
 # (Depends on tilemap128.tmx map generated on Tiled)
 %/MAP128.MAP: %/tilemap128.tmx
@@ -157,7 +162,7 @@ cleancook:
 	rm -f "$(basename $<)_none.psxcsv"
 	rm -f "$(basename $<)_front.psxcsv"
 
-# Level maps
+# =========== Level maps ===========
 # These maps should use a tileset generated from "128.png".
 # (Depends on files such as Z1.tmx, Z2.tmx, etc., generated on Tiled)
 %.LVL: %.tmx
@@ -166,16 +171,23 @@ cleancook:
 	rm "$(basename $@).psxlvl"
 
 
-# Object level placement
+# =========== Object level placement ===========
 # (Depends on files such as Z1.tmx, Z2.tmx, etc., generated on Tiled)
 %.OMP: %.tmx
 	./tools/cookobj/cookobj.py $<
 
-# Level parallax data
+# =========== Level parallax data ===========
 # (Depends on a specific file named parallax.toml within level directory)
 %/PRL.PRL: %/parallax.toml
 	./tools/buildprl/buildprl.py $<
 
+# =========== VAG audio encoding ===========
+%.VAG: %.ogg
+	ffmpeg -loglevel quiet -y -i "$<" -acodec pcm_s16le -ac 1 -ar 22050 "$(basename $<).WAV"
+	wav2vag "$(basename $<).WAV" "$@"
+	@rm "$(basename $<).WAV"
+
+# =========== XA audio encoding ===========
 # Individual file XA songs
 %.xa: %.flac
 	psxavenc -f 37800 -t xa -b 4 -c 2 -F 1 -C 0 $< $@
