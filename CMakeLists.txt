@@ -38,7 +38,7 @@ psn00bsdk_add_executable(sonic
 target_include_directories(sonic PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/>)
 
-psn00bsdk_add_cd_image(iso sonicxa
+psn00bsdk_add_cd_image(iso "Sonic The Hedgehog XA"
   iso.xml
   DEPENDS sonic system.cnf)
 

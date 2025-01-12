@@ -1,6 +1,9 @@
 export PATH           := /opt/psn00bsdk/bin:$(PATH)
 export PSN00BSDK_LIBS := /opt/psn00bsdk/lib/libpsn00b
 
+CHD       := ./Sonic\ The\ Hedgehog\ XA.chd
+CUESHEET  := ./build/Sonic\ The\ Hedgehog\ XA.cue
+
 MAP16SRC  := $(shell ls ./assets/levels/**/map16.json)
 COL16SRC  := $(shell ls ./assets/levels/**/tiles16.tsx)
 MAP128SRC := $(shell ls ./assets/levels/**/tilemap128.tmx)
@@ -16,39 +19,33 @@ OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
 MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
 PRLOUT    := $(addsuffix PRL.PRL,$(dir $(PRLSRC)))
 
-.PHONY: clean ./build/sonicxa.cue run configure chd cook iso elf debug cooktest purge rebuild repack packrun
+.PHONY: clean ${CUESHEET} run configure chd cook iso elf debug cooktest purge rebuild repack packrun
 
 # Final product is CUE+BIN files
 all: iso
 
 # Targets for producing ELF, CUE+BIN and CHD files
 elf: ./build/sonic.elf
-iso: ./build/sonicxa.cue
-chd: sonicxa.chd
+iso: ${CUESHEET}
+chd: ${CHD}
 
 # Target for running the image
-run: ./build/sonicxa.cue
+run: ${CUESHEET}
 	pcsx-redux-appimage \
 		-run -interpreter -fastboot -stdout \
 		-iso $<
 
 # Target for running the image on Mednafen
-run-mednafen: ./build/sonicxa.cue
+run-mednafen: ${CUESHEET}
 	mednafen -force_module psx $<
 
 # Target for running the image on PCSX-ReARMed
-run-rearmed: ./build/sonicxa.cue
+run-rearmed: ${CUESHEET}
 	pcsx -cdfile $<
 
 # Run debugger
 debug:
 	gdb-multiarch
-
-# Build on release target
-release: purge cook
-	cmake --preset release .
-	cd build && make iso
-	tochd -d . -- ./build/sonicxa.cue
 
 # =======================================
 #  Targets for executable building
@@ -62,12 +59,12 @@ release: purge cook
 	cd build && make sonic
 
 # .CUE + .BIN (needs ELF and cooked assets)
-./build/sonicxa.cue: cook ./build/sonic.elf
+${CUESHEET}: cook ./build/sonic.elf
 	cd build && make iso
 
 # .CHD file (single-file CD image)
-sonicxa.chd: ./build/sonicxa.cue
-	tochd -d . -- $<
+${CHD}: ${CUESHEET}
+	tochd -d . -- "$<"
 
 
 # =======================================
