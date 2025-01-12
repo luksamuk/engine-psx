@@ -16,6 +16,7 @@
 #include "screens/slide.h"
 
 #define ANIM_WALKING          0x0854020e
+#define ANIM_ROLLING          0x08890218
 #define ANIM_GASP             0x02d9012c
 
 // Extern elements
@@ -634,6 +635,10 @@ _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 
     state->freepos->vx = player.pos.vx;
     state->freepos->vy = player.pos.vy + (16 << 12);
+
+    if(player_get_current_animation_hash(&player) == ANIM_ROLLING) {
+        state->freepos->vy += 4 << 12;
+    }
 
     // Compensate position since it is drawn before player update
     state->freepos->vx += player.vel.vx;

@@ -1205,16 +1205,48 @@ player_update(Player *player)
     player->ev_ceil2 = (CollisionEvent){ 0 };
 }
 
+static int32_t
+_snap_angle(int32_t angle)
+{
+    // Snap angle to nearest quarter.
+    // These angles work somewhat like floor collision modes,
+    // and floor/ceiling angles take precedence as well, but they're
+    // a bit more complex since we also need to leverage diagonal angles.
+    // NOTE: floor and ceiling angles add/subtract half a quarter (128)
+    // units from their limits so the player doesn't rotate at every small
+    // slope (e.g. 11.25 degrees or so)
+    if((angle > 0x180) && (angle < 0x300))
+        return 0x200;
+    if((angle >= 0x300) && (angle <= 0x500))
+        return 0x400;
+    if((angle > 0x500) && (angle < 0x680))
+        return 0x600;
+    if((angle >= 0x680) && (angle <= 0x980))
+        return 0x800;
+    if((angle > 0x980) && (angle < 0xa38))
+        return 0x938;
+    if((angle >= 0xa38) && (angle <= 0xd00))
+        return 0xc00;
+    if((angle > 0xd00) && (angle < 0xe80))
+        return 0xe00;
+    return 0x00;
+}
+
 void
 player_draw(Player *player, VECTOR *pos)
 {
+    uint8_t is_rolling = (player_get_current_animation_hash(player) == ANIM_ROLLING);
+    int32_t anim_angle = -_snap_angle(player->angle);
     // if iframes, do not show for every 4 frames
-    if(player->cur_anim && ((player->iframes >> 2) % 2) == 0)
-        chara_render_frame(&player->chara,
-                           player->anim_frame,
-                           (int16_t)(pos->vx >> 12),
-                           (int16_t)(pos->vy >> 12) - 9,
-                           player->anim_dir < 0);
+    if(player->cur_anim && ((player->iframes >> 2) % 2) == 0) {
+        chara_draw_gte(&player->chara,
+                       player->anim_frame,
+                       (int16_t)(pos->vx >> 12),
+                       (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : 0),
+                       player->anim_dir < 0,
+                       (is_rolling ? 0 : anim_angle));
+    }
+    
 }
 
 void _player_set_hurt(Player *player, int32_t hazard_x);

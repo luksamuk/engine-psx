@@ -1,6 +1,7 @@
 #include "chara.h"
 #include "util.h"
 #include "render.h"
+#include "basic_font.h"
 #include <psxgpu.h>
 #include <inline_c.h>
 #include <stdlib.h>
@@ -97,15 +98,32 @@ free_chara(Chara *chara)
     }
 }
 
-
+// Extern variables
+uint8_t frame_debug = 0;
 
 void
-chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8_t flipx)
+chara_draw_gte(Chara *chara, int16_t framenum,
+               int16_t vx, int16_t vy,
+               uint8_t flipx, int32_t angle)
 {
     CharaFrame *frame = &chara->frames[framenum];
-
     int16_t left = frame->x >> 3;
     int16_t right = 7 - (frame->width >> 3) - left;
+
+    // Prepare position
+    VECTOR pos = {
+        .vx = vx - CENTERX,
+        .vy = vy - CENTERY,
+        .vz = frame_debug ? 0 : SCREEN_Z,
+    };
+    SVECTOR rotation = { 0, 0, angle, 0 };
+    int otz;
+
+    MATRIX world = { 0 };
+    TransMatrix(&world, &pos);
+    RotMatrix(&rotation, &world);
+    gte_SetTransMatrix(&world);
+    gte_SetRotMatrix(&world);
 
     for(uint16_t row = 0; row < frame->rows; row++) {
         for(uint16_t colx = 0; colx < frame->cols; colx++) {
@@ -114,51 +132,74 @@ chara_render_frame(Chara *chara, int16_t framenum, int16_t vx, int16_t vy, uint8
             idx = frame->tiles[idx];
             if(idx == 0) continue;
 
+            uint16_t precty = chara->precty;
+
             // Get upper left UV from tile index on tileset
-            uint16_t v0idx = idx >> 5; // divide by 32
-            uint16_t u0idx = idx - (v0idx << 5);
-
-            uint8_t
-                u0 = (u0idx << 3),
-                v0 = (v0idx << 3);
-
-            SVECTOR xy0 = {
-                vx + (colx << 3) + (flipx ? (right << 3) : frame->x) - (chara->width >> 1),
-                vy + (row << 3) + frame->y - (chara->height >> 1),
-                0, 0,
-            };
-
-            // I don't know why, but it works
-            uint8_t tw, th;
-            tw = (u0 < 248 ? 8 : 7);
-            th = (v0 < 248 ? 8 : 7);
-            if(flipx) {
-                if (u0 > 0) u0--;
-                if (u0 + tw >= 254) tw--;
+            uint16_t v0idx = idx / 28;
+            uint16_t u0idx = idx - (v0idx * 28);
+            uint16_t
+                u0 = u0idx * 9,
+                v0 = v0idx * 9;
+            if((v0 + 9) >= 256) {
+                // Go to TPAGE right below
+                v0idx -= 28;
+                v0 = v0idx * 9;
+                precty = 256;
             }
 
-            // Use a textured quad since we need to reverse
-            // our UVs manually
-            POLY_FT4 *poly = (POLY_FT4 *) get_next_prim();
+            POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
             increment_prim(sizeof(POLY_FT4));
             setPolyFT4(poly);
             setRGB0(poly, level_fade, level_fade, level_fade);
-            setTPage(poly, 1, 1, chara->prectx, chara->precty); // 8-bit CLUT
+            // 8-bit CLUT
+            setTPage(poly, 1, 1, chara->prectx, precty);
             setClut(poly, chara->crectx, chara->crecty);
-            setXYWH(poly, xy0.vx, xy0.vy, 8, 8);
-            
+    
             if(flipx) {
-                setUV4(
-                    poly,
-                    u0 + tw, v0,
-                    u0,      v0,
-                    u0 + tw, v0 + th,
-                    u0, v0 + th);
+                if(u0 > 0) u0--;
+                setUV4(poly,
+                       u0 + 8, v0,
+                       u0,     v0,
+                       u0 + 8, v0 + 8,
+                       u0,     v0 + 8);
             } else {
-                setUVWH(poly, u0, v0, tw, th);
+                setUV4(poly,
+                       u0,     v0,
+                       u0 + 8, v0,
+                       u0,     v0 + 8,
+                       u0 + 8, v0 + 8);
             }
+
+            int16_t tilex = (colx << 3) + (flipx ? (right << 3) : frame->x) - (chara->width >> 1) + 5;
+            int16_t tiley = (row << 3) + frame->y - (chara->height >> 1) - 5;
+
+            SVECTOR vertices[] = {
+                { -4 + tilex, -4 + tiley, 0, 0 },
+                {  4 + tilex, -4 + tiley, 0, 0 },
+                { -4 + tilex,  4 + tiley, 0, 0 },
+                {  4 + tilex,  4 + tiley, 0, 0 },
+            };
+
+            RotAverageNclip4(
+                &vertices[0],
+                &vertices[1],
+                &vertices[2],
+                &vertices[3],
+                (uint32_t *)&poly->x0,
+                (uint32_t *)&poly->x1,
+                (uint32_t *)&poly->x2,
+                (uint32_t *)&poly->x3,
+                &otz);
+
             sort_prim(poly, OTZ_LAYER_PLAYER);
+
+            if(frame_debug) {
+                char buffer[10];
+                sprintf(buffer, "%d\n", idx);
+                if(!(idx % 2)) font_set_color(0, 128, 0);
+                else font_set_color(0, 128, 128);
+                font_draw_sm(buffer, poly->x0 + 4, poly->y0 + 4);
+            }
         }
     }
 }
-

@@ -197,8 +197,7 @@ _draw_glyph(
     setRGB0(sprt, font_color[0], font_color[1], font_color[2]);
     increment_prim(sizeof(SPRT));
     setXY0(sprt, vx, vy);
-    sprt->w = w;
-    sprt->h = h;
+    setWH(sprt, w, h);
     setUV0(sprt, u0, v0);
     sprt->clut = getClut(0, 490);
     sort_prim(sprt, OTZ_LAYER_HUD);
