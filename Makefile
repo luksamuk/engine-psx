@@ -1,8 +1,8 @@
 export PATH           := /opt/psn00bsdk/bin:$(PATH)
 export PSN00BSDK_LIBS := /opt/psn00bsdk/lib/libpsn00b
 
-CHD       := ./Sonic\ The\ Hedgehog\ XA.chd
-CUESHEET  := ./build/Sonic\ The\ Hedgehog\ XA.cue
+CHD       := ./SONICXA.chd
+CUESHEET  := ./build/SONICXA.cue
 
 MAP16SRC  := $(shell ls ./assets/levels/**/map16.json)
 COL16SRC  := $(shell ls ./assets/levels/**/tiles16.tsx)

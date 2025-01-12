@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(PSXEngine
-  LANGUAGES    C CXX ASM
+  LANGUAGES    C ASM
   VERSION      0.1.0
   DESCRIPTION  "Sonic The Hedgehog XA for PlayStation"
   HOMEPAGE_URL "https://luksamuk.codes")
@@ -38,7 +38,7 @@ psn00bsdk_add_executable(sonic
 target_include_directories(sonic PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/>)
 
-psn00bsdk_add_cd_image(iso "Sonic The Hedgehog XA"
+psn00bsdk_add_cd_image(iso "SONICXA"
   iso.xml
   DEPENDS sonic system.cnf)
 
