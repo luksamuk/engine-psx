@@ -43,6 +43,9 @@ run-mednafen: ${CUESHEET}
 run-rearmed: ${CUESHEET}
 	pcsx -cdfile $<
 
+run-duckstation: ${CUESHEET}
+	duckstation $<
+
 # Run debugger
 debug:
 	gdb-multiarch
