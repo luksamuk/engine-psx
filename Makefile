@@ -10,6 +10,7 @@ MAP128SRC := $(shell ls ./assets/levels/**/tilemap128.tmx)
 LVLSRC    := $(shell ls ./assets/levels/**/Z*.tmx)
 MDLSRC    := $(shell ls ./assets/models/**/*.rsd)
 PRLSRC    := $(shell ls ./assets/levels/**/parallax.toml)
+XASRC     := $(shell ls ./assets/bgm/*.txt)
 
 MAP16OUT  := $(addsuffix MAP16.MAP,$(dir $(MAP16SRC)))
 COL16OUT  := $(addsuffix MAP16.COL,$(dir $(COL16SRC)))
@@ -18,6 +19,7 @@ LVLOUT    := $(addsuffix .LVL,$(basename $(LVLSRC)))
 OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
 MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
 PRLOUT    := $(addsuffix PRL.PRL,$(dir $(PRLSRC)))
+XAOUT     := $(addsuffix .XA,$(basename $(XASRC)))
 
 .PHONY: clean ${CUESHEET} run configure chd cook iso elf debug cooktest purge rebuild repack packrun
 
@@ -33,7 +35,7 @@ chd: ${CHD}
 run: ${CUESHEET}
 	pcsx-redux-appimage \
 		-run -interpreter -fastboot -stdout \
-		-iso $<
+		-iso "$<"
 
 # Target for running the image on Mednafen
 run-mednafen: ${CUESHEET}
@@ -106,8 +108,9 @@ map128: $(MAP128OUT)
 lvl:    $(LVLOUT)
 prl:	$(PRLOUT)
 objs:   $(OMPOUT)
+xa:     $(XAOUT)
 
-cook: mdls map16 map128 lvl objs prl
+cook: mdls map16 map128 lvl objs prl xa
 
 cleancook:
 	rm -rf assets/models/**/*.mdl \
@@ -121,7 +124,9 @@ cleancook:
 	       assets/levels/**/tilemap128.csv \
 	       assets/levels/**/tilemap128_solid.csv \
 	       assets/levels/**/tilemap128_oneway.csv \
-	       assets/levels/**/tilemap128_front.csv
+	       assets/levels/**/tilemap128_front.csv \
+	       assets/bgm/*.XA \
+	       assets/bgm/*.xa
 
 # Object models
 %.mdl: %.rsd %.ply %.mat
@@ -170,3 +175,18 @@ cleancook:
 # (Depends on a specific file named parallax.toml within level directory)
 %/PRL.PRL: %/parallax.toml
 	./tools/buildprl/buildprl.py $<
+
+# Individual file XA songs
+%.xa: %.flac
+	psxavenc -f 37800 -t xa -b 4 -c 2 -F 1 -C 0 $< $@
+
+# Dynamic rule for generating dependencies for a given .XA file.
+# These dependencies are then .xa files that are generated for individual .flac songs.
+define XA_RULE
+$T: $(shell cat "$(T:.XA=.txt)" | awk '{print $$3}' | awk 'NF {print "./assets/bgm/"$$1}' | paste -s -d ' ')
+endef
+$(foreach T,$(XAOUT),$(eval $(XA_RULE)))
+
+# Interleaved XA songs
+%.XA: %.txt 
+	cd $(dir $<) && xainterleave 1 $(notdir $<) $(notdir $@)
