@@ -626,6 +626,9 @@
  <tile id="105">
   <objectgroup draworder="index" id="2">
    <object id="2" x="0" y="16">
+    <properties>
+     <property name="floor_angle" value="0x16c"/>
+    </properties>
     <polygon points="0,0 15.9091,-10 16,0"/>
    </object>
   </objectgroup>
