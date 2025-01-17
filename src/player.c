@@ -68,6 +68,35 @@ extern Camera     camera;
 extern uint8_t    level_ring_count;
 extern int32_t    level_water_y;
 
+
+/* GROUND SENSOR COLLISION ANGLES */
+// As a rule of thumb, only floor and ceiling min/max
+// angles are well-defined.
+// Floor: floor left <= x OR x <= floor right
+// R.wall: floor right < x < ceiling min
+// Ceiling: ceiling min <= x <= ceiling max
+// L.wall: ceiling max < x < floor left
+#define GSMODE_ANGLE_FLOOR_RIGHT    0x01d5 // ~41° (original: 45°)
+#define GSMODE_ANGLE_CEIL_MIN       0x0600 // 135°
+#define GSMODE_ANGLE_CEIL_MAX       0x0a00 // 225°
+#define GSMODE_ANGLE_FLOOR_LEFT     0x0e94 // ~318° (original: 315°)
+
+/* PUSH SENSOR COLLISION ANGLES */
+// As opposed to ground sensors, here the L.Wall and R.Wall modes are
+// well-defined.
+#define PSMODE_ANGLE_RWALL_MIN    0x014e // ~41°
+#define PSMODE_ANGLE_RWALL_MAX    0x0579 // 135°
+#define PSMODE_ANGLE_LWALL_MIN    0x0a87 // 225°
+#define PSMODE_ANGLE_LWALL_MAX    0x0db9 // ~318°
+
+/* LANDING SPEED TRANSFER ANGLES */
+// Depending on these angle ranges, X and Y air speed transfer to
+// ground speed in different ways
+#define LANDING_ANGLE_FLAT_LEFT   0x0f11 // 339
+#define LANDING_ANGLE_FLAT_RIGHT  0x0105 // 23
+#define LANDING_ANGLE_SLOPE_LEFT  0x0e0b // 316
+#define LANDING_ANGLE_SLOPE_RIGHT 0x0200 // 45
+
 void
 load_player(Player *player,
             const char *chara_filename,
@@ -514,22 +543,20 @@ _player_update_collision_tb(Player *player)
                     : player->ev_grnd2.angle;
             }
 
-            // TODO: FIX THIS!!!!!
-            int32_t deg = (abs(player->angle) * (360 << 12) >> 24);
-
-            // Set ground speed according to X and Y velocity,
-            // and plaform angle
-            if((deg <= 23) || (deg >= 339))
+            if((player->angle >= LANDING_ANGLE_FLAT_LEFT)
+               || (player->angle <= LANDING_ANGLE_FLAT_RIGHT)) {
                 // Landed on very flat ground, conserve X
                 player->vel.vz = player->vel.vx;
-            else if((deg <= 45) || (deg >= 316))
+            } else if((player->angle <= LANDING_ANGLE_SLOPE_RIGHT)
+                      || (player->angle >= LANDING_ANGLE_SLOPE_LEFT)) {
                 // Slope ground, set to half vy
                 player->vel.vz =
                     ((player->vel.vy * 2048) >> 12) * -SIGNUM(rsin(player->angle));
-            else
+            } else {
                 // Steep ground, set to full vy
                 player->vel.vz =
                     player->vel.vy * -SIGNUM(rsin(player->angle));
+            }
 
             int32_t new_coord = 0;
             if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
@@ -676,18 +703,6 @@ _player_resolve_collision_modes(Player *player)
     int32_t p_angle = player->angle;
 
     /* GROUND SENSORS COLLISION MODES */
-    // As a rule of thumb, only floor and ceiling min/max
-    // angles are well-defined. See:
-    // Floor: floor left <= x OR x <= floor right
-    // R.wall: floor right < x < ceiling min
-    // Ceiling: ceiling min <= x <= ceiling max
-    // L.wall: ceiling max < x < floor left
-#define GSMODE_ANGLE_FLOOR_RIGHT    0x01d5 // ~41° (original: 45°)
-#define GSMODE_ANGLE_CEIL_MIN       0x0600 // 135°
-#define GSMODE_ANGLE_CEIL_MAX       0x0a00 // 225°
-#define GSMODE_ANGLE_FLOOR_LEFT     0x0e94 // ~318° (original: 315°)
-    
-    // Original collision mode ranges
     if((p_angle >= GSMODE_ANGLE_FLOOR_LEFT) || (p_angle <= GSMODE_ANGLE_FLOOR_RIGHT))
         // floor
         player->gsmode = CDIR_FLOOR;
@@ -706,13 +721,6 @@ _player_resolve_collision_modes(Player *player)
             : CDIR_RWALL;
 
     /* PUSH SENSORS COLLISION MODES */
-    // As opposed to ground sensors, here the L.Wall and R.Wall modes are
-    // well-defined.
-#define PSMODE_ANGLE_RWALL_MIN    0x014e // ~41°
-#define PSMODE_ANGLE_RWALL_MAX    0x0579 // 135°
-#define PSMODE_ANGLE_LWALL_MIN    0x0a87 // 225°
-#define PSMODE_ANGLE_LWALL_MAX    0x0db9 // ~318°
-
     if((p_angle > PSMODE_ANGLE_LWALL_MAX) || (p_angle < PSMODE_ANGLE_RWALL_MIN))
         player->psmode = CDIR_FLOOR;
     else if((PSMODE_ANGLE_RWALL_MIN <= p_angle) && (p_angle <= PSMODE_ANGLE_RWALL_MAX))
