@@ -952,6 +952,10 @@
  <tile id="340">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0xa00"/>
+     <property name="lwall_angle" value="0xa00"/>
+    </properties>
     <polygon points="0,0 16,0 16,13.0435 11.1304,16 0,16"/>
    </object>
   </objectgroup>
@@ -959,6 +963,10 @@
  <tile id="341">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x955"/>
+     <property name="lwall_angle" value="0x955"/>
+    </properties>
     <polygon points="0,0 16,0 16,6.04348 0.0869565,12.9565"/>
    </object>
   </objectgroup>
@@ -966,6 +974,10 @@
  <tile id="342">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x888"/>
+     <property name="lwall_angle" value="0x888"/>
+    </properties>
     <polygon points="0,0 16,0 16,2.08696 0.0434783,6"/>
    </object>
   </objectgroup>
@@ -973,6 +985,10 @@
  <tile id="343">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x822"/>
+     <property name="lwall_angle" value="0x822"/>
+    </properties>
     <polygon points="0,0 16,0 0.0434783,2"/>
    </object>
   </objectgroup>
@@ -985,6 +1001,10 @@
  <tile id="345">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0xa00"/>
+     <property name="lwall_angle" value="0xa00"/>
+    </properties>
     <polygon points="0,0 16,0 16.0435,9.04348 9.04348,16.0435 0,16"/>
    </object>
   </objectgroup>
@@ -992,6 +1012,10 @@
  <tile id="346">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0xa00"/>
+     <property name="lwall_angle" value="0xa00"/>
+    </properties>
     <polygon points="0,0 11,0.0434783 0,9.17391"/>
    </object>
   </objectgroup>
@@ -999,6 +1023,10 @@
  <tile id="347">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0xa00"/>
+     <property name="lwall_angle" value="0xa00"/>
+    </properties>
     <polygon points="0,0 16,0 16.0435,10.913 13.087,15.9565 0,16"/>
    </object>
   </objectgroup>
@@ -1006,6 +1034,10 @@
  <tile id="348">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0xa00"/>
+     <property name="lwall_angle" value="0xa00"/>
+    </properties>
     <polygon points="0,0 8.86957,0 0.0434783,11.0435"/>
    </object>
   </objectgroup>
@@ -1013,6 +1045,10 @@
  <tile id="349">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0xaaa"/>
+     <property name="lwall_angle" value="0xaaa"/>
+    </properties>
     <polygon points="0,0 13,0.0434783 6.08696,16 0,16"/>
    </object>
   </objectgroup>
@@ -1020,6 +1056,10 @@
  <tile id="350">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0xb77"/>
+     <property name="lwall_angle" value="0xb77"/>
+    </properties>
     <polygon points="0,0 5.95652,0.0434783 2.13043,15.913 0,16"/>
    </object>
   </objectgroup>
@@ -1027,6 +1067,10 @@
  <tile id="351">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0xbdd"/>
+     <property name="lwall_angle" value="0xbdd"/>
+    </properties>
     <polygon points="0,0 2,0.0869565 0,16"/>
    </object>
   </objectgroup>
@@ -1034,6 +1078,10 @@
  <tile id="352">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x7dd"/>
+     <property name="rwall_angle" value="0x7dd"/>
+    </properties>
     <polygon points="0,0 16,0 16.0435,2"/>
    </object>
   </objectgroup>
@@ -1041,6 +1089,10 @@
  <tile id="353">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x777"/>
+     <property name="rwall_angle" value="0x777"/>
+    </properties>
     <polygon points="0,0 16,0 16.087,5.95652 0.0434783,2.04348"/>
    </object>
   </objectgroup>
@@ -1048,6 +1100,10 @@
  <tile id="354">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x6aa"/>
+     <property name="rwall_angle" value="0x6aa"/>
+    </properties>
     <polygon points="0,0 16,0 16.0435,12.913 0,6.08696"/>
    </object>
   </objectgroup>
@@ -1055,6 +1111,10 @@
  <tile id="355">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x600"/>
+     <property name="rwall_angle" value="0x600"/>
+    </properties>
     <polygon points="0,0 16,0 16,16 3.04348,15.913 0,13.087"/>
    </object>
   </objectgroup>
@@ -1072,6 +1132,10 @@
  <tile id="358">
   <objectgroup draworder="index" id="2">
    <object id="1" x="3.17391" y="0.0434783">
+    <properties>
+     <property name="ceil_angle" value="0x600"/>
+     <property name="rwall_angle" value="0x600"/>
+    </properties>
     <polygon points="0,0 12.8261,-0.0434783 12.8261,8.86957"/>
    </object>
   </objectgroup>
@@ -1079,6 +1143,10 @@
  <tile id="359">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x600"/>
+     <property name="rwall_angle" value="0x600"/>
+    </properties>
     <polygon points="0,0 16,0 16,16 6.04348,16.0435 0,9"/>
    </object>
   </objectgroup>
@@ -1086,6 +1154,10 @@
  <tile id="361">
   <objectgroup draworder="index" id="2">
    <object id="1" x="6.30435" y="0.0869565">
+    <properties>
+     <property name="ceil_angle" value="0x600"/>
+     <property name="rwall_angle" value="0x600"/>
+    </properties>
     <polygon points="0,0 9.69565,-0.0869565 9.73913,10.8696"/>
    </object>
   </objectgroup>
@@ -1093,11 +1165,19 @@
  <tile id="362">
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x600"/>
+     <property name="rwall_angle" value="0x600"/>
+    </properties>
     <polygon points="0,0 16,0 16,16 2.04348,16 0.0434783,11.0435"/>
    </object>
   </objectgroup>
  </tile>
  <tile id="363">
+  <properties>
+   <property name="ceil_angle" value="0x555"/>
+   <property name="rwall_angle" value="0x555"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="2.08696" y="0.0869565">
     <polygon points="0,0 13.913,-0.0869565 13.913,15.913 6.91304,15.8261"/>
@@ -1107,6 +1187,10 @@
  <tile id="364">
   <objectgroup draworder="index" id="2">
    <object id="1" x="8.86957" y="0">
+    <properties>
+     <property name="ceil_angle" value="0x488"/>
+     <property name="rwall_angle" value="0x488"/>
+    </properties>
     <polygon points="0,0 7.13043,0 7.13043,16 4.13043,15.9565"/>
    </object>
   </objectgroup>
@@ -1114,6 +1198,10 @@
  <tile id="365">
   <objectgroup draworder="index" id="2">
    <object id="1" x="12.7826" y="0.0434783">
+    <properties>
+     <property name="ceil_angle" value="0x422"/>
+     <property name="rwall_angle" value="0x422"/>
+    </properties>
     <polygon points="0,0 3.21739,-0.0434783 3.21739,15.9565"/>
    </object>
   </objectgroup>
