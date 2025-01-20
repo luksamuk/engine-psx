@@ -738,6 +738,7 @@ _player_resolve_collision_modes(Player *player)
 void
 player_update(Player *player)
 {
+    // Angle slope pattern in degrees: 3, 12, 30, 45, 60, 78, 87
     //_player_resolve_collision_modes(player);
 
     _player_update_collision_lr(player); // Push sensor collision detection
