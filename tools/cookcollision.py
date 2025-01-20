@@ -66,7 +66,7 @@ def to_psx_angle(a):
     return math.floor(rat * 4096)
 
 
-def get_height_mask(d: Direction, points):
+def get_height_mask(d: Direction, points, predef_angle):
     # Perform iterative linecast.
     # Linecast checks for a point within a geometry starting at a height
     # of 15 until 1 (inclusive). 0 means no collision at that height.
@@ -100,6 +100,11 @@ def get_height_mask(d: Direction, points):
                 break
         if not found:
             heightmask.append(0)
+
+    # When using a predefined angle, we don't need to perform any heavy
+    # angle calculations!
+    if predef_angle is not None:
+        return (heightmask, predef_angle)
 
     # Build vector according to direction
     # and heightmask.
@@ -146,11 +151,20 @@ def parse_masks(tiles):
     res = []
     for tile in tiles:
         points = tile.get("points")
+        predef = tile.get("predef", {})
         id = tile.get("id")
-        (floor, floor_angle) = get_height_mask(Direction.DOWN, points)
-        (ceil, ceil_angle) = get_height_mask(Direction.UP, points)
-        (rwall, rwall_angle) = get_height_mask(Direction.RIGHT, points)
-        (lwall, lwall_angle) = get_height_mask(Direction.LEFT, points)
+        (floor, floor_angle) = get_height_mask(
+            Direction.DOWN, points, predef.get("floor_angle")
+        )
+        (ceil, ceil_angle) = get_height_mask(
+            Direction.UP, points, predef.get("ceil_angle")
+        )
+        (rwall, rwall_angle) = get_height_mask(
+            Direction.RIGHT, points, predef.get("rwall_angle")
+        )
+        (lwall, lwall_angle) = get_height_mask(
+            Direction.LEFT, points, predef.get("lwall_angle")
+        )
 
         res.append(
             {
@@ -171,6 +185,10 @@ def load_json(filename):
         return json.load(fp)
 
 
+def hex_to_int(s):
+    return int(s, 16)
+
+
 def parse_json(j):
     tiles = j.get("tiles")
     res = []
@@ -180,6 +198,15 @@ def parse_json(j):
             objs = grp.get("objects")
             if objs:
                 o = objs[0]
+                props = o.get("properties", [])
+                # Objects might have angle information encoded in them.
+                # In that case, take these premade angles.
+                # Name: angle_X value: ??
+                predef = {}
+                for prop in props:
+                    has = True
+                    predef[prop.get("name")] = hex_to_int(prop.get("value"))
+
                 id = tile.get("id")
                 x = round(o.get("x"), 0)
                 y = round(o.get("y"), 0)
@@ -199,6 +226,7 @@ def parse_json(j):
                         {
                             "id": id,
                             "points": points,
+                            "predef": predef,
                         }
                     )
                 else:
@@ -219,6 +247,7 @@ def parse_json(j):
                         {
                             "id": id,
                             "points": points,
+                            "predef": predef,
                         }
                     )
     # print(f"Number of collidable tiles: {len(res)}")
