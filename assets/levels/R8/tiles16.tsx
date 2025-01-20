@@ -1174,12 +1174,12 @@
   </objectgroup>
  </tile>
  <tile id="363">
-  <properties>
-   <property name="ceil_angle" value="0x555"/>
-   <property name="rwall_angle" value="0x555"/>
-  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="2.08696" y="0.0869565">
+    <properties>
+     <property name="ceil_angle" value="0x555"/>
+     <property name="rwall_angle" value="0x555"/>
+    </properties>
     <polygon points="0,0 13.913,-0.0869565 13.913,15.913 6.91304,15.8261"/>
    </object>
   </objectgroup>

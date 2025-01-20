@@ -171,9 +171,6 @@
   </objectgroup>
  </tile>
  <tile id="31">
-  <properties>
-   <property name="floor_angle" value="0x1ea"/>
-  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="0" y="0" width="16" height="16">
     <properties>
