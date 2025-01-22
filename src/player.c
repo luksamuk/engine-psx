@@ -319,10 +319,12 @@ _player_update_collision_lr(Player *player)
          && ((player->angle >= 0x0 && player->angle <= 0x400)
              || (player->angle >= 0xc00 && player->angle <= 0x1000)));
 
+    int32_t vel_x = player->grnd ? player->vel.vz : player->vel.vx;
+
     if(is_push_active) {
         // "E" sensor
         if(!player->ev_left.collided) {
-            if(player->vel.vx < 0) {
+            if(vel_x < 0) {
                 player->ev_left = linecast(&leveldata, &map128, &map16,
                                            anchorx, push_anchory,
                                            ldir, left_mag, player->gsmode);
@@ -331,7 +333,7 @@ _player_update_collision_lr(Player *player)
 
         // "F" sensor
         if(!player->ev_right.collided) {
-            if(player->vel.vx > 0) {
+            if(vel_x > 0) {
                 player->ev_right = linecast(&leveldata, &map128, &map16,
                                             anchorx, push_anchory,
                                             rdir, right_mag, player->gsmode);
@@ -339,12 +341,10 @@ _player_update_collision_lr(Player *player)
         }
     }
 
-    int32_t vel_x = player->grnd ? player->vel.vz : player->vel.vx;
-
     // Draw sensors
     if(debug_mode > 1) {
-        if(vel_x < 0) _draw_sensor(anchorx, push_anchory, ldir, left_mag, 0xff, 0x38, 0xff);
-        if(vel_x > 0) _draw_sensor(anchorx, push_anchory, rdir, right_mag, 0xff, 0x54, 0x54);
+        _draw_sensor(anchorx, push_anchory, ldir, left_mag, 0xff, 0x38, 0xff);
+        _draw_sensor(anchorx, push_anchory, rdir, right_mag, 0xff, 0x54, 0x54);
     }
 
 
