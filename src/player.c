@@ -447,26 +447,26 @@ _player_update_collision_tb(Player *player)
     case CDIR_RWALL:
         grndir = CDIR_RWALL;
         ceildir = CDIR_LWALL;
-        anchory_left += grn_grnd_dist + 1;
+        anchory_left += grn_grnd_dist;
         anchory_right -= grn_grnd_dist - 1;
         break;
     case CDIR_LWALL:
         grndir = CDIR_LWALL;
         ceildir = CDIR_RWALL;
         anchory_left -= grn_grnd_dist - 1;
-        anchory_right += grn_grnd_dist + 1;
+        anchory_right += grn_grnd_dist;
         break;
     case CDIR_CEILING:
         grndir = CDIR_CEILING;
         ceildir = CDIR_FLOOR;
         anchorx_left += grn_grnd_dist - 1;
-        anchorx_right -= grn_grnd_dist + 1;
+        anchorx_right -= grn_grnd_dist;
         break;
     case CDIR_FLOOR:
     default:
         grndir = CDIR_FLOOR;
         ceildir = CDIR_CEILING;
-        anchorx_left -= grn_grnd_dist + 1;
+        anchorx_left -= grn_grnd_dist;
         anchorx_right += grn_grnd_dist - 1;
         break;
     };
@@ -515,6 +515,16 @@ _player_update_collision_tb(Player *player)
         _draw_sensor(anchorx_right, anchory_right,
                      grndir, grn_mag,
                      0x38, 0xff, 0xa2);
+
+        // Ceiling sensors
+        _draw_sensor(anchorx_left, anchory_left,
+                     ceildir, ceil_mag,
+                     0x00, 0xae, 0xef);
+        _draw_sensor(anchorx_right, anchory_right,
+                     ceildir, ceil_mag,
+                     0xff, 0xf2, 0x38);
+
+        // Ledge sensor
         if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
             _draw_sensor(anchorx, anchory_right,
                          CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
