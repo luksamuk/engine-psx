@@ -341,7 +341,7 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 {
                     player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
                     player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
-                    player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy;
+                    player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy + 4;
                 } else if((player_vy + 8) > solidity_vy) {
                     // Check for intersection on left/right
                     if((player_vx + 8) < pos->vx) {

@@ -226,7 +226,6 @@ begin_render_routine:
             vy -= (frame->w >> 1);
         } else {
             vx -= (frame->w >> 1);
-            if(!(flipmask & MASK_FLIP_FLIPX)) vx += 1;
             if(flipmask & MASK_FLIP_FLIPY) vy -= 64 - frame->h;
             vy -= frame->h;
         }
