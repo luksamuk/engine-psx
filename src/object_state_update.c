@@ -363,9 +363,9 @@ static void
 _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
 {
     if(state->anim_state.animation == 0) {
-        int32_t solidity_vx = pos->vx - 16;
+        int32_t solidity_vx = pos->vx - 15;
         int32_t solidity_vy = pos->vy - 16; // Spring is 32x16 solid
-        int32_t solidity_w  = 32;
+        int32_t solidity_w  = 31;
         int32_t solidity_h  = 16;
         
         if(state->flipmask & MASK_FLIP_ROTCW) {
