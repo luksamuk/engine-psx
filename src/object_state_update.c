@@ -503,6 +503,8 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
         if(collision_side == OBJ_SIDE_NONE) return;
         
         player.grnd = 0;
+        player.pos.vx = pos->vx << 12;
+        player.pos.vy = (pos->vy - 16) << 12;
         player.vel.vx = is_red ? SPRND_ST_R : SPRND_ST_Y;
         player.vel.vy = is_red ? SPRND_ST_R : SPRND_ST_Y;
         if(!(state->flipmask & MASK_FLIP_FLIPY)) player.vel.vy *= -1;
