@@ -150,7 +150,7 @@ static const char *creditstxt[] = {
     "\r",
 
     "Special Thanks",
-    "Gustavo Pezzi",
+    "Pikuma.com",
     "PSXDEV Network",
     "The Spriters Resource",
     "Schnappy",
