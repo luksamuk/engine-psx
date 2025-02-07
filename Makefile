@@ -153,14 +153,14 @@ cleancook:
 # Also generates 128.png to create a 128x128 tileset (should be done manually)
 # (Depends on tilemap128.tmx map generated on Tiled)
 %/MAP128.MAP: %/tilemap128.tmx
-	tiled --export-map $< "$(basename $<).psxcsv"
+	tiled --export-map $< "$(basename $<).cnk"
 	tmxrasterizer $< "$(dir $<)128.png"
-	./tools/chunkgen.py "$(basename $<).psxcsv" $@
-	rm -f "$(basename $<).psxcsv"
-	rm -f "$(basename $<)_solid.psxcsv"
-	rm -f "$(basename $<)_oneway.psxcsv"
-	rm -f "$(basename $<)_none.psxcsv"
-	rm -f "$(basename $<)_front.psxcsv"
+	./tools/chunkgen.py "$(basename $<).cnk" $@
+	rm -f "$(basename $<).cnk"
+	rm -f "$(basename $<)_solid.cnk"
+	rm -f "$(basename $<)_oneway.cnk"
+	rm -f "$(basename $<)_none.cnk"
+	rm -f "$(basename $<)_front.cnk"
 
 # =========== Level maps ===========
 # These maps should use a tileset generated from "128.png".

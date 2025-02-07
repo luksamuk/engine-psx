@@ -10,11 +10,11 @@ import os
 class PSXChunk(Plugin):
     @classmethod
     def nameFilter(cls):
-        return "PlayStation chunk proto map (*.psxcsv)"
+        return "PlayStation chunk proto map (*.cnk)"
 
     @classmethod
     def shortName(cls):
-        return "psxcsv"
+        return "cnk"
 
     @classmethod
     def write(cls, tileMap, fileName):
@@ -23,7 +23,7 @@ class PSXChunk(Plugin):
                 tileLayer = tileLayerAt(tileMap, ilayer)
                 actual_filename = fileName
                 if tileMap.layerCount() > 1:
-                    actual_filename = f"{os.path.splitext(fileName)[0]}_{tileLayer.name().lower()}.psxcsv"
+                    actual_filename = f"{os.path.splitext(fileName)[0]}_{tileLayer.name().lower()}.cnk"
                 with open(actual_filename, "w") as f:
                     width = tileLayer.width()
                     if width % 8 > 0:

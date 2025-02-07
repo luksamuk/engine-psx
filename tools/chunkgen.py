@@ -3,8 +3,8 @@
 # chunkgen.py
 # Tool for converting 128x128 chunks generated from a .tmx tilemap in Tiled
 # to a proper .MAP file for the PlayStation engine-psx.
-# Converts map128.psxcsv -> MAP128.MAP
-# Make sure you export your .tmx map to .psxcsv before using this tool.
+# Converts map128.cnk -> MAP128.MAP
+# Make sure you export your .tmx map to .cnk before using this tool.
 import os
 import sys
 import pandas as pd
@@ -122,10 +122,10 @@ def main():
         solid_layer = load_data(sys.argv[1])
     else:
         basepath = os.path.splitext(sys.argv[1])[0]
-        solid_layer = load_data(f"{basepath}_solid.psxcsv")
-        oneway_layer = load_data(f"{basepath}_oneway.psxcsv")
-        none_layer = load_data(f"{basepath}_none.psxcsv")
-        front_layer = load_data(f"{basepath}_front.psxcsv")
+        solid_layer = load_data(f"{basepath}_solid.cnk")
+        oneway_layer = load_data(f"{basepath}_oneway.cnk")
+        none_layer = load_data(f"{basepath}_none.cnk")
+        front_layer = load_data(f"{basepath}_front.cnk")
 
     with open(out, "wb") as f:
         export_binary(f, solid_layer, oneway_layer, none_layer, front_layer)
