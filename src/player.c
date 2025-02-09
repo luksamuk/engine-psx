@@ -585,14 +585,14 @@ _player_update_collision_tb(Player *player)
                     player->iframes = PLAYER_HURT_IFRAMES;
                     player->ctrllock = 0;
                 }
-                player->action = ACTION_NONE;
+                player_set_action(player, ACTION_NONE);
                 player->airdirlock = 0;
             }
             else if(player->action == ACTION_DROPDASH) {
                 // Perform drop dash
                 player->framecount   = 0;
                 player->holding_jump = 0;
-                player->action = ACTION_ROLLING;
+                player_set_action(player, ACTION_ROLLING);
                 // We're going to need the previous vel.vx as usual,
                 // but we're going to manipulate gsp AFTER it has been calculated,
                 // so this code MUST come after landing speed calculation
@@ -643,7 +643,7 @@ _player_update_collision_tb(Player *player)
         // Cancel drop dash if not holding jump
         if(player->action == ACTION_DROPDASH
            && !input_pressing(&player->input, PAD_CROSS)) {
-            player->action = ACTION_JUMPING;
+            player_set_action(player, ACTION_JUMPING);
         }
     } else {
         if(!player->ev_grnd1.collided && !player->ev_grnd2.collided) {
@@ -791,13 +791,13 @@ player_update(Player *player)
 
             // Uncurl if too slow
             if(abs(player->vel.vz) < player->cnst->x_min_uncurl_spd)
-                player->action = ACTION_NONE;
+                player_set_action(player, ACTION_NONE);
         } else if(player->action == ACTION_SPINDASH) {
             // Release
             if(!input_pressing(&player->input, PAD_DOWN)) {
                 player->vel.vz +=
                     (0x8000 + (floor12(player->spinrev) >> 1)) * player->anim_dir;
-                player->action = ACTION_ROLLING;
+                player_set_action(player, ACTION_ROLLING);
                 camera.lag = (0x10000 - player->spinrev) >> 12;
                 player->spinrev = 0;
                 sound_play_vag(sfx_relea, 0);
@@ -812,12 +812,12 @@ player_update(Player *player)
             }
         } else {
             // Default physics
-            player->action = ACTION_NONE;
+            player_set_action(player, ACTION_NONE);
 
             if(input_pressing(&player->input, PAD_RIGHT)
                && (player->ctrllock == 0)) {
                 if(player->vel.vz < 0) {
-                    player->action = ACTION_SKIDDING;
+                    player_set_action(player, ACTION_SKIDDING);
                     player->vel.vz += player->cnst->x_decel;
                 } else {
                     if(player->vel.vz < player->cnst->x_top_spd)
@@ -827,7 +827,7 @@ player_update(Player *player)
             } else if(input_pressing(&player->input, PAD_LEFT)
                       && (player->ctrllock == 0)) {
                 if(player->vel.vz > 0) {
-                    player->action = ACTION_SKIDDING;
+                    player_set_action(player, ACTION_SKIDDING);
                     player->vel.vz -= player->cnst->x_decel;
                 } else {
                     if(player->vel.vz > -player->cnst->x_top_spd)
@@ -864,13 +864,13 @@ player_update(Player *player)
             /* Action changers */
             if(input_pressing(&player->input, PAD_DOWN)) {
                 if(abs(player->vel.vz) >= player->cnst->x_min_roll_spd) { // Rolling
-                    player->action = ACTION_ROLLING;
+                    player_set_action(player, ACTION_ROLLING);
                     player_set_animation_direct(player, ANIM_ROLLING);
                     sound_play_vag(sfx_roll, 0);
                 } else if(player->col_ledge
                           && player->vel.vz == 0
                           && input_pressed(&player->input, PAD_CROSS)) { // Spindash
-                    player->action = ACTION_SPINDASH;
+                    player_set_action(player, ACTION_SPINDASH);
                     player_set_animation_direct(player, ANIM_ROLLING);
                     player->spinrev = 0;
                     sound_play_vag(sfx_dash, 0);
@@ -937,7 +937,7 @@ player_update(Player *player)
                         player->framecount++;
                     } else {
                         sound_play_vag(sfx_dropd, 0);
-                        player->action = ACTION_DROPDASH;
+                        player_set_action(player, ACTION_DROPDASH);
                     }
                 }
             }
@@ -953,7 +953,7 @@ player_update(Player *player)
             player->grnd = 0;
             player_set_animation_direct(player, ANIM_ROLLING);
             sound_play_vag(sfx_jump, 0);
-            player->action = ACTION_JUMPING;
+            player_set_action(player, ACTION_JUMPING);
             player->holding_jump = 1;
         }
     }
@@ -969,11 +969,11 @@ player_update(Player *player)
             } else if(player->col_ledge && input_pressing(&player->input, PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
-                player->action = ACTION_LOOKUP;
+                player_set_action(player, ACTION_LOOKUP);
             } else if(player->col_ledge && input_pressing(&player->input, PAD_DOWN)) {
                 player_set_animation_direct(player, ANIM_CROUCHDOWN);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
-                player->action = ACTION_CROUCHDOWN;
+                player_set_action(player, ACTION_CROUCHDOWN);
             } else if(player->idle_timer == 0) {
                 player_set_animation_direct(player, ANIM_IDLE);
                 player->loopback_frame = 2;
@@ -1287,7 +1287,7 @@ player_do_damage(Player *player, int32_t hazard_x)
 void
 _player_set_hurt(Player *player, int32_t hazard_x)
 {
-    player->action = ACTION_HURT;
+    player_set_action(player, ACTION_HURT);
     player->grnd = 0;
     player->vel.vy = -player->cnst->y_hurt_force;
     int32_t a = SIGNUM(player->pos.vx - hazard_x);
@@ -1339,4 +1339,16 @@ _player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings)
             ring_angle = RING_STARTING_ANGLE;
         }
     }
+}
+
+void
+player_set_action(Player *player, PlayerAction action)
+{
+    // When changing action from whence the player was hurt,
+    // remove control lock and setup iframes
+    if(player->action == ACTION_HURT) {
+        player->ctrllock = 0;
+        player->iframes = PLAYER_HURT_IFRAMES;
+    }
+    player->action = action;
 }

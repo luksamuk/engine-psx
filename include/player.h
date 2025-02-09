@@ -118,6 +118,7 @@ void      player_set_frame_duration(Player *player, uint8_t duration);
 uint32_t  player_get_current_animation_hash(Player *player);
 CharaAnim *player_get_animation(Player *player, uint32_t sum);
 CharaAnim *player_get_animation_by_name(Player *player, const char *name);
+void      player_set_action(Player *player, PlayerAction action);
 
 void player_update(Player *player);
 void player_draw(Player *player, VECTOR *screen_pos);

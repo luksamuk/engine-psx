@@ -253,7 +253,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             // Set animation according to character
             state->timer = 360; // 6-seconds music
             state->anim_state.animation = 2;
-            player.action = ACTION_NONE;
+            player_set_action(&player, ACTION_NONE);
             screen_level_setmode(LEVEL_MODE_FINISHED);
             _goal_sign_change_score();
         }
@@ -414,7 +414,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             player.grnd = 0;
             player.vel.vy = is_red ? -0x10000 : -0xa000;
             player.angle = 0;
-            player.action = ACTION_SPRING;
+            player_set_action(&player, ACTION_SPRING);
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
         } else if(state->flipmask & MASK_FLIP_FLIPY) { // Bottom-pointing spring
@@ -422,7 +422,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             player.grnd = 0;
             player.vel.vy = is_red ? 0x10000 : 0xa000;
             player.angle = 0;
-            player.action = ACTION_SPRING;
+            player_set_action(&player, ACTION_SPRING);
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
         }
@@ -514,7 +514,7 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
         } else player.anim_dir = 1; // No flip on X: point player right
         player.angle = 0;
         player.airdirlock = 1;
-        player.action = ACTION_SPRING;
+        player_set_action(&player, ACTION_SPRING);
         state->anim_state.animation = 1;
         sound_play_vag(sfx_sprn, 0);
         
@@ -858,7 +858,7 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             player.remaining_air_frames = 1800;
             // TODO: Cancel any drowning music.
             // TODO: Setup proper action.
-            player.action = ACTION_NONE;
+            player_set_action(&player, ACTION_NONE);
             player_set_animation_direct(&player, ANIM_GASP);
             player.grnd = 0;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
