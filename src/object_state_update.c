@@ -414,6 +414,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             player.grnd = 0;
             player.vel.vy = is_red ? -0x10000 : -0xa000;
             player.angle = 0;
+            player.ctrllock = 0;
             player_set_action(&player, ACTION_SPRING);
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
@@ -422,6 +423,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             player.grnd = 0;
             player.vel.vy = is_red ? 0x10000 : 0xa000;
             player.angle = 0;
+            player.ctrllock = 0;
             player_set_action(&player, ACTION_SPRING);
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
