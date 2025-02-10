@@ -40,7 +40,7 @@ static volatile const struct {
         .image = "\\MISC\\SEGALOGO.TIM;1",
         .bgm = 0xff,
         .next = SCREEN_SLIDE,
-        .next_slide = SLIDE_PS30YRS,
+        .next_slide = SLIDE_CREATEDBY,
         .duration = 180
     },
     {
