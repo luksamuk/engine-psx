@@ -24,7 +24,8 @@ PlayerConstants CNST_DEFAULT = {
     .x_drpspd         = 0x08000,
     .x_drpmax         = 0x0c000,
     .y_hurt_force     = 0x04000,
-    .x_hurt_force     = 0x02000
+    .x_hurt_force     = 0x02000,
+    .x_peelout_spd    = 0x0c000
 };
 
 // Underwater player values.
@@ -52,7 +53,8 @@ PlayerConstants CNST_UNDERWATER = {
     .x_drpspd         = 0x08000,
     .x_drpmax         = 0x0c000,
     .y_hurt_force     = 0x02000, // Changed
-    .x_hurt_force     = 0x01000  // Changed
+    .x_hurt_force     = 0x01000, // Changed
+    .x_peelout_spd    = 0x06000  // Changed
 };
 
 // Speed shoes (only used outside water)
@@ -79,5 +81,6 @@ PlayerConstants CNST_SPEEDSHOES = {
     .x_drpspd         = 0x08000,
     .x_drpmax         = 0x0c000,
     .y_hurt_force     = 0x04000,
-    .x_hurt_force     = 0x02000
+    .x_hurt_force     = 0x02000,
+    .x_peelout_spd    = 0x0c000
 };

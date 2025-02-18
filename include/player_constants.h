@@ -29,7 +29,8 @@ typedef struct {
         x_drpspd,
         x_drpmax,
         y_hurt_force,
-        x_hurt_force;
+        x_hurt_force,
+        x_peelout_spd;
 } PlayerConstants;
 
 // SEE PLAYER_CONSTANTS.C FOR CONSTANTS DEFINITIONS!!!!
