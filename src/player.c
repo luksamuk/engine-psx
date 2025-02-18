@@ -810,6 +810,21 @@ player_update(Player *player)
                     sound_play_vag(sfx_dash, 0);
                 }
             }
+        } else if(player->action == ACTION_PEELOUT) {
+            // Release
+            if(!input_pressing(&player->input, PAD_UP)) {
+                player_set_action(player, ACTION_NONE);
+                if(player->spinrev >= 30) { // Only properly release after 30 frames
+                    player->vel.vz = (0xc000 * player->anim_dir);
+                    camera.lag = (0x10000 - player->spinrev) >> 12;
+                    player->spinrev = 0;
+                    sound_play_vag(sfx_relea, 0);
+                }
+            } else {
+                if(player->spinrev < 30) {
+                    player->spinrev++;
+                }
+            }
         } else {
             // Default physics
             player_set_action(player, ACTION_NONE);
@@ -875,7 +890,15 @@ player_update(Player *player)
                     player->spinrev = 0;
                     sound_play_vag(sfx_dash, 0);
                 }
-                
+            } else if(input_pressing(&player->input, PAD_UP)) {
+                if(player->col_ledge
+                   && player->vel.vz == 0
+                   && input_pressed(&player->input, PAD_CROSS)) { // Peel-out
+                    player_set_action(player, ACTION_PEELOUT);
+                    player_set_animation_direct(player, ANIM_WALKING);
+                    player->spinrev = 0;
+                    sound_play_vag(sfx_dash, 0);
+                }
             }
         }
 
@@ -946,7 +969,9 @@ player_update(Player *player)
             ? player->cnst->y_hurt_gravity
             : player->cnst->y_gravity;
     } else {
-        if(input_pressed(&player->input, PAD_CROSS) && player->action != ACTION_SPINDASH) {
+        if(input_pressed(&player->input, PAD_CROSS)
+           && (player->action != ACTION_SPINDASH)
+            && (player->action != ACTION_PEELOUT)) {
             // TODO: Review jump according to angle
             player->vel.vx -= (player->cnst->y_jump_strength * rsin(player->angle)) >> 12;
             player->vel.vy -= (player->cnst->y_jump_strength * rcos(player->angle)) >> 12;
@@ -966,6 +991,14 @@ player_update(Player *player)
         } else if(player->vel.vz == 0) {
             if(player->action == ACTION_SPINDASH) {
                 player_set_animation_direct(player, ANIM_ROLLING);
+            } else if(player->action == ACTION_PEELOUT) {
+                // Use player->spinrev as a timer for when animations should
+                // play. It builds up from walking to running to peel-out.
+                if(player->spinrev >= 30)
+                    player_set_animation_direct(player, ANIM_PEELOUT);
+                else if(player->spinrev >= 10)
+                    player_set_animation_direct(player, ANIM_RUNNING);
+                else player_set_animation_direct(player, ANIM_WALKING);
             } else if(player->col_ledge && input_pressing(&player->input, PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
@@ -1037,45 +1070,57 @@ player_update(Player *player)
 
     // Animation speed correction
     if(player->anim_timer == 0) {
-        switch(player_get_current_animation_hash(player)) {
-        case ANIM_WALKING:
-        case ANIM_WATERWALK:
-        case ANIM_RUNNING:
-            player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
-            break;
 
-        case ANIM_ROLLING:
-            if(player->action == ACTION_SPINDASH || player->action == ACTION_DROPDASH)
-                player_set_frame_duration(player, 0);
-            else
-                player_set_frame_duration(player, MAX(0, 4 - abs(player->vel.vz >> 12)));
-            break;
-        case ANIM_PEELOUT:
-            break;
+        if(player->action == ACTION_PEELOUT) {
+            if(player->spinrev >= 30) {// Peel-out animation
+                player_set_frame_duration(player, 1);
+            } else { // Walking and running animations (charging)
+                player_set_frame_duration(
+                    player,
+                    8 - ((((int32_t)player->spinrev << 12) * 0x0429) >> 24));
+            }
+        } else {
+            switch(player_get_current_animation_hash(player)) {
+            case ANIM_WALKING:
+            case ANIM_WATERWALK:
+            case ANIM_RUNNING:
+                player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
+                break;
 
-        case ANIM_PUSHING:
-            player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)) << 2);
-            break;
+            case ANIM_ROLLING:
+                if(player->action == ACTION_SPINDASH || player->action == ACTION_DROPDASH)
+                    player_set_frame_duration(player, 0);
+                else
+                    player_set_frame_duration(player, MAX(0, 4 - abs(player->vel.vz >> 12)));
+                break;
+            case ANIM_PEELOUT:
+                player_set_frame_duration(player, 1);
+                break;
 
-        case ANIM_SPRING:
-            player_set_frame_duration(player, 3);
-            break;
+            case ANIM_PUSHING:
+                player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)) << 2);
+                break;
 
-        case ANIM_BALANCELIGHT:
-        case ANIM_BALANCEHEAVY:
-            player_set_frame_duration(player, 12);
-            break;
+            case ANIM_SPRING:
+                player_set_frame_duration(player, 3);
+                break;
 
-            // Single-frame animations
-        case ANIM_STOPPED:
-        case ANIM_IDLE:
-        case ANIM_SKIDDING:
-        case ANIM_CROUCHDOWN:
-        case ANIM_LOOKUP:
-        default:
-            player_set_frame_duration(player, 6);
-            break;
-        };
+            case ANIM_BALANCELIGHT:
+            case ANIM_BALANCEHEAVY:
+                player_set_frame_duration(player, 12);
+                break;
+
+                // Single-frame animations
+            case ANIM_STOPPED:
+            case ANIM_IDLE:
+            case ANIM_SKIDDING:
+            case ANIM_CROUCHDOWN:
+            case ANIM_LOOKUP:
+            default:
+                player_set_frame_duration(player, 6);
+                break;
+            };
+        }
     }
 
     // Animation update
