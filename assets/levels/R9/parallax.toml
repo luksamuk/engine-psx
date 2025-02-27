@@ -88,7 +88,7 @@ v0 = 0
 width = 256
 height = 64
 single = false
-scrollx = 0.3
+scrollx = 0.1
 speedx =  0.0
 y0 = 96
 
@@ -98,6 +98,6 @@ v0 = 64
 width = 256
 height = 80
 single = false
-scrollx = 0.32
+scrollx = 0.12
 speedx = 0.0
 y0 = 160
