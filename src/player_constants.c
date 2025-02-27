@@ -54,7 +54,7 @@ PlayerConstants CNST_UNDERWATER = {
     .x_drpmax         = 0x0c000,
     .y_hurt_force     = 0x02000, // Changed
     .x_hurt_force     = 0x01000, // Changed
-    .x_peelout_spd    = 0x06000  // Changed
+    .x_peelout_spd    = 0x05fff  // Changed
 };
 
 // Speed shoes (only used outside water)
