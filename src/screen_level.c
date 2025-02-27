@@ -1009,6 +1009,7 @@ level_play_music(uint8_t round, uint8_t act)
     case 6: break; // TODO
     case 7: break; // TODO
     case 8: sound_bgm_play(BGM_EGGMANLAND);      break;
+    case 9: sound_bgm_play(BGM_WINDMILLISLE);    break;
     default: break;
     }
 }

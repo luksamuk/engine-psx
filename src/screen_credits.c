@@ -90,6 +90,11 @@ static const char *creditstxt[] = {
     "By Richard Jacques",
     "\r",
 
+    "Windmill Isle",
+    "Windmill Isle Day: Silent Dreams Remix",
+    "By Silent Dreams",
+    "\r",
+
     /* SFX */
     "Sound Effects Ripping",
     "luksamuk",

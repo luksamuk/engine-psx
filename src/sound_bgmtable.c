@@ -22,6 +22,8 @@ const BGMTableEntry bgm_table[] = {
     {"\\BGM\\BGM003.XA;1",   0, 3900, 0}, // DCZ
     {"\\BGM\\BGM003.XA;1",   2, 7420, 0}, // A0Z
     {"\\BGM\\BGM003.XA;1",   1, 2830, 0}, // EZ
+
+    {"\\BGM\\BGM004.XA;1",   0, 9300, 0}, // WIZ
 };
 
 static CdlLOC bgm_table_locs[BGM_NUM_SONGS];

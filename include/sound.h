@@ -95,7 +95,8 @@ typedef enum {
     BGM_DAWNCANYON   = 11,
     BGM_AMAZINGOCEAN = 12,
     BGM_EGGMANLAND   = 13,
-    BGM_NUM_SONGS    = BGM_EGGMANLAND + 1,
+    BGM_WINDMILLISLE = 14,
+    BGM_NUM_SONGS    = BGM_WINDMILLISLE + 1,
 } BGMOption;
 
 typedef struct {
