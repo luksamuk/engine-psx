@@ -94,10 +94,20 @@ y0 = 96
 
 [city2]
 u0 = 0
+v0 = 0
+width = 128
+height = 64
+single = false
+scrollx = 0.12
+speedx =  0.0
+y0 = 120
+
+[city3]
+u0 = 0
 v0 = 64
 width = 256
 height = 80
 single = false
-scrollx = 0.12
+scrollx = 0.14
 speedx = 0.0
 y0 = 160
