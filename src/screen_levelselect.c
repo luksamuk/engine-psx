@@ -42,7 +42,7 @@ typedef struct {
 } screen_levelselect_data;
 
 static const char *menutext[] = {
-    "PLAYGROUND    1",
+    "TEST LEVEL    1",
     "              2",
     "              3",
     "              4",

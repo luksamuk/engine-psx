@@ -733,9 +733,12 @@ level_load_level(screen_level_data *data)
 
     switch(level) {
     case 0: case 1: case 2: case 3: // Playground
-        data->level_name = "PLAYGROUND";
+        data->level_name = "TEST LEVEL";
         data->level_round = 0;
         data->level_act = level;
+        if(level == 2) {
+            level_water_y = 0x00c43401;
+        }
         break;
     case 4: case 5:
         data->level_name = "GREEN HILL";
@@ -756,7 +759,7 @@ level_load_level(screen_level_data *data)
         data->level_name = "AMAZING OCEAN";
         data->level_round = 5;
         data->level_act = level - 10;
-        level_water_y = 0x2c0000;
+        level_water_y = 0x002c0000;
         break;
     case 12: case 13:
         data->level_name = "BLAZING FORCE";
