@@ -387,6 +387,9 @@
  <tile id="171">
   <objectgroup draworder="index" id="2">
    <object id="1" x="16.0909" y="11.2727">
+    <properties>
+     <property name="floor_angle" value="0x78"/>
+    </properties>
     <polygon points="0,0 -0.0909091,4.72727 -16.0909,4.72727"/>
    </object>
   </objectgroup>
@@ -394,6 +397,9 @@
  <tile id="172">
   <objectgroup draworder="index" id="2">
    <object id="1" x="16.1818" y="7">
+    <properties>
+     <property name="floor_angle" value="0x78"/>
+    </properties>
     <polygon points="0,0 -0.181818,9 -16.1818,9 -16.1818,4"/>
    </object>
   </objectgroup>
@@ -401,6 +407,9 @@
  <tile id="173">
   <objectgroup draworder="index" id="2">
    <object id="1" x="15.8182" y="3.27273">
+    <properties>
+     <property name="floor_angle" value="0x78"/>
+    </properties>
     <polygon points="0,0 0.181818,12.7273 -15.8182,12.7273 -15.8182,3.54545"/>
    </object>
   </objectgroup>
@@ -454,6 +463,9 @@
  <tile id="190">
   <objectgroup draworder="index" id="2">
    <object id="1" x="16" y="0">
+    <properties>
+     <property name="floor_angle" value="0x78"/>
+    </properties>
     <polygon points="0,0 0,16 -16,16 -15.9091,2.81818"/>
    </object>
   </objectgroup>
