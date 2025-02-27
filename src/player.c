@@ -1043,7 +1043,7 @@ player_update(Player *player)
                  player_set_animation_direct(player, ANIM_ROLLING);
             } else if(abs(player->vel.vz) >= (10 << 12)) {
                 player_set_animation_direct(player, ANIM_PEELOUT);
-            } else if(abs(player->vel.vz) >= (6 << 12)) {
+            } else if(abs(player->vel.vz) >= (6 << 12) - 0xff) {
                 player_set_animation_direct(player, ANIM_RUNNING);
             } else if(player->underwater && abs(player->vel.vz) >= (4 << 12)) {
                 player_set_animation_direct(player, ANIM_WATERWALK);
