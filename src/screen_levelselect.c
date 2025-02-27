@@ -14,12 +14,12 @@
 #include "timer.h"
 #include "basic_font.h"
 
-#define CHOICE_SOUNDTEST  19
-#define CHOICE_SLIDE      20
-#define CHOICE_SPRITETEST 21
-#define CHOICE_MODELTEST  22
-#define CHOICE_TITLE      23
-#define CHOICE_CREDITS    24
+#define CHOICE_SOUNDTEST  20
+#define CHOICE_SLIDE      21
+#define CHOICE_SPRITETEST 22
+#define CHOICE_MODELTEST  23
+#define CHOICE_TITLE      24
+#define CHOICE_CREDITS    25
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
 #define MAX_COLUMN_CHOICES 17
 
@@ -61,6 +61,7 @@ static const char *menutext[] = {
     "EGGMANLAND    1",
     "              2",
     "              3",
+    "WINDMILL ISLE 1",
     "\n",
     "SOUND TEST  *??*",
     "SLIDE TEST  *??*",

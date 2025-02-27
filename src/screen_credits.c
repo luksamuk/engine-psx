@@ -118,6 +118,7 @@ static const char *creditstxt[] = {
     "Techokami",
     "Blue Frenzy",
     "DerZocker",
+    "Enrico Cartmanuel",
     "\r",
 
     "Fonts Ripping",

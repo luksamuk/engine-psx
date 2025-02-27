@@ -773,6 +773,11 @@ level_load_level(screen_level_data *data)
         data->level_round = 8;
         data->level_act = level - 16;
         break;
+    case 19:
+        data->level_name = "WINDMILL ISLE";
+        data->level_round = 9;
+        data->level_act = level - 19;
+        break;
     default:
         data->level_name = "TEST LEVEL";
         data->level_round = 0xff;
@@ -952,6 +957,8 @@ level_set_clearcolor()
                         LERPC(level_fade, 200));
     else if(level == 16 || level == 17 || level == 18) // R8 (EZ)
         set_clear_color(LERPC(level_fade, 0x21), 0x00, 0x00);
+    else if(level == 19) // R9 (WIZ)
+        set_clear_color(0x00, LERPC(level_fade, 0xa0), LERPC(level_fade, 0xe0));
     // R0
     else set_clear_color(LERPC(level_fade, 63),
                          LERPC(level_fade, 0),
