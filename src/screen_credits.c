@@ -103,13 +103,17 @@ static const char *creditstxt[] = {
 
 
     /* Graphics credits */
-    "Character Sprites Ripping",
-    "Triangly",
-    "Paraemon",
-    "TCRF Community",
-    "Sonic Retro Community",
-    "Devon",
-    "Vector T",
+    /* "Character Sprites Ripping", */
+    /* "Triangly", */
+    /* "Paraemon", */
+    /* "TCRF Community", */
+    /* "Sonic Retro Community", */
+    /* "Devon", */
+    /* "Vector T", */
+    /* "\r", */
+
+    "Original Character Sprites",
+    "CartoonsAnimate22",
     "\r",
 
     "Level and Menu Graphics Ripping",
