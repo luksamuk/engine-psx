@@ -456,8 +456,8 @@ screen_title_cycle_demo()
     /* case 0:  demo_number = 4;  break; */
     /* case 4:  demo_number = 6;  break; */
     case 6:  demo_number = 10; break;
-    case 10: demo_number = 16; break;
-    case 16: demo_number = 0;  break;
+    /* case 10: demo_number = 16; break; */
+    /* case 16: demo_number = 0;  break; */
     /* default: demo_number = 0;  break; */
     default: demo_number = 6;  break;
     }
