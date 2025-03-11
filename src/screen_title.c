@@ -197,17 +197,17 @@ screen_title_update(void *d)
                     data->selected = 1;
                     switch(data->menu_option) {
                     case 1: // Continue
-                        // For now, this redirects you to Green Hill Zone 1
+                        // For now, this redirects you to Surely Wood Zone
                         screen_title_reset_demo();
-                        screen_level_setlevel(4);
+                        screen_level_setlevel(6);
                         screen_level_setmode(LEVEL_MODE_NORMAL);
                         data->next_scene = SCREEN_LEVEL;
                         level_score_count = 0;
                         break;
                     case 2: // New Game
-                        // Use Playground Zone 1 as first level
+                        // Use Surely Wood Zone 1 as first level
                         screen_title_reset_demo();
-                        screen_level_setlevel(0);
+                        screen_level_setlevel(6);
                         screen_level_setmode(LEVEL_MODE_NORMAL);
                         data->next_scene = SCREEN_LEVEL;
                         level_score_count = 0;
