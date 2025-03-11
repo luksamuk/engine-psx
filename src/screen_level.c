@@ -731,6 +731,8 @@ level_load_level(screen_level_data *data)
     // Negative water means no water
     level_water_y = -1;
 
+    data->level_name = "PLACEHOLDER";
+
     switch(level) {
     case 0: case 1: case 2: case 3: // Playground
         data->level_name = "TEST LEVEL";
@@ -762,12 +764,12 @@ level_load_level(screen_level_data *data)
         level_water_y = 0x002c0000;
         break;
     case 12: case 13:
-        data->level_name = "BLAZING FORCE";
+        /* data->level_name = "R6"; */
         data->level_round = 6;
         data->level_act = level - 12;
         break;
     case 14: case 15:
-        data->level_name = "RADIANT TOMB";
+        /* data->level_name = "R7"; */
         data->level_round = 7;
         data->level_act = level - 14;
         break;
