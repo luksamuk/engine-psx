@@ -19,7 +19,7 @@
 extern int      debug_mode;
 extern uint32_t level_score_count;
 
-uint16_t demo_number = 0;
+uint16_t demo_number = 6;
 
 typedef struct {
     int32_t prect_x;
@@ -197,17 +197,17 @@ screen_title_update(void *d)
                     data->selected = 1;
                     switch(data->menu_option) {
                     case 1: // Continue
-                        // For now, this redirects you to Green Hill Zone 1
+                        // For now, this redirects you to Surely Wood Zone
                         screen_title_reset_demo();
-                        screen_level_setlevel(4);
+                        screen_level_setlevel(6);
                         screen_level_setmode(LEVEL_MODE_NORMAL);
                         data->next_scene = SCREEN_LEVEL;
                         level_score_count = 0;
                         break;
                     case 2: // New Game
-                        // Use Playground Zone 1 as first level
+                        // Use Surely Wood Zone 1 as first level
                         screen_title_reset_demo();
-                        screen_level_setlevel(0);
+                        screen_level_setlevel(6);
                         screen_level_setmode(LEVEL_MODE_NORMAL);
                         data->next_scene = SCREEN_LEVEL;
                         level_score_count = 0;
@@ -446,18 +446,19 @@ screen_title_draw(void *d)
 void
 screen_title_reset_demo()
 {
-    demo_number = 0;
+    demo_number = 6;
 }
 
 void
 screen_title_cycle_demo()
 {
     switch(demo_number) {
-    case 0:  demo_number = 4;  break;
-    case 4:  demo_number = 6;  break;
+    /* case 0:  demo_number = 4;  break; */
+    /* case 4:  demo_number = 6;  break; */
     case 6:  demo_number = 10; break;
-    case 10: demo_number = 16; break;
-    case 16: demo_number = 0;  break;
-    default: demo_number = 0;  break;
+    /* case 10: demo_number = 16; break; */
+    /* case 16: demo_number = 0;  break; */
+    /* default: demo_number = 0;  break; */
+    default: demo_number = 6;  break;
     }
 }

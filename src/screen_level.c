@@ -544,7 +544,7 @@ screen_level_draw(void *d)
         font_draw_hg(buffer, data->tc_act_x, 70 + GLYPH_HG_WHITE_HEIGHT + 40);
 
         // Game text
-        font_set_color(0xc8, 0xc8, 0x00);
+        //font_set_color(0xc8, 0xc8, 0x00);
         uint16_t wt = font_measurew_sm("SONIC XA");
         font_draw_sm("SONIC XA", 50 + ((80 - wt) >> 1), data->tc_ribbon_y + 180);
         font_reset_color();
@@ -554,10 +554,10 @@ screen_level_draw(void *d)
             POLY_G4 *polyg = get_next_prim();
             increment_prim(sizeof(POLY_G4));
             setPolyG4(polyg);
-            setRGB0(polyg, 0x48, 0x48, 0xfc);
-            setRGB1(polyg, 0x48, 0x48, 0xfc);
-            setRGB2(polyg, 0xf0, 0xf0, 0xf0);
-            setRGB3(polyg, 0xf0, 0xf0, 0xf0);
+            setRGB0(polyg, 0xfc, 0xfc, 0xfc);
+            setRGB1(polyg, 0xfc, 0xfc, 0xfc);
+            setRGB2(polyg, 0x00, 0x24, 0xd8);
+            setRGB3(polyg, 0x00, 0x24, 0xd8);
             setXYWH(polyg, 50, data->tc_ribbon_y, 80, 200);
             sort_prim(polyg, OTZ_LAYER_HUD);
 
@@ -571,10 +571,10 @@ screen_level_draw(void *d)
     }
 
     // Demo HUD. Only when playing AutoDemo!
-    if(level_mode == LEVEL_MODE_DEMO) {
-        // Uses HUD layer to draw!
-        font_draw_logo(20, SCREEN_YRES - 65, 120, 45);
-    }
+    /* if(level_mode == LEVEL_MODE_DEMO) { */
+    /*     // Uses HUD layer to draw! */
+    /*     font_draw_logo(20, SCREEN_YRES - 65, 120, 45); */
+    /* } */
 
     // Heads-up display
     if((debug_mode <= 1) && (level_mode != LEVEL_MODE_DEMO)) {
@@ -731,6 +731,8 @@ level_load_level(screen_level_data *data)
     // Negative water means no water
     level_water_y = -1;
 
+    data->level_name = "PLACEHOLDER";
+
     switch(level) {
     case 0: case 1: case 2: case 3: // Playground
         data->level_name = "TEST LEVEL";
@@ -762,12 +764,12 @@ level_load_level(screen_level_data *data)
         level_water_y = 0x002c0000;
         break;
     case 12: case 13:
-        data->level_name = "BLAZING FORCE";
+        /* data->level_name = "R6"; */
         data->level_round = 6;
         data->level_act = level - 12;
         break;
     case 14: case 15:
-        data->level_name = "RADIANT TOMB";
+        /* data->level_name = "R7"; */
         data->level_round = 7;
         data->level_act = level - 14;
         break;
