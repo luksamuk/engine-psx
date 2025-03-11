@@ -25,6 +25,7 @@
 /*
   Locations of common textures on frame buffer:
   ================================================
+  Title screen:   320x0      No CLUT
   Player 1:       320x0;     CLUT: 0x480
   Common objects: 576x0;     CLUT: 0x481 (8-bit only)
   Level tiles:    448x0;     CLUT: 0x482 (4 or 8-bit CLUT)
