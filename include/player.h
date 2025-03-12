@@ -54,6 +54,7 @@ typedef enum {
     ACTION_DROPDASH,
     ACTION_SPRING,
     ACTION_HURT,
+    ACTION_GASP,
 } PlayerAction;
 
 // Alias to make things look less weird

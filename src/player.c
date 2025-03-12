@@ -757,13 +757,16 @@ player_update(Player *player)
     // i-frames
     if(player->iframes > 0) player->iframes--;
 
+    // Update control lock
+    if(player->ctrllock > 0) {
+        if((player->action == ACTION_GASP) || player->grnd) {
+            player->ctrllock--;
+        }
+    }
+
     // X movement
     /* Ground movement */
     if(player->grnd) {
-        if(player->ctrllock > 0) {
-            player->ctrllock--;
-        }
-
         if(player->action == ACTION_ROLLING) {
             // Rolling physics.
             // Slope factor
@@ -825,6 +828,10 @@ player_update(Player *player)
                     player->spinrev++;
                 }
             }
+        } else if(player->action == ACTION_GASP) {
+            // Ignore input while gasping. Release action when control
+            // lock is over
+            if(player->ctrllock <= 0) player_set_action(player, ACTION_NONE);
         } else {
             // Default physics
             player_set_action(player, ACTION_NONE);
@@ -991,6 +998,8 @@ player_update(Player *player)
         } else if(player->vel.vz == 0) {
             if(player->action == ACTION_SPINDASH) {
                 player_set_animation_direct(player, ANIM_ROLLING);
+            } else if(player->action == ACTION_GASP) {
+                player_set_animation_direct(player, ANIM_GASP);
             } else if(player->action == ACTION_PEELOUT) {
                 // Use player->spinrev as a timer for when animations should
                 // play. It builds up from walking to running to peel-out.

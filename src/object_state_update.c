@@ -859,9 +859,9 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             state->props |= OBJ_FLAG_DESTROYED;
             player.remaining_air_frames = 1800;
             // TODO: Cancel any drowning music.
-            // TODO: Setup proper action.
-            player_set_action(&player, ACTION_NONE);
+            player_set_action(&player, ACTION_GASP);
             player_set_animation_direct(&player, ANIM_GASP);
+            player.ctrllock = player.grnd ? 15 : 10;
             player.grnd = 0;
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
             sound_play_vag(sfx_bubble, 0);
