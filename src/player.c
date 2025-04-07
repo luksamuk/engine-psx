@@ -1007,13 +1007,15 @@ player_update(Player *player)
                     player->vel.vy = -player->cnst->y_min_jump;
                 player->holding_jump = 0;
             } else {
-                // Drop dash charge wait
-                if(!player->holding_jump) {
-                    if(player->framecount < 20) {
-                        player->framecount++;
-                    } else {
-                        sound_play_vag(sfx_dropd, 0);
-                        player_set_action(player, ACTION_DROPDASH);
+                if(player->character == CHARA_SONIC) {
+                    // Drop dash charge wait
+                    if(!player->holding_jump) {
+                        if(player->framecount < 20) {
+                            player->framecount++;
+                        } else {
+                            sound_play_vag(sfx_dropd, 0);
+                            player_set_action(player, ACTION_DROPDASH);
+                        }
                     }
                 }
             }
@@ -1389,7 +1391,7 @@ player_draw(Player *player, VECTOR *pos)
                        (int16_t)(pos->vx >> 12) - tail_distance,
                        (int16_t)(pos->vy >> 12),
                        player->anim_dir < 0,
-                       (is_rolling ? 0 : anim_angle)); // TODO: Tail angle
+                       anim_angle); // TODO: Tail angle
     }
     
 }
