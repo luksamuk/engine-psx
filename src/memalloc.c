@@ -26,7 +26,7 @@ alloc_arena_malloc(ArenaAllocator *arena, size_t size)
 {
     if(size == 0) return NULL;
 
-    // Align size so we don't get unaligned memory access
+    // ALIGN SIZE so we don't get unaligned memory access
     size += 8 - (size % 8);
 
     uintptr_t p = (uintptr_t)arena->ptr;

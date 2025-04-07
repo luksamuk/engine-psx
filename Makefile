@@ -35,7 +35,7 @@ chd: ${CHD}
 
 # Target for running the image
 run: ${CUESHEET}
-	pcsx-redux-appimage \
+	pcsx-redux \
 		-run -interpreter -fastboot -stdout \
 		-iso "$<"
 
