@@ -34,10 +34,13 @@ extern PlayerConstants CNST_SPEEDSHOES;
 #define ANIM_DEATH            0x04200167
 #define ANIM_DROWN            0x048a018b
 #define ANIM_GASP             0x02d9012c
-#define ANIM_WATERWALK        0x0da602b3
+#define ANIM_WATERWALK        0x0da602b3 // SONIC ONLY
 #define ANIM_DROP             0x02f80136
 #define ANIM_BALANCELIGHT     0x156c035f
 #define ANIM_BALANCEHEAVY     0x15570364
+
+#define ANIM_TAILIDLE         0x0a6e0249 // MILES ONLY
+#define ANIM_TAILMOVE         0x0ab30262 // MILES ONLY
 
 extern int debug_mode;
 
@@ -99,12 +102,14 @@ extern int32_t    level_water_y;
 
 void
 load_player(Player *player,
+            PlayerCharacter character,
             const char *chara_filename,
             TIM_IMAGE  *sprites)
 {
     player->input = (InputState){ 0 };
     load_chara(&player->chara, chara_filename, sprites);
     player->cur_anim = NULL;
+    player->tail_cur_anim = NULL;
     player->cnst  = &CNST_DEFAULT;
     player->pos   = (VECTOR){ 0 };
     player->vel   = (VECTOR){ 0 };
@@ -136,6 +141,7 @@ load_player(Player *player,
     player->col_ledge = 0;
 
     player->action = ACTION_NONE;
+    player->character = character;
 
     if(sfx_jump.addr == 0)   sfx_jump    = sound_load_vag("\\SFX\\JUMP.VAG;1");
     if(sfx_skid.addr == 0)   sfx_skid    = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
@@ -190,6 +196,44 @@ player_get_animation_by_name(Player *player, const char *name)
 }
 
 void
+_player_set_tail_animation(Player *player, uint32_t anim_sum)
+{ 
+    if(player->character != CHARA_MILES) return;
+    
+    uint32_t tail_sum = ANIM_TAILMOVE;
+    CharaAnim *tail_anim = NULL;
+
+    switch(anim_sum) {
+        /* Animations where the tail is idle */
+    case ANIM_STOPPED:
+    case ANIM_IDLE:
+    case ANIM_CROUCHDOWN:
+    case ANIM_LOOKUP:
+        tail_sum = ANIM_TAILIDLE; // Fallthrough
+        /* Animations where the tail is sideways */
+    case ANIM_WALKING:
+    case ANIM_ROLLING:
+    case ANIM_SKIDDING:
+    case ANIM_PUSHING:
+        tail_anim = player_get_animation(player, tail_sum);
+        break;
+        /* Any animation not described implies on not showing the tail */
+    default: break;
+    }
+
+    if(!tail_anim) {
+        player->tail_cur_anim = NULL;
+        return;
+    }
+    
+    if(tail_anim != player->tail_cur_anim) {
+        player->tail_cur_anim = tail_anim;
+        player->tail_anim_frame = tail_anim->start;
+        player->tail_anim_timer = 7;
+    }
+}
+
+void
 _set_animation_underlying(Player *player, CharaAnim *anim)
 {
     if(player->cur_anim == anim) return;
@@ -201,6 +245,7 @@ _set_animation_underlying(Player *player, CharaAnim *anim)
         player->anim_frame = anim->start;
         player->anim_timer = player->frame_duration;
     }
+    _player_set_tail_animation(player, anim->hname);
 }
 
 void
@@ -219,6 +264,7 @@ void
 player_set_animation_direct(Player *player, uint32_t sum)
 {
     _set_animation_underlying(player, player_get_animation(player, sum));
+    _player_set_tail_animation(player, sum);
 }
 
 void
@@ -1054,7 +1100,8 @@ player_update(Player *player)
                 player_set_animation_direct(player, ANIM_PEELOUT);
             } else if(abs(player->vel.vz) >= (6 << 12) - 0xff) {
                 player_set_animation_direct(player, ANIM_RUNNING);
-            } else if(player->underwater && abs(player->vel.vz) >= (4 << 12)) {
+            } else if((player->character == CHARA_SONIC) &&
+                (player->underwater && abs(player->vel.vz) >= (4 << 12))) {
                 player_set_animation_direct(player, ANIM_WATERWALK);
             } else player_set_animation_direct(player, ANIM_WALKING);
         }
@@ -1139,6 +1186,18 @@ player_update(Player *player)
             if(player->anim_frame > player->cur_anim->end)
                 player->anim_frame = player->cur_anim->start + player->loopback_frame;
         } else player->anim_timer--;
+    }
+
+    if((player->character == CHARA_MILES) && player->tail_cur_anim) {
+        if(player->tail_cur_anim->start >= player->tail_cur_anim->end)
+            player->tail_anim_frame = player->tail_cur_anim->start;
+        else if(player->tail_anim_timer == 0) {
+            player->tail_anim_timer = 7; // Tail animation frame duration
+            player->tail_anim_frame++;
+            if(player->tail_anim_frame > player->tail_cur_anim->end) {
+                player->tail_anim_frame = player->tail_cur_anim->start; // No loopback
+            }
+        } else player->tail_anim_timer--;
     }
 
     // Speed shoes
@@ -1303,14 +1362,34 @@ player_draw(Player *player, VECTOR *pos)
 {
     uint8_t is_rolling = (player_get_current_animation_hash(player) == ANIM_ROLLING);
     int32_t anim_angle = -_snap_angle(player->angle);
+    uint8_t show_character = (((player->iframes >> 2) % 2) == 0);
+    
     // if iframes, do not show for every 4 frames
-    if(player->cur_anim && ((player->iframes >> 2) % 2) == 0) {
+    if(player->cur_anim && show_character) {
         chara_draw_gte(&player->chara,
                        player->anim_frame,
                        (int16_t)(pos->vx >> 12),
                        (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : 0),
                        player->anim_dir < 0,
                        (is_rolling ? 0 : anim_angle));
+    }
+
+    // Miles' tail
+    if((player->character == CHARA_MILES)
+       && player->tail_cur_anim
+       && show_character) {
+        
+        int16_t tail_distance = is_rolling
+            ? 8
+            : 0;
+        if(player->anim_dir < 0) tail_distance *= -1;
+        
+        chara_draw_gte(&player->chara,
+                       player->tail_anim_frame,
+                       (int16_t)(pos->vx >> 12) - tail_distance,
+                       (int16_t)(pos->vy >> 12),
+                       player->anim_dir < 0,
+                       (is_rolling ? 0 : anim_angle)); // TODO: Tail angle
     }
     
 }

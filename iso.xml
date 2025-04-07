@@ -23,6 +23,12 @@
 	<file name="SONIC.CHARA"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/SONIC.CHARA" />
+	<file name="MILES.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/MILES.TIM" />
+	<file name="MILES.CHARA"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/MILES.CHARA" />
 	<file name="BASEFONT.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/BASEFONT.TIM" />

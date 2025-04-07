@@ -125,6 +125,8 @@ names = [
     "DROP",
     "BALANCELIGHT",
     "BALANCEHEAVY",
+    "TAILIDLE",
+    "TAILMOVE",
 ]
 
 def get_hash(name):
@@ -160,6 +162,8 @@ print_hashes(names)
 #define ANIM_DROP             0x02f80136
 #define ANIM_BALANCELIGHT     0x156c035f
 #define ANIM_BALANCEHEAVY     0x15570364
+#define ANIM_TAILIDLE         0x0a6e0249
+#define ANIM_TAILMOVE         0x0ab30262
 #+end_example
 
 * Generating 8x8 tiles and their 16x16 mappings

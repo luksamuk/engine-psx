@@ -8,30 +8,6 @@
 #include "input.h"
 #include "player_constants.h"
 
-/* #define X_ACCEL          0x000c0 */
-/* #define X_AIR_ACCEL      0x00180 */
-/* #define X_FRICTION       0x000c0 */
-/* #define X_DECEL          0x00800 */
-/* #define X_TOP_SPD        0x06000 */
-/* #define Y_GRAVITY        0x00380 */
-/* #define Y_HURT_GRAVITY   0x00300 */
-/* #define Y_MIN_JUMP       0x04000 */
-/* #define Y_JUMP_STRENGTH  0x06800 */
-/* #define X_MIN_ROLL_SPD   0x01000 */
-/* #define X_MIN_UNCURL_SPD 0x00800 */
-/* #define X_ROLL_FRICTION  0x00060 */
-/* #define X_ROLL_DECEL     0x00200 */
-/* #define X_SLOPE_MIN_SPD  0x000d0 */
-/* #define X_SLOPE_NORMAL   0x00200 */
-/* #define X_SLOPE_ROLLUP   0x00140 */
-/* #define X_SLOPE_ROLLDOWN 0x00500 */
-/* #define X_MAX_SPD        0x10000 */
-/* #define X_MAX_SLIP_SPD   0x02800 */
-/* #define X_DRPSPD         0x08000 */
-/* #define X_DRPMAX         0x0c000 */
-/* #define Y_HURT_FORCE     0x04000 */
-/* #define X_HURT_FORCE     0x02000 */
-
 // Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      9
 #define HEIGHT_RADIUS_NORMAL    19
@@ -41,6 +17,11 @@
 #define PUSH_RADIUS             10
 
 #define PLAYER_HURT_IFRAMES     120
+
+typedef enum {
+    CHARA_SONIC = 0,
+    CHARA_MILES = 1,
+} PlayerCharacter;
 
 typedef enum {
     ACTION_NONE,
@@ -64,13 +45,18 @@ typedef struct {
     InputState       input;
     PlayerConstants *cnst;
     Chara            chara;
+    PlayerCharacter  character;
 
     CharaAnim *cur_anim;
+    CharaAnim *tail_cur_anim;
     VECTOR    pos;
     VECTOR    vel; // vel.vz = ground speed
     int32_t   angle;
+    int32_t   tail_angle;
     uint8_t   anim_frame;
     uint8_t   anim_timer;
+    uint8_t   tail_anim_frame;
+    uint8_t   tail_anim_timer;
     uint8_t   frame_duration;
     uint8_t   loopback_frame;
     int8_t    anim_dir;
@@ -110,7 +96,7 @@ typedef struct {
     VECTOR respawnpos;
 } Player;
 
-void load_player(Player *player, const char *chara_filename, TIM_IMAGE  *sprites);
+void load_player(Player *player, PlayerCharacter character, const char *chara_filename, TIM_IMAGE  *sprites);
 void free_player(Player *player);
 
 void      player_set_animation(Player *player, const char *name);

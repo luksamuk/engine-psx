@@ -24,6 +24,7 @@ extern int debug_mode;
 extern PlayerConstants CNST_DEFAULT;
 
 static uint8_t level = 0;
+static PlayerCharacter level_character = CHARA_MILES;
 
 // Accessible in other source
 Player      player;
@@ -42,7 +43,7 @@ LEVELMODE   level_mode;
 
 
 // Forward function declarations
-static void level_load_player();
+static void level_load_player(PlayerCharacter character);
 static void level_load_level();
 static void level_set_clearcolor();
 static void level_play_music(uint8_t round, uint8_t act);
@@ -88,7 +89,7 @@ screen_level_load()
 
     camera_init(&camera);
 
-    level_load_player();
+    level_load_player(level_character);
     level_load_level(data);
     camera_set(&camera, player.pos.vx, player.pos.vy);
 
@@ -708,17 +709,29 @@ screen_level_getlevel(void)
 /* ============================== */
 
 static void
-level_load_player()
+level_load_player(PlayerCharacter character)
 {
+    const char *chara_file = "\\SPRITES\\SONIC.CHARA;1";
+    const char *tim_file = "\\SPRITES\\SONIC.TIM;1";
+
+    switch(character) {
+    case CHARA_MILES:
+        chara_file = "\\SPRITES\\MILES.CHARA;1";
+        tim_file = "\\SPRITES\\MILES.TIM;1";
+        break;
+    case CHARA_SONIC:
+    default: break;
+    }
+    
     uint32_t filelength;
     TIM_IMAGE tim;
-    uint8_t *timfile = file_read("\\SPRITES\\SONIC.TIM;1", &filelength);
+    uint8_t *timfile = file_read(tim_file, &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
         free(timfile);
     }
 
-    load_player(&player, "\\SPRITES\\SONIC.CHARA;1", &tim);
+    load_player(&player, character, chara_file, &tim);
     player.startpos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
     player.pos = player.startpos;
 }
@@ -989,6 +1002,12 @@ void
 screen_level_setmode(LEVELMODE mode)
 {
     level_mode = mode;
+}
+
+void
+screen_level_setcharacter(PlayerCharacter character)
+{
+    level_character = character;
 }
 
 
