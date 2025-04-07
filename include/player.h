@@ -54,7 +54,6 @@ typedef struct {
     VECTOR    pos;
     VECTOR    vel; // vel.vz = ground speed
     int32_t   angle;
-    int32_t   tail_angle;
     uint8_t   anim_frame;
     uint8_t   anim_timer;
     uint8_t   tail_anim_frame;

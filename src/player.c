@@ -1365,6 +1365,7 @@ player_draw(Player *player, VECTOR *pos)
     uint8_t is_rolling = (player_get_current_animation_hash(player) == ANIM_ROLLING);
     int32_t anim_angle = -_snap_angle(player->angle);
     uint8_t show_character = (((player->iframes >> 2) % 2) == 0);
+    uint8_t facing_left = (player->anim_dir < 0);
     
     // if iframes, do not show for every 4 frames
     if(player->cur_anim && show_character) {
@@ -1372,7 +1373,7 @@ player_draw(Player *player, VECTOR *pos)
                        player->anim_frame,
                        (int16_t)(pos->vx >> 12),
                        (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : 0),
-                       player->anim_dir < 0,
+                       facing_left,
                        (is_rolling ? 0 : anim_angle));
     }
 
@@ -1381,17 +1382,33 @@ player_draw(Player *player, VECTOR *pos)
        && player->tail_cur_anim
        && show_character) {
         
-        int16_t tail_distance = is_rolling
-            ? 8
-            : 0;
+        int32_t tail_distance = (is_rolling ? 8 : 0) << 12;
         if(player->anim_dir < 0) tail_distance *= -1;
+        
+        int32_t tail_angle = anim_angle;
+        if(!player->grnd) {
+            if(player->vel.vx == 0) {
+                if(player->vel.vy < 0) {
+                    tail_angle = facing_left ? 0x400 : 0xc00;
+                } else tail_angle = facing_left ? 0xc00 : 0x400;
+            } else {
+                if(player->vel.vy < -(player->cnst->y_min_jump >> 1)) {
+                    tail_angle = facing_left ? 0x200 : 0xe00;
+                } else if(player->vel.vy > (player->cnst->y_min_jump >> 1)) {
+                    tail_angle = facing_left ? 0xe00 : 0x200;
+                } else tail_angle = 0x000;
+            }
+        }
+
+        int16_t tail_distance_x = (tail_distance * rcos(tail_angle)) >> 24;
+        int16_t tail_distance_y = (tail_distance * rsin(tail_angle)) >> 24;
         
         chara_draw_gte(&player->chara,
                        player->tail_anim_frame,
-                       (int16_t)(pos->vx >> 12) - tail_distance,
-                       (int16_t)(pos->vy >> 12),
-                       player->anim_dir < 0,
-                       anim_angle); // TODO: Tail angle
+                       (int16_t)(pos->vx >> 12) - tail_distance_x,
+                       (int16_t)(pos->vy >> 12) - tail_distance_y,
+                       facing_left,
+                       tail_angle);
     }
     
 }
