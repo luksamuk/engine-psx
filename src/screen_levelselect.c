@@ -68,7 +68,7 @@ static const char *menutext[] = {
     "\n",
     "SOUND TEST  *??*",
     "SLIDE TEST  *??*",
-    "CHARACTER   *??*",
+    "CHARA   ????????",
     "\n",
     "\n",
     "\n",
@@ -315,8 +315,14 @@ screen_levelselect_draw(void *d)
             font_draw_sm(buffer, vx, vy);
         } else if(cursel == CHOICE_CHARACTER) {
             char buffer[80];
-            snprintf(buffer, 80, "CHARACTER   *%02X*",
-                     data->character_selection);
+            const char *charaname = "";
+            switch(data->character_selection) {
+            case CHARA_SONIC: charaname = "SONIC";   break;
+            case CHARA_MILES: charaname = "MILES";   break;
+            default:          charaname = "UNKNOWN"; break;
+            }
+            snprintf(buffer, 80, "CHARA   %8s",
+                     charaname);
             font_draw_sm(buffer, vx, vy);
         } else font_draw_sm(*txt, vx, vy);
         
