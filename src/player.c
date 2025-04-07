@@ -1387,7 +1387,7 @@ player_draw(Player *player, VECTOR *pos)
         
         int32_t tail_angle = anim_angle;
         if(!player->grnd) {
-            if(player->vel.vx == 0) {
+            if(abs(player->vel.vx) <= player->cnst->x_min_roll_spd) {
                 if(player->vel.vy < 0) {
                     tail_angle = facing_left ? 0x400 : 0xc00;
                 } else tail_angle = facing_left ? 0xc00 : 0x400;
