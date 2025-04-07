@@ -107,7 +107,7 @@ screen_levelselect_load()
     data->music_selected = 0;
     data->soundtest_selection = 0x00;
     data->slidetest_selection = 0x00;
-    data->character_selection = CHARA_SONIC;
+    data->character_selection = screen_level_getcharacter();
 
     // Regardless of the level, reset score.
     // You're already cheating, I'm not going to allow you

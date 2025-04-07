@@ -1010,6 +1010,12 @@ screen_level_setcharacter(PlayerCharacter character)
     level_character = character;
 }
 
+PlayerCharacter
+screen_level_getcharacter()
+{
+    return level_character;
+}
+
 
 static void
 level_play_music(uint8_t round, uint8_t act)

@@ -21,5 +21,6 @@ void    screen_level_setstate(uint8_t state);
 uint8_t screen_level_getstate();
 void    screen_level_setmode(LEVELMODE mode);
 void    screen_level_setcharacter(PlayerCharacter character);
+PlayerCharacter screen_level_getcharacter();
 
 #endif
