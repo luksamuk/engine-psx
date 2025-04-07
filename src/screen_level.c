@@ -24,7 +24,7 @@ extern int debug_mode;
 extern PlayerConstants CNST_DEFAULT;
 
 static uint8_t level = 0;
-static PlayerCharacter level_character = CHARA_MILES;
+static PlayerCharacter level_character = CHARA_SONIC;
 
 // Accessible in other source
 Player      player;

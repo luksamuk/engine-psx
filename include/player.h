@@ -23,6 +23,8 @@ typedef enum {
     CHARA_MILES = 1,
 } PlayerCharacter;
 
+#define CHARA_MAX CHARA_MILES
+
 typedef enum {
     ACTION_NONE,
     ACTION_SKIDDING,

@@ -13,13 +13,15 @@
 #include "util.h"
 #include "timer.h"
 #include "basic_font.h"
+#include "player.h"
 
 #define CHOICE_SOUNDTEST  20
 #define CHOICE_SLIDE      21
-#define CHOICE_SPRITETEST 22
-#define CHOICE_MODELTEST  23
-#define CHOICE_TITLE      24
-#define CHOICE_CREDITS    25
+#define CHOICE_CHARACTER  22
+#define CHOICE_SPRITETEST 23
+#define CHOICE_MODELTEST  24
+#define CHOICE_TITLE      25
+#define CHOICE_CREDITS    26
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
 #define MAX_COLUMN_CHOICES 17
 
@@ -39,6 +41,7 @@ typedef struct {
     uint8_t  music_selected;
     uint8_t  soundtest_selection;
     uint8_t  slidetest_selection;
+    uint8_t  character_selection;
 } screen_levelselect_data;
 
 static const char *menutext[] = {
@@ -65,7 +68,7 @@ static const char *menutext[] = {
     "\n",
     "SOUND TEST  *??*",
     "SLIDE TEST  *??*",
-    "\n",
+    "CHARACTER   *??*",
     "\n",
     "\n",
     "\n",
@@ -104,6 +107,7 @@ screen_levelselect_load()
     data->music_selected = 0;
     data->soundtest_selection = 0x00;
     data->slidetest_selection = 0x00;
+    data->character_selection = CHARA_SONIC;
 
     // Regardless of the level, reset score.
     // You're already cheating, I'm not going to allow you
@@ -180,6 +184,16 @@ screen_levelselect_update(void *d)
                 data->slidetest_selection = 0;
             else data->slidetest_selection++;
         }
+    } else if(data->menu_choice == CHOICE_CHARACTER) {
+        if(pad_pressed(PAD_LEFT)) {
+            if(data->character_selection == 0)
+                data->character_selection = CHARA_MAX;
+            else data->character_selection--;
+        } else if(pad_pressed(PAD_RIGHT)) {
+            if(data->character_selection == CHARA_MAX)
+                data->character_selection = 0;
+            else data->character_selection++;
+        }
     }
 
     if(pad_pressed(PAD_DOWN))
@@ -190,6 +204,7 @@ screen_levelselect_update(void *d)
     } else if(
         (data->menu_choice != CHOICE_SOUNDTEST)
         && (data->menu_choice != CHOICE_SLIDE)
+        && (data->menu_choice != CHOICE_CHARACTER)
         && (pad_pressed(PAD_LEFT) || pad_pressed(PAD_RIGHT))) {
         if(data->menu_choice < MAX_COLUMN_CHOICES - 1) {
             data->menu_choice += MAX_COLUMN_CHOICES - 1;
@@ -223,6 +238,7 @@ screen_levelselect_update(void *d)
         } else {
             screen_level_setlevel(data->menu_choice);
             screen_level_setmode(LEVEL_MODE_NORMAL);
+            screen_level_setcharacter(data->character_selection);
             // Start auto-demo
             if(pad_pressing(PAD_TRIANGLE)) {
                 screen_level_setmode(LEVEL_MODE_DEMO);
@@ -296,6 +312,11 @@ screen_levelselect_draw(void *d)
             char buffer[80];
             snprintf(buffer, 80, "SLIDE TEST  *%02X*",
                      data->slidetest_selection);
+            font_draw_sm(buffer, vx, vy);
+        } else if(cursel == CHOICE_CHARACTER) {
+            char buffer[80];
+            snprintf(buffer, 80, "CHARACTER   *%02X*",
+                     data->character_selection);
             font_draw_sm(buffer, vx, vy);
         } else font_draw_sm(*txt, vx, vy);
         
