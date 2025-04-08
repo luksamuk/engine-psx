@@ -8,9 +8,12 @@
 #include "timer.h"
 #include "basic_font.h"
 #include "screens/sprite_test.h"
+#include "player.h"
 
 extern uint8_t level_fade;
 extern uint8_t frame_debug;
+
+static PlayerCharacter spritetest_character = CHARA_SONIC;
 
 typedef struct {
     Chara chara;
@@ -27,13 +30,26 @@ screen_sprite_test_load()
 
     uint32_t filelength;
     TIM_IMAGE tim;
-    uint8_t *timfile = file_read("\\SPRITES\\SONIC.TIM;1", &filelength);
+
+    const char *chara_file = "\\SPRITES\\SONIC.CHARA;1";
+    const char *tim_file = "\\SPRITES\\SONIC.TIM;1";
+
+    switch(spritetest_character) {
+    case CHARA_MILES:
+        chara_file = "\\SPRITES\\MILES.CHARA;1";
+        tim_file = "\\SPRITES\\MILES.TIM;1";
+        break;
+    case CHARA_SONIC:
+    default: break;
+    }
+    
+    uint8_t *timfile = file_read(tim_file, &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
         free(timfile);
     }
     
-    load_chara(&data->chara, "\\SPRITES\\SONIC.CHARA;1", &tim);
+    load_chara(&data->chara, chara_file, &tim);
 
     data->frame = 0;
     data->play_frames = 0;
@@ -130,4 +146,10 @@ screen_sprite_test_draw(void *d)
                    (int16_t)CENTERY,
                    data->flipx,
                    data->angle);
+}
+
+void
+screen_sprite_test_setcharacter(PlayerCharacter character)
+{
+    spritetest_character = character;
 }

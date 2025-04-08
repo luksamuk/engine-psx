@@ -14,6 +14,7 @@
 #include "timer.h"
 #include "basic_font.h"
 #include "player.h"
+#include "screens/sprite_test.h"
 
 #define CHOICE_SOUNDTEST  20
 #define CHOICE_SLIDE      21
@@ -234,6 +235,8 @@ screen_levelselect_update(void *d)
                 data->music_selected = data->soundtest_selection - 1;
             }
         } else if(data->menu_choice == CHOICE_SPRITETEST) {
+            screen_level_setcharacter(data->character_selection);
+            screen_sprite_test_setcharacter(data->character_selection);
             scene_change(SCREEN_SPRITETEST);
         } else {
             screen_level_setlevel(data->menu_choice);
