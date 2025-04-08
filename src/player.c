@@ -49,6 +49,18 @@ extern PlayerConstants CNST_SPEEDSHOES;
 #define ANIM_TAILMOVE         0x0ab30262 // MILES ONLY
 #define ANIM_TAILFLY          0x08390216 // MILES ONLY
 
+#define ANIM_CLIMBSTOP        0x0d1102ae // KNUCKLKES ONLY
+#define ANIM_CLIMBUP          0x0805020d // KNUCKLKES ONLY
+#define ANIM_CLIMBDOWN        0x0cd402a0 // KNUCKLKES ONLY
+#define ANIM_CLIMBRISE        0x0ce9029b // KNUCKLKES ONLY
+#define ANIM_CLIMBEND         0x0a22023f // KNUCKLKES ONLY
+#define ANIM_GLIDE            0x04400166 // KNUCKLKES ONLY
+#define ANIM_GLIDETURNA       0x100902f0 // KNUCKLKES ONLY
+#define ANIM_GLIDETURNB       0x100a02f1 // KNUCKLKES ONLY
+#define ANIM_GLIDECANCEL      0x1252030c // KNUCKLKES ONLY
+#define ANIM_GLIDELAND        0x0cab0285 // KNUCKLKES ONLY
+#define ANIM_GLIDERISE        0x0ce60299 // KNUCKLKES ONLY
+
 extern int debug_mode;
 
 SoundEffect sfx_jump   = { 0 };
@@ -1430,7 +1442,6 @@ player_draw(Player *player, VECTOR *pos)
                        facing_left,
                        tail_angle);
     }
-    
 }
 
 void _player_set_hurt(Player *player, int32_t hazard_x);

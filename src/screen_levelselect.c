@@ -320,8 +320,9 @@ screen_levelselect_draw(void *d)
             char buffer[80];
             const char *charaname = "";
             switch(data->character_selection) {
-            case CHARA_SONIC: charaname = "SONIC";   break;
-            case CHARA_MILES: charaname = "MILES";   break;
+            case CHARA_SONIC:    charaname = "SONIC";    break;
+            case CHARA_MILES:    charaname = "MILES";    break;
+            case CHARA_KNUCKLES: charaname = "KNUCKLES"; break;
             default:          charaname = "UNKNOWN"; break;
             }
             snprintf(buffer, 80, "CHARA   %8s",

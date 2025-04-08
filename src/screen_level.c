@@ -719,6 +719,10 @@ level_load_player(PlayerCharacter character)
         chara_file = "\\SPRITES\\MILES.CHARA;1";
         tim_file = "\\SPRITES\\MILES.TIM;1";
         break;
+    case CHARA_KNUCKLES:
+        chara_file = "\\SPRITES\\KNUX.CHARA;1";
+        tim_file = "\\SPRITES\\KNUX.TIM;1";
+        break;
     case CHARA_SONIC:
     default: break;
     }

@@ -29,6 +29,12 @@
 	<file name="MILES.CHARA"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/MILES.CHARA" />
+	<file name="KNUX.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/KNUX.TIM" />
+	<file name="KNUX.CHARA"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/KNUX.CHARA" />
 	<file name="BASEFONT.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/BASEFONT.TIM" />

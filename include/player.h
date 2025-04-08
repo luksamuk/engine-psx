@@ -21,9 +21,10 @@
 typedef enum {
     CHARA_SONIC = 0,
     CHARA_MILES = 1,
+    CHARA_KNUCKLES = 2,
 } PlayerCharacter;
 
-#define CHARA_MAX CHARA_MILES
+#define CHARA_MAX CHARA_KNUCKLES
 
 typedef enum {
     ACTION_NONE,
