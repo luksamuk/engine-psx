@@ -21,7 +21,6 @@
 #include "demo.h"
 
 extern int debug_mode;
-extern PlayerConstants CNST_DEFAULT;
 
 static uint8_t level = 0;
 static PlayerCharacter level_character = CHARA_SONIC;
@@ -300,7 +299,7 @@ screen_level_update(void *d)
             player.vel.vx = player.vel.vy = player.vel.vz = 0;
             player.psmode = player.gsmode = CDIR_FLOOR;
             player.underwater = 0;
-            player.cnst = &CNST_DEFAULT;
+            player.cnst = getconstants(player.character, PC_DEFAULT);
             player.speedshoes_frames = (player.speedshoes_frames > 0) ? 0 : -1;
         }
 

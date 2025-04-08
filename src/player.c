@@ -10,10 +10,7 @@
 #include "camera.h"
 #include "collision.h"
 #include "basic_font.h"
-
-extern PlayerConstants CNST_DEFAULT;
-extern PlayerConstants CNST_UNDERWATER;
-extern PlayerConstants CNST_SPEEDSHOES;
+#include "player_constants.h"
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
@@ -125,11 +122,12 @@ load_player(Player *player,
             const char *chara_filename,
             TIM_IMAGE  *sprites)
 {
+    player->character = character;
     player->input = (InputState){ 0 };
     load_chara(&player->chara, chara_filename, sprites);
     player->cur_anim = NULL;
     player->tail_cur_anim = NULL;
-    player->cnst  = &CNST_DEFAULT;
+    player->cnst  = getconstants(character, PC_DEFAULT);
     player->pos   = (VECTOR){ 0 };
     player->vel   = (VECTOR){ 0 };
     player->angle = 0;
@@ -160,7 +158,6 @@ load_player(Player *player,
     player->col_ledge = 0;
 
     player->action = ACTION_NONE;
-    player->character = character;
 
     if(sfx_jump.addr == 0)   sfx_jump    = sound_load_vag("\\SFX\\JUMP.VAG;1");
     if(sfx_skid.addr == 0)   sfx_skid    = sound_load_vag("\\SFX\\SKIDDING.VAG;1");
@@ -1233,7 +1230,7 @@ player_update(Player *player)
     if(player->speedshoes_frames == 0) {
         // Reset constants.
         // Notice that speedshoes_frames is set to -1 by general level update.
-        player->cnst = player->underwater ? &CNST_UNDERWATER : &CNST_DEFAULT;
+        player->cnst = getconstants(player->character, player->underwater ? PC_UNDERWATER : PC_DEFAULT);
     }
 
     // Underwater / leaving water
@@ -1245,16 +1242,18 @@ player_update(Player *player)
 
             // Change constants accordingly!
             if(player->underwater) { // Entered underwater state
-                player->cnst = &CNST_UNDERWATER;
+                player->cnst = getconstants(player->character, PC_UNDERWATER);
                 // Halve player's X speed
                 if(player->grnd) player->vel.vz = player->vel.vz >> 1;
                 else player->vel.vx = player->vel.vx >> 1;
                 // Quarter player's Y speed
                 player->vel.vy = player->vel.vy >> 2;
             } else {
-                player->cnst = (player->speedshoes_frames > 0)
-                    ? &CNST_SPEEDSHOES
-                    : &CNST_DEFAULT;
+                player->cnst = getconstants(
+                    player->character,
+                    (player->speedshoes_frames > 0)
+                    ? PC_SPEEDSHOES
+                    : PC_DEFAULT);
                 // Double Y speed, limiting it to -16.0 (0x00010000)
                 player->vel.vy = MAX(player->vel.vy << 1, -0x10000);
             }

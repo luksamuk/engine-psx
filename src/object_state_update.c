@@ -22,7 +22,6 @@
 // Extern elements
 extern Player player;
 extern Camera camera;
-extern PlayerConstants CNST_SPEEDSHOES;
 extern TileMap16  map16;
 extern TileMap128 map128;
 extern LevelData  leveldata;
@@ -617,7 +616,7 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
         case MONITOR_KIND_SPEEDSHOES:
             // Start speed shoes count
             player.speedshoes_frames = 1200; // 20 seconds
-            player.cnst = &CNST_SPEEDSHOES;
+            player.cnst = getconstants(player.character, PC_SPEEDSHOES);
             sound_bgm_play(BGM_SPEEDSHOES);
             break;
         default: break;

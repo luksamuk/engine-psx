@@ -44,6 +44,15 @@ typedef enum {
 // Alias to make things look less weird
 typedef LinecastDirection CollMode;
 
+typedef enum {
+    PC_DEFAULT,
+    PC_UNDERWATER,
+    PC_SPEEDSHOES,
+} PlayerConstantType;
+
+// declared in player_constants.c
+PlayerConstants *getconstants(PlayerCharacter, PlayerConstantType);
+
 typedef struct {
     InputState       input;
     PlayerConstants *cnst;
