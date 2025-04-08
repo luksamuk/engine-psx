@@ -125,8 +125,14 @@ names = [
     "DROP",
     "BALANCELIGHT",
     "BALANCEHEAVY",
+    "FLYUP",
+    "FLYDOWN",
+    "FLYTIRED",
+    "SWIMMING",
+    "SWIMTIRED",
     "TAILIDLE",
     "TAILMOVE",
+    "TAILFLY",
 ]
 
 def get_hash(name):
@@ -162,8 +168,14 @@ print_hashes(names)
 #define ANIM_DROP             0x02f80136
 #define ANIM_BALANCELIGHT     0x156c035f
 #define ANIM_BALANCEHEAVY     0x15570364
+#define ANIM_FLYUP            0x04980191
+#define ANIM_FLYDOWN          0x086f0224
+#define ANIM_FLYTIRED         0x0aee0264
+#define ANIM_SWIMMING         0x0b2a026c
+#define ANIM_SWIMTIRED        0x0e0502b9
 #define ANIM_TAILIDLE         0x0a6e0249
 #define ANIM_TAILMOVE         0x0ab30262
+#define ANIM_TAILFLY          0x08390216
 #+end_example
 
 * Generating 8x8 tiles and their 16x16 mappings

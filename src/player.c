@@ -39,8 +39,14 @@ extern PlayerConstants CNST_SPEEDSHOES;
 #define ANIM_BALANCELIGHT     0x156c035f
 #define ANIM_BALANCEHEAVY     0x15570364
 
+#define ANIM_FLYUP            0x04980191 // MILES ONLY
+#define ANIM_FLYDOWN          0x086f0224 // MILES ONLY
+#define ANIM_FLYTIRED         0x0aee0264 // MILES ONLY
+#define ANIM_SWIMMING         0x0b2a026c // MILES ONLY
+#define ANIM_SWIMTIRED        0x0e0502b9 // MILES ONLY
 #define ANIM_TAILIDLE         0x0a6e0249 // MILES ONLY
 #define ANIM_TAILMOVE         0x0ab30262 // MILES ONLY
+#define ANIM_TAILFLY          0x08390216 // MILES ONLY
 
 extern int debug_mode;
 
