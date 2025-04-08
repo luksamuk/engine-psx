@@ -1374,8 +1374,10 @@ _snap_angle(int32_t angle)
 void
 player_draw(Player *player, VECTOR *pos)
 {
+    uint8_t is_rolling_angle =
+        (player_get_current_animation_hash(player) == ANIM_ROLLING);
     uint8_t is_rolling =
-        (player_get_current_animation_hash(player) == ANIM_ROLLING)
+        is_rolling_angle
         || (player_get_current_animation_hash(player) == ANIM_SPINDASH);
     int32_t anim_angle = -_snap_angle(player->angle);
     uint8_t show_character = (((player->iframes >> 2) % 2) == 0);
@@ -1388,7 +1390,7 @@ player_draw(Player *player, VECTOR *pos)
                        (int16_t)(pos->vx >> 12),
                        (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : 0),
                        facing_left,
-                       (is_rolling ? 0 : anim_angle));
+                       (is_rolling_angle ? 0 : anim_angle));
     }
 
     // Miles' tail
