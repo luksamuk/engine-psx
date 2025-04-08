@@ -1391,20 +1391,24 @@ player_draw(Player *player, VECTOR *pos)
         
         int32_t tail_distance = (is_rolling ? 8 : 0) << 12;
         if(player->anim_dir < 0) tail_distance *= -1;
+
+        uint8_t moving_towards_dir =
+            (!player->grnd) || (SIGNUM(player->vel.vz) == player->anim_dir);
         
         int32_t tail_angle = anim_angle;
-        if(!player->grnd) {
-            if(abs(player->vel.vx) <= player->cnst->x_min_roll_spd) {
-                if(player->vel.vy < 0) {
-                    tail_angle = facing_left ? 0x400 : 0xc00;
-                } else tail_angle = facing_left ? 0xc00 : 0x400;
-            } else {
+        if(((player->action == ACTION_JUMPING)
+            || (player->action == ACTION_ROLLING))) {
                 if(player->vel.vy < -(player->cnst->y_min_jump >> 1)) {
-                    tail_angle = facing_left ? 0x200 : 0xe00;
+                    if(abs(player->vel.vx) <= player->cnst->x_min_roll_spd)
+                        tail_angle = facing_left ? 0x400 : 0xc00;
+                    else if(!moving_towards_dir) tail_angle = 0x000;
+                    else tail_angle = facing_left ? 0x200 : 0xe00;
                 } else if(player->vel.vy > (player->cnst->y_min_jump >> 1)) {
-                    tail_angle = facing_left ? 0xe00 : 0x200;
+                    if(abs(player->vel.vx) <= player->cnst->x_min_roll_spd)
+                        tail_angle = facing_left ? 0xc00 : 0x400;
+                    else if(!moving_towards_dir) tail_angle = 0x000;
+                    else tail_angle = facing_left ? 0xe00 : 0x200;
                 } else tail_angle = 0x000;
-            }
         }
 
         int16_t tail_distance_x = (tail_distance * rcos(tail_angle)) >> 24;
