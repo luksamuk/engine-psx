@@ -238,6 +238,8 @@ screen_levelselect_update(void *d)
             screen_level_setcharacter(data->character_selection);
             screen_sprite_test_setcharacter(data->character_selection);
             scene_change(SCREEN_SPRITETEST);
+        } else if(data->menu_choice == CHOICE_CHARACTER) {
+            // Do nothing
         } else {
             screen_level_setlevel(data->menu_choice);
             screen_level_setmode(LEVEL_MODE_NORMAL);
