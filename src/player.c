@@ -24,6 +24,7 @@ extern PlayerConstants CNST_SPEEDSHOES;
 #define ANIM_WALKING          0x0854020e
 #define ANIM_RUNNING          0x08bf0222
 #define ANIM_ROLLING          0x08890218
+#define ANIM_SPINDASH         0x0acd025b
 #define ANIM_SKIDDING         0x0a85024e
 #define ANIM_PEELOUT          0x0849021f
 #define ANIM_PUSHING          0x08b2021f
@@ -219,6 +220,7 @@ _player_set_tail_animation(Player *player, uint32_t anim_sum)
         /* Animations where the tail is sideways */
     case ANIM_WALKING:
     case ANIM_ROLLING:
+    case ANIM_SPINDASH:
     case ANIM_SKIDDING:
     case ANIM_PUSHING:
         tail_anim = player_get_animation(player, tail_sum);
@@ -945,7 +947,7 @@ player_update(Player *player)
                           && player->vel.vz == 0
                           && input_pressed(&player->input, PAD_CROSS)) { // Spindash
                     player_set_action(player, ACTION_SPINDASH);
-                    player_set_animation_direct(player, ANIM_ROLLING);
+                    player_set_animation_direct(player, ANIM_SPINDASH);
                     player->spinrev = 0;
                     sound_play_vag(sfx_dash, 0);
                 }
@@ -1052,7 +1054,7 @@ player_update(Player *player)
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
         } else if(player->vel.vz == 0) {
             if(player->action == ACTION_SPINDASH) {
-                player_set_animation_direct(player, ANIM_ROLLING);
+                player_set_animation_direct(player, ANIM_SPINDASH);
             } else if(player->action == ACTION_GASP) {
                 player_set_animation_direct(player, ANIM_GASP);
             } else if(player->action == ACTION_PEELOUT) {
@@ -1149,8 +1151,11 @@ player_update(Player *player)
                 player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
                 break;
 
+            case ANIM_SPINDASH:
+                player_set_frame_duration(player, 0);
+                break;
             case ANIM_ROLLING:
-                if(player->action == ACTION_SPINDASH || player->action == ACTION_DROPDASH)
+                if(player->action == ACTION_DROPDASH)
                     player_set_frame_duration(player, 0);
                 else
                     player_set_frame_duration(player, MAX(0, 4 - abs(player->vel.vz >> 12)));
@@ -1369,7 +1374,9 @@ _snap_angle(int32_t angle)
 void
 player_draw(Player *player, VECTOR *pos)
 {
-    uint8_t is_rolling = (player_get_current_animation_hash(player) == ANIM_ROLLING);
+    uint8_t is_rolling =
+        (player_get_current_animation_hash(player) == ANIM_ROLLING)
+        || (player_get_current_animation_hash(player) == ANIM_SPINDASH);
     int32_t anim_angle = -_snap_angle(player->angle);
     uint8_t show_character = (((player->iframes >> 2) % 2) == 0);
     uint8_t facing_left = (player->anim_dir < 0);
