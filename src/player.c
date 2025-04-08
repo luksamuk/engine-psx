@@ -949,7 +949,8 @@ player_update(Player *player)
                     player->spinrev = 0;
                     sound_play_vag(sfx_dash, 0);
                 }
-            } else if(input_pressing(&player->input, PAD_UP)) {
+            } else if((player->character == CHARA_SONIC)
+                && input_pressing(&player->input, PAD_UP)) {
                 if(player->col_ledge
                    && player->vel.vz == 0
                    && input_pressed(&player->input, PAD_CROSS)) { // Peel-out
