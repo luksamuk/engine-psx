@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#define MILES_GRAVITY_FLYDOWN 0x00000080
+#define MILES_GRAVITY_FLYUP   0x00000200 // Fly up by SUBTRACTING this gravity
+
 // Constants for running the game at a fixed 60 FPS.
 // These constants are also in a 12-scale format for fixed point math.
 typedef struct {

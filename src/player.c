@@ -225,15 +225,28 @@ _player_set_tail_animation(Player *player, uint32_t anim_sum)
     case ANIM_IDLE:
     case ANIM_CROUCHDOWN:
     case ANIM_LOOKUP:
-        tail_sum = ANIM_TAILIDLE; // Fallthrough
+        tail_sum = ANIM_TAILIDLE;
+        tail_anim = player_get_animation(player, tail_sum);
+        break;
+
+        /* Animations where the tail is a buttcopter */
+    case ANIM_FLYUP:
+    case ANIM_FLYDOWN:
+    case ANIM_FLYTIRED:
+        tail_sum = ANIM_TAILFLY;
+        tail_anim = player_get_animation(player, tail_sum);
+        break;
+
         /* Animations where the tail is sideways */
     case ANIM_WALKING:
     case ANIM_ROLLING:
     case ANIM_SPINDASH:
     case ANIM_SKIDDING:
     case ANIM_PUSHING:
+        tail_sum = ANIM_TAILMOVE; // (Redundant failsafe)
         tail_anim = player_get_animation(player, tail_sum);
         break;
+
         /* Any animation not described implies on not showing the tail */
     default: break;
     }
@@ -1030,22 +1043,58 @@ player_update(Player *player)
                     player->vel.vy = -player->cnst->y_min_jump;
                 player->holding_jump = 0;
             } else {
-                if(player->character == CHARA_SONIC) {
-                    // Drop dash charge wait
-                    if(!player->holding_jump) {
+                if(!player->holding_jump) {
+                    switch(player->character) {
+                    case CHARA_SONIC:
+                        // Drop dash charge wait
                         if(player->framecount < 20) {
                             player->framecount++;
                         } else {
                             sound_play_vag(sfx_dropd, 0);
                             player_set_action(player, ACTION_DROPDASH);
                         }
+                        break;
+                    case CHARA_MILES:
+                        player_set_action(player, ACTION_FLY);
+                        player->spinrev = 0;    // Do not move up for first time
+                        player->framecount = 0; // Start counter for tiredness
+                        break;
+                    default: break;
                     }
                 }
             }
+        } else if(player->action == ACTION_FLY) {
+            if(player->framecount < PLAYER_FLY_MAXFRAMES) {
+                player->framecount++;
+
+                // spinrev is a flight state. 1 is ascent, 0 is descent.
+                // This state affects gravity, so we're OK with the speed here
+                if(input_pressed(&player->input, PAD_CROSS)) {
+                    player->spinrev = 1;
+                }
+
+                // Ceiling collision
+                if(player->ceil) player->spinrev = 0;
+            }
+            // if ascending and ysp < -1, turn on descent again
+            if(player->spinrev && (player->vel.vy < -ONE))
+                player->spinrev = 0;
         }
-        player->vel.vy += (player->action == ACTION_HURT)
-            ? player->cnst->y_hurt_gravity
-            : player->cnst->y_gravity;
+
+        // Apply gravity
+        switch(player->action) {
+        case ACTION_HURT:
+            player->vel.vy += player->cnst->y_hurt_gravity;
+            break;
+        case ACTION_FLY:
+            // Flying up (spinrev > 0) uses negative gravity
+            if(player->spinrev) player->vel.vy -= MILES_GRAVITY_FLYUP;
+            else player->vel.vy += MILES_GRAVITY_FLYDOWN;
+            break;
+        default:
+            player->vel.vy += player->cnst->y_gravity;
+            break;
+        }
     } else {
         if(input_pressed(&player->input, PAD_CROSS)
            && (player->action != ACTION_SPINDASH)
@@ -1146,6 +1195,18 @@ player_update(Player *player)
             }
         } else if(player->action == ACTION_HURT) {
             player_set_animation_direct(player, ANIM_HURT);
+        } else if(player->action == ACTION_FLY) {
+            if(player->framecount >= PLAYER_FLY_MAXFRAMES)
+                player_set_animation_direct(
+                    player,
+                    (player->underwater ? ANIM_SWIMTIRED : ANIM_FLYTIRED));
+            else player_set_animation_direct(
+                player,
+                player->underwater
+                ? ANIM_SWIMMING
+                : ((player->spinrev) || (player->vel.vy < 0)
+                   ? ANIM_FLYUP
+                   : ANIM_FLYDOWN));
         }
     }
 

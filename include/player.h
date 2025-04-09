@@ -17,6 +17,7 @@
 #define PUSH_RADIUS             10
 
 #define PLAYER_HURT_IFRAMES     120
+#define PLAYER_FLY_MAXFRAMES    480
 
 typedef enum {
     CHARA_SONIC = 0,
@@ -39,6 +40,7 @@ typedef enum {
     ACTION_SPRING,
     ACTION_HURT,
     ACTION_GASP,
+    ACTION_FLY,
 } PlayerAction;
 
 // Alias to make things look less weird
@@ -75,10 +77,10 @@ typedef struct {
     uint8_t   grnd;
     uint8_t   ceil;
     uint8_t   push;
-    uint32_t  spinrev;
+    uint32_t  spinrev;        // Also used as flight and glide direction toggle
     uint8_t   ctrllock;
     uint8_t   airdirlock;
-    uint8_t   framecount;
+    uint16_t  framecount;
     uint8_t   holding_jump;
     uint16_t  iframes;
     uint8_t   shield;
