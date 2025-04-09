@@ -1158,11 +1158,15 @@ player_update(Player *player)
             // it slightly slower
             player_set_frame_duration(player, 1);
         } else {
-            switch(player_get_current_animation_hash(player)) {
+            uint32_t anim_hash = player_get_current_animation_hash(player);
+            switch(anim_hash) {
             case ANIM_WALKING:
             case ANIM_WATERWALK:
             case ANIM_RUNNING:
-                player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
+                if((player->character == CHARA_KNUCKLES) && (anim_hash == ANIM_WALKING))
+                    // Speed up Knuckles's walk animation, just a little bit
+                    player_set_frame_duration(player, MAX(0, 7 - abs(player->vel.vz >> 12)));
+                else player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)));
                 break;
 
             case ANIM_SPINDASH:
@@ -1179,7 +1183,11 @@ player_update(Player *player)
                 break;
 
             case ANIM_PUSHING:
-                player_set_frame_duration(player, MAX(0, 8 - abs(player->vel.vz >> 12)) << 2);
+                player_set_frame_duration(
+                    player,
+                    (player->character == CHARA_KNUCKLES)
+                    ? 6
+                    : MAX(0, 8 - abs(player->vel.vz >> 12)) << 2);
                 break;
 
             case ANIM_SPRING:
