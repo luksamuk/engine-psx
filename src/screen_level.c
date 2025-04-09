@@ -329,6 +329,11 @@ screen_level_update(void *d)
     update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
     object_pool_update(&obj_table_common);
 
+    // Only update these if past fade in!
+    if(data->level_transition > 0) {
+        player_update(&player);
+    }
+
     // Limit player left position
     if((player.pos.vx - (PUSH_RADIUS << 12)) < (camera.min_x - (CENTERX << 12))) {
         player.pos.vx = camera.min_x - (CENTERX << 12) + (PUSH_RADIUS << 12);
@@ -338,9 +343,11 @@ screen_level_update(void *d)
         }
     }
 
-    // Only update these if past fade in!
-    if(data->level_transition > 0) {
-        player_update(&player);
+    // Limit player top position
+    if((player.pos.vy - (16 << 12) < 0) && (player.vel.vy < 0)) {
+        player.pos.vy = (16 << 12);
+        player.vel.vy = 0;
+        if(player.action == ACTION_FLY) player.spinrev = 0;
     }
 
     // If speed shoes are finished, we use the player's values
