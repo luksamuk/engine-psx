@@ -147,7 +147,7 @@ load_player(Player *player,
     player->anim_frame = player->anim_timer = 0;
     player->anim_dir = 1;
     player->idle_timer = ANIM_IDLE_TIMER_MAX;
-    player->grnd = player->push = 0;
+    player->grnd = player->ceil = player->push = 0;
 
     player->ev_grnd1 = (CollisionEvent){ 0 };
     player->ev_grnd2 = (CollisionEvent){ 0 };
@@ -701,7 +701,8 @@ _player_update_collision_tb(Player *player)
                 new_coord = player->ev_ceil2.coord;
             
             player->pos.vy = (new_coord + 32) << 12;
-        }
+            player->ceil = 1;
+        } else player->ceil = 0;
 
         // Cancel drop dash if not holding jump
         if(player->action == ACTION_DROPDASH
@@ -709,6 +710,10 @@ _player_update_collision_tb(Player *player)
             player_set_action(player, ACTION_JUMPING);
         }
     } else {
+        if(!player->ev_ceil1.collided && !player->ev_ceil2.collided) {
+            player->ceil = 0;
+        }
+
         if(!player->ev_grnd1.collided && !player->ev_grnd2.collided) {
             player->grnd = 0;
             player->gsmode = player->psmode = CDIR_FLOOR;
@@ -1343,7 +1348,7 @@ player_update(Player *player)
                  player->ev_grnd2.collided ? "G" : " ",
                  player->ev_left.collided ? "L" : " ",
                  player->ev_right.collided ? "R" : " ");
-        font_draw_sm(buffer, 8, 67);
+        font_draw_sm(buffer, 8, 74);
     }
 
     // Reset sensors

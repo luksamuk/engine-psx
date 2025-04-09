@@ -659,6 +659,7 @@ screen_level_draw(void *d)
                      "ANG %08x G.P %s %s %3d\n"
                      "POS %08x %08x\n"
                      "ACT %02u\n"
+                     "GRN CEI %01u %01u\n"
                      ,
                      player.vel.vz,
                      player.vel.vx, player.vel.vy,
@@ -683,7 +684,8 @@ screen_level_draw(void *d)
                      : "  ",
                      (int32_t)(((int32_t)player.angle * (int32_t)(360 << 12)) >> 24), // angle in deg
                      player.pos.vx, player.pos.vy,
-                     player.action
+                     player.action,
+                     player.grnd, player.ceil
                 );
             font_draw_sm(buffer, 8, 12);
         }

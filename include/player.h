@@ -73,6 +73,7 @@ typedef struct {
     int8_t    anim_dir;
     uint8_t   idle_timer;
     uint8_t   grnd;
+    uint8_t   ceil;
     uint8_t   push;
     uint32_t  spinrev;
     uint8_t   ctrllock;
