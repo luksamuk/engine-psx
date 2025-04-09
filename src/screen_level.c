@@ -556,8 +556,24 @@ screen_level_draw(void *d)
             setPolyG4(polyg);
             setRGB0(polyg, 0xfc, 0xfc, 0xfc);
             setRGB1(polyg, 0xfc, 0xfc, 0xfc);
-            setRGB2(polyg, 0x00, 0x24, 0xd8);
-            setRGB3(polyg, 0x00, 0x24, 0xd8);
+            switch(level_character) {
+            case CHARA_SONIC:
+                setRGB2(polyg, 0x00, 0x24, 0xd8);
+                setRGB3(polyg, 0x00, 0x24, 0xd8);
+                break;
+            case CHARA_MILES:
+                setRGB2(polyg, 0xd8, 0x48, 0x00);
+                setRGB3(polyg, 0xd8, 0x48, 0x00);
+                break;
+            case CHARA_KNUCKLES:
+                setRGB2(polyg, 0xd0, 0x00, 0x40);
+                setRGB3(polyg, 0xd0, 0x00, 0x40);
+                break;
+            default:
+                setRGB2(polyg, 0x00, 0x24, 0xd8);
+                setRGB3(polyg, 0x00, 0x24, 0xd8);
+                break;
+            }
             setXYWH(polyg, 50, data->tc_ribbon_y, 80, 200);
             sort_prim(polyg, OTZ_LAYER_HUD);
 
