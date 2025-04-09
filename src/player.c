@@ -1072,10 +1072,11 @@ player_update(Player *player)
                 if(input_pressed(&player->input, PAD_CROSS)) {
                     player->spinrev = 1;
                 }
-
-                // Ceiling collision
-                if(player->ceil) player->spinrev = 0;
             }
+
+            // Ceiling collision
+            if(player->ceil) player->spinrev = 0;
+            
             // if ascending and ysp < -1, turn on descent again
             if(player->spinrev && (player->vel.vy < -ONE))
                 player->spinrev = 0;
