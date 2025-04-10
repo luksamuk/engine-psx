@@ -142,7 +142,7 @@ load_player(Player *player,
     player->psmode = CDIR_FLOOR;
     player->remaining_air_frames = 1800; // 30 seconds
     player->speedshoes_frames = -1; // Start inactive
-    player->glide_turn_dir = 0;
+    player->glide_turn_dir = player->sliding = 0;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -652,7 +652,23 @@ _player_update_collision_tb(Player *player)
                 new_coord = player->ev_grnd2.coord;
 
             player->pos.vy = ((new_coord - 16) << 12);
-            player->grnd = 1;
+
+            // When gliding, apply friction
+            player->sliding = 0;
+            if(player->action == ACTION_GLIDE) {
+                if(abs(player->vel.vx) <= KNUX_GLIDE_FRICTION)
+                    player->vel.vx = 0;
+                else {
+                    player->sliding = 1;
+                    player->vel.vx -= KNUX_GLIDE_FRICTION * player->anim_dir;
+                    player->vel.vy = 0;
+                }
+            }
+
+            // If the ground is hit while gliding, only set the ground flag
+            // to true if X speed is 0. Otherwise, always set to true
+            if(!((player->action == ACTION_GLIDE) && (player->vel.vx != 0)))
+                player->grnd = 1;
 
             if(player->action == ACTION_JUMPING
                || player->action == ACTION_ROLLING
@@ -703,8 +719,6 @@ _player_update_collision_tb(Player *player)
                 }
                 sound_play_vag(sfx_relea, 0);
                 camera.lag = 0x8000 >> 12;
-            } else if(player->action == ACTION_GLIDE) {
-                // TODO: Slide
             } else if(player->action == ACTION_DROP) {
                 player_set_action(player, ACTION_NONE);
                 player->vel.vz = 0;
@@ -1037,14 +1051,16 @@ player_update(Player *player)
             }
 
             // Turn to the other side
-            if(input_pressed(&player->input, PAD_LEFT)
-               && ((player->vel.vx > ONE) || (player->vel.vx == 0))) {
-                player->vel.vz = player->vel.vx;
-                player->glide_turn_dir = -1;
-            } else if(input_pressed(&player->input, PAD_RIGHT)
-                      && ((player->vel.vx < -ONE) || (player->vel.vx == 0))) {
-                player->vel.vz = player->vel.vx;
-                player->glide_turn_dir = 1;
+            if(!player->sliding) {
+                if(input_pressed(&player->input, PAD_LEFT)
+                   && ((player->vel.vx > ONE) || (player->vel.vx == 0))) {
+                    player->vel.vz = player->vel.vx;
+                    player->glide_turn_dir = -1;
+                } else if(input_pressed(&player->input, PAD_RIGHT)
+                          && ((player->vel.vx < -ONE) || (player->vel.vx == 0))) {
+                    player->vel.vz = player->vel.vx;
+                    player->glide_turn_dir = 1;
+                }
             }
 
             // When not turning...
@@ -1282,7 +1298,9 @@ player_update(Player *player)
                    ? ANIM_FLYUP
                    : ANIM_FLYDOWN));
         } else if(player->action == ACTION_GLIDE) {
-            if(player->glide_turn_dir == 0) {
+            if(player->sliding) {
+                player_set_animation_direct(player, ANIM_GLIDELAND);
+            } else if(player->glide_turn_dir == 0) {
                 player_set_animation_direct(player, ANIM_GLIDE);
             } else {
                 if(abs(player->vel.vx) >= (1 << 12))
@@ -1551,7 +1569,8 @@ void
 player_draw(Player *player, VECTOR *pos)
 {
     uint8_t is_rolling_angle =
-        (player_get_current_animation_hash(player) == ANIM_ROLLING);
+        (player_get_current_animation_hash(player) == ANIM_ROLLING)
+        || (player_get_current_animation_hash(player) == ANIM_GLIDELAND);
     uint8_t is_rolling =
         is_rolling_angle
         || (player_get_current_animation_hash(player) == ANIM_SPINDASH);

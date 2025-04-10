@@ -40,9 +40,13 @@ typedef enum {
     ACTION_SPRING,
     ACTION_HURT,
     ACTION_GASP,
+    // Miles actions
     ACTION_FLY,
+    // Knuckles actions
     ACTION_GLIDE,
     ACTION_DROP,
+    ACTION_CLIMB,
+    ACTION_CLIMBUP,
 } PlayerAction;
 
 // Alias to make things look less weird
@@ -90,6 +94,7 @@ typedef struct {
     uint8_t   underwater;
     uint16_t  remaining_air_frames;
     int8_t    glide_turn_dir;
+    uint8_t   sliding;
 
     // Collision modes
     CollMode  gsmode;
