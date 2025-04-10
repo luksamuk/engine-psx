@@ -1370,7 +1370,9 @@ player_update(Player *player)
 
             case ANIM_BALANCELIGHT:
             case ANIM_BALANCEHEAVY:
-                player_set_frame_duration(player, 12);
+                if(player->character == CHARA_KNUCKLES)
+                    player_set_frame_duration(player, 6);
+                else player_set_frame_duration(player, 12);
                 break;
 
             case ANIM_GLIDECANCEL:
