@@ -1125,7 +1125,8 @@ player_update(Player *player)
             }
         } else if(player->action == ACTION_FLY) {
             if(player->framecount < PLAYER_FLY_MAXFRAMES) {
-                player->framecount++;
+                if(player->vel.vy <= 0)
+                    player->framecount++;
 
                 // spinrev is a flight state. 1 is ascent, 0 is descent.
                 // This state affects gravity, so we're OK with the speed here

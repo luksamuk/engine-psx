@@ -677,6 +677,9 @@ screen_level_draw(void *d)
         snprintf(buffer, 255, "SPR %4d", level_get_num_sprites());
         font_draw_sm(buffer, 248, 68);
 
+        snprintf(buffer, 255, "FC %5d", player.framecount);
+        font_draw_sm(buffer, 248, 76);
+
         // Player debug
         if(debug_mode > 1) {
             snprintf(buffer, 255,
