@@ -671,8 +671,11 @@ screen_level_draw(void *d)
         snprintf(buffer, 255, "AIR   %02d", player.remaining_air_frames / 60);
         font_draw_sm(buffer, 248, 52);
 
-        snprintf(buffer, 255, "SPR %4d", level_get_num_sprites());
+        snprintf(buffer, 255, "REV %4d", player.spinrev);
         font_draw_sm(buffer, 248, 60);
+
+        snprintf(buffer, 255, "SPR %4d", level_get_num_sprites());
+        font_draw_sm(buffer, 248, 68);
 
         // Player debug
         if(debug_mode > 1) {

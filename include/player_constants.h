@@ -6,6 +6,11 @@
 #define MILES_GRAVITY_FLYDOWN 0x00000080
 #define MILES_GRAVITY_FLYUP   0x00000200 // Fly up by SUBTRACTING this gravity
 
+#define KNUX_GLIDE_X_ACCEL    0x00000040
+#define KNUX_GLIDE_X_TOPSPD   0x00018000
+#define KNUX_GLIDE_GRAVITY    0x00000200 // May be added or subtracted
+#define KNUX_GLIDE_TURN_STEP  0x00000020 // 20.12 scale for a range [0.5 -- 0]
+
 // Constants for running the game at a fixed 60 FPS.
 // These constants are also in a 12-scale format for fixed point math.
 typedef struct {

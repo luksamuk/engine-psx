@@ -41,6 +41,8 @@ typedef enum {
     ACTION_HURT,
     ACTION_GASP,
     ACTION_FLY,
+    ACTION_GLIDE,
+    ACTION_DROP,
 } PlayerAction;
 
 // Alias to make things look less weird
@@ -80,17 +82,14 @@ typedef struct {
     uint32_t  spinrev;        // Also used as flight and glide direction toggle
     uint8_t   ctrllock;
     uint8_t   airdirlock;
-    uint16_t  framecount;
+    uint16_t  framecount;     // Used for many purposes incl. flight and glide
     uint8_t   holding_jump;
     uint16_t  iframes;
     uint8_t   shield;
     int32_t   speedshoes_frames;
-
-    // TODO: Change this to player value modes.
-    // For now we're only storing info on whether
-    // player is underwater
-    uint8_t  underwater;
-    uint16_t remaining_air_frames;
+    uint8_t   underwater;
+    uint16_t  remaining_air_frames;
+    int8_t    glide_turn_dir;
 
     // Collision modes
     CollMode  gsmode;

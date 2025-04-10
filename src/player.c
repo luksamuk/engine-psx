@@ -142,6 +142,7 @@ load_player(Player *player,
     player->psmode = CDIR_FLOOR;
     player->remaining_air_frames = 1800; // 30 seconds
     player->speedshoes_frames = -1; // Start inactive
+    player->glide_turn_dir = 0;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -702,6 +703,12 @@ _player_update_collision_tb(Player *player)
                 }
                 sound_play_vag(sfx_relea, 0);
                 camera.lag = 0x8000 >> 12;
+            } else if(player->action == ACTION_GLIDE) {
+                // TODO: Slide
+            } else if(player->action == ACTION_DROP) {
+                player_set_action(player, ACTION_NONE);
+                player->vel.vz = 0;
+                player->airdirlock = 0;
             }
         }
 
@@ -1002,23 +1009,67 @@ player_update(Player *player)
         player->vel.vy = (player->vel.vz * -rsin(player->angle)) >> 12;
     } else {
         // Air X movement
-        if(input_pressing(&player->input, PAD_RIGHT)
-           && (player->ctrllock == 0)) {
-            if(player->vel.vx < player->cnst->x_top_spd)
-                player->vel.vx += player->cnst->x_air_accel;
-            if(!player->airdirlock)
-                player->anim_dir = 1;
-        } else if(input_pressing(&player->input, PAD_LEFT)
-                  && (player->ctrllock == 0)) {
-            if(player->vel.vx > -player->cnst->x_top_spd)
-                player->vel.vx -= player->cnst->x_air_accel;
-            if(!player->airdirlock)
-                player->anim_dir = -1;
+        if(player->action == ACTION_GLIDE) {
+            // spinrev is an acceleration "angle" for turning while gliding.
+            if(player->glide_turn_dir == -1) { // Turning right to left
+                // Disable turn, fix angle
+                if(player->spinrev >= (ONE >> 1)) {
+                    player->glide_turn_dir = 0;
+                    player->spinrev = (ONE >> 1);
+                } else {
+                    // Still turning? Setup X speed
+                    player->spinrev += KNUX_GLIDE_TURN_STEP;
+                    player->vel.vx = (player->vel.vz * rcos(player->spinrev)) >> 12;
+                    // If angle is past 90 degrees, turn animation
+                    if(player->spinrev >= (ONE >> 2)) player->anim_dir = -1;
+                }
+            } else if(player->glide_turn_dir == 1) { // Turning left to right
+                // Disable turn, fix angle
+                if(player->spinrev <= 0) {
+                    player->glide_turn_dir = 0;
+                    player->spinrev = 0;
+                } else {
+                    player->spinrev -= KNUX_GLIDE_TURN_STEP;
+                    player->vel.vx = (player->vel.vz * -rcos(player->spinrev)) >> 12;
+                    // If angle is past 90 degrees, turn animation
+                    if(player->spinrev <= (ONE >> 2)) player->anim_dir = 1;
+                }
+            }
+
+            // Turn to the other side
+            if(input_pressed(&player->input, PAD_LEFT)
+               && (player->vel.vx > ONE)) {
+                player->vel.vz = player->vel.vx;
+                player->glide_turn_dir = -1;
+            } else if(input_pressed(&player->input, PAD_RIGHT)
+                      && (player->vel.vx < -ONE)) {
+                player->vel.vz = player->vel.vx;
+                player->glide_turn_dir = 1;
+            }
+
+            // When not turning...
+            if(player->glide_turn_dir == 0) {
+                // Apply glide acceleration
+                player->vel.vx += player->anim_dir * KNUX_GLIDE_X_ACCEL;
+            }
+        } else if(player->ctrllock == 0) {
+            if(input_pressing(&player->input, PAD_RIGHT)) {
+                if(player->vel.vx < player->cnst->x_top_spd)
+                    player->vel.vx += player->cnst->x_air_accel;
+                if(!player->airdirlock)
+                    player->anim_dir = 1;
+            } else if(input_pressing(&player->input, PAD_LEFT)) {
+                if(player->vel.vx > -player->cnst->x_top_spd)
+                    player->vel.vx -= player->cnst->x_air_accel;
+                if(!player->airdirlock)
+                    player->anim_dir = -1;
+            }
         }
 
         // Air drag. Calculated before applying gravity.
         if((player->vel.vy < 0 && player->vel.vy > -player->cnst->y_min_jump)
-           && (player->action != ACTION_HURT)) {
+           && (player->action != ACTION_HURT)
+           && (player->action != ACTION_GLIDE)) {
             // xsp -= (xsp div 0.125) / 256
             int32_t air_drag = (div12(abs(player->vel.vx), 0x200) << 12) / 0x100000;
             if(player->vel.vx > 0)
@@ -1059,6 +1110,15 @@ player_update(Player *player)
                         player->spinrev = 0;    // Do not move up for first time
                         player->framecount = 0; // Start counter for tiredness
                         break;
+                    case CHARA_KNUCKLES:
+                        player_set_action(player, ACTION_GLIDE);
+                        player->vel.vx = (4 * player->anim_dir) << 12;
+                        if(player->vel.vy < 0) player->vel.vy = 0;
+                        // Glide "angle" (used when turning).
+                        // Starts pointing at direction by default (0 for right,
+                        // 0.5 for left)
+                        player->spinrev = (player->anim_dir > 0) ? 0 : (ONE >> 1);
+                        player->glide_turn_dir = 0;
                     default: break;
                     }
                 }
@@ -1080,6 +1140,13 @@ player_update(Player *player)
             // if ascending and ysp < -1, turn on descent again
             if(player->spinrev && (player->vel.vy < -ONE))
                 player->spinrev = 0;
+        } else if(player->action == ACTION_GLIDE) {
+            if(!input_pressing(&player->input, PAD_CROSS)) {
+                // Cancel gliding
+                player_set_action(player, ACTION_DROP);
+                player->vel.vx >>= 2; // times 0.25
+                player->airdirlock = 1;
+            }
         }
 
         // Apply gravity
@@ -1091,6 +1158,11 @@ player_update(Player *player)
             // Flying up (spinrev > 0) uses negative gravity
             if(player->spinrev) player->vel.vy -= MILES_GRAVITY_FLYUP;
             else player->vel.vy += MILES_GRAVITY_FLYDOWN;
+            break;
+        case ACTION_GLIDE:
+            if(player->vel.vy < (ONE >> 1))
+                player->vel.vy += KNUX_GLIDE_GRAVITY;
+            else player->vel.vy -= KNUX_GLIDE_GRAVITY;
             break;
         default:
             player->vel.vy += player->cnst->y_gravity;
@@ -1208,6 +1280,19 @@ player_update(Player *player)
                 : ((player->spinrev) || (player->vel.vy < 0)
                    ? ANIM_FLYUP
                    : ANIM_FLYDOWN));
+        } else if(player->action == ACTION_GLIDE) {
+            if(player->glide_turn_dir == 0) {
+                player_set_animation_direct(player, ANIM_GLIDE);
+            } else {
+                if(abs(player->vel.vx) >= (1 << 12))
+                    player_set_animation_direct(player, ANIM_GLIDETURNA);
+                else player_set_animation_direct(player, ANIM_GLIDETURNB);
+            }
+        } else if(player->action == ACTION_DROP) {
+            player_set_animation_direct(player, ANIM_GLIDECANCEL);
+            player_set_frame_duration(player, 12);
+            player->loopback_frame = 1;
+            
         }
     }
 
@@ -1258,6 +1343,10 @@ player_update(Player *player)
 
             case ANIM_BALANCELIGHT:
             case ANIM_BALANCEHEAVY:
+                player_set_frame_duration(player, 12);
+                break;
+
+            case ANIM_GLIDECANCEL:
                 player_set_frame_duration(player, 12);
                 break;
 

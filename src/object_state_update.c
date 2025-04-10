@@ -101,7 +101,8 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     player_attacking = (player.action == ACTION_JUMPING ||
                         player.action == ACTION_ROLLING ||
                         player.action == ACTION_SPINDASH ||
-                        player.action == ACTION_DROPDASH);
+                        player.action == ACTION_DROPDASH ||
+                        player.action == ACTION_GLIDE);
     player_height = (player_attacking
                      ? HEIGHT_RADIUS_ROLLING
                      : HEIGHT_RADIUS_NORMAL) << 1;
