@@ -1726,6 +1726,8 @@ player_set_action(Player *player, PlayerAction action)
     if(player->action == ACTION_HURT) {
         player->ctrllock = 0;
         player->iframes = PLAYER_HURT_IFRAMES;
+    } else if(player->action == ACTION_GLIDE) {
+        player->sliding = 0;
     }
     player->action = action;
 }
