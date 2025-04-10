@@ -402,8 +402,10 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             player.anim_dir = -1;
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
-            if(player.action != ACTION_ROLLING)
+            if(player.action != ACTION_ROLLING) {
                 player_set_action(&player, ACTION_NONE);
+                player.sliding = 0;
+            }
         } else if(state->flipmask & MASK_FLIP_ROTCW) { // Right-pointing spring
             //player.pos.vx = (solidity_vx + solidity_w + player_width + 8) << 12;
             player.ev_left.collided = 0; // Detach player from left wall if needed
@@ -413,8 +415,10 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             player.anim_dir = 1;
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
-            if(player.action != ACTION_ROLLING)
+            if(player.action != ACTION_ROLLING) {
                 player_set_action(&player, ACTION_NONE);
+                player.sliding = 0;
+            }
         } else if(state->flipmask == 0) { // Top-pointing spring
             player.pos.vy = (solidity_vy - (player_height >> 1)) << 12;
             player.grnd = 0;

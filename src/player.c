@@ -660,6 +660,7 @@ _player_update_collision_tb(Player *player)
                     player->vel.vx = 0;
                 else {
                     player->sliding = 1;
+                    player->glide_turn_dir = 0;
                     player->vel.vx -= KNUX_GLIDE_FRICTION * player->anim_dir;
                     player->vel.vy = 0;
                 }
@@ -723,6 +724,13 @@ _player_update_collision_tb(Player *player)
                 player_set_action(player, ACTION_NONE);
                 player->vel.vz = 0;
                 player->airdirlock = 0;
+            }
+        } else {
+            // If NOT touching the ground.
+            if(player->sliding) {
+                // Player was sliding but left the platform. Reset action.
+                player_set_action(player, ACTION_NONE);
+                player->sliding = 0;
             }
         }
 
@@ -1574,6 +1582,11 @@ player_draw(Player *player, VECTOR *pos)
     uint8_t is_rolling =
         is_rolling_angle
         || (player_get_current_animation_hash(player) == ANIM_SPINDASH);
+    uint8_t is_gliding =
+        (player_get_current_animation_hash(player) == ANIM_GLIDE)
+        || (player_get_current_animation_hash(player) == ANIM_GLIDECANCEL)
+        || (player_get_current_animation_hash(player) == ANIM_GLIDETURNA)
+        || (player_get_current_animation_hash(player) == ANIM_GLIDETURNB);
     int32_t anim_angle = -_snap_angle(player->angle);
     uint8_t show_character = (((player->iframes >> 2) % 2) == 0);
     uint8_t facing_left = (player->anim_dir < 0);
@@ -1583,7 +1596,8 @@ player_draw(Player *player, VECTOR *pos)
         chara_draw_gte(&player->chara,
                        player->anim_frame,
                        (int16_t)(pos->vx >> 12),
-                       (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : 0),
+                       (int16_t)(pos->vy >> 12)
+                       + (is_rolling ? 4 : (is_gliding ? 8 : 0)),
                        facing_left,
                        (is_rolling_angle ? 0 : anim_angle));
     }
