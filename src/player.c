@@ -1379,6 +1379,10 @@ player_update(Player *player)
                 player_set_frame_duration(player, 12);
                 break;
 
+            case ANIM_FLYTIRED:
+                player_set_frame_duration(player, 12);
+                break;
+
                 // Single-frame animations
             case ANIM_STOPPED:
             case ANIM_IDLE:
