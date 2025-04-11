@@ -111,4 +111,9 @@ void                sound_bgm_play(BGMOption);
 const BGMTableEntry *sound_bgm_get_data(BGMOption);
 void                sound_bgm_check_stop(BGMOption);
 
+
+
+/* SFX audio */
+void  sound_sfx_init();
+
 #endif

@@ -68,6 +68,7 @@ main(void)
 
     // Initial loads from disc
     render_loading_logo();
+    sound_sfx_init();
     sound_bgm_init();
 
     // Set first scene
