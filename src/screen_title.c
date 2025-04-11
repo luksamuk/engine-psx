@@ -207,9 +207,7 @@ screen_title_update(void *d)
                     case 2: // New Game
                         // Use Surely Wood Zone 1 as first level
                         screen_title_reset_demo();
-                        screen_level_setlevel(6);
-                        screen_level_setmode(LEVEL_MODE_NORMAL);
-                        data->next_scene = SCREEN_LEVEL;
+                        data->next_scene = SCREEN_CHARSELECT;
                         level_score_count = 0;
                         break;
                     case 3: // Level Select
