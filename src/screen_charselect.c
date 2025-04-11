@@ -16,6 +16,8 @@
 
 #define CHARSEL_PADDING (SCREEN_XRES >> 2)
 
+extern SoundEffect sfx_switch;
+
 typedef struct {
     int8_t   character;
     int32_t  bg_prect_x;
@@ -100,14 +102,14 @@ screen_charselect_update(void *d)
         }
     }
 
-    if(pad_pressed(PAD_RIGHT)) data->character++;
-    if(pad_pressed(PAD_LEFT)) data->character--;
-    data->character =
-        (data->character < 0)
-        ? 0
-        : ((data->character > CHARA_MAX)
-           ? CHARA_MAX
-           : data->character);
+    if(pad_pressed(PAD_RIGHT) && (data->character < CHARA_MAX)) {
+        data->character++;
+        sound_play_vag(sfx_switch, 0);
+    }
+    if(pad_pressed(PAD_LEFT) && (data->character > 0)) {
+        data->character--;
+        sound_play_vag(sfx_switch, 0);
+    }
 
     if(pad_pressed(PAD_CROSS) || pad_pressed(PAD_START)) {
         screen_level_setcharacter(data->character);
