@@ -56,6 +56,8 @@ static uint8_t glyph_info_big[] = {
     0xff, 0, 0, 0, // = (no char)
     0xff, 0, 0, 0, // ! (no char)
     0xff, 0, 0, 0, // ? (no char)
+    115, 11, 6, 11, // <
+    121, 11, 6, 11, // >
 };
 
 static uint8_t glyph_info_sm[] = {
@@ -107,6 +109,8 @@ static uint8_t glyph_info_sm[] = {
     103, 29, 6, 7, // =
     110, 29, 4, 7, // !
     115, 29, 7, 7, // ?
+    0xff, 0, 0, 0, // < (no char)
+    0xff, 0, 0, 0, // > (no char)
 };
 
 static uint8_t glyph_info_hg[] = {
@@ -159,6 +163,8 @@ static uint8_t glyph_info_hg[] = {
     0xff, 0, 0, 0, // =
     0xff, 0, 0, 0, // !
     0xff, 0, 0, 0, // ?
+    0xff, 0, 0, 0, // < (no char)
+    0xff, 0, 0, 0, // > (no char)
 };
 
 void
@@ -203,22 +209,6 @@ _draw_glyph(
     sort_prim(sprt, OTZ_LAYER_HUD);
 }
 
-void
-font_draw_logo(
-    int16_t vx, int16_t vy,
-    uint16_t w, uint16_t h)
-{
-    POLY_FT4 *poly = get_next_prim();
-    setPolyFT4(poly);
-    setRGB0(poly, font_color[0], font_color[1], font_color[2]);
-    increment_prim(sizeof(POLY_FT4));
-    setXYWH(poly, vx, vy, w, h);
-    setUVWH(poly, 0, 195, 160, 60);
-    poly->tpage = getTPage(font_mode & 0x3, 1, 960, 256);
-    poly->clut = getClut(0, 490);
-    sort_prim(poly, OTZ_LAYER_HUD);
-}
-
 uint16_t
 _font_measurew_generic(const char *text,
                        const uint8_t ws_w,
@@ -260,6 +250,8 @@ _font_measurew_generic(const char *text,
             case '=': offset = 40; break;
             case '!': offset = 41; break;
             case '?': offset = 42; break;
+            case '<': offset = 43; break;
+            case '>': offset = 44; break;
             default:  offset = 0xff; break;
             }
         }
@@ -345,6 +337,8 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
             case '=': offset = 40; break;
             case '!': offset = 41; break;
             case '?': offset = 42; break;
+            case '<': offset = 43; break;
+            case '>': offset = 44; break;
             default:  offset = 0xff; break;
             }
         }
