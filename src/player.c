@@ -712,6 +712,7 @@ _player_update_collision_tb(Player *player)
             if(player->sliding) {
                 // Player was sliding but left the platform. Reset action.
                 player_set_action(player, ACTION_NONE);
+                player_set_animation_direct(player, ANIM_DROP);
                 player->sliding = 0;
             }
         }
