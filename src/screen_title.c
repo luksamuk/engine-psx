@@ -420,33 +420,18 @@ screen_title_draw(void *d)
         // New menu text
         const char *menutxt = NULL;
         switch(data->menu_option) {
-        case 0: menutxt = "PRESS START";  break;
-        case 1: menutxt = "ENGINE TEST";  break;
-        case 2: menutxt = "START GAME";   break;
-        case 3: menutxt = "LEVEL SELECT"; break;
-        case 4: menutxt = "SCENE SELECT"; break;
-        default: menutxt = "????????";    break;
+        case 0: menutxt = "PRESS START";      break;
+        case 1: menutxt = "  ENGINE TEST >";  break;
+        case 2: menutxt = "< START GAME >";   break;
+        case 3: menutxt = "< LEVEL SELECT  "; break;
+        case 4: menutxt = "< SCENE SELECT  "; break;
+        default: menutxt = "???????????????";        break;
         }
         uint16_t txt_hsize = font_measurew_big(menutxt) >> 1;
         int16_t vx = CENTERX - txt_hsize;
         font_set_color(0xc8, 0xc8, 0x00);
         font_draw_big(menutxt, vx, 200);
-        if(data->menu_option > 0) {
-            if(data->menu_option > 1)
-                screen_title_drawtxt(data, 4, CENTERX - txt_hsize - 12, 205);
-            if(data->menu_option < 3)
-                screen_title_drawtxt(data, 5, CENTERX + txt_hsize + 12, 205);
-        }
         font_reset_color();
-        
-        /* // Old menu text */
-        /* screen_title_drawtxt(data, data->menu_option, CENTERX, 208); */
-        /* if(data->menu_option > 0) { */
-        /*     if(data->menu_option > 1) */
-        /*         screen_title_drawtxt(data, 4, CENTERX - 60, 208); */
-        /*     if(data->menu_option < 3) */
-        /*         screen_title_drawtxt(data, 5, CENTERX + 60, 208); */
-        /* } */
     }
 
     int16_t x;
