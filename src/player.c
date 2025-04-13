@@ -1045,11 +1045,11 @@ player_update(Player *player)
             if(!player->sliding) {
                 if(input_pressed(&player->input, PAD_LEFT)
                    && ((player->vel.vx > ONE) || (player->vel.vx == 0))) {
-                    player->vel.vz = player->vel.vx;
+                    player->vel.vz = MAX(abs(player->vel.vx), 2 << 12) * player->anim_dir;
                     player->glide_turn_dir = -1;
                 } else if(input_pressed(&player->input, PAD_RIGHT)
                           && ((player->vel.vx < -ONE) || (player->vel.vx == 0))) {
-                    player->vel.vz = player->vel.vx;
+                    player->vel.vz = MAX(abs(player->vel.vx), 2 << 12) * player->anim_dir;
                     player->glide_turn_dir = 1;
                 }
             }
