@@ -183,7 +183,7 @@ screen_title_update(void *d)
                 }
 
                 if(pad_pressed(PAD_START)) {
-                    // TODO: Check for saved data
+                    // TODO: Check for saved data?
                     data->menu_option = 2; // New Game
                     //data->menu_option = 1; // Continue
                 }
@@ -196,17 +196,19 @@ screen_title_update(void *d)
                 if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
                     data->selected = 1;
                     switch(data->menu_option) {
-                    case 1: // Continue
-                        // For now, this redirects you to Surely Wood Zone
+                    case 1: // Engine Test
                         screen_title_reset_demo();
-                        screen_level_setlevel(6);
+                        // Go to Engine Test
+                        screen_level_setlevel(0);
                         screen_level_setmode(LEVEL_MODE_NORMAL);
-                        data->next_scene = SCREEN_LEVEL;
+                        data->next_scene = SCREEN_CHARSELECT;
                         level_score_count = 0;
                         break;
                     case 2: // New Game
-                        // Use Surely Wood Zone 1 as first level
                         screen_title_reset_demo();
+                        // Use Surely Wood Zone 1 as first level
+                        screen_level_setlevel(6);
+                        screen_level_setmode(LEVEL_MODE_NORMAL);
                         data->next_scene = SCREEN_CHARSELECT;
                         level_score_count = 0;
                         break;
@@ -290,7 +292,7 @@ screen_title_drawtxt(screen_title_data *data, uint8_t idx, int16_t cx, int16_t c
            u0 + w , v0,
            u0,         v0 + h,
            u0 + w , v0 + h);
-    sort_prim(poly, OTZ_LAYER_HUD);
+    sort_prim(poly, OTZ_LAYER_TOPMOST);
 }
 
 static void
@@ -415,13 +417,36 @@ screen_title_draw(void *d)
     /* render_model(&data->planet); */
 
     if(data->rgb_count >= 128) {
-        screen_title_drawtxt(data, data->menu_option, CENTERX, 208);
+        // New menu text
+        const char *menutxt = NULL;
+        switch(data->menu_option) {
+        case 0: menutxt = "PRESS START";  break;
+        case 1: menutxt = "ENGINE TEST";  break;
+        case 2: menutxt = "START GAME";   break;
+        case 3: menutxt = "LEVEL SELECT"; break;
+        case 4: menutxt = "SCENE SELECT"; break;
+        default: menutxt = "????????";    break;
+        }
+        uint16_t txt_hsize = font_measurew_big(menutxt) >> 1;
+        int16_t vx = CENTERX - txt_hsize;
+        font_set_color(0xc8, 0xc8, 0x00);
+        font_draw_big(menutxt, vx, 200);
         if(data->menu_option > 0) {
             if(data->menu_option > 1)
-                screen_title_drawtxt(data, 4, CENTERX - 60, 208);
+                screen_title_drawtxt(data, 4, CENTERX - txt_hsize - 12, 205);
             if(data->menu_option < 3)
-                screen_title_drawtxt(data, 5, CENTERX + 60, 208);
+                screen_title_drawtxt(data, 5, CENTERX + txt_hsize + 12, 205);
         }
+        font_reset_color();
+        
+        /* // Old menu text */
+        /* screen_title_drawtxt(data, data->menu_option, CENTERX, 208); */
+        /* if(data->menu_option > 0) { */
+        /*     if(data->menu_option > 1) */
+        /*         screen_title_drawtxt(data, 4, CENTERX - 60, 208); */
+        /*     if(data->menu_option < 3) */
+        /*         screen_title_drawtxt(data, 5, CENTERX + 60, 208); */
+        /* } */
     }
 
     int16_t x;

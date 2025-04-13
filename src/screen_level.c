@@ -781,7 +781,7 @@ level_load_level(screen_level_data *data)
     data->level_name = "PLACEHOLDER";
 
     switch(level) {
-    case 0: case 1: case 2: case 3: // Playground
+    case 0: case 1: case 2: case 3: // Test level
         data->level_name = "TEST LEVEL";
         data->level_round = 0;
         data->level_act = level;

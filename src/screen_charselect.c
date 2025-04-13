@@ -113,7 +113,8 @@ screen_charselect_update(void *d)
 
     if(pad_pressed(PAD_CROSS) || pad_pressed(PAD_START)) {
         screen_level_setcharacter(data->character);
-        screen_level_setlevel(6);
+        // NOTE: screen_level_setlevel should have
+        // been called from previous screen
         screen_level_setmode(LEVEL_MODE_NORMAL);
         scene_change(SCREEN_LEVEL);
     }
