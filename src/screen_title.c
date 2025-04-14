@@ -445,7 +445,7 @@ screen_title_draw(void *d)
             if(data->menu_option > 1)
                 font_draw_big("<", CENTERX - txt_hsize - 22, 200);
             if(data->menu_option < 4)
-                font_draw_big(">", CENTERX + txt_hsize + 22, 200);
+                font_draw_big(">", CENTERX + txt_hsize + 14, 200);
         }
         font_reset_color();
     }
