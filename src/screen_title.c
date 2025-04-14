@@ -27,6 +27,17 @@ typedef struct {
     uint8_t mode;
 } texture_props;
 
+static const char *title_text[] = {
+    "PRESS START",
+
+    "ENGINE TEST",
+    "START GAME",
+    "LEVEL SELECT",
+    "OPTIONS",
+};
+
+#define MENU_MAX_OPTION 4
+
 /* Parallax data */
 #define PRL_INFO_PER_PIECE 6
 #define PRL_NUM_PIECES     7
@@ -60,6 +71,8 @@ static const int16_t txt_data[] = {
     8, 13, 219, 110,
 };
 
+extern SoundEffect sfx_switch;
+
 typedef struct {
     texture_props props_title;
     texture_props props_prl;
@@ -79,8 +92,6 @@ typedef struct {
 
     /* Model planet; */
 } screen_title_data;
-
-#define MENU_MAX_OPTION 3
 
 static void
 title_load_texture(const char *filename, texture_props *props)
@@ -188,10 +199,14 @@ screen_title_update(void *d)
                     //data->menu_option = 1; // Continue
                 }
             } else if(data->menu_option > 0) {
-                if(pad_pressed(PAD_LEFT) && (data->menu_option > 1))
+                if(pad_pressed(PAD_LEFT) && (data->menu_option > 1)) {
+                    sound_play_vag(sfx_switch, 0);
                     data->menu_option--;
-                if(pad_pressed(PAD_RIGHT) && (data->menu_option < MENU_MAX_OPTION))
+                } else if(pad_pressed(PAD_RIGHT)
+                          && (data->menu_option < MENU_MAX_OPTION)) {
+                    sound_play_vag(sfx_switch, 0);
                     data->menu_option++;
+                }
 
                 if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
                     data->selected = 1;
@@ -214,6 +229,10 @@ screen_title_update(void *d)
                         break;
                     case 3: // Level Select
                         data->next_scene = SCREEN_LEVELSELECT;
+                        break;
+                    case 4: // Options
+                        // TODO
+                        data->selected = 0;
                         break;
                     default: data->selected = 0; break;
                     }
@@ -417,20 +436,17 @@ screen_title_draw(void *d)
     /* render_model(&data->planet); */
 
     if(data->rgb_count >= 128) {
-        // New menu text
-        const char *menutxt = NULL;
-        switch(data->menu_option) {
-        case 0: menutxt = "PRESS START";      break;
-        case 1: menutxt = "  ENGINE TEST >";  break;
-        case 2: menutxt = "< START GAME >";   break;
-        case 3: menutxt = "< LEVEL SELECT  "; break;
-        case 4: menutxt = "< SCENE SELECT  "; break;
-        default: menutxt = "???????????????";        break;
-        }
+        const char *menutxt = title_text[data->menu_option];
         uint16_t txt_hsize = font_measurew_big(menutxt) >> 1;
         int16_t vx = CENTERX - txt_hsize;
-        font_set_color(0xc8, 0xc8, 0x00);
         font_draw_big(menutxt, vx, 200);
+        if(data->menu_option > 0) {
+            font_set_color(0xc8, 0xc8, 0x00);
+            if(data->menu_option > 1)
+                font_draw_big("<", CENTERX - txt_hsize - 22, 200);
+            if(data->menu_option < 4)
+                font_draw_big(">", CENTERX + txt_hsize + 22, 200);
+        }
         font_reset_color();
     }
 
