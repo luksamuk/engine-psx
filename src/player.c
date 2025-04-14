@@ -157,6 +157,8 @@ load_player(Player *player,
     player->ev_right = (CollisionEvent){ 0 };
     player->ev_ceil1 = (CollisionEvent){ 0 };
     player->ev_ceil2 = (CollisionEvent){ 0 };
+    player->ev_climbdrop = (CollisionEvent){ .collided = 1 };
+    player->ev_clamber = (CollisionEvent){ .collided = 1 };
     player->col_ledge = 0;
 
     player->action = ACTION_NONE;
@@ -338,6 +340,27 @@ _player_update_collision_lr(Player *player)
     uint16_t
         anchorx = (player->pos.vx >> 12),
         anchory = (player->pos.vy >> 12) - 8;
+
+
+    // SPECIAL HORIZONTAL COLLISION: KNUCKLES CLIMB DROP / CLAMBERING
+    // This is a special collision case that only occurs to Knuckles.
+    // These will only happen when Knuckles is climbing which basically
+    // ignores all other horizontal collision
+    if(player->action == ACTION_CLIMB) {
+        LinecastDirection dir =
+            (player->anim_dir > 0) ? CDIR_RWALL : CDIR_LWALL;
+        uint16_t radius = PUSH_RADIUS + ((player->anim_dir < 0) ? 1 : 0);
+        int16_t drop_anchory = anchory + HEIGHT_RADIUS_CLIMB;
+        int16_t clamber_anchory = anchory - HEIGHT_RADIUS_CLIMB;
+
+        player->ev_climbdrop = linecast(&leveldata, &map128, &map16,
+                                        anchorx, drop_anchory,
+                                        dir, radius, CDIR_FLOOR);
+        player->ev_clamber = linecast(&leveldata, &map128, &map16,
+                                        anchorx, clamber_anchory,
+                                        dir, radius, CDIR_FLOOR);
+        return;
+    }
 
     // Adjust y anchor to y + 8 when on totally flat ground
     int32_t push_anchory = anchory
@@ -1059,7 +1082,17 @@ player_update(Player *player)
                 // Apply glide acceleration
                 player->vel.vx += player->anim_dir * KNUX_GLIDE_X_ACCEL;
             }
-        } else if(player->ctrllock == 0) {
+
+            // If you're facing a certain direction and you hit the wall on
+            // that direction, then just climb
+            if(((player->anim_dir > 0) && player->ev_right.collided) ||
+               ((player->anim_dir < 0) && player->ev_left.collided)) {
+                player->vel.vx = 0;
+                player->vel.vz = 0;
+                player_set_action(player, ACTION_CLIMB);
+            }
+        } else if((player->ctrllock == 0)
+                  && (player->action != ACTION_CLIMB)) {
             if(input_pressing(&player->input, PAD_RIGHT)) {
                 if(player->vel.vx < player->cnst->x_top_spd)
                     player->vel.vx += player->cnst->x_air_accel;
@@ -1155,6 +1188,31 @@ player_update(Player *player)
                 player->vel.vx >>= 2; // times 0.25
                 player->airdirlock = 1;
             }
+        } else if(player->action == ACTION_CLIMB) {
+            if(!player->ev_climbdrop.collided) {
+                // Fall off bottom of wall if no wall is found at Y + height radius
+                player_set_action(player, ACTION_DROP);
+            }
+            /* else if(!player->ev_clamber.collided) { */
+            /*     // Clamber if no wall is found at Y - height radius */
+            /* } */
+            else {
+                // Climbing movement
+                if(input_pressing(&player->input, PAD_UP))
+                    player->vel.vy = -ONE;
+                else if(input_pressing(&player->input, PAD_DOWN))
+                    player->vel.vy = ONE;
+                else player->vel.vy = 0;
+
+                // Jump back
+                if(input_pressed(&player->input, PAD_CROSS)) {
+                    player_set_action(player, ACTION_JUMPING);
+                    player->anim_dir *= -1;
+                    player->vel.vx = (4 << 12) * player->anim_dir;
+                    player->vel.vy = -(4 << 12);
+                    player->holding_jump = 1;
+                }
+            }
         }
 
         // Apply gravity
@@ -1172,6 +1230,9 @@ player_update(Player *player)
                 player->vel.vy += KNUX_GLIDE_GRAVITY;
             else player->vel.vy -= KNUX_GLIDE_GRAVITY;
             break;
+        case ACTION_CLIMB:
+            // NO GRAVITY!
+            break;
         default:
             player->vel.vy += player->cnst->y_gravity;
             break;
@@ -1184,7 +1245,6 @@ player_update(Player *player)
             player->vel.vx -= (player->cnst->y_jump_strength * rsin(player->angle)) >> 12;
             player->vel.vy -= (player->cnst->y_jump_strength * rcos(player->angle)) >> 12;
             player->grnd = 0;
-            player_set_animation_direct(player, ANIM_ROLLING);
             sound_play_vag(sfx_jump, 0);
             player_set_action(player, ACTION_JUMPING);
             player->holding_jump = 1;
@@ -1262,17 +1322,14 @@ player_update(Player *player)
         }
     } else {
         player->idle_timer = ANIM_IDLE_TIMER_MAX;
-        if(player->action == ACTION_SPRING) {
+        if(player->action == ACTION_JUMPING) {
+            player_set_animation_direct(player, ANIM_ROLLING);
+        } else if(player->action == ACTION_SPRING) {
             if(player->vel.vy < 0) {
                 player_set_animation_direct(player, ANIM_SPRING);
             } else {
                 player->airdirlock = 0;
                 player_set_animation_direct(player, ANIM_DROP);
-                /* if(abs(player->vel.vz) >= (10 << 12)) { */
-                /*     player_set_animation_direct(player, ANIM_PEELOUT); */
-                /* } else if(abs(player->vel.vz) >= (6 << 12)) { */
-                /*     player_set_animation_direct(player, ANIM_RUNNING); */
-                /* } else player_set_animation_direct(player, ANIM_WALKING); */
             }
         } else if(player->action == ACTION_HURT) {
             player_set_animation_direct(player, ANIM_HURT);
@@ -1302,7 +1359,28 @@ player_update(Player *player)
             player_set_animation_direct(player, ANIM_GLIDECANCEL);
             player_set_frame_duration(player, 12);
             player->loopback_frame = 1;
-            
+        } else if(player->action == ACTION_CLIMB) {
+            if(player->vel.vy == 0)
+                player_set_animation_direct(player, ANIM_CLIMBSTOP);
+            else if(player->vel.vy < 0)
+                player_set_animation_direct(player, ANIM_CLIMBUP);
+            else player_set_animation_direct(player, ANIM_CLIMBDOWN);
+        } else {
+            // NO ACTION
+            // Only handle cases where we have certain animations that would
+            // make falling weird
+            if(player->cur_anim) {
+                switch(player->cur_anim->hname) {
+                case ANIM_CLIMBSTOP:
+                case ANIM_CLIMBUP:
+                case ANIM_CLIMBDOWN:
+                case ANIM_GLIDE:
+                case ANIM_GLIDETURNA:
+                case ANIM_GLIDETURNB:
+                    player_set_animation_direct(player, ANIM_WALKING);
+                    break;
+                }
+            }
         }
     }
 
@@ -1364,6 +1442,11 @@ player_update(Player *player)
 
             case ANIM_FLYTIRED:
                 player_set_frame_duration(player, 12);
+                break;
+
+            case ANIM_CLIMBUP:
+            case ANIM_CLIMBDOWN:
+                player_set_frame_duration(player, 4);
                 break;
 
                 // Single-frame animations
@@ -1514,7 +1597,7 @@ player_update(Player *player)
     if(debug_mode > 1) {
         char buffer[255];
         snprintf(buffer, 255,
-                 "COL %s%s.%s%s.%s.%s\n"
+                 "COL %s%s.%s%s.%s.%s  %s.%s\n"
                  ,
                  // Collisions
                  player->ev_ceil1.collided ? "C" : " ",
@@ -1522,7 +1605,9 @@ player_update(Player *player)
                  player->ev_grnd1.collided ? "G" : " ",
                  player->ev_grnd2.collided ? "G" : " ",
                  player->ev_left.collided ? "L" : " ",
-                 player->ev_right.collided ? "R" : " ");
+                 player->ev_right.collided ? "R" : " ",
+                 player->ev_climbdrop.collided ? "D" : " ",
+                 player->ev_clamber.collided ? "U" : " ");
         font_draw_sm(buffer, 8, 74);
     }
 
@@ -1718,5 +1803,12 @@ player_set_action(Player *player, PlayerAction action)
     } else if(player->action == ACTION_GLIDE) {
         player->sliding = 0;
     }
+
+    if(action == ACTION_CLIMB) {
+        // "Fake" collision to start as detecting a wall
+        // so Knuckles doesn't drop instantly
+        player->ev_climbdrop.collided = player->ev_clamber.collided = 1;
+    }
+
     player->action = action;
 }

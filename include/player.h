@@ -16,6 +16,8 @@
 #define HEIGHT_RADIUS_ROLLING   14
 #define PUSH_RADIUS             10
 
+#define HEIGHT_RADIUS_CLIMB     10
+
 #define PLAYER_HURT_IFRAMES     120
 #define PLAYER_FLY_MAXFRAMES    480
 
@@ -46,7 +48,7 @@ typedef enum {
     ACTION_GLIDE,
     ACTION_DROP,
     ACTION_CLIMB,
-    ACTION_CLIMBUP,
+    ACTION_CLAMBER,
 } PlayerAction;
 
 // Alias to make things look less weird
@@ -109,6 +111,12 @@ typedef struct {
     CollisionEvent ev_right;
     CollisionEvent ev_ceil1;
     CollisionEvent ev_ceil2;
+
+    // Collision detectors for Knuckles.
+    // Used for dropping of the bottom of a wall
+    // or clambering it up.
+    CollisionEvent ev_climbdrop;
+    CollisionEvent ev_clamber;
 
     VECTOR startpos;
     VECTOR respawnpos;
