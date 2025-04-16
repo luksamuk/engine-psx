@@ -356,9 +356,16 @@ _player_update_collision_lr(Player *player)
         player->ev_climbdrop = linecast(&leveldata, &map128, &map16,
                                         anchorx, drop_anchory,
                                         dir, radius, CDIR_FLOOR);
-        player->ev_clamber = linecast(&leveldata, &map128, &map16,
-                                        anchorx, clamber_anchory,
-                                        dir, radius, CDIR_FLOOR);
+
+        // If the clamber Y anchor is negative, always return the collision
+        // as true. This prevents the player from climbing over ledges that
+        // are offscreen
+        if(clamber_anchory <= 0) player->ev_clamber.collided = 1;
+        else {
+            player->ev_clamber = linecast(&leveldata, &map128, &map16,
+                                          anchorx, clamber_anchory,
+                                          dir, radius, CDIR_FLOOR);
+        }
         return;
     }
 
