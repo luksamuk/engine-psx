@@ -46,17 +46,17 @@
 #define ANIM_TAILMOVE         0x0ab30262 // MILES ONLY
 #define ANIM_TAILFLY          0x08390216 // MILES ONLY
 
-#define ANIM_CLIMBSTOP        0x0d1102ae // KNUCKLKES ONLY
-#define ANIM_CLIMBUP          0x0805020d // KNUCKLKES ONLY
-#define ANIM_CLIMBDOWN        0x0cd402a0 // KNUCKLKES ONLY
-#define ANIM_CLIMBRISE        0x0ce9029b // KNUCKLKES ONLY
-#define ANIM_CLIMBEND         0x0a22023f // KNUCKLKES ONLY
-#define ANIM_GLIDE            0x04400166 // KNUCKLKES ONLY
-#define ANIM_GLIDETURNA       0x100902f0 // KNUCKLKES ONLY
-#define ANIM_GLIDETURNB       0x100a02f1 // KNUCKLKES ONLY
-#define ANIM_GLIDECANCEL      0x1252030c // KNUCKLKES ONLY
-#define ANIM_GLIDELAND        0x0cab0285 // KNUCKLKES ONLY
-#define ANIM_GLIDERISE        0x0ce60299 // KNUCKLKES ONLY
+#define ANIM_CLIMBSTOP        0x0d1102ae // KNUCKLES ONLY
+#define ANIM_CLIMBUP          0x0805020d // KNUCKLES ONLY
+#define ANIM_CLIMBDOWN        0x0cd402a0 // KNUCKLES ONLY
+#define ANIM_CLIMBRISE        0x0ce9029b // KNUCKLES ONLY
+#define ANIM_CLIMBEND         0x0a22023f // KNUCKLES ONLY
+#define ANIM_GLIDE            0x04400166 // KNUCKLES ONLY
+#define ANIM_GLIDETURNA       0x100902f0 // KNUCKLES ONLY
+#define ANIM_GLIDETURNB       0x100a02f1 // KNUCKLES ONLY
+#define ANIM_GLIDECANCEL      0x1252030c // KNUCKLES ONLY
+#define ANIM_GLIDELAND        0x0cab0285 // KNUCKLES ONLY
+#define ANIM_GLIDERISE        0x0ce60299 // KNUCKLES ONLY
 
 extern int debug_mode;
 
@@ -948,6 +948,9 @@ player_update(Player *player)
             // Ignore input while gasping. Release action when control
             // lock is over
             if(player->ctrllock <= 0) player_set_action(player, ACTION_NONE);
+        } else if(player->action == ACTION_CLAMBER) {
+            // Do not move while clambering
+            player->vel.vx = player->vel.vy = player->vel.vz = 0;
         } else {
             // Default physics
             player_set_action(player, ACTION_NONE);
@@ -1092,7 +1095,8 @@ player_update(Player *player)
                 player_set_action(player, ACTION_CLIMB);
             }
         } else if((player->ctrllock == 0)
-                  && (player->action != ACTION_CLIMB)) {
+                  && (player->action != ACTION_CLIMB)
+                  && (player->action != ACTION_CLAMBER)) {
             if(input_pressing(&player->input, PAD_RIGHT)) {
                 if(player->vel.vx < player->cnst->x_top_spd)
                     player->vel.vx += player->cnst->x_air_accel;
@@ -1192,9 +1196,13 @@ player_update(Player *player)
                 // Fall off bottom of wall if no wall is found at Y + height radius
                 player_set_action(player, ACTION_DROP);
             }
-            /* else if(!player->ev_clamber.collided) { */
-            /*     // Clamber if no wall is found at Y - height radius */
-            /* } */
+            else if(!player->ev_clamber.collided) {
+                // Clamber if no wall is found at Y - height radius
+                player_set_action(player, ACTION_CLAMBER);
+                // Spinrev used as frame counter
+                player->framecount = 18;
+                player->vel.vx = player->vel.vy = player->vel.vz = 0;
+            }
             else {
                 // Climbing movement
                 if(input_pressing(&player->input, PAD_UP))
@@ -1212,6 +1220,24 @@ player_update(Player *player)
                     player->holding_jump = 1;
                 }
             }
+        } else if(player->action == ACTION_CLAMBER) {
+            // Clambering while still on air.
+            // Decrement framecount (set at the beginning to 16 frames).
+            // Once we reach six remaining frames, put player over
+            // platform
+            if(player->framecount > 0) {
+                player->framecount--;
+                if(player->framecount <= 6) {
+                    int32_t x_dislocate = (HEIGHT_RADIUS_CLIMB + 1) << 12;
+                    player->pos.vy -= HEIGHT_RADIUS_CLIMB << 12;
+                    player->pos.vx += (x_dislocate * player->anim_dir);
+                }
+            }
+
+            // Finish clambering, usually when still not on ground.
+            // But we also have a failsafe ground action, see below.
+            if(player->framecount == 0)
+                player_set_action(player, ACTION_NONE);
         }
 
         // Apply gravity
@@ -1230,17 +1256,24 @@ player_update(Player *player)
             else player->vel.vy -= KNUX_GLIDE_GRAVITY;
             break;
         case ACTION_CLIMB:
+        case ACTION_CLAMBER:
             // NO GRAVITY!
             break;
         default:
             player->vel.vy += player->cnst->y_gravity;
             break;
         }
-    } else {
-        if(input_pressed(&player->input, PAD_CROSS)
+    } else { // Y MOVEMENT, ON GROUND
+        if(player->action == ACTION_CLAMBER) {
+            // Failsafe for clambering while on ground.
+            // Finish frame count.
+            // When on 0, reset action
+            if(player->framecount > 0) player->framecount--;
+            else player_set_action(player, ACTION_NONE);
+        } else if(input_pressed(&player->input, PAD_CROSS)
            && (player->action != ACTION_SPINDASH)
             && (player->action != ACTION_PEELOUT)) {
-            // TODO: Review jump according to angle
+            // Jump according to angle
             player->vel.vx -= (player->cnst->y_jump_strength * rsin(player->angle)) >> 12;
             player->vel.vy -= (player->cnst->y_jump_strength * rcos(player->angle)) >> 12;
             player->grnd = 0;
@@ -1268,6 +1301,10 @@ player_update(Player *player)
                 else if(player->spinrev >= (player->underwater ? 15 : 10))
                     player_set_animation_direct(player, ANIM_RUNNING);
                 else player_set_animation_direct(player, ANIM_WALKING);
+            } else if(player->action == ACTION_CLAMBER) {
+                // If grounded, then this means we climbed up the ledge and
+                // are just waiting for things to finish
+                player_set_animation_direct(player, ANIM_CLIMBEND);
             } else if(player->col_ledge && input_pressing(&player->input, PAD_UP)) {
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
@@ -1364,6 +1401,9 @@ player_update(Player *player)
             else if(player->vel.vy < 0)
                 player_set_animation_direct(player, ANIM_CLIMBUP);
             else player_set_animation_direct(player, ANIM_CLIMBDOWN);
+        } else if(player->action == ACTION_CLAMBER) {
+            // We're clambering, but still on air!
+            player_set_animation_direct(player, ANIM_CLIMBRISE);
         } else {
             // NO ACTION
             // Only handle cases where we have certain animations that would
@@ -1376,6 +1416,8 @@ player_update(Player *player)
                 case ANIM_GLIDE:
                 case ANIM_GLIDETURNA:
                 case ANIM_GLIDETURNB:
+                case ANIM_CLIMBRISE:
+                case ANIM_CLIMBEND:
                     player_set_animation_direct(player, ANIM_WALKING);
                     break;
                 }
@@ -1445,7 +1487,14 @@ player_update(Player *player)
 
             case ANIM_CLIMBUP:
             case ANIM_CLIMBDOWN:
-                player_set_frame_duration(player, 4);
+                player_set_frame_duration(player, 6);
+                break;
+
+            case ANIM_CLIMBRISE:
+            case ANIM_CLIMBEND:
+                if(anim_hash == ANIM_CLIMBRISE)
+                    player->loopback_frame = 1;
+                player_set_frame_duration(player, 6);
                 break;
 
                 // Single-frame animations
