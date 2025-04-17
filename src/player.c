@@ -668,9 +668,11 @@ _player_update_collision_tb(Player *player)
             // When gliding, apply friction
             player->sliding = 0;
             if(player->action == ACTION_GLIDE) {
-                if(abs(player->vel.vx) <= KNUX_GLIDE_FRICTION)
+                if(abs(player->vel.vx) <= KNUX_GLIDE_FRICTION) {
+                    player_set_action(player, ACTION_GLIDERECOVER);
+                    player->framecount = 12;
                     player->vel.vx = 0;
-                else {
+                } else {
                     player->sliding = 1;
                     player->glide_turn_dir = 0;
                     player->vel.vx -= KNUX_GLIDE_FRICTION * player->anim_dir;
@@ -733,7 +735,8 @@ _player_update_collision_tb(Player *player)
                 sound_play_vag(sfx_relea, 0);
                 camera.lag = 0x8000 >> 12;
             } else if(player->action == ACTION_DROP) {
-                player_set_action(player, ACTION_NONE);
+                player_set_action(player, ACTION_DROPRECOVER);
+                player->framecount = 12;
                 player->vel.vz = 0;
                 player->airdirlock = 0;
             }
@@ -958,6 +961,12 @@ player_update(Player *player)
         } else if(player->action == ACTION_CLAMBER) {
             // Do not move while clambering
             player->vel.vx = player->vel.vy = player->vel.vz = 0;
+        } else if((player->action == ACTION_DROPRECOVER)
+                  || (player->action == ACTION_GLIDERECOVER)) {
+            if(player->framecount > 0) {
+                player->framecount--;
+                player->vel.vx = player->vel.vz = 0;
+            } else player_set_action(player, ACTION_NONE);
         } else {
             // Default physics
             player_set_action(player, ACTION_NONE);
@@ -1295,6 +1304,10 @@ player_update(Player *player)
         if(player->push) {
             player_set_animation_direct(player, ANIM_PUSHING);
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
+        } else if(player->action == ACTION_GLIDERECOVER) {
+            player_set_animation_direct(player, ANIM_GLIDERISE);
+        } else if(player->action == ACTION_DROPRECOVER) {
+            player_set_animation_direct(player, ANIM_CROUCHDOWN);
         } else if(player->vel.vz == 0) {
             if(player->action == ACTION_SPINDASH) {
                 player_set_animation_direct(player, ANIM_SPINDASH);
@@ -1707,7 +1720,8 @@ player_draw(Player *player, VECTOR *pos)
 {
     uint8_t is_rolling_angle =
         (player_get_current_animation_hash(player) == ANIM_ROLLING)
-        || (player_get_current_animation_hash(player) == ANIM_GLIDELAND);
+        || (player_get_current_animation_hash(player) == ANIM_GLIDELAND)
+        || (player_get_current_animation_hash(player) == ANIM_GLIDERISE);
     uint8_t is_rolling =
         is_rolling_angle
         || (player_get_current_animation_hash(player) == ANIM_SPINDASH);

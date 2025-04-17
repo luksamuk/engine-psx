@@ -46,7 +46,9 @@ typedef enum {
     ACTION_FLY,
     // Knuckles actions
     ACTION_GLIDE,
+    ACTION_GLIDERECOVER,
     ACTION_DROP,
+    ACTION_DROPRECOVER,
     ACTION_CLIMB,
     ACTION_CLAMBER,
 } PlayerAction;
