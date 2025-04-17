@@ -1788,7 +1788,7 @@ player_draw(Player *player, VECTOR *pos)
                     else if(!moving_towards_dir) tail_angle = 0x000;
                     else tail_angle = facing_left ? 0xe00 : 0x200;
                 } else tail_angle = 0x000;
-        }
+        } else if(is_zero_angle) tail_angle = 0x000;
 
         int16_t tail_distance_x = (tail_distance * rcos(tail_angle)) >> 24;
         int16_t tail_distance_y = (tail_distance * rsin(tail_angle)) >> 24;
