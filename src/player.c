@@ -1729,18 +1729,25 @@ _snap_angle(int32_t angle)
 void
 player_draw(Player *player, VECTOR *pos)
 {
-    uint8_t is_rolling_angle =
-        (player_get_current_animation_hash(player) == ANIM_ROLLING)
-        || (player_get_current_animation_hash(player) == ANIM_GLIDELAND)
-        || (player_get_current_animation_hash(player) == ANIM_GLIDERISE);
+    uint32_t anim_hash = player_get_current_animation_hash(player);
+    uint8_t is_zero_angle =
+        (anim_hash == ANIM_STOPPED)
+        || (anim_hash == ANIM_IDLE)
+        || (anim_hash == ANIM_CROUCHDOWN)
+        || (anim_hash == ANIM_LOOKUP)
+        || (anim_hash == ANIM_SPINDASH);
+    uint8_t is_lowered_animation =
+        (anim_hash == ANIM_ROLLING)
+        || (anim_hash == ANIM_GLIDELAND)
+        || (anim_hash == ANIM_GLIDERISE);
     uint8_t is_rolling =
-        is_rolling_angle
-        || (player_get_current_animation_hash(player) == ANIM_SPINDASH);
+        is_lowered_animation
+        || (anim_hash == ANIM_SPINDASH);
     uint8_t is_gliding =
-        (player_get_current_animation_hash(player) == ANIM_GLIDE)
-        || (player_get_current_animation_hash(player) == ANIM_GLIDECANCEL)
-        || (player_get_current_animation_hash(player) == ANIM_GLIDETURNA)
-        || (player_get_current_animation_hash(player) == ANIM_GLIDETURNB);
+        (anim_hash == ANIM_GLIDE)
+        || (anim_hash == ANIM_GLIDECANCEL)
+        || (anim_hash == ANIM_GLIDETURNA)
+        || (anim_hash == ANIM_GLIDETURNB);
     int32_t anim_angle = -_snap_angle(player->angle);
     uint8_t show_character = (((player->iframes >> 2) % 2) == 0);
     uint8_t facing_left = (player->anim_dir < 0);
@@ -1753,7 +1760,7 @@ player_draw(Player *player, VECTOR *pos)
                        (int16_t)(pos->vy >> 12)
                        + (is_rolling ? 4 : (is_gliding ? 8 : 0)),
                        facing_left,
-                       (is_rolling_angle ? 0 : anim_angle));
+                       ((is_zero_angle || is_lowered_animation) ? 0 : anim_angle));
     }
 
     // Miles' tail
