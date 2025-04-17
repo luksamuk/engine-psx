@@ -669,6 +669,7 @@ _player_update_collision_tb(Player *player)
             player->sliding = 0;
             if(player->action == ACTION_GLIDE) {
                 if(abs(player->vel.vx) <= KNUX_GLIDE_FRICTION) {
+                    // (duplicated on gliding action)
                     player_set_action(player, ACTION_GLIDERECOVER);
                     player->framecount = 12;
                     player->vel.vx = 0;
@@ -1202,10 +1203,20 @@ player_update(Player *player)
                 player->spinrev = 0;
         } else if(player->action == ACTION_GLIDE) {
             if(!input_pressing(&player->input, PAD_CROSS)) {
-                // Cancel gliding
-                player_set_action(player, ACTION_DROP);
-                player->vel.vx >>= 2; // times 0.25
-                player->airdirlock = 1;
+                if(player->sliding) {
+                    // Prevent erroneously treating a premature slide
+                    // interruption as a drop.
+                    // (duplicated code from sliding part on ground collision)
+                    player->sliding = 0;
+                    player_set_action(player, ACTION_GLIDERECOVER);
+                    player->framecount = 12;
+                    player->vel.vx = 0;
+                } else {
+                    // Cancel gliding
+                    player_set_action(player, ACTION_DROP);
+                    player->vel.vx >>= 2; // times 0.25
+                    player->airdirlock = 1;
+                }
             }
         } else if(player->action == ACTION_CLIMB) {
             if(!player->ev_climbdrop.collided) {
