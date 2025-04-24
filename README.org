@@ -101,6 +101,24 @@ even load the ELF file with proper debug symbols.
 
 Have fun.
 
+** A note on gdb-multiarch and Arch Linux
+
+For some  reason, =gdb-multiarch=  right now  cannot be  installed from  AUR. So
+you'll probably have to generate the package from a PKGBUILD by cloning the repo
+and building it:
+
+#+begin_src bash
+git clone --depth=1 https://aur.archlinux.org/gdb-multiarch.git/
+cd gdb-multiarch
+makepkg -si
+#+end_src
+
+Notice that you MIGHT Have to tweak  download links and the =pkgver= variable as
+well!  If you  install the  =gdb= package,  take a  look at  the version  of the
+package  =gdb-common= which  is  also  installed with  it.  (If  you have  other
+problems you  can just pass =--skippgpcheck=  to =makepkg=, but be  wary of what
+you're doing)
+
 * Running on real hardware
 
 #+html: <center>

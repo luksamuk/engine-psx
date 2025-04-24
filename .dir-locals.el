@@ -7,18 +7,18 @@
 	      (setq-local flycheck-clang-include-path includes)
 	      (setq-local flycheck-gcc-include-path includes)
 	      (dap-register-debug-template
-	       "PSX Debug"
-	       (list :name "PSX -- Engine debug"
+	       "Sonic XA Debug"
+	       (list :name "PSX -- Sonic XA debug"
 		     :type "gdbserver"
 		     :request "attach"
 		     :gdbpath "/usr/bin/gdb-multiarch"
 		     :target ":3333"
 		     :cwd root
-		     ;;:executable (concat root "build/engine.elf")
-		     ;;:args (concat "-x " root "tools/gdbinit.txt")
-		     ;; :autorun (list "monitor reset shellhalt"
-		     ;; 		    "load build/engine.elf"
-		     ;; 		    "tbreak main")
+		     :executable (concat root "build/sonic.elf")
+		     :args (concat "-x " root ".gdbinit")
+		     :autorun (list "monitor reset shellhalt"
+				    "load build/sonic.elf"
+				    "tbreak main")
 		     ))
 	      ;; (when neotreebuf
 	      ;; 	(with-current-buffer (first neotreebuf)

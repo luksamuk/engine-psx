@@ -1,5 +1,5 @@
 target remote localhost:3333
 monitor reset shellhalt
-file ./build/engine.elf
-load ./build/engine.elf
+file ./build/sonic.elf
+load ./build/sonic.elf
 tbreak main
