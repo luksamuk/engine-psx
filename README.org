@@ -169,7 +169,8 @@ tochd -d . -- ./build/engine.cue
 
 | Screenshot                                            | Description                                                                                             |
 |-------------------------------------------------------+---------------------------------------------------------------------------------------------------------|
-| [[file:/screenshots/sonicxa-realhardware-xmas-24.gif]]    | Beta engine [2024-12-25]. Christmas build. Showcasing Amazing Ocean running on AutoDemo.                |
+| [[file:./screenshots/sonicxa-v0.1.gif]]                   | Version 0.1 [2025-04-24]. First tag featuring Sonic, Tails, Knuckles, and a bunch of other stuff.       |
+| [[file:./screenshots/sonicxa-realhardware-xmas-24.gif]]   | Beta engine [2024-12-25]. Christmas build. Showcasing Amazing Ocean running on AutoDemo.                |
 | [[file:./screenshots/sonicxa-122224-aoz.gif]]             | Beta engine [2024-12-22]. Amazing Ocean Zone. Much more mature with many objects and water implemented. |
 | [[file:./screenshots/sonicxa-110424-swz.gif]]             | Beta engine [2024-11-04]. Like below. Showcasing Surely Wood Zone, springs, background, etc.            |
 | [[file:./screenshots/sonicxa-110424-ghz.gif]]             | Beta engine [2024-11-04]. Many changes, notably a HUD, improved collision, spikes and damage.           |
