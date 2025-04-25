@@ -8,11 +8,8 @@ RenderContext ctx;
 void
 setup_context()
 {
-    // Initialize the GPU and load the default font texture provided by
-    // PSn00bSDK at (960, 0) in VRAM.
+    // Initialize the GPU
     ResetGraph(0);
-    FntLoad(960, 0);
-    FntOpen(4, 12, 312, 16, 2, 256);
 
     // Place the two framebuffers vertically in VRAM.
     SetDefDrawEnv(&ctx.buffers[0].draw_env, 0, 0,           SCREEN_XRES, SCREEN_YRES);
@@ -128,30 +125,11 @@ sort_prim(void *prim, uint32_t otz)
     assert(ctx.next_packet <= &ctx.buffers[ctx.active_buffer].buffer[BUFFER_LENGTH]);
 }
 
-// A simple helper for drawing text using PSn00bSDK's debug font API. Note that
-// FntSort() requires the debug font texture to be uploaded to VRAM beforehand
-// by calling FntLoad().
-void
-draw_text(int x, int y, int z, const char *text)
-{
-    ctx.next_packet = FntSort(get_ot_at(z), get_next_prim(), x, y, text);
-    assert(ctx.next_packet <= &ctx.buffers[ctx.active_buffer].buffer[BUFFER_LENGTH]);
-}
-
 uint32_t *
 get_ot_at(uint32_t otz)
 {
     RenderBuffer *buffer = &ctx.buffers[ctx.active_buffer];
     return &buffer->ot[otz];
-}
-
-void
-render_loading_text()
-{
-    swap_buffers();
-    draw_text(CENTERX - 52, CENTERY - 4, 0, "Now Loading...");
-    swap_buffers();
-    swap_buffers();
 }
 
 RECT *

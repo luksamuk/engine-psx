@@ -66,10 +66,6 @@ void     draw_quad(int16_t vx, int16_t vy,
                    uint8_t semitrans,
                    uint16_t otz);
 
-void draw_text(int x, int y, int z, const char *text);
-
-void render_loading_text();
-
 RECT *render_get_buffer_clip(void);
 
 #endif

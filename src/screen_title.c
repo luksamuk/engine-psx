@@ -418,17 +418,25 @@ screen_title_draw(void *d)
 
     if(debug_mode) {
         uint32_t elapsed_sectors;
+        char buffer[80];
         sound_xa_get_elapsed_sectors(&elapsed_sectors);
-        FntPrint(-1, "%-29s %4s %3d\n",
+        snprintf(buffer, 120,
+                 "DBG %1u\n"
+                 "%-29s\n"
+                 "%4s %3d Hz\n"
+                 "Build Date %11s %8s\n"
+                 "BGM SECTORS %08u",
+                 debug_mode,
                  GIT_COMMIT,
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
-                 get_frame_rate());
-        FntPrint(-1, "%11s %8s          %08u\n",
-                 __DATE__, __TIME__, elapsed_sectors);
-        FntFlush(-1);
+                 get_frame_rate(),
+                 __DATE__, __TIME__,
+                 elapsed_sectors);
+        font_draw_sm(buffer, 8, 12);
+        draw_quad(0, 0, SCREEN_XRES, 75,
+                  0, 0, 0, 1,
+                  OTZ_LAYER_LEVEL_FG_FRONT);
     }
-
-
     
     screen_title_drawtitle(data);
     screen_title_drawprl(data);
