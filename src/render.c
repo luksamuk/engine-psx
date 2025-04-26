@@ -97,6 +97,7 @@ swap_buffers()
     PutDrawEnv(&draw_buffer->draw_env);
     PutDispEnv(&disp_buffer->disp_env);
     /* DrawOTagEnv(&draw_buffer->ot[OT_LENGTH - 1], &draw_buffer->draw_env); */
+    sort_sub_ot();
     DrawOTag(&draw_buffer->ot[OT_LENGTH - 1]);
 
     SetDispMask(1);

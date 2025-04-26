@@ -84,7 +84,6 @@ main(void)
 
         // Draw scene
         scene_draw();
-        sort_sub_ot();
         font_flush();
         swap_buffers();
     }
