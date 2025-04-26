@@ -1762,6 +1762,7 @@ player_draw(Player *player, VECTOR *pos)
         chara_draw_blit(&player->render_area,
                         (int16_t)(pos->vx >> 12),
                         (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : (is_gliding ? 8 : 0)),
+                        facing_left ? 6 : 2, 9,
                         facing_left,
                         ((is_zero_angle || is_lowered_animation) ? 0 : anim_angle));
         /* chara_draw_gte(&player->chara, */
@@ -1809,8 +1810,9 @@ player_draw(Player *player, VECTOR *pos)
         chara_draw_prepare(&player->render_sub_area, SUB_OT_LENGTH - 3);
         chara_draw_offscreen(&player->chara, player->tail_anim_frame, facing_left, SUB_OT_LENGTH - 4);
         chara_draw_blit(&player->render_sub_area,
-                        (int16_t)(pos->vx >> 12) - tail_distance_x,
+                        (int16_t)(pos->vx >> 12) - tail_distance_x + (facing_left ? 6 : 2),
                         (int16_t)(pos->vy >> 12) - tail_distance_y,
+                        0, 9,
                         facing_left,
                         tail_angle);
         

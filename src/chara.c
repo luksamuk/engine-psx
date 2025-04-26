@@ -201,15 +201,19 @@ chara_draw_offscreen(Chara *chara, int16_t framenum, int flipx, int otz)
 void
 chara_draw_blit(RECT *render_area,
                 int16_t vx, int16_t vy,
+                int32_t offsetx, int32_t offsety,
                 uint8_t flipx, int32_t angle)
 {
-    // Prepare position
+    // Calculate offsets
     int32_t asin = rsin(angle);
     int32_t acos = rcos(angle);
-    int32_t offsety_b = (9 << 12);
 
-    int32_t offsety = ((offsety_b * acos) >> 12);
-    int32_t offsetx = ((offsety_b * asin) >> 12);
+    int32_t offsetx_b = offsetx << 12;
+    int32_t offsety_b = offsety << 12;
+    offsety = ((offsety_b * acos) >> 12);
+    offsetx = ((offsety_b * asin) >> 12);
+    offsety += (offsetx_b * asin) >> 12;
+    offsetx += (offsetx_b * acos) >> 12;
     
     VECTOR pos = {
         .vx = vx - CENTERX + (offsetx >> 12),
