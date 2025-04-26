@@ -72,7 +72,8 @@ main(void)
     sound_bgm_init();
 
     // Set first scene
-    scene_change(SCREEN_DISCLAIMER);
+    //scene_change(SCREEN_DISCLAIMER);
+    scene_change(SCREEN_SPRITETEST);
 
     while(1) {
         // Update systems

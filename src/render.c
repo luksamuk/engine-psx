@@ -57,8 +57,10 @@ force_clear()
         sort_prim(poly, OTZ_LAYER_TOPMOST);
         increment_prim(sizeof(POLY_F4));
 
-        DrawOTagEnv(&ctx.buffers[ctx.active_buffer].ot[OT_LENGTH - 1],
-                    &ctx.buffers[ctx.active_buffer].draw_env);
+        /* DrawOTagEnv(&ctx.buffers[ctx.active_buffer].ot[OT_LENGTH - 1], */
+        /*             &ctx.buffers[ctx.active_buffer].draw_env); */
+        DrawOTag(&ctx.buffers[ctx.active_buffer].ot[OT_LENGTH - 1]);
+        PutDrawEnv(&ctx.buffers[ctx.active_buffer].draw_env);
         PutDispEnv(&ctx.buffers[ctx.active_buffer].disp_env);
 
         DrawSync(0);
@@ -67,6 +69,7 @@ force_clear()
         ctx.active_buffer ^= 1;
         ctx.next_packet    = ctx.buffers[ctx.active_buffer].buffer;
         ClearOTagR(ctx.buffers[ctx.active_buffer].ot, OT_LENGTH);
+        ClearOTagR(ctx.buffers[ctx.active_buffer].sub_ot, SUB_OT_LENGTH);
     }
 }
 
@@ -91,8 +94,12 @@ swap_buffers()
 
     // Display the framebuffer the GPU has just finished drawing and start
     // rendering the display list that was filled up in the main loop.
+    PutDrawEnv(&draw_buffer->draw_env);
     PutDispEnv(&disp_buffer->disp_env);
-    DrawOTagEnv(&draw_buffer->ot[OT_LENGTH - 1], &draw_buffer->draw_env);
+    /* DrawOTagEnv(&draw_buffer->ot[OT_LENGTH - 1], &draw_buffer->draw_env); */
+    DrawOTag(&draw_buffer->ot[OT_LENGTH - 1]);
+
+    SetDispMask(1);
 
     // Switch over to the next buffer, clear it and reset the packet allocation
     // pointer.
@@ -100,6 +107,7 @@ swap_buffers()
     ctx.next_packet    = disp_buffer->buffer;
 
     ClearOTagR(disp_buffer->ot, OT_LENGTH);
+    ClearOTagR(disp_buffer->sub_ot, SUB_OT_LENGTH);
 }
 
 void *
@@ -125,11 +133,32 @@ sort_prim(void *prim, uint32_t otz)
     assert(ctx.next_packet <= &ctx.buffers[ctx.active_buffer].buffer[BUFFER_LENGTH]);
 }
 
+void
+sort_sub_prim(void *prim, uint32_t otz)
+{
+    addPrim(get_sub_ot_at(otz), (uint8_t *) prim);
+    assert(ctx.next_packet <= &ctx.buffers[ctx.active_buffer].buffer[BUFFER_LENGTH]);
+}
+
+void
+sort_sub_ot()
+{
+    RenderBuffer *buffer = &ctx.buffers[ctx.active_buffer];
+    addPrims(&buffer->ot, &buffer->sub_ot[SUB_OT_LENGTH-1], &buffer->sub_ot);
+}
+
 uint32_t *
 get_ot_at(uint32_t otz)
 {
     RenderBuffer *buffer = &ctx.buffers[ctx.active_buffer];
     return &buffer->ot[otz];
+}
+
+uint32_t *
+get_sub_ot_at(uint32_t otz)
+{
+    RenderBuffer *buffer = &ctx.buffers[ctx.active_buffer];
+    return &buffer->sub_ot[otz];
 }
 
 RECT *

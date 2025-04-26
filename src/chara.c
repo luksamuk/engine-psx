@@ -102,6 +102,189 @@ free_chara(Chara *chara)
 uint8_t frame_debug = 0;
 
 void
+chara_draw_fb(Chara *chara, int16_t framenum,
+              RECT *render_area,
+              int16_t vx, int16_t vy,
+              uint8_t flipx, int32_t angle)
+{
+    CharaFrame *frame = &chara->frames[framenum];
+    int16_t left = frame->x >> 3;
+    int16_t right = 7 - (frame->width >> 3) - left;
+
+    /* DR_TPAGE  *tpage_a, *tpage_b; */
+    FILL      *pfill;
+    DR_AREA   *parea;
+    DR_OFFSET *poffs;
+    RECT      *clip = render_get_buffer_clip();
+
+    sort_sub_ot();
+
+    // Clear offscreen area.
+    // This is put at the end because this is the very first thing to be done.
+    pfill = (FILL *)get_next_prim();
+    setFill(pfill);
+    setXY0(pfill, render_area->x, render_area->y);
+    setWH(pfill, render_area->w, render_area->h);
+    setRGB0(pfill, 0, 0, 0);
+    sort_sub_prim(pfill, SUB_OT_LENGTH-1);
+    increment_prim(sizeof(FILL));
+
+    // Sort draw area primitive.
+    parea = (DR_AREA *)get_next_prim();
+    setDrawArea(parea, render_area);
+    sort_sub_prim(parea, SUB_OT_LENGTH-1);
+    increment_prim(sizeof(DR_AREA));
+
+    // Revert to original draw area at end.
+    parea = (DR_AREA *)get_next_prim();
+    setDrawArea(parea, clip);
+    sort_sub_prim(parea, 1);
+    increment_prim(sizeof(DR_AREA));
+
+    // Sort draw offset primitive.
+    poffs = (DR_OFFSET *)get_next_prim();
+    setDrawOffset(poffs, render_area->x, render_area->y);
+    sort_sub_prim(poffs, SUB_OT_LENGTH-1);
+    increment_prim(sizeof(DR_OFFSET));
+
+    // Revert to original draw offset at end.
+    poffs = (DR_OFFSET *)get_next_prim();
+    setDrawOffset(poffs, clip->x, clip->y);
+    sort_sub_prim(poffs, 1);
+    increment_prim(sizeof(DR_OFFSET));
+
+    // Start drawing before sub_ot[2] and sub_ot[SUB_OT_LENGTH-2].
+
+    // We're gonna use two TPAGE's: one for the top texture, one for the bottom
+    // texture. Both use the same CLUT.
+
+    // Prepare TPAGE's. Both use 8-bit CLUT always.
+    /* tpage_a = get_next_prim(); */
+    /* setDrawTPage(tpage_a, 0, 1, getTPage(1, 1, chara->prectx, 0)); // Upper page */
+    /* sort_sub_prim(tpage_a, 2); // sub_otz = 2 */
+    /* increment_prim(sizeof(DR_TPAGE)); */
+
+    /* tpage_b = get_next_prim(); */
+    /* setDrawTPage(tpage_b, 0, 1, getTPage(1, 1, chara->prectx, 256)); // Lower page */
+    /* sort_sub_prim(tpage_b, 3); // sub_otz = 3 */
+    /* increment_prim(sizeof(DR_TPAGE)); */
+
+    for(uint16_t row = 0; row < frame->rows; row++) {
+        for(uint16_t col = 0; col < frame->cols; col++) {
+            uint16_t idx = (row * frame->cols) + col;
+            idx = frame->tiles[idx];
+            if(idx == 0) continue;
+
+            uint32_t otz = 2;
+            uint16_t precty = chara->precty;
+
+            uint16_t v0idx = idx / 28;
+            uint16_t u0idx = idx - (v0idx * 28);
+            uint16_t
+                u0 = u0idx * 9,
+                v0 = v0idx * 9;
+            if((v0 + 9) >= 256) {
+                // Go to TPAGE right below
+                v0idx -= 28;
+                v0 = v0idx * 9;
+                /* otz = SUB_OT_LENGTH - 50; */
+                precty = 256;
+            }
+
+            //int16_t tilex = (col << 3) + (flipx ? (right << 3) : frame->x) + 5;
+            int16_t tilex = (col << 3) + frame->x + 5;
+            int16_t tiley = (row << 3) + frame->y - 5 + 8;
+
+            /* SPRT_8 *sprt = (SPRT_8 *)get_next_prim(); */
+            /* increment_prim(sizeof(SPRT_8)); */
+            /* setSprt8(sprt); */
+            /* setUV0(sprt, u0, v0); */
+            /* setXY0(sprt, tilex, tiley); */
+            /* setRGB0(sprt, level_fade, level_fade, level_fade); */
+            /* setClut(sprt, chara->crectx, chara->crecty); */
+            /* sort_sub_prim(sprt, otz); */
+
+            POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+            increment_prim(sizeof(POLY_FT4));
+            setPolyFT4(poly);
+            setRGB0(poly, 128, 128, 128);
+            setTPage(poly, 1, 1, chara->prectx, precty);
+            setClut(poly, chara->crectx, chara->crecty);
+            setUV4(poly,
+                   u0,     v0,
+                   u0 + 8, v0,
+                   u0,     v0 + 8,
+                   u0 + 8, v0 + 8);
+            setXYWH(poly, tilex, tiley, 8, 8);
+            sort_sub_prim(poly, otz);
+        }
+    }
+
+    // Prepare position
+    VECTOR pos = {
+        .vx = vx - CENTERX,
+        .vy = vy - CENTERY,
+        .vz = frame_debug ? 0 : SCREEN_Z,
+    };
+    SVECTOR rotation = { 0, 0, angle, 0 };
+    int otz;
+
+    MATRIX world = { 0 };
+    TransMatrix(&world, &pos);
+    RotMatrix(&rotation, &world);
+    gte_SetTransMatrix(&world);
+    gte_SetRotMatrix(&world);
+
+    // Now draw the actual character, where it is supposed to be!
+    POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+    increment_prim(sizeof(POLY_FT4));
+    setPolyFT4(poly);
+    setRGB0(poly, level_fade, level_fade, level_fade);
+    setTPage(poly, 2, 0, render_area->x, render_area->y);
+    // Not CLUT! We use 16-bit depth.
+
+    uint8_t umax = render_area->w - 1;
+    uint8_t vmax = render_area->h - 1;
+    poly->clut = 0;
+    if(flipx) {
+        setUV4(poly,
+               umax, 0,
+               0,    0,
+               umax, vmax,
+               0,    vmax);
+    } else {
+        setUV4(poly,
+               0,    0,
+               umax, 0,
+               0,    vmax,
+               umax, vmax);
+    }
+
+    int16_t hw = (render_area->w >> 1) + 4;
+    int16_t hh = (render_area->h >> 1) + 4;
+
+    SVECTOR vertices[] = {
+        { -hw, -hh, 0, 0 },
+        {  hw, -hh, 0, 0 },
+        { -hw,  hh, 0, 0 },
+        {  hw,  hh, 0, 0 },
+    };
+
+    RotAverageNclip4(
+        &vertices[0],
+        &vertices[1],
+        &vertices[2],
+        &vertices[3],
+        (uint32_t *)&poly->x0,
+        (uint32_t *)&poly->x1,
+        (uint32_t *)&poly->x2,
+        (uint32_t *)&poly->x3,
+        &otz);
+
+    sort_prim(poly, OTZ_LAYER_PLAYER);
+}
+
+void
 chara_draw_gte(Chara *chara, int16_t framenum,
                int16_t vx, int16_t vy,
                uint8_t flipx, int32_t angle)

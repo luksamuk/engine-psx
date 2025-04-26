@@ -58,14 +58,14 @@ screen_sprite_test_load()
     load_chara(&data->chara, chara_file, &tim);
 
     data->frame = 0;
-    data->play_frames = 0;
+    data->play_frames = 1;
     data->angle = 0;
     data->flipx = 0;
     level_fade = 0x7f;
     set_clear_color(0x64, 0x95, 0xed);
 
-    setRECT(&data->render_area, 960, 0, 56, 56);
-    setRECT(&data->render_sub_area, 960, data->render_area.y + data->render_area.h, 56, 56);
+    setRECT(&data->render_area, 960, 0, 64, 64);
+    setRECT(&data->render_sub_area, 960, data->render_area.y + data->render_area.h, 64, 64);
 }
 
 void
@@ -149,18 +149,19 @@ screen_sprite_test_draw(void *d)
              GetVideoMode() == MODE_PAL ? "PAL" : "NTSC", get_frame_rate());
     font_draw_sm(buffer, 248, 12);
 
-    chara_draw_gte(&data->chara,
-                   data->frame,
-                   (int16_t)CENTERX,
-                   (int16_t)CENTERY,
-                   data->flipx,
-                   data->angle);
-    /* chara_draw_fb(&data->chara, */
+    /* chara_draw_gte(&data->chara, */
     /*                data->frame, */
     /*                (int16_t)CENTERX, */
     /*                (int16_t)CENTERY, */
     /*                data->flipx, */
     /*                data->angle); */
+    chara_draw_fb(&data->chara,
+                  data->frame,
+                  &data->render_area,
+                  (int16_t)CENTERX,
+                  (int16_t)CENTERY,
+                  data->flipx,
+                  data->angle);
 }
 
 void
