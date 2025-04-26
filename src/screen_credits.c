@@ -73,6 +73,11 @@ static const char *creditstxt[] = {
     "By Sonic Team",
     "\r",
 
+    "Amazing Ocean Zone",
+    "Aquarium Park -Dragon Dance Mashup-",
+    "By DarkHyperSonic7",
+    "\r",
+
     "Eggmanland Zone",
     "Eggmanland: 16 Bit Remix",
     "By DRocca",
