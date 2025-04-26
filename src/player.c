@@ -1779,7 +1779,10 @@ player_draw(Player *player, VECTOR *pos)
        && show_character) {
         
         int32_t tail_distance = (is_rolling ? 8 : 0) << 12;
-        if(player->anim_dir < 0) tail_distance *= -1;
+        if(player->anim_dir < 0) {
+            if(anim_hash == ANIM_ROLLING) tail_distance = 12 << 12;
+            tail_distance *= -1;
+        }
 
         uint8_t moving_towards_dir =
             (!player->grnd) || (SIGNUM(player->vel.vz) == player->anim_dir);
