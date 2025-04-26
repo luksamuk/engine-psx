@@ -157,7 +157,7 @@ screen_sprite_test_draw(void *d)
     /*                data->angle); */
 
     chara_draw_prepare(&data->render_area, SUB_OT_LENGTH - 1);
-    chara_draw_offscreen(&data->chara, data->frame, SUB_OT_LENGTH - 2);
+    chara_draw_offscreen(&data->chara, data->frame, data->flipx, SUB_OT_LENGTH - 2);
     chara_draw_blit(&data->render_area,
                     (int16_t)CENTERX,
                     (int16_t)CENTERY,
@@ -166,7 +166,7 @@ screen_sprite_test_draw(void *d)
 
     if(spritetest_character == CHARA_MILES) {
         chara_draw_prepare(&data->render_sub_area, SUB_OT_LENGTH - 3);
-        chara_draw_offscreen(&data->chara, 73, SUB_OT_LENGTH - 4);
+        chara_draw_offscreen(&data->chara, 73, data->flipx, SUB_OT_LENGTH - 4);
         chara_draw_blit(&data->render_sub_area,
                         (int16_t)CENTERX,
                         (int16_t)CENTERY,

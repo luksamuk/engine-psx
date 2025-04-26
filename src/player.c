@@ -161,6 +161,9 @@ load_player(Player *player,
     player->ev_clamber = (CollisionEvent){ .collided = 1 };
     player->col_ledge = 0;
 
+    setRECT(&player->render_area, 960, 0, 56, 56);
+    setRECT(&player->render_sub_area, 960, 56, 56, 56);
+
     player->action = ACTION_NONE;
 }
 
@@ -1754,13 +1757,20 @@ player_draw(Player *player, VECTOR *pos)
     
     // if iframes, do not show for every 4 frames
     if(player->cur_anim && show_character) {
-        chara_draw_gte(&player->chara,
-                       player->anim_frame,
-                       (int16_t)(pos->vx >> 12),
-                       (int16_t)(pos->vy >> 12)
-                       + (is_rolling ? 4 : (is_gliding ? 8 : 0)),
-                       facing_left,
-                       ((is_zero_angle || is_lowered_animation) ? 0 : anim_angle));
+        chara_draw_prepare(&player->render_area, SUB_OT_LENGTH - 1);
+        chara_draw_offscreen(&player->chara, player->anim_frame, facing_left, SUB_OT_LENGTH - 2);
+        chara_draw_blit(&player->render_area,
+                        (int16_t)(pos->vx >> 12),
+                        (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : (is_gliding ? 8 : 0)),
+                        facing_left,
+                        ((is_zero_angle || is_lowered_animation) ? 0 : anim_angle));
+        /* chara_draw_gte(&player->chara, */
+        /*                player->anim_frame, */
+        /*                (int16_t)(pos->vx >> 12), */
+        /*                (int16_t)(pos->vy >> 12) */
+        /*                + (is_rolling ? 4 : (is_gliding ? 8 : 0)), */
+        /*                facing_left, */
+        /*                ((is_zero_angle || is_lowered_animation) ? 0 : anim_angle)); */
     }
 
     // Miles' tail
@@ -1792,13 +1802,21 @@ player_draw(Player *player, VECTOR *pos)
 
         int16_t tail_distance_x = (tail_distance * rcos(tail_angle)) >> 24;
         int16_t tail_distance_y = (tail_distance * rsin(tail_angle)) >> 24;
+
+        chara_draw_prepare(&player->render_sub_area, SUB_OT_LENGTH - 3);
+        chara_draw_offscreen(&player->chara, player->tail_anim_frame, facing_left, SUB_OT_LENGTH - 4);
+        chara_draw_blit(&player->render_sub_area,
+                        (int16_t)(pos->vx >> 12) - tail_distance_x,
+                        (int16_t)(pos->vy >> 12) - tail_distance_y,
+                        facing_left,
+                        tail_angle);
         
-        chara_draw_gte(&player->chara,
-                       player->tail_anim_frame,
-                       (int16_t)(pos->vx >> 12) - tail_distance_x,
-                       (int16_t)(pos->vy >> 12) - tail_distance_y,
-                       facing_left,
-                       tail_angle);
+        /* chara_draw_gte(&player->chara, */
+        /*                player->tail_anim_frame, */
+        /*                (int16_t)(pos->vx >> 12) - tail_distance_x, */
+        /*                (int16_t)(pos->vy >> 12) - tail_distance_y, */
+        /*                facing_left, */
+        /*                tail_angle); */
     }
 }
 

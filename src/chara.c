@@ -153,11 +153,9 @@ chara_draw_end(int otz)
 }
 
 void
-chara_draw_offscreen(Chara *chara, int16_t framenum, int otz)
+chara_draw_offscreen(Chara *chara, int16_t framenum, int flipx, int otz)
 {
     CharaFrame *frame = &chara->frames[framenum];
-    /* int16_t left = frame->x >> 3; */
-    /* int16_t right = 7 - (frame->width >> 3) - left; */
 
     // Start drawing before sub_ot[2] and sub_ot[SUB_OT_LENGTH-2].
     for(uint16_t row = 0; row < frame->rows; row++) {
@@ -183,6 +181,10 @@ chara_draw_offscreen(Chara *chara, int16_t framenum, int otz)
             int16_t tilex = (col << 3) + frame->x + 5;
             int16_t tiley = (row << 3) + frame->y - 5 + 8;
 
+            if(flipx) {
+                tilex -= 10;
+            }
+
             POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
             increment_prim(sizeof(POLY_FT4));
             setPolyFT4(poly);
@@ -206,9 +208,16 @@ chara_draw_blit(RECT *render_area,
                 uint8_t flipx, int32_t angle)
 {
     // Prepare position
+    int32_t asin = rsin(angle);
+    int32_t acos = rcos(angle);
+    int32_t offsety_b = (9 << 12);
+
+    int32_t offsety = ((offsety_b * acos) >> 12);
+    int32_t offsetx = ((offsety_b * asin) >> 12);
+    
     VECTOR pos = {
-        .vx = vx - CENTERX,
-        .vy = vy - CENTERY,
+        .vx = vx - CENTERX + (offsetx >> 12),
+        .vy = vy - CENTERY - (offsety >> 12),
         .vz = frame_debug ? 0 : SCREEN_Z,
     };
     SVECTOR rotation = { 0, 0, angle, 0 };

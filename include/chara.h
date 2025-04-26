@@ -39,7 +39,7 @@ void chara_draw_gte(Chara *chara, int16_t framenum,
                     uint8_t flipx, int32_t angle);
 
 void chara_draw_prepare(RECT *render_area, int otz);
-void chara_draw_offscreen(Chara *chara, int16_t framenum, int otz);
+void chara_draw_offscreen(Chara *chara, int16_t framenum, int flipx, int otz);
 void chara_draw_blit(RECT *render_area,
                      int16_t vx, int16_t vy,
                      uint8_t flipx, int32_t angle);
