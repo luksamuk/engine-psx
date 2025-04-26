@@ -178,12 +178,8 @@ chara_draw_offscreen(Chara *chara, int16_t framenum, int flipx, int otz)
                 precty = 256;
             }
 
-            int16_t tilex = (col << 3) + frame->x + 5;
+            int16_t tilex = (col << 3) + frame->x;
             int16_t tiley = (row << 3) + frame->y - 5 + 8;
-
-            if(flipx) {
-                tilex -= 10;
-            }
 
             POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
             increment_prim(sizeof(POLY_FT4));

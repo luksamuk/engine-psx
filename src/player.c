@@ -1818,6 +1818,8 @@ player_draw(Player *player, VECTOR *pos)
         /*                facing_left, */
         /*                tail_angle); */
     }
+
+    chara_draw_end(0);
 }
 
 void _player_set_hurt(Player *player, int32_t hazard_x);

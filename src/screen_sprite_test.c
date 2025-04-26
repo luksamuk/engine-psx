@@ -174,7 +174,7 @@ screen_sprite_test_draw(void *d)
                         data->angle);
     }
 
-    chara_draw_end(1);
+    chara_draw_end(0);
 }
 
 void

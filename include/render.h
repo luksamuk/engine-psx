@@ -17,7 +17,7 @@
 // Length of the sub ordering table. This ordering table is used for offscreen
 // rendering of some textures like character sprites, which usually need extra
 // rearranging into a proper texture and then blitting onto the scene
-#define SUB_OT_LENGTH 128
+#define SUB_OT_LENGTH 8
 
 // Size of the buffer GPU commands and primitives are written to. If the program
 // crashes due to too many primitives being drawn, increase this value.
