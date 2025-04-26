@@ -278,7 +278,9 @@ screen_levelselect_draw(void *d)
                  get_frame_rate(),
                  __DATE__, __TIME__,
                  elapsed_sectors);
+        font_set_color(0x00, 0x7f, 0x00);
         font_draw_sm(buffer, 8, 12);
+        font_reset_color();
         draw_quad(0, 0, SCREEN_XRES, 75,
                   0, 0, 0, 1,
                   OTZ_LAYER_LEVEL_FG_FRONT);
