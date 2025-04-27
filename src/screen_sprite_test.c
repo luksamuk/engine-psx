@@ -22,7 +22,6 @@ typedef struct {
     uint8_t flipx;
     int32_t angle;
     RECT    render_area;
-    RECT    render_sub_area;
 } screen_sprite_test_data;
 
 void
@@ -64,8 +63,7 @@ screen_sprite_test_load()
     level_fade = 0x7f;
     set_clear_color(0x64, 0x95, 0xed);
 
-    setRECT(&data->render_area, 960, 0, 64, 64);
-    setRECT(&data->render_sub_area, 960, 64, 64, 64);
+    setRECT(&data->render_area, 960, 0, 56, 56);
 }
 
 void
@@ -164,18 +162,6 @@ screen_sprite_test_draw(void *d)
                     data->flipx ? 6 : 2, 9,
                     data->flipx,
                     data->angle);
-
-    if(spritetest_character == CHARA_MILES) {
-        chara_draw_prepare(&data->render_sub_area, SUB_OT_LENGTH - 3);
-        chara_draw_offscreen(&data->chara, 73, data->flipx, SUB_OT_LENGTH - 4);
-        chara_draw_blit(&data->render_sub_area,
-                        (int16_t)CENTERX,
-                        (int16_t)CENTERY,
-                        data->flipx ? 7 : 0, 9,
-                        data->flipx,
-                        data->angle);
-    }
-
     chara_draw_end(0);
 }
 
