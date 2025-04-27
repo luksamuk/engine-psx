@@ -547,7 +547,8 @@ screen_level_draw(void *d)
 
         // ACT card
         char buffer[5];
-        snprintf(buffer, 5, "*%d", data->level_act + 1);
+        uint8_t act_number = (level == 3) ? 2 : data->level_act;
+        snprintf(buffer, 5, "*%d", act_number + 1);
         font_draw_hg(buffer, data->tc_act_x, 70 + GLYPH_HG_WHITE_HEIGHT + 40);
 
         // Game text
@@ -784,6 +785,7 @@ level_load_level(screen_level_data *data)
     case 0: case 1: case 2: case 3: // Test level
         data->level_name = "TEST LEVEL";
         data->level_round = 0;
+        // Act 4 is Knuckles act 3
         data->level_act = level;
         if(level == 2) {
             level_water_y = 0x00c43401;

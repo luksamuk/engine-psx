@@ -49,7 +49,7 @@ static const char *menutext[] = {
     "TEST LEVEL    1",
     "              2",
     "              3",
-    "              4",
+    "              3K",
     "EXTRA 1       1",
     "              2",
     "SURELY WOOD   1",
