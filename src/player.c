@@ -1781,7 +1781,8 @@ player_draw(Player *player, VECTOR *pos)
         
         int32_t tail_distance = (is_rolling ? 8 : 0) << 12;
         if(player->anim_dir < 0) {
-            if(anim_hash == ANIM_ROLLING) tail_distance = 12 << 12;
+            if(anim_hash == ANIM_ROLLING) tail_distance = 14 << 12;
+            else tail_distance = 4 << 12;
             tail_distance *= -1;
         }
 
@@ -1804,13 +1805,18 @@ player_draw(Player *player, VECTOR *pos)
                 } else tail_angle = 0x000;
         } else if(is_zero_angle) tail_angle = 0x000;
 
-        int16_t tail_distance_x = (tail_distance * rcos(tail_angle)) >> 24;
-        int16_t tail_distance_y = (tail_distance * rsin(tail_angle)) >> 24;
+        int32_t tail_angle_sin = rsin(tail_angle);
+        int32_t tail_angle_cos = rcos(tail_angle);
+        int16_t tail_distance_x = (tail_distance * tail_angle_cos) >> 24;
+        int16_t tail_distance_y = (tail_distance * tail_angle_sin) >> 24;
+
+        tail_distance_x -= (((facing_left ? 2 : 2) << 12) * tail_angle_cos) >> 24;
+        tail_distance_y -= (((facing_left ? 0 : 2) << 12) * tail_angle_sin) >> 24;
 
         chara_draw_prepare(&player->render_sub_area, SUB_OT_LENGTH - 3);
         chara_draw_offscreen(&player->chara, player->tail_anim_frame, facing_left, SUB_OT_LENGTH - 4);
         chara_draw_blit(&player->render_sub_area,
-                        (int16_t)(pos->vx >> 12) - tail_distance_x + (facing_left ? 6 : 2),
+                        (int16_t)(pos->vx >> 12) - tail_distance_x,
                         (int16_t)(pos->vy >> 12) - tail_distance_y,
                         0, 9,
                         facing_left,

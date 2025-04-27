@@ -171,7 +171,7 @@ screen_sprite_test_draw(void *d)
         chara_draw_blit(&data->render_sub_area,
                         (int16_t)CENTERX,
                         (int16_t)CENTERY,
-                        data->flipx ? 5 : 0, 9,
+                        data->flipx ? 7 : 0, 9,
                         data->flipx,
                         data->angle);
     }
