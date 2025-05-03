@@ -1,0 +1,367 @@
+#+TITLE: Sonic XA Changelog
+
+This  changelog file  describes  the  differences between  each  Sonic XA  build
+available  in  this directory.  Changes  are  always  relative to  the  previous
+version.
+
+* Latest
+
+- Remove embedded debug font to make room for offscreen rendering
+- Add missing credits for AOZ music
+- Add improved, offscreen-buffered character rendering
+- Changes to R0Z4
+
+* v0.1 (2025-04-24)
+
+This is the  first version to use semantic versioning.  This makes very profound
+changes including the  new Sonic sprites and the addition  of Tails and Knuckles
+(sprites by CartoonsAnimate22).
+
+- Change internal project references to SONIC XA instead of Engine
+- Add animations for ledge balancing and gulping bubbles
+- Add some checkpoint respawn code (still unused)
+- Fix game hanging when music loops by putting loop code outside of CD callback
+- Restructure and unify definitions of loop points for songs
+- Add animation rotation through GTE
+- Fix offsets for rolling animations and shield object
+- Snap angles of animations so character rotation isn't arbitrary
+- Change ISO name to "Sonic The Hedgehog XA"
+- Add Makefile target to run game on DuckStation
+- Add encoding targets for .VAG and .XA audio files
+- Remove all traces of FMV (.STR playback) code
+- Add a way to manually inform angles for collision geometry on 16x16 tiles
+- Manually fix some collision data on a few levels
+- Fix monitor and spring hitboxes and collision
+- Replace .psxcsv extension with .cnk
+- Create unified method to change player action (enables bugfixes)
+- Fix a bug with control
+- Remove PlayStation 30 Years anniversary assets and slide
+- Add Super Peel Out
+- Add R9 (extra level)
+- Change Sonic sprite
+- Change starting level to SWZ1
+- Layout changes to R0Z3 so it becomes a water test level
+- Add Tails! (including flight/swim and tail animations)
+- Add Knuckles! (including glide, glide turn, climbing, etc)
+- Add a Character Select screen before starting the game
+- Load all sound effects at beginning of game to decrease load times
+- Modify title screen to better suit the new layout
+- Add a constraint to the top of levels so characters won't go above Y = 0
+- Configuration and notes on GDB-Multiarch and DAP
+
+* New Year Build (2024-01-02)
+
+This is a  hotfix which introduces a  few changes for a  better experience. This
+effectively  introduces  changes  after  observing  a  few  people  playing  the
+Christmas build.
+
+- Remove FMVs (code, functionality and .STR files from disc)
+- Add  slideshow frames  for most  written information  (such as  screens before
+  startup)
+- Change "coming soon" screen
+- Make the player move forward and stop any action at end of level
+- Fix some text alignment on title screen
+- Change level select options alignment and disposition
+- Add slide test on level select
+- Remove FMV test on level select
+- Add a few startup screens via slide functionality
+- Properly limit  player left  boundaries depending on  camera's min  X (affects
+  level startup and end)
+- Add drop dash cancel when not holding jump button before hitting the ground
+- Fix speed  shoes resetting  the player's constants  to surface  behaviour when
+  wearing off underwater
+- Make layout and tile changes to Green Hill Zone 1 so the navigation feels less
+  "clunky" for now
+
+* Christmas '24 build (2024-12-25)
+
+This is a  very stable Christmas build  that finally adds Amazing  Ocean Zone as
+one of the levels that are playable outside of level select.
+
+- Remake R1Z1 and R1Z2 into R0Z3 and R0Z4
+- Remove R1
+- Significant changes to R5Z1
+- Add water tint, surface waves, splash effect
+- Ensure that the water in R5 parallax always matches water surface
+- Fix a bug where  the player would lose speed when  hitting a horizontal spring
+  from above
+- Add autodemo for R5Z1
+- Add bubble spawner object
+- Add bubble object (many sizes and number bubbles)
+- Add a big part of drowning code (emitting bubbles, sound effects, air count)
+- Add separated structure for movement constants, enabling for dynamic switching
+- Add water physics
+- Add speed shoes physics and music behaviour
+- Fix a bug when generating object placement with default extra properties
+- Add AOZ1 after SWZ1 when playing the demo
+- Optimize water and parallax rendering, adjust R5Z1 parallax accordingly
+- Speed-up BGM  and FMV playback by  pre-storing .XA and .STR  disc locations on
+  boot-up
+- Fix a  game-halting effect when  switching immediately  from one .XA  music to
+  another (this enables seamless speed shoes music)
+
+* Eggmanland build (2024-12-15)
+
+- Add Eggmanland Zone (R8) (WIP)
+- Add title cards and title card fonts
+- Add Amazing Ocean Zone (R5) (WIP)
+- Fix timer-locked animations when time is not running
+- Fix single-tile parallax
+- Add switch/button object
+- Add front layer on chunk mappings
+- Add a framework for recording and playing auto-demos
+- Add cycling auto-demos on title screen
+- Changes to R0Z1
+- Add working titles to R6 and R7
+- Fix calculation of rounds/acts
+- Show game logo during autodemo
+- Add speed shoes music (still unused)
+- Fix how collision angles are generated for collision geometry
+- Improve collision angle deduction and add rounding
+- Add initial support for 360° collision mode change (inactive for now)
+- Change "inspired by" FMV in favor of "PlayStation 30 Years" logo
+- Small fix  to avoid  losing much  speed when  hitting horizontal  springs from
+  above
+- Fix collision sensors positioning and sizes
+- Add an FMV Test, much like Sound Test, on level select
+
+* Dawn Canyon build (2024-11-16)
+
+- Changes to R0Z1
+- Add support for levels with no data (so levels can be built part by part)
+- Make  MDEC  playback  less  resilient (errors  result  in  finishing  playback
+  again. This decision was necessary to avoid breaking the game)
+- Add level R4: Dawn Canyon Zone (only background and music for now)
+- Change moving rings  collision (check for collision every frame  and bounce on
+  walls)
+- Create  a centralized  BGM structure  with  support for  looping and  stopping
+  points
+- Add a BGM sound test on level select
+
+
+* Free Objects build (2024-11-13 rev 01)
+
+This build  introduces objects that  live freely on  a short object  pool. These
+objects can have  a free position on the  world and may also hold X  and Y speed
+information. So  now we can have  very interesting objects such  as moving rings
+and shields, but also other kinds of objects as well!
+
+This build had two revisions. The second one introduces a fix for the MDEC which
+goes lighter  on the  disc reader,  so now  FMVs will  likely play  without much
+hazzle.
+
+- Add the concept of free (short-lived) objects and object pool
+- Add ring loss with vertical collision
+- Add monitor image functionality with delayed behaviour
+- Change debug  mode controls  within level screen  (change cycling,  add damage
+  button)
+- Changes in SWZ1, R0Z1, R1Z2
+- Fix extended camera not moving when player direction changes at high speed
+- Fixes   to  CD-ROM   usage   and   management  for   BGM   looping  and   MDEC
+  playback. Minimizes stuttering!
+- Add shield
+- Add 1-Up sound effect
+- Change title screen to start on Playground 1, but continue on Green Hill 1
+
+
+* Collision, Fonts and Damage build (2024-11-07)
+
+Introduces many  bugfixes, especially related  to Player collision  with objects
+and tiles.  Also adds many new  visual features to  make the game play  a little
+more like it should. The player can also finally take damage.
+
+- Changes in SWZ1 (R3Z1), R0Z1
+- Add big and small basic fonts
+- Change level select to use a proper small font
+- Add credits screen
+- Add level HUD
+- Add XA playback music volume controls
+- Mute music when game is paused
+- Make RELEASE the default target (for performance reasons)
+- Title screen now show version based on Git tag (if existing) or commit SHA1
+- Improve Player sprite generation instructions and formalize process
+- Add Spring, Hurt and Death (still unused) animations
+- Add in-game timer and score count at end of level (still a work in progress)
+- Fix parallax in GHZ (R2)
+- Fix top/bottom collision issues when running at a wall at full speed
+- Add Player taking damage (currently only triggered by spikes)
+- Fix Player sprite rendering position
+
+* Surely Wood build (2024-10-30)
+
+This is a build which introduces performance fixes and the new Surely Wood Zone.
+
+- Add Surely Wood Zone 1 (R3Z1)
+- Improvements on orthogonal springs collision
+- Restore RELEASE target (which improved performance by A LOT!)
+- Improve MDEC  playback code by  making variables  ~volatile~, so we  don't get
+  errors on real hardware
+- Changes to GHZ1 (R2Z1)
+- Change initial main menu level to GHZ1
+
+* Backgrounds and Parallax build (2024-10-27 rev 02)
+
+- Add parallax data (.PRL file format)
+- Add parallax logic inspired by how title screen works
+- Change spring collision so they are much simpler and less buggy
+- Add diagonal springs
+- Add parallax background for R0 and GHZ (R2)
+
+* UaiDev build (2024-10-14)
+
+This  is the  build presented  for free  play on  UaiDev Talks  6.0 (2024).  GIF
+animations of it were also included on the presentation.
+
+- Fixes to Sonic and monitor hitbox
+- Changes to R0Z1, R0Z2, R1Z1, R1Z2, GHZ1 (R2Z1)
+- Partial implementation of springs
+- New ring and braking sound effects
+- Add Player spawn point object
+- Change and mix level music and sound effects so they are not too loud
+- Add title screen fade-in and fade-out
+- Add tevel select background animation
+- Add git info (branch and latest commit) within builds
+- Add level fade-in and fade-out
+- Add first implementation of checkpoint
+
+* Level objects build (2024-10-04 rev 02)
+
+This  build   introduces  many  visual   changes  to  tweak  level   and  screen
+visualization,  but also  introduce common  level  objects, and  a custom  model
+format for 3D objects.
+
+- Changes to R0Z1, R0Z2, R1Z1, R1Z2, GHZ1 (R2Z1)
+- Introduce collision info on chunk mappings (for one-way platforms)
+- First attempt at converting .RSD models into a custom format (.MDL file type)
+- Add model test
+- Add common level objects definition (.OTD file type)
+- Add common level objects placement (.OMP file type)
+- Change disclaimer screen
+- Fix a bug where the CD would lock on some emulators
+- Add a proper loading logo
+- Fix screen clearing at beginning of game
+- Add rendering for most common objects
+- Add object frame control optionally tied to global timer
+- Add interaction between Player and some objects (rings, goal sign, monitors)
+- Add goal sign level transition (WIP)
+
+* Sonic XA first build (2024-09-15)
+
+First build  with the name  SONIC XA,  giving the game  an actual face  and some
+personality. "XA"  comes from the  .XA audio format,  which is exclusive  to the
+PlayStation.
+
+From now on, builds are also more spaced in time.
+
+- Add Player drop dash
+- Add title screen
+- Change level select music
+- Rework R2 into Green Hill Zone
+- Improvements on level select
+
+* MDEC and FMV playback build (2024-08-30)
+
+This build is preceeded by two others:
+- 28/08/2024 (which had seven reviews)
+- 29/08/2024 (which had three reviews)
+
+These builds  had many  attempts (six  reviews, over 15  burned discs)  until it
+worked on  an actual SCPH-5501. Most  problems arised from the  way the hardware
+expects variables  for FMV playback, and  from lack of care  when controlling CD
+speed and .STR streaming.
+
+- Separate logic for each screen on their own library
+- Add MDEC/FMV playback!
+- Add Sonic CD intro FMV example
+- Add Sonic Team logo FMV example
+- Add control flow for screens and for predefining FMVs
+- Skip level select and start at R0Z1
+
+* Spindash and more slopes build (2024-08-27 rev 01)
+
+- Add Spindash and Rolling
+- Fix extended camera
+- Add Player control lock
+- Adjust Player slope physics for slippery slopes
+- Changes to R1Z1, R1Z2
+
+* Slopes and rolling build (2024-08-25)
+
+- Add first version of disclaimer screen
+- Fix Player feeling heavy/sluggish when accelerating
+- Fix Player air drag
+- Improve Player sensors logic
+- Tweak Player collisions for accurateness
+- Changes to R1 collisions
+- Changes to R1Z2
+- Add Player actions management
+- Add Player slope physics
+- Add Rolling and Dashing animations
+
+* More physics and camera build (2024-08-19 rev 01)
+
+- Add automated level cooking process
+- Changes to R0Z1, R0Z2
+- First experiments with level R2
+- Make ground angle affect Player jump
+- Add Player air acceleration
+- Add Player air drag
+- Add camera extension when running
+- Add camera extension when looking up or down
+
+* Player physics build (2024-08-17)
+
+- Add new level: R1Z2
+- Changes to R1Z1, R0Z2
+- Add terrain angles to level data
+- Add Player landing speed calculation
+- Add arena allocator for scratchpad
+- Add a new, more robust collision detection algorithm
+- Add Player braking (with sound effect)
+- Add Player variable animation speed
+- Fix Player idle animation
+- Fix sprite rendering when camera is away from Player
+- Change disc structure
+
+* Level select build (2024-08-09)
+
+- Added level select
+- Old level considered R0Z1
+- Add new levels: R0Z2, R1Z1
+- Improve level structure on disc
+- Add different music for old and new levels
+
+* Level maps build (2024-08-05)
+
+- Tooling for creating and cooking levels
+- First version of level tile and chunk mappings (.LVL, .MP16, .MAP128, .COL)
+- First working version of level renderer and camera
+- First working version of collision detection
+- Separate player logic into its own library
+- Addition of arena allocators (beginning with level data)
+
+* Movement and audio build (2024-07-24)
+
+- Audio looping
+- Basic animations and character movement
+- Some sound effects
+
+* First build (2024-07-20)
+
+First build of the actual engine codebase,  and also the first one working on an
+SCPH-5501.
+
+- First build working on the PlayStation
+- Nothing playable, just a sprite rendering test
+- Initial tile-based character rendering (.CHARA files)
+- Alternate music by switching channels on the fly
+
+* Sonic-PSX (2024-06-02)
+
+First ever  attempt at  having Sonic  on PlayStation screen.  Built while  I was
+still studying  the PlayStation hardware.  This engine is  also not part  of the
+final codebase, being mostly a proof-of-concept.
+
+- Sprite test
+- Built using Psy-Q SDK
+- Uses a perspective camera
