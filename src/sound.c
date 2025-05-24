@@ -209,3 +209,9 @@ sound_cdda_stop()
     cdda_current_track = 0xff;
     cdda_track_loops = 0;
 }
+
+uint8_t
+sound_cdda_get_num_tracks()
+{
+    return cdda_toc_size;
+}

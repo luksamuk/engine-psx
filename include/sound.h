@@ -35,12 +35,12 @@ uint32_t    sound_upload_vag(const uint32_t *data, uint32_t size);
 void        sound_play_vag(SoundEffect sfx, uint8_t loops);
 
 /* CD-DA direct playback functions */
-void sound_cdda_init();
-void sound_cdda_play_track(uint8_t track, uint8_t loops);
-void sound_cdda_stop();
-void sound_cdda_set_volume(uint32_t volume);
-void sound_cdda_set_mute(uint8_t state);
-
+void    sound_cdda_init();
+void    sound_cdda_play_track(uint8_t track, uint8_t loops);
+void    sound_cdda_stop();
+void    sound_cdda_set_volume(uint32_t volume);
+void    sound_cdda_set_mute(uint8_t state);
+uint8_t sound_cdda_get_num_tracks();
 
 /* BGM audio table */
 typedef enum {

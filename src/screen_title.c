@@ -370,12 +370,14 @@ screen_title_draw(void *d)
                  "DBG %1u\n"
                  "%-29s\n"
                  "%4s %3d Hz\n"
-                 "Build Date %11s %8s",
+                 "Build Date %11s %8s\n"
+                 "CD Tracks: %d",
                  debug_mode,
                  GIT_COMMIT,
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
                  get_frame_rate(),
-                 __DATE__, __TIME__);
+                 __DATE__, __TIME__,
+                 sound_cdda_get_num_tracks());
         font_draw_sm(buffer, 8, 12);
         draw_quad(0, 0, SCREEN_XRES, 75,
                   0, 0, 0, 1,
