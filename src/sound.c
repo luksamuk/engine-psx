@@ -205,6 +205,7 @@ sound_cdda_stop()
 {
     CdControl(CdlPause, 0, 0);
     CdSync(0, 0);
+    CdControl(CdlDemute, 0, 0);
     cdda_current_track = 0xff;
     cdda_track_loops = 0;
 }
