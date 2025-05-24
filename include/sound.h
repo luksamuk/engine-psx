@@ -4,9 +4,7 @@
 #include <stdint.h>
 #include <psxcd.h>
 
-#define BGM_VOLUME_75PERC   0xbfff
-#define BGM_VOLUME_50PERC   0x7fff
-#define BGM_DEFAULT_VOLUME  BGM_VOLUME_75PERC
+#define BGM_DEFAULT_VOLUME  0x3fff
 
 // .VAG audio header
 typedef struct {
