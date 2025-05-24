@@ -6,6 +6,7 @@
 #include "screen.h"
 #include "input.h"
 #include "render.h"
+#include "basic_font.h"
 
 typedef struct {
     char buffer[255];
@@ -98,6 +99,6 @@ screen_modeltest_draw(void *d)
              data->ring->scl.vx,
              data->ring->scl.vy,
              data->ring->scl.vz);
-    draw_text(8, 12, 0, data->buffer);
+    font_draw_sm(data->buffer, 8, 12);
     render_model(data->ring);
 }

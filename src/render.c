@@ -8,11 +8,8 @@ RenderContext ctx;
 void
 setup_context()
 {
-    // Initialize the GPU and load the default font texture provided by
-    // PSn00bSDK at (960, 0) in VRAM.
+    // Initialize the GPU
     ResetGraph(0);
-    FntLoad(960, 0);
-    FntOpen(4, 12, 312, 16, 2, 256);
 
     // Place the two framebuffers vertically in VRAM.
     SetDefDrawEnv(&ctx.buffers[0].draw_env, 0, 0,           SCREEN_XRES, SCREEN_YRES);
@@ -60,8 +57,10 @@ force_clear()
         sort_prim(poly, OTZ_LAYER_TOPMOST);
         increment_prim(sizeof(POLY_F4));
 
-        DrawOTagEnv(&ctx.buffers[ctx.active_buffer].ot[OT_LENGTH - 1],
-                    &ctx.buffers[ctx.active_buffer].draw_env);
+        /* DrawOTagEnv(&ctx.buffers[ctx.active_buffer].ot[OT_LENGTH - 1], */
+        /*             &ctx.buffers[ctx.active_buffer].draw_env); */
+        DrawOTag(&ctx.buffers[ctx.active_buffer].ot[OT_LENGTH - 1]);
+        PutDrawEnv(&ctx.buffers[ctx.active_buffer].draw_env);
         PutDispEnv(&ctx.buffers[ctx.active_buffer].disp_env);
 
         DrawSync(0);
@@ -70,6 +69,7 @@ force_clear()
         ctx.active_buffer ^= 1;
         ctx.next_packet    = ctx.buffers[ctx.active_buffer].buffer;
         ClearOTagR(ctx.buffers[ctx.active_buffer].ot, OT_LENGTH);
+        ClearOTagR(ctx.buffers[ctx.active_buffer].sub_ot, SUB_OT_LENGTH);
     }
 }
 
@@ -94,8 +94,13 @@ swap_buffers()
 
     // Display the framebuffer the GPU has just finished drawing and start
     // rendering the display list that was filled up in the main loop.
+    PutDrawEnv(&draw_buffer->draw_env);
     PutDispEnv(&disp_buffer->disp_env);
-    DrawOTagEnv(&draw_buffer->ot[OT_LENGTH - 1], &draw_buffer->draw_env);
+    /* DrawOTagEnv(&draw_buffer->ot[OT_LENGTH - 1], &draw_buffer->draw_env); */
+    sort_sub_ot();
+    DrawOTag(&draw_buffer->ot[OT_LENGTH - 1]);
+
+    SetDispMask(1);
 
     // Switch over to the next buffer, clear it and reset the packet allocation
     // pointer.
@@ -103,6 +108,7 @@ swap_buffers()
     ctx.next_packet    = disp_buffer->buffer;
 
     ClearOTagR(disp_buffer->ot, OT_LENGTH);
+    ClearOTagR(disp_buffer->sub_ot, SUB_OT_LENGTH);
 }
 
 void *
@@ -128,14 +134,18 @@ sort_prim(void *prim, uint32_t otz)
     assert(ctx.next_packet <= &ctx.buffers[ctx.active_buffer].buffer[BUFFER_LENGTH]);
 }
 
-// A simple helper for drawing text using PSn00bSDK's debug font API. Note that
-// FntSort() requires the debug font texture to be uploaded to VRAM beforehand
-// by calling FntLoad().
 void
-draw_text(int x, int y, int z, const char *text)
+sort_sub_prim(void *prim, uint32_t otz)
 {
-    ctx.next_packet = FntSort(get_ot_at(z), get_next_prim(), x, y, text);
+    addPrim(get_sub_ot_at(otz), (uint8_t *) prim);
     assert(ctx.next_packet <= &ctx.buffers[ctx.active_buffer].buffer[BUFFER_LENGTH]);
+}
+
+void
+sort_sub_ot()
+{
+    RenderBuffer *buffer = &ctx.buffers[ctx.active_buffer];
+    addPrims(&buffer->ot, &buffer->sub_ot[SUB_OT_LENGTH-1], &buffer->sub_ot);
 }
 
 uint32_t *
@@ -145,13 +155,11 @@ get_ot_at(uint32_t otz)
     return &buffer->ot[otz];
 }
 
-void
-render_loading_text()
+uint32_t *
+get_sub_ot_at(uint32_t otz)
 {
-    swap_buffers();
-    draw_text(CENTERX - 52, CENTERY - 4, 0, "Now Loading...");
-    swap_buffers();
-    swap_buffers();
+    RenderBuffer *buffer = &ctx.buffers[ctx.active_buffer];
+    return &buffer->sub_ot[otz];
 }
 
 RECT *

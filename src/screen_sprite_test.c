@@ -13,7 +13,7 @@
 extern uint8_t level_fade;
 extern uint8_t frame_debug;
 
-static PlayerCharacter spritetest_character = CHARA_SONIC;
+static PlayerCharacter spritetest_character = CHARA_MILES;
 
 typedef struct {
     Chara chara;
@@ -21,6 +21,7 @@ typedef struct {
     uint8_t play_frames;
     uint8_t flipx;
     int32_t angle;
+    RECT    render_area;
 } screen_sprite_test_data;
 
 void
@@ -61,6 +62,8 @@ screen_sprite_test_load()
     data->flipx = 0;
     level_fade = 0x7f;
     set_clear_color(0x64, 0x95, 0xed);
+
+    setRECT(&data->render_area, 960, 0, 56, 56);
 }
 
 void
@@ -144,12 +147,22 @@ screen_sprite_test_draw(void *d)
              GetVideoMode() == MODE_PAL ? "PAL" : "NTSC", get_frame_rate());
     font_draw_sm(buffer, 248, 12);
 
-    chara_draw_gte(&data->chara,
-                   data->frame,
-                   (int16_t)CENTERX,
-                   (int16_t)CENTERY,
-                   data->flipx,
-                   data->angle);
+    /* chara_draw_gte(&data->chara, */
+    /*                data->frame, */
+    /*                (int16_t)CENTERX, */
+    /*                (int16_t)CENTERY, */
+    /*                data->flipx, */
+    /*                data->angle); */
+
+    chara_draw_prepare(&data->render_area, SUB_OT_LENGTH - 1);
+    chara_draw_offscreen(&data->chara, data->frame, data->flipx, SUB_OT_LENGTH - 2);
+    chara_draw_blit(&data->render_area,
+                    (int16_t)CENTERX,
+                    (int16_t)CENTERY,
+                    data->flipx ? 6 : 2, 9,
+                    data->flipx,
+                    data->angle);
+    chara_draw_end(0);
 }
 
 void

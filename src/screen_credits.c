@@ -73,6 +73,11 @@ static const char *creditstxt[] = {
     "By Sonic Team",
     "\r",
 
+    "Amazing Ocean Zone",
+    "Aquarium Park -Dragon Dance Mashup-",
+    "By DarkHyperSonic7",
+    "\r",
+
     "Eggmanland Zone",
     "Eggmanland: 16 Bit Remix",
     "By DRocca",
@@ -260,17 +265,6 @@ void
 screen_credits_draw(void *d)
 {
     screen_credits_data *data = (screen_credits_data *)d;
-
-    if(debug_mode) {
-        uint32_t elapsed_sectors;
-        sound_xa_get_elapsed_sectors(&elapsed_sectors);
-        FntPrint(-1, "%-29s %4s %3d\n",
-                 GIT_COMMIT,
-                 GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
-                 get_frame_rate());
-        FntPrint(-1, "                              %08u\n", elapsed_sectors);
-        FntFlush(-1);
-    }
 
     // Get current text
     const char **window = &creditstxt[data->entry];

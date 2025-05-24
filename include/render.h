@@ -14,6 +14,11 @@
 // when drawing a complex 3D scene) at the expense of RAM usage and performance.
 #define OT_LENGTH 2048
 
+// Length of the sub ordering table. This ordering table is used for offscreen
+// rendering of some textures like character sprites, which usually need extra
+// rearranging into a proper texture and then blitting onto the scene
+#define SUB_OT_LENGTH 8
+
 // Size of the buffer GPU commands and primitives are written to. If the program
 // crashes due to too many primitives being drawn, increase this value.
 //#define BUFFER_LENGTH 8192
@@ -43,6 +48,7 @@ typedef struct {
     DISPENV disp_env;
     DRAWENV draw_env;
     uint32_t ot[OT_LENGTH];
+    uint32_t sub_ot[SUB_OT_LENGTH];
     uint8_t  buffer[BUFFER_LENGTH];
 } RenderBuffer;
 
@@ -65,11 +71,12 @@ void     draw_quad(int16_t vx, int16_t vy,
                    uint8_t r, uint8_t g, uint8_t b,
                    uint8_t semitrans,
                    uint16_t otz);
+RECT     *render_get_buffer_clip(void);
 
-void draw_text(int x, int y, int z, const char *text);
-
-void render_loading_text();
-
-RECT *render_get_buffer_clip(void);
+// Functions for offscreen rendering.
+// NOTE: This is extensively used for character drawing. Use with care
+void     sort_sub_prim(void *prim, uint32_t otz);
+void     sort_sub_ot();
+uint32_t *get_sub_ot_at(uint32_t otz);
 
 #endif

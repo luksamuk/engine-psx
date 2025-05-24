@@ -122,6 +122,10 @@ typedef struct {
 
     VECTOR startpos;
     VECTOR respawnpos;
+
+    // Render attributes
+    RECT render_area;
+    RECT render_sub_area;
 } Player;
 
 void load_player(Player *player, PlayerCharacter character, const char *chara_filename, TIM_IMAGE  *sprites);

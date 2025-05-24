@@ -280,7 +280,17 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 // Finished engine test
                 scene_change(SCREEN_TITLE);
             } else if(lvl < 10) {
-                if(lvl == 6) {
+                // If on test level 2 and our character is Knuckles...
+                // Go to test level 4 (also an act 3)
+                if(lvl == 1) {
+                    if(screen_level_getcharacter() == CHARA_KNUCKLES) {
+                        screen_level_setlevel(3);
+                    } else screen_level_setlevel(2);
+                } else if((lvl == 2) || (lvl == 3)) {
+                    // On act 3 (sonic and tails) or act 4 (knuckles), jump
+                    // to SWZ
+                    screen_level_setlevel(4);
+                } else if(lvl == 6) {
                     // Transition from SWZ1 to AOZ1
                     // TODO: THIS IS TEMPORARY
                     screen_level_setlevel(10);
