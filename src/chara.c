@@ -286,8 +286,6 @@ chara_draw_fb(Chara *chara, int16_t framenum,
               uint8_t flipx, int32_t angle)
 {
     CharaFrame *frame = &chara->frames[framenum];
-    int16_t left = frame->x >> 3;
-    int16_t right = 7 - (frame->width >> 3) - left;
 
     // Start drawing before sub_ot[2] and sub_ot[SUB_OT_LENGTH-2].
 

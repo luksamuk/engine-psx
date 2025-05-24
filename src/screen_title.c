@@ -55,22 +55,6 @@ static const int16_t prl_data[] = {
     66,   4, 20, 0x0ccd,  237,  0,
 };
 
-static const int16_t txt_data[] = {
-    /* W H u0 v0 */
-    // PRESS START
-    86, 13, 0, 110,
-    // CONTINUE
-    60, 13, 86, 110,
-    // NEW GAME
-    65, 13, 146, 110,
-    // LEVEL SELECT
-    87, 13, 0, 123,
-    // ARROW LEFT
-    8, 13, 211, 110,
-    // ARROW RIGHT
-    8, 13, 219, 110,
-};
-
 extern SoundEffect sfx_switch;
 
 typedef struct {
@@ -276,40 +260,6 @@ screen_title_drawtitle(screen_title_data *data)
            0,   174,
            255, 174);
     sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
-}
-
-static void
-screen_title_drawtxt(screen_title_data *data, uint8_t idx, int16_t cx, int16_t cy)
-{
-    int16_t w  = txt_data[(idx << 2)];
-    int16_t h  = txt_data[(idx << 2) + 1];
-    int16_t u0 = txt_data[(idx << 2) + 2];
-    int16_t v0 = txt_data[(idx << 2) + 3];
-
-    int16_t x = cx - (w >> 1);
-    int16_t y = cy - (h >> 1);
-
-    POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
-    increment_prim(sizeof(POLY_FT4));
-    setPolyFT4(poly);
-    setRGB0(poly, 128, 128, 128);
-    poly->tpage = getTPage(
-        data->props_prl.mode & 0x3,
-        0,
-        data->props_prl.prect_x,
-        data->props_prl.prect_y);
-    poly->clut = 0;
-    setXY4(poly,
-           x,     y,
-           x + w, y,
-           x,     y + h,
-           x + w, y + h);
-    setUV4(poly,
-           u0,         v0,
-           u0 + w , v0,
-           u0,         v0 + h,
-           u0 + w , v0 + h);
-    sort_prim(poly, OTZ_LAYER_TOPMOST);
 }
 
 static void
