@@ -1,17 +1,10 @@
 #include "sound.h"
 #include "util.h"
-#include "cd_callback.h"
 
 #include <psxspu.h>
 #include <psxapi.h>
 #include <assert.h>
 #include <stdlib.h>
-
-typedef enum {
-    CDXA_NONE,
-    CDXA_LOOP_BACK,
-    CDXA_STOP,
-} CDXAInternalCommand;
 
 
 // First 4KB of SPU RAM are reserved for capture buffers.
@@ -33,25 +26,13 @@ static uint32_t next_sample_addr = SPU_ALLOC_START_ADDR;
 #define MAX_CHANNELS 24
 static int32_t next_channel = 0;
 
-// Used by the CD handler callback as a temporary area for
-// sectors read from the CD. Due to DMA limitations, it can't
-// be allocated on the stack -- especially not in the interrupt
-// callback's stack, whose size is very limited.
-/* static volatile XACDSector _sector; */
+// Table of contents for playback of CD-DA audio
+#define MAX_TOC_TRACKS 25
+static volatile int32_t cdda_toc_size;
+static volatile CdlLOC  cdda_toc[MAX_TOC_TRACKS];
+static volatile uint8_t cdda_current_track;
+static volatile uint8_t cdda_track_loops;
 
-// Current .XA audio data start location and other stuff
-static volatile CdlLOC   _xa_loc;
-static volatile int      _xa_should_play = 0;
-static volatile uint32_t _cd_status = 0;
-static volatile uint32_t _xa_loopback_sector = 0;
-static volatile CDXAInternalCommand _xa_command = CDXA_NONE;
-
-// Read error threshold. If surpasses the limit, restart the music.
-#define CD_MAX_ERR_THRESHOLD 10
-static uint8_t _cd_err_threshold = 0;
-
-// Elapsed CD sectors from start of .XA playback
-static uint32_t _cd_elapsed_sectors = 0;
 
 void
 _sound_reset_channels(void)
@@ -72,7 +53,6 @@ sound_init(void)
     SpuInit();
     sound_reset_mem();
     _sound_reset_channels();
-    sound_xa_set_volume(XA_DEFAULT_VOLUME);
 }
 
 void
@@ -81,37 +61,6 @@ sound_reset_mem(void)
     next_sample_addr = SPU_ALLOC_START_ADDR;
 }
 
-void
-sound_update(void)
-{
-    CdControl(CdlNop, 0, 0);
-    _cd_status = CdStatus();
-
-    EnterCriticalSection();
-    if(_xa_command != CDXA_NONE) {
-        switch(_xa_command) {
-        case CDXA_LOOP_BACK:
-            _cd_elapsed_sectors = 0;
-            CdControlF(CdlReadS, (const void *)&_xa_loc);
-            break;
-        case CDXA_STOP:
-            _xa_should_play = 0;
-            _xa_loopback_sector = 0;
-            _cd_elapsed_sectors = 0;
-            CdControlF(CdlPause, 0);
-            break;
-        default: break;
-        }
-        _xa_command = CDXA_NONE;
-    }
-    ExitCriticalSection();
-}
-
-uint32_t
-sound_get_cd_status(void)
-{
-    return _cd_status;
-}
 
 uint32_t
 sound_upload_vag(const uint32_t *data, uint32_t size)
@@ -188,165 +137,74 @@ sound_play_vag(SoundEffect sfx, uint8_t loops)
 }
 
 
-void _xacd_event_callback(CdlIntrResult, uint8_t *);
-
-CdlLOC
-sound_find_xa(const char *filename)
+void
+_cdda_loop_callback()
 {
-    CdlFILE file = { 0 };
-    if(!CdSearchFile(&file, filename)) {
-        printf("WARNING: Could not find .XA file %s.\n", filename);
-        return (CdlLOC){ 0 };
+    if(!cdda_track_loops || (cdda_current_track > cdda_toc_size)) {
+        CdControlF(CdlPause, 0);
+        return;
     }
-    return file.pos;
+    CdControlF(CdlSetloc, (CdlLOC *)&cdda_toc[cdda_current_track]);
+    CdControlF(CdlPlay, 0);
 }
 
 void
-sound_play_xa(const char *filename, int double_speed,
-              uint8_t channel, uint32_t loopback_sector)
+sound_cdda_set_volume(uint32_t volume)
 {
-    // Stop sound if playing. We'll need the CD right now
-    sound_stop_xa();
-    CdlLOC loc = sound_find_xa(filename);
-    /* int sectorn = CdPosToInt(&loc); */
-    /* int numsectors = (file.size + 2047) / 2048; */
-    /* printf("%s: Sector %d (size: %d => %d sectors).\n", */
-    /*        filename, sectorn, file.size, numsectors); */
-    sound_play_xa_immediate(&loc, double_speed, channel, loopback_sector);
+    SpuSetCommonMasterVolume(volume, volume);
+    SpuSetCommonCDVolume(volume, volume);
 }
 
 void
-sound_play_xa_immediate(
-    CdlLOC *loc, int double_speed,
-    uint8_t channel, uint32_t loopback_sector)
+sound_cdda_set_mute(uint8_t state)
 {
-    CdlFILTER filter;
-
-    // Save current file location
-    _xa_loc = *loc;
-
-    // Hook .XA callback for auto stop/loop
-    cd_set_callbacks(PLAYBACK_XA);
-
-    // Set read mode for XA streaming (send XA to SPU, enable filter)
-    uint32_t mode = CdlModeRT | CdlModeSF | CdlModeAP;
-    if(double_speed) mode |= CdlModeSpeed;
-    CdControl(CdlSetmode, &mode, 0);
-
-    filter.file = 1;
-    filter.chan = channel;
-
-    // Set CD volume to 50%
-    sound_xa_set_volume(XA_DEFAULT_VOLUME);
-
-    _cd_elapsed_sectors = 0;
-    _xa_loopback_sector = loopback_sector;
-    CdControl(CdlSetfilter, &filter, 0);
-    CdControlF(CdlReadS, (const void *)&_xa_loc);
-    _xa_should_play = 1;
+    CdControl(state ? CdlMute : CdlDemute, 0, 0);
+    
 }
 
-// Callback for XA audio playback.
-// NOTE: This is leveraged from cd_callback.h, but is declared here
 void
-_xa_cd_event_callback(CdlIntrResult event, uint8_t * /* payload */)
-{   
-    switch(event) {
-    case CdlDataReady:
-        _cd_err_threshold = 0; // Reset error threshold
-        _cd_elapsed_sectors++;
-        if((_xa_loopback_sector > 0) && (_cd_elapsed_sectors > _xa_loopback_sector)) {
-            // Loop back to beginning
-            _cd_err_threshold = 0;
-            _xa_command = CDXA_LOOP_BACK;
-        }
-        break;
-    case CdlDiskError:
-        printf("Caught CD error\n");
-        _cd_err_threshold++;
-        if(_cd_err_threshold > CD_MAX_ERR_THRESHOLD) {
-            // Stop music if too many errs
-            _cd_err_threshold = 0;
-            printf("Too many CD errors -- stop playback!\n");
-            _xa_command = CDXA_STOP;
-        }
-        break;
-    default:
-        printf("Event: %d\n", event);
-        break;
-    };
-}
-
-
-void
-sound_stop_xa(void)
+sound_cdda_init()
 {
-    // It is more desirable to use a pause command instead
-    // of a full stop. Halting the playback completely also
-    // stops CD from spinning and may increase time until
-    // next playback
-    if(_xa_should_play) CdControl(CdlPause, 0, 0);
-    _xa_should_play = 0;
-    _xa_loopback_sector = 0;
+    CdAutoPauseCallback(_cdda_loop_callback);
+    sound_cdda_set_volume(BGM_DEFAULT_VOLUME);
+
+    while((cdda_toc_size = CdGetToc((CdlLOC *)cdda_toc)) == 0) {
+        printf("Warning: CD TOC not found, retrying. Please insert a CD-DA disc..\n");
+    }
+
+    printf("Number of TOC entries: %d\n", cdda_toc_size);
+
+    // Align locations
+    for(uint8_t i = 0; i < cdda_toc_size; i++) {
+        CdIntToPos(CdPosToInt((CdlLOC *)&cdda_toc[i]) - 74,
+                   (CdlLOC *)&cdda_toc[i]);
+    }
 }
 
 void
-sound_xa_set_channel(uint8_t channel)
+sound_cdda_play_track(uint8_t track, uint8_t loops)
 {
-    // Seamlessly change channel
-    CdlFILTER filter;
-    filter.file = 1;
-    filter.chan = channel;
-    CdControl(CdlSetfilter, &filter, 0);
-}
-
-void
-sound_xa_get_pos(uint8_t *minute, uint8_t *second, uint8_t *sector)
-{
-    static CdlLOCINFOL info;
-    if(_cd_status != 0x22) {
-        if(minute) *minute = 0;
-        if(second) *second = 0;
-        if(sector) *sector = 0;
+    if(track > cdda_toc_size) {
+        printf("Error: Cannot set audio track %02d\n", track);
         return;
     }
 
-    CdControl(CdlGetlocL, 0, (uint8_t *)&info);
+    // Mode: Report + CD-DA + Auto-pause callback
+    uint8_t mode = CdlModeRept | CdlModeDA | CdlModeAP;
+
+    cdda_current_track = track;
+    cdda_track_loops = loops;
     CdSync(0, 0);
-    if(minute) *minute = BCD_TO_DEC(info.minute);
-    if(second) *second = BCD_TO_DEC(info.second);
-    if(sector) *sector = info.sector;
+    CdControl(CdlSetmode, &mode, 0);
+    CdControl(CdlSetloc, (CdlLOC *)&cdda_toc[cdda_current_track], 0);
+    CdControl(CdlPlay, 0, 0);
 }
 
 void
-sound_xa_get_elapsed_sectors(uint32_t *out)
+sound_cdda_stop()
 {
-    *out = _cd_elapsed_sectors;
-}
-
-void
-sound_xa_set_volume(uint8_t vol)
-{
-    CdlATV v;
-    // Stereo
-    /* v.val0 = v.val3 = vol; // L->L and R->R volumes */
-    /* v.val1 = v.val2 = 0x00; // L->R and R->L volumes */
-
-    // Reversed stereo
-    /* v.val0 = v.val3 = 0x00; // L->L and R->R volumes */
-    /* v.val1 = v.val2 = vol; // L->R and R->L volumes */
-
-    // Mono
-    v.val0 = v.val3 = vol >> 1; // L->L and R->R volumes
-    v.val1 = v.val2 = vol >> 1; // L->R and R->L volume
-    
-    CdMix(&v);
+    CdControl(CdlPause, 0, 0);
     CdSync(0, 0);
-}
-
-int
-sound_xa_requested_play()
-{
-    // Sound is not necessarily playing, but is certainly not stopped
-    return _xa_should_play != 0;
+    cdda_current_track = 0xff;
+    cdda_track_loops = 0;
 }

@@ -69,7 +69,7 @@ main(void)
     // Initial loads from disc
     render_loading_logo();
     sound_sfx_init();
-    sound_bgm_init();
+    sound_cdda_init();
 
     // Set first scene
     scene_change(SCREEN_DISCLAIMER);
@@ -77,7 +77,6 @@ main(void)
 
     while(1) {
         // Update systems
-        sound_update();
         pad_update();
         scene_update();
         timer_update();

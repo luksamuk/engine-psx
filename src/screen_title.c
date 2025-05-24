@@ -153,7 +153,7 @@ screen_title_load()
 void
 screen_title_unload(void *)
 {
-    sound_stop_xa();
+    sound_cdda_stop();
     screen_free();
 }
 
@@ -166,8 +166,6 @@ screen_title_update(void *d)
     }
 
     screen_title_data *data = (screen_title_data *)d;
-
-    sound_bgm_check_stop(BGM_TITLESCREEN);
 
     data->pos.vx -= 1;
     if(data->pos.vx < -646) {
@@ -417,21 +415,17 @@ screen_title_draw(void *d)
                     LERPC(data->rgb_count, 200));
 
     if(debug_mode) {
-        uint32_t elapsed_sectors;
         char buffer[80];
-        sound_xa_get_elapsed_sectors(&elapsed_sectors);
         snprintf(buffer, 120,
                  "DBG %1u\n"
                  "%-29s\n"
                  "%4s %3d Hz\n"
-                 "Build Date %11s %8s\n"
-                 "BGM SECTORS %08u",
+                 "Build Date %11s %8s",
                  debug_mode,
                  GIT_COMMIT,
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
                  get_frame_rate(),
-                 __DATE__, __TIME__,
-                 elapsed_sectors);
+                 __DATE__, __TIME__);
         font_draw_sm(buffer, 8, 12);
         draw_quad(0, 0, SCREEN_XRES, 75,
                   0, 0, 0, 1,

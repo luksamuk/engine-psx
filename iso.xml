@@ -371,30 +371,6 @@
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/BUBBLE.VAG" />
       </dir>
 
-      <dir name="BGM">
-	<file name="BGM001.XA"
-	      type="xa"
-	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM001.XA" />
-	<file name="BGM002.XA"
-	      type="xa"
-	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM002.XA" />
-	<file name="BGM003.XA"
-	      type="xa"
-	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM003.XA" />
-	<file name="BGM004.XA"
-	      type="xa"
-	      source="${PROJECT_SOURCE_DIR}/assets/bgm/BGM004.XA" />
-	<file name="MNU001.XA"
-	      type="xa"
-	      source="${PROJECT_SOURCE_DIR}/assets/bgm/MNU001.XA" />
-	<file name="MNU002.XA"
-	      type="xa"
-	      source="${PROJECT_SOURCE_DIR}/assets/bgm/MNU002.XA" />
-	<file name="EVENT001.XA"
-	      type="xa"
-	      source="${PROJECT_SOURCE_DIR}/assets/bgm/EVENT001.XA" />
-      </dir>
-
       <dummy sectors="1024"/>
 
       <file name="audio01.da" trackid="02" type="da" />
@@ -411,21 +387,23 @@
       <file name="audio12.da" trackid="13" type="da" />
       <file name="audio13.da" trackid="14" type="da" />
       <file name="audio14.da" trackid="15" type="da" />
+      <file name="audio15.da" trackid="16" type="da" />
     </directory_tree>
   </track>
   <track type="audio" trackid="02" source="${PROJECT_SOURCE_DIR}/assets/bgm/amenbreak.flac" />
   <track type="audio" trackid="03" source="${PROJECT_SOURCE_DIR}/assets/bgm/amenbreak2.flac" />
-  <track type="audio" trackid="04" source="${PROJECT_SOURCE_DIR}/assets/bgm/rustyruin1.flac" />
-  <track type="audio" trackid="05" source="${PROJECT_SOURCE_DIR}/assets/bgm/rustyruin2.flac" />
-  <track type="audio" trackid="06" source="${PROJECT_SOURCE_DIR}/assets/bgm/letmomsleep.flac" />
-  <track type="audio" trackid="07" source="${PROJECT_SOURCE_DIR}/assets/bgm/letmomsleep2.flac" />
-  <track type="audio" trackid="08" source="${PROJECT_SOURCE_DIR}/assets/bgm/saladplain.flac" />
-  <track type="audio" trackid="09" source="${PROJECT_SOURCE_DIR}/assets/bgm/elgato2.flac" />
-  <track type="audio" trackid="10" source="${PROJECT_SOURCE_DIR}/assets/bgm/chaosisland2.flac" />
-  <track type="audio" trackid="11" source="${PROJECT_SOURCE_DIR}/assets/bgm/eggmanland.flac" />
-  <track type="audio" trackid="12" source="${PROJECT_SOURCE_DIR}/assets/bgm/amazing.flac" />
-  <track type="audio" trackid="13" source="${PROJECT_SOURCE_DIR}/assets/bgm/apotos.flac" />
-  <track type="audio" trackid="14" source="${PROJECT_SOURCE_DIR}/assets/bgm/levelclear.flac" />
-  <track type="audio" trackid="15" source="${PROJECT_SOURCE_DIR}/assets/bgm/youremyhero.flac" />
+  <track type="audio" trackid="04" source="${PROJECT_SOURCE_DIR}/assets/bgm/youremyhero.flac" />
+  <track type="audio" trackid="05" source="${PROJECT_SOURCE_DIR}/assets/bgm/rustyruin1.flac" />
+  <track type="audio" trackid="06" source="${PROJECT_SOURCE_DIR}/assets/bgm/rustyruin2.flac" />
+  <track type="audio" trackid="07" source="${PROJECT_SOURCE_DIR}/assets/bgm/letmomsleep.flac" />
+  <track type="audio" trackid="08" source="${PROJECT_SOURCE_DIR}/assets/bgm/letmomsleep2.flac" />
+  <track type="audio" trackid="09" source="${PROJECT_SOURCE_DIR}/assets/bgm/saladplain.flac" />
+  <track type="audio" trackid="10" source="${PROJECT_SOURCE_DIR}/assets/bgm/elgato2.flac" />
+  <track type="audio" trackid="11" source="${PROJECT_SOURCE_DIR}/assets/bgm/chaosisland2.flac" />
+  <track type="audio" trackid="12" source="${PROJECT_SOURCE_DIR}/assets/bgm/eggmanland.flac" />
+  <track type="audio" trackid="13" source="${PROJECT_SOURCE_DIR}/assets/bgm/amazing.flac" />
+  <track type="audio" trackid="14" source="${PROJECT_SOURCE_DIR}/assets/bgm/apotos.flac" />
+  <track type="audio" trackid="15" source="${PROJECT_SOURCE_DIR}/assets/bgm/levelclear.flac" />
+  <track type="audio" trackid="16" source="${PROJECT_SOURCE_DIR}/assets/bgm/herormx.flac" />
 </iso_project>
 
