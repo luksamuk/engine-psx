@@ -10,7 +10,6 @@ MAP128SRC := $(shell ls ./assets/levels/**/tilemap128.tmx)
 LVLSRC    := $(shell ls ./assets/levels/**/Z*.tmx)
 MDLSRC    := $(shell ls ./assets/models/**/*.rsd)
 PRLSRC    := $(shell ls ./assets/levels/**/parallax.toml)
-XASRC     := $(shell ls ./assets/bgm/*.txt)
 VAGSRC    := $(shell ls ./assets/sfx/*.ogg)
 
 MAP16OUT  := $(addsuffix MAP16.MAP,$(dir $(MAP16SRC)))
@@ -20,7 +19,6 @@ LVLOUT    := $(addsuffix .LVL,$(basename $(LVLSRC)))
 OMPOUT    := $(addsuffix .OMP,$(basename $(LVLSRC)))
 MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
 PRLOUT    := $(addsuffix PRL.PRL,$(dir $(PRLSRC)))
-XAOUT     := $(addsuffix .XA,$(basename $(XASRC)))
 VAGOUT    := $(addsuffix .VAG,$(basename $(VAGSRC)))
 
 .PHONY: clean ${CUESHEET} run configure chd cook iso elf debug cooktest purge rebuild repack packrun
@@ -110,10 +108,9 @@ map128: $(MAP128OUT)
 lvl:    $(LVLOUT)
 prl:    $(PRLOUT)
 objs:   $(OMPOUT)
-xa:     $(XAOUT)
 vag:    $(VAGOUT)
 
-cook: mdls map16 map128 lvl objs prl vag xa
+cook: mdls map16 map128 lvl objs prl vag
 
 cleancook:
 	rm -rf assets/models/**/*.mdl \
@@ -186,19 +183,3 @@ cleancook:
 	ffmpeg -loglevel quiet -y -i "$<" -acodec pcm_s16le -ac 1 -ar 22050 "$(basename $<).WAV"
 	wav2vag "$(basename $<).WAV" "$@"
 	@rm "$(basename $<).WAV"
-
-# =========== XA audio encoding ===========
-# Individual file XA songs
-%.xa: %.flac
-	psxavenc -f 37800 -t xa -b 4 -c 2 -F 1 -C 0 $< $@
-
-# Dynamic rule for generating dependencies for a given .XA file.
-# These dependencies are then .xa files that are generated for individual .flac songs.
-define XA_RULE
-$T: $(shell cat "$(T:.XA=.txt)" | awk '{print $$3}' | awk 'NF {print "./assets/bgm/"$$1}' | paste -s -d ' ')
-endef
-$(foreach T,$(XAOUT),$(eval $(XA_RULE)))
-
-# Interleaved XA songs
-%.XA: %.txt 
-	cd $(dir $<) && xainterleave 1 $(notdir $<) $(notdir $@)
