@@ -146,7 +146,7 @@ void
 screen_level_unload(void *)
 {
     level_fade = 0;
-    sound_stop_xa();
+    sound_cdda_stop();
     level_reset();
     sound_reset_mem();
     screen_free();
@@ -227,8 +227,8 @@ screen_level_update(void *d)
            && !level_finished
            && (data->level_transition == 2)) {
             paused = !paused;
-            if(paused) sound_xa_set_volume(0x00);
-            else sound_xa_set_volume(XA_DEFAULT_VOLUME);
+            if(paused) sound_cdda_set_mute(1);
+            else sound_cdda_set_mute(0);
         }
     } else {
         // If in demo mode, absolutely any button press will
@@ -652,34 +652,28 @@ screen_level_draw(void *d)
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC", get_frame_rate());
         font_draw_sm(buffer, 248, 12);
 
-        // Sound debug
-        uint32_t elapsed_sectors;
-        sound_xa_get_elapsed_sectors(&elapsed_sectors);
-        snprintf(buffer, 255, "%08u", elapsed_sectors);
-        font_draw_sm(buffer, 248, 20);
-
         // Free object debug
         snprintf(buffer, 255, "OBJS %3d", object_pool_get_count());
-        font_draw_sm(buffer, 248, 28);
+        font_draw_sm(buffer, 248, 20);
 
         // Rings, time and air for convenience
         snprintf(buffer, 255, "RING %03d", level_ring_count);
-        font_draw_sm(buffer, 248, 36);
+        font_draw_sm(buffer, 248, 28);
 
         snprintf(buffer, 255, "TIME %03d", (get_elapsed_frames() / 60));
-        font_draw_sm(buffer, 248, 44);
+        font_draw_sm(buffer, 248, 36);
 
         snprintf(buffer, 255, "AIR   %02d", player.remaining_air_frames / 60);
-        font_draw_sm(buffer, 248, 52);
+        font_draw_sm(buffer, 248, 44);
 
         snprintf(buffer, 255, "REV %4d", player.spinrev);
-        font_draw_sm(buffer, 248, 60);
+        font_draw_sm(buffer, 248, 52);
 
         snprintf(buffer, 255, "SPR %4d", level_get_num_sprites());
-        font_draw_sm(buffer, 248, 68);
+        font_draw_sm(buffer, 248, 60);
 
         snprintf(buffer, 255, "FC %5d", player.framecount);
-        font_draw_sm(buffer, 248, 76);
+        font_draw_sm(buffer, 248, 68);
 
         // Player debug
         if(debug_mode > 1) {

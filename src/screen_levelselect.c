@@ -121,7 +121,7 @@ screen_levelselect_load()
 void
 screen_levelselect_unload(void *)
 {
-    sound_stop_xa();
+    sound_cdda_stop();
     screen_free();
 }
 
@@ -253,8 +253,6 @@ screen_levelselect_update(void *d)
             scene_change(SCREEN_LEVEL);
         }
     }
-
-    sound_bgm_check_stop(data->music_selected);
 }
 
 void
@@ -263,21 +261,17 @@ screen_levelselect_draw(void *d)
     screen_levelselect_data *data = (screen_levelselect_data *)d;
 
     if(debug_mode) {
-        uint32_t elapsed_sectors;
         char buffer[80];
-        sound_xa_get_elapsed_sectors(&elapsed_sectors);
         snprintf(buffer, 120,
                  "DBG %1u\n"
                  "%-29s\n"
                  "%4s %3d Hz\n"
-                 "Build Date %11s %8s\n"
-                 "BGM SECTORS %08u",
+                 "Build Date %11s %8s",
                  debug_mode,
                  GIT_COMMIT,
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
                  get_frame_rate(),
-                 __DATE__, __TIME__,
-                 elapsed_sectors);
+                 __DATE__, __TIME__);
         font_set_color(0x00, 0x7f, 0x00);
         font_draw_sm(buffer, 8, 12);
         font_reset_color();

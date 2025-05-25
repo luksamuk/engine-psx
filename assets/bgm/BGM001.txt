@@ -1,4 +1,0 @@
-1 xa rustyruin1.xa   1 0
-1 xa rustyruin2.xa   1 1
-1 xa letmomsleep.xa  1 2
-1 null

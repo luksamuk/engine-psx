@@ -97,7 +97,7 @@ screen_slide_unload(void *d)
 {
     screen_slide_data *data = (screen_slide_data *)d;
 
-    if(data->bgm != 0xff) sound_stop_xa();
+    if(data->bgm != 0xff) sound_cdda_stop();
     screen_free();
 }
 
@@ -105,8 +105,6 @@ void
 screen_slide_update(void *d)
 {
     screen_slide_data *data = (screen_slide_data *)d;
-
-    if(data->bgm != 0xff) sound_bgm_check_stop(data->bgm);
 
     if(data->state == 0) {
         if(data->fade < 128) data->fade += 2;

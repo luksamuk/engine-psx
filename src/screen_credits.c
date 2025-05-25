@@ -206,15 +206,13 @@ screen_credits_load()
 void
 screen_credits_unload(void *)
 {
-    sound_stop_xa();
+    sound_cdda_stop();
     screen_free();
 }
 
 void
 screen_credits_update(void *d)
 {
-    sound_bgm_check_stop(BGM_CREDITS);
-
     screen_credits_data *data = (screen_credits_data *)d;
     if(creditstxt[data->entry] != NULL
        && (!pad_pressed(PAD_START) && !pad_pressed(PAD_CROSS))) {

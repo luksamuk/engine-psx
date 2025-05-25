@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <psxcd.h>
 
-#define XA_DEFAULT_VOLUME 0x60 // 75%
+#define BGM_DEFAULT_VOLUME  0x3fff
 
 // .VAG audio header
 typedef struct {
@@ -27,90 +27,43 @@ typedef struct {
 // "VAGp" text
 #define VAG_MAGIC 0x70474156
 
-// .XA audio header
-typedef struct {
-    uint8_t file;
-    uint8_t channel;
-    uint8_t submode;
-    uint8_t coding_info;
-} XAHeader;
-
-// .XA audio submode flags
-typedef enum {
-    XA_END_OF_RECORD = 0x01,
-    XA_TYPE_VIDEO    = 0x02,
-    XA_TYPE_AUDIO    = 0x04,
-    XA_TYPE_DATA     = 0x08,
-    XA_TRIGGER       = 0x10,
-    XA_FORM2         = 0x20,
-    XA_REAL_TIME     = 0x40,
-    XA_END_OF_FILE   = 0x80,
-} XASubmode;
-
-// CD-ROM Sector encoding (for .XA playback)
-/* typedef struct { */
-/*     CdlLOC    pos; */
-/*     XAHeader  xa_header[2]; */
-/*     uint8_t   data[2048]; */
-/*     uint32_t  edc; */
-/*     uint8_t   ecc[276]; */
-/* } XACDSector; */
-
 void sound_init(void);
 void sound_reset_mem(void);
-void sound_update(void);
 
 SoundEffect sound_load_vag(const char *filename);
 uint32_t    sound_upload_vag(const uint32_t *data, uint32_t size);
 void        sound_play_vag(SoundEffect sfx, uint8_t loops);
 
-uint32_t sound_get_cd_status(void);
-CdlLOC   sound_find_xa(const char *filename);
-void     sound_play_xa(const char *filename, int double_speed,
-                       uint8_t channel, uint32_t loopback_sector);
-void     sound_play_xa_immediate(CdlLOC *loc, int double_speed,
-                                 uint8_t channel, uint32_t loopback_sector);
-void     sound_stop_xa(void);
-int      sound_xa_requested_play();
-void     sound_xa_set_channel(uint8_t channel);
-void     sound_xa_get_pos(uint8_t *minute, uint8_t *second, uint8_t *sector);
-void     sound_xa_get_elapsed_sectors(uint32_t *out);
-void     sound_xa_set_volume(uint8_t vol);
-
-
+/* CD-DA direct playback functions */
+void    sound_cdda_init();
+void    sound_cdda_play_track(uint8_t track, uint8_t loops);
+void    sound_cdda_stop();
+void    sound_cdda_set_volume(uint32_t volume);
+void    sound_cdda_set_mute(uint8_t state);
+uint8_t sound_cdda_get_num_tracks();
 
 /* BGM audio table */
 typedef enum {
-    BGM_LEVELSELECT  = 0,
-    BGM_TITLESCREEN  = 1,
-    BGM_CREDITS      = 2,
-    BGM_SPEEDSHOES   = 3,
-    BGM_LEVELCLEAR   = 4,
-    BGM_PLAYGROUND1  = 5,
-    BGM_PLAYGROUND2  = 6,
-    BGM_PLAYGROUND3  = 7,
-    BGM_PLAYGROUND4  = 8,
-    BGM_GREENHILL    = 9,
-    BGM_SURELYWOOD   = 10,
-    BGM_DAWNCANYON   = 11,
-    BGM_AMAZINGOCEAN = 12,
-    BGM_EGGMANLAND   = 13,
-    BGM_WINDMILLISLE = 14,
-    BGM_NUM_SONGS    = BGM_WINDMILLISLE + 1,
+    BGM_TITLESCREEN  = 0,
+    BGM_SPEEDSHOES   = 1,
+    BGM_LEVELSELECT  = 2,
+    BGM_PLAYGROUND1  = 3,
+    BGM_PLAYGROUND2  = 4,
+    BGM_PLAYGROUND3  = 5,
+    BGM_PLAYGROUND4  = 6,
+    BGM_GREENHILL    = 7,
+    BGM_SURELYWOOD   = 8,
+    BGM_DAWNCANYON   = 9,
+    BGM_EGGMANLAND   = 10,
+    BGM_AMAZINGOCEAN = 11,
+    BGM_WINDMILLISLE = 12,
+    BGM_LEVELCLEAR   = 13,
+    BGM_CREDITS      = 14,
+
+    BGM_NUM_SONGS    = BGM_CREDITS + 1,
 } BGMOption;
 
-typedef struct {
-    char *filename;
-    uint8_t channel;
-    uint16_t loopback_sector;
-    uint16_t stop_sector;
-} BGMTableEntry;
-
-void                sound_bgm_init();
 void                sound_bgm_play(BGMOption);
-const BGMTableEntry *sound_bgm_get_data(BGMOption);
-void                sound_bgm_check_stop(BGMOption);
-
 
 
 /* SFX audio */

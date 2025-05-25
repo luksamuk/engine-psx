@@ -65,7 +65,7 @@ screen_charselect_load()
 void
 screen_charselect_unload(void *)
 {
-    sound_stop_xa();
+    sound_cdda_stop();
     screen_free();
 }
 

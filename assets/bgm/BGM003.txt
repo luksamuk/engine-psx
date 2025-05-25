@@ -1,4 +1,0 @@
-1 xa chaosisland2.xa 1 0
-1 xa eggmanland.xa   1 1
-1 xa amazing.xa      1 2
-1 null

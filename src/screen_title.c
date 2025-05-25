@@ -55,22 +55,6 @@ static const int16_t prl_data[] = {
     66,   4, 20, 0x0ccd,  237,  0,
 };
 
-static const int16_t txt_data[] = {
-    /* W H u0 v0 */
-    // PRESS START
-    86, 13, 0, 110,
-    // CONTINUE
-    60, 13, 86, 110,
-    // NEW GAME
-    65, 13, 146, 110,
-    // LEVEL SELECT
-    87, 13, 0, 123,
-    // ARROW LEFT
-    8, 13, 211, 110,
-    // ARROW RIGHT
-    8, 13, 219, 110,
-};
-
 extern SoundEffect sfx_switch;
 
 typedef struct {
@@ -153,7 +137,7 @@ screen_title_load()
 void
 screen_title_unload(void *)
 {
-    sound_stop_xa();
+    sound_cdda_stop();
     screen_free();
 }
 
@@ -166,8 +150,6 @@ screen_title_update(void *d)
     }
 
     screen_title_data *data = (screen_title_data *)d;
-
-    sound_bgm_check_stop(BGM_TITLESCREEN);
 
     data->pos.vx -= 1;
     if(data->pos.vx < -646) {
@@ -281,40 +263,6 @@ screen_title_drawtitle(screen_title_data *data)
 }
 
 static void
-screen_title_drawtxt(screen_title_data *data, uint8_t idx, int16_t cx, int16_t cy)
-{
-    int16_t w  = txt_data[(idx << 2)];
-    int16_t h  = txt_data[(idx << 2) + 1];
-    int16_t u0 = txt_data[(idx << 2) + 2];
-    int16_t v0 = txt_data[(idx << 2) + 3];
-
-    int16_t x = cx - (w >> 1);
-    int16_t y = cy - (h >> 1);
-
-    POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
-    increment_prim(sizeof(POLY_FT4));
-    setPolyFT4(poly);
-    setRGB0(poly, 128, 128, 128);
-    poly->tpage = getTPage(
-        data->props_prl.mode & 0x3,
-        0,
-        data->props_prl.prect_x,
-        data->props_prl.prect_y);
-    poly->clut = 0;
-    setXY4(poly,
-           x,     y,
-           x + w, y,
-           x,     y + h,
-           x + w, y + h);
-    setUV4(poly,
-           u0,         v0,
-           u0 + w , v0,
-           u0,         v0 + h,
-           u0 + w , v0 + h);
-    sort_prim(poly, OTZ_LAYER_TOPMOST);
-}
-
-static void
 screen_title_drawprl(screen_title_data *data)
 {
     for(int p = 0; p < PRL_NUM_PIECES; p++) {
@@ -417,21 +365,19 @@ screen_title_draw(void *d)
                     LERPC(data->rgb_count, 200));
 
     if(debug_mode) {
-        uint32_t elapsed_sectors;
         char buffer[80];
-        sound_xa_get_elapsed_sectors(&elapsed_sectors);
         snprintf(buffer, 120,
                  "DBG %1u\n"
                  "%-29s\n"
                  "%4s %3d Hz\n"
                  "Build Date %11s %8s\n"
-                 "BGM SECTORS %08u",
+                 "CD Tracks: %d",
                  debug_mode,
                  GIT_COMMIT,
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
                  get_frame_rate(),
                  __DATE__, __TIME__,
-                 elapsed_sectors);
+                 sound_cdda_get_num_tracks());
         font_draw_sm(buffer, 8, 12);
         draw_quad(0, 0, SCREEN_XRES, 75,
                   0, 0, 0, 1,

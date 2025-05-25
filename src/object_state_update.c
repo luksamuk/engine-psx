@@ -269,9 +269,6 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         }
         state->timer--;
 
-        // Doesn't hurt to not allow the CD reader to go berserk
-        sound_bgm_check_stop(BGM_LEVELCLEAR);
-
         if((state->timer < 0) && (screen_level_getstate() == 2)) {
             screen_level_setstate(3);
         } else if(screen_level_getstate() == 4) {
