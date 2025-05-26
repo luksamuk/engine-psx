@@ -18,6 +18,7 @@
 #include "screens/credits.h"
 #include "screens/sprite_test.h"
 #include "screens/charselect.h"
+#include "screens/options.h"
 
 // Start with 64k until we make the actual level scene
 // an object as well
@@ -82,6 +83,7 @@ scene_load()
     case SCREEN_CREDITS:     screen_credits_load();     break;
     case SCREEN_SPRITETEST:  screen_sprite_test_load(); break;
     case SCREEN_CHARSELECT:  screen_charselect_load();  break;
+    case SCREEN_OPTIONS:     screen_options_load();  break;
     default: break; // Unknown scene???
     }
 }
@@ -99,6 +101,7 @@ scene_unload()
     case SCREEN_CREDITS:     screen_credits_unload(scene_data);     break;
     case SCREEN_SPRITETEST:  screen_sprite_test_unload(scene_data); break;
     case SCREEN_CHARSELECT:  screen_charselect_unload(scene_data);  break;
+    case SCREEN_OPTIONS:     screen_options_unload(scene_data);     break;
     default: break; // Unknown scene???
     }
 }
@@ -116,6 +119,7 @@ scene_update()
     case SCREEN_CREDITS:     screen_credits_update(scene_data);     break;
     case SCREEN_SPRITETEST:  screen_sprite_test_update(scene_data); break;
     case SCREEN_CHARSELECT:  screen_charselect_update(scene_data);  break;
+    case SCREEN_OPTIONS:     screen_options_update(scene_data);     break;
     default: break; // Unknown scene???
     }
 }
@@ -134,6 +138,7 @@ scene_draw()
     case SCREEN_CREDITS:     screen_credits_draw(scene_data);     break;
     case SCREEN_SPRITETEST:  screen_sprite_test_draw(scene_data); break;
     case SCREEN_CHARSELECT:  screen_charselect_draw(scene_data);  break;
+    case SCREEN_OPTIONS:     screen_options_draw(scene_data);     break;
     default: break; // Unknown scene???
     }
 }
