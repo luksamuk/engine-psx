@@ -18,7 +18,10 @@
 
 #define CHARSEL_PADDING (SCREEN_XRES >> 2)
 
+#define SLIDER_STEP 0x1e9
+
 extern SoundEffect sfx_switch;
+extern int         debug_mode;
 
 typedef struct {
     int32_t  bg_prect_x;
@@ -79,8 +82,8 @@ int
 _manage_volume_control(int16_t *gauge)
 {
     int16_t oldvalue = *gauge;
-    if(pad_pressing(PAD_RIGHT)) (*gauge) += 0xa3;
-    if(pad_pressing(PAD_LEFT)) (*gauge) -= 0xa3;
+    if(pad_pressing(PAD_RIGHT)) (*gauge) += SLIDER_STEP;
+    if(pad_pressing(PAD_LEFT)) (*gauge) -= SLIDER_STEP;
     (*gauge) =
         ((*gauge) < 0)
         ? 0
@@ -128,7 +131,7 @@ screen_options_update(void *d)
     data->selection =
         (data->selection < 0)
         ? 0
-        : (data->selection > 3)
+        : (data->selection > 4)
         ? 3
         : data->selection;
 
@@ -137,13 +140,11 @@ screen_options_update(void *d)
         case 0:
             if(_manage_volume_control(&data->master_volume)) {
                 sound_master_set_volume(data->master_volume);
-                sound_play_vag(sfx_switch, 0);
             }
             break;
         case 1:
             if(_manage_volume_control(&data->bgm_volume)) {
                 sound_cdda_set_volume(data->bgm_volume);
-                sound_play_vag(sfx_switch, 0);
             }
             break;
         case 2:
@@ -154,6 +155,25 @@ screen_options_update(void *d)
             break;
         default: break;
         }
+    }
+
+    switch(data->selection) {
+    case 3:
+        if(pad_pressed(PAD_LEFT)) {
+            debug_mode--;
+            sound_play_vag(sfx_switch, 0);
+        }
+        if(pad_pressed(PAD_RIGHT)) {
+            debug_mode++;
+            sound_play_vag(sfx_switch, 0);
+        }
+        debug_mode = (debug_mode < 0)
+            ? 2
+            : (debug_mode > 2)
+            ? 0
+                : debug_mode;
+        break;
+    default: break;
     }
 
     /* if(pad_pressed(PAD_RIGHT) && (data->character < CHARA_MAX)) { */
@@ -173,7 +193,7 @@ screen_options_update(void *d)
     /*     scene_change(SCREEN_LEVEL); */
     /* } */
 
-    if(pad_pressed(PAD_CROSS) && (data->selection == 3)) {
+    if(pad_pressed(PAD_CROSS) && (data->selection == 4)) {
         scene_change(SCREEN_TITLE);
     }
 }
@@ -231,10 +251,24 @@ screen_options_draw(void *d)
     font_draw_big(title, text_xpos, SCREEN_YRES >> 3);
 
     _draw_control(60, "Master Volume", data->master_volume, data->selection == 0);
-    _draw_control(80, "BGM Volume", data->bgm_volume, data->selection == 1);
-    _draw_control(100, "SFX Volume", data->sfx_volume, data->selection == 2);
+    _draw_control(80, "CD-DA BGM", data->bgm_volume, data->selection == 1);
+    _draw_control(100, "VAG SFX", data->sfx_volume, data->selection == 2);
 
     if(data->selection == 3) font_set_color(128, 128, 0);
+    font_draw_sm("Debug Mode", 15, 120);
+
+    const char *dbgtxt =
+        (debug_mode == 0)
+        ? "OFF"
+        : (debug_mode == 1)
+        ? "BASIC"
+        : "FULL";
+    uint16_t txtw = font_measurew_sm(dbgtxt);
+    font_draw_sm(dbgtxt, SCREEN_XRES - 10 - txtw, 120);
+
+    font_reset_color();
+
+    if(data->selection == 4) font_set_color(128, 128, 0);
     font_draw_sm("Back", 270, 200);
     font_reset_color();
 
