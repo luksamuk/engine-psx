@@ -19,10 +19,11 @@
 #define CHOICE_SOUNDTEST  20
 #define CHOICE_SLIDE      21
 #define CHOICE_CHARACTER  22
-#define CHOICE_SPRITETEST 23
-#define CHOICE_MODELTEST  24
-#define CHOICE_TITLE      25
-#define CHOICE_CREDITS    26
+#define CHOICE_OPTIONS    23
+#define CHOICE_SPRITETEST 24
+#define CHOICE_MODELTEST  25
+#define CHOICE_TITLE      26
+#define CHOICE_CREDITS    27
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
 #define MAX_COLUMN_CHOICES 17
 
@@ -73,7 +74,7 @@ static const char *menutext[] = {
     "\n",
     "\n",
     "\n",
-    "\n",
+    "OPTIONS",
     "SPRITE TEST",
     "MODEL TEST",
     "TITLESCREEN",
@@ -234,6 +235,8 @@ screen_levelselect_update(void *d)
                 sound_bgm_play(data->soundtest_selection - 1);
                 data->music_selected = data->soundtest_selection - 1;
             }
+        } else if(data->menu_choice == CHOICE_OPTIONS) {
+            scene_change(SCREEN_OPTIONS);
         } else if(data->menu_choice == CHOICE_SPRITETEST) {
             screen_level_setcharacter(data->character_selection);
             screen_sprite_test_setcharacter(data->character_selection);

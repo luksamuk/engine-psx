@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include "screen.h"
 #include "screens/options.h"
@@ -75,7 +74,6 @@ screen_options_unload(void *)
     sound_cdda_stop();
     screen_free();
 }
-#include <psxspu.h>
 
 
 int
