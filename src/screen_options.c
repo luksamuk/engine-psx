@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "screen.h"
 #include "screens/options.h"
@@ -7,6 +8,7 @@
 #include "input.h"
 #include "basic_font.h"
 #include "sound.h"
+#include "timer.h"
 
 #include "screens/level.h"
 
@@ -25,6 +27,10 @@ typedef struct {
     uint8_t  bg_frame;
     uint8_t  bg_state;
     uint16_t bg_timer;
+    int8_t  selection;
+    int16_t  master_volume;
+    int16_t  bgm_volume;
+    int16_t  sfx_volume;
 } screen_options_data;
 
 // TIM 15bpp -- TPAGE: 384x0
@@ -51,6 +57,11 @@ screen_options_load()
     data->bg_state = 0;
     data->bg_timer = BG_PAUSE;
 
+    data->selection = 0;
+    data->master_volume = sound_master_get_volume();
+    data->bgm_volume = sound_cdda_get_volume();
+    data->sfx_volume = sound_vag_get_volume();
+
     // Play level select music, but loop
     sound_cdda_play_track(3, 1);
 }
@@ -60,6 +71,23 @@ screen_options_unload(void *)
 {
     sound_cdda_stop();
     screen_free();
+}
+#include <psxspu.h>
+
+
+int
+_manage_volume_control(int16_t *gauge)
+{
+    int16_t oldvalue = *gauge;
+    if(pad_pressing(PAD_RIGHT)) (*gauge) += 0xa3;
+    if(pad_pressing(PAD_LEFT)) (*gauge) -= 0xa3;
+    (*gauge) =
+        ((*gauge) < 0)
+        ? 0
+        : ((*gauge) > 0x3fff)
+        ? 0x3fff
+        : (*gauge);
+    return (*gauge) != oldvalue;
 }
 
 void
@@ -95,6 +123,39 @@ screen_options_update(void *d)
         }
     }
 
+    if(pad_pressed(PAD_UP)) data->selection--;
+    if(pad_pressed(PAD_DOWN)) data->selection++;
+    data->selection =
+        (data->selection < 0)
+        ? 0
+        : (data->selection > 3)
+        ? 3
+        : data->selection;
+
+    if(!(get_global_frames() % 4)) {
+        switch(data->selection) {
+        case 0:
+            if(_manage_volume_control(&data->master_volume)) {
+                sound_master_set_volume(data->master_volume);
+                sound_play_vag(sfx_switch, 0);
+            }
+            break;
+        case 1:
+            if(_manage_volume_control(&data->bgm_volume)) {
+                sound_cdda_set_volume(data->bgm_volume);
+                sound_play_vag(sfx_switch, 0);
+            }
+            break;
+        case 2:
+            if(_manage_volume_control(&data->sfx_volume)) {
+                sound_vag_set_volume(data->sfx_volume);
+                sound_play_vag(sfx_switch, 0);
+            }
+            break;
+        default: break;
+        }
+    }
+
     /* if(pad_pressed(PAD_RIGHT) && (data->character < CHARA_MAX)) { */
     /*     data->character++; */
     /*     sound_play_vag(sfx_switch, 0); */
@@ -112,9 +173,49 @@ screen_options_update(void *d)
     /*     scene_change(SCREEN_LEVEL); */
     /* } */
 
-    if(pad_pressed(PAD_CIRCLE)) {
+    if(pad_pressed(PAD_CROSS) && (data->selection == 3)) {
         scene_change(SCREEN_TITLE);
     }
+}
+
+void
+_draw_slider(int16_t vx, int16_t vy, int16_t width, int16_t value)
+{
+    // Calculate indicator position
+    // indicator_x = vx + (value / 0x3fff)
+    // p = width * value / 3fff
+    // (width / 3fff) * value
+    uint32_t w = ((uint32_t)width) << 12;
+    uint32_t v = ((uint32_t)value) << 12;
+    uint32_t vunit = (w << 12) / 0x3fff000;
+    uint32_t vrpos = (v * vunit) >> 12;
+    int16_t pos = vx + (int16_t)(vrpos >> 12);
+
+    // Draw indicator
+    font_draw_big("I", pos, vy - 1);
+
+    // Draw background
+    TILE *tile = (TILE *)get_next_prim();
+    increment_prim(sizeof(TILE));
+    setTile(tile);
+    setRGB0(tile, 0, 0, 0);
+    setXY0(tile, vx, vy);
+    setWH(tile, width, 8);
+    sort_prim(tile, OTZ_LAYER_HUD);
+}
+
+void
+_draw_control(int16_t vy, const char *caption, int16_t value, uint8_t selected)
+{
+    char buffer[10];
+    
+    snprintf(buffer, 10, "%04x", value);
+
+    if(selected) font_set_color(128, 128, 0);
+    font_draw_sm(caption, 15, vy + 1);
+    _draw_slider(150, vy, 120, value);
+    font_draw_sm(buffer, 280, vy + 1);
+    font_reset_color();
 }
 
 void
@@ -129,7 +230,13 @@ screen_options_draw(void *d)
     uint16_t text_xpos = CENTERX - text_hsize;
     font_draw_big(title, text_xpos, SCREEN_YRES >> 3);
 
-    // TODO
+    _draw_control(60, "Master Volume", data->master_volume, data->selection == 0);
+    _draw_control(80, "BGM Volume", data->bgm_volume, data->selection == 1);
+    _draw_control(100, "SFX Volume", data->sfx_volume, data->selection == 2);
+
+    if(data->selection == 3) font_set_color(128, 128, 0);
+    font_draw_sm("Back", 270, 200);
+    font_reset_color();
 
     // Draw background
     for(uint16_t y = 0; y < SCREEN_YRES; y += 32) {
