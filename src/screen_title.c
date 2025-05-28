@@ -213,8 +213,7 @@ screen_title_update(void *d)
                         data->next_scene = SCREEN_LEVELSELECT;
                         break;
                     case 4: // Options
-                        // TODO
-                        data->selected = 0;
+                        data->next_scene = SCREEN_OPTIONS;
                         break;
                     default: data->selected = 0; break;
                     }

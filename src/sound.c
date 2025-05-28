@@ -33,6 +33,10 @@ static volatile CdlLOC  cdda_toc[MAX_TOC_TRACKS];
 static volatile uint8_t cdda_current_track;
 static volatile uint8_t cdda_track_loops;
 
+// Volume levels
+static volatile uint16_t volume_master = 0;
+static volatile uint16_t volume_cdda   = 0;
+static volatile uint16_t volume_vag    = BGM_MAX_VOLUME;
 
 void
 _sound_reset_channels(void)
@@ -124,8 +128,8 @@ sound_play_vag(SoundEffect sfx, uint8_t loops)
 
     // Set channel volume and ADSR parameters.
     // 0x80ff and 0x1fee are dummy values that disable ADSR envelope entirely.
-    SPU_CH_VOL_L(ch) = 0x3fff;
-    SPU_CH_VOL_R(ch) = 0x3fff;
+    SPU_CH_VOL_L(ch) = volume_vag;
+    SPU_CH_VOL_R(ch) = volume_vag;
     SPU_CH_ADSR1(ch) = 0x00ff;
     SPU_CH_ADSR2(ch) = 0x0000;
 
@@ -149,10 +153,23 @@ _cdda_loop_callback()
 }
 
 void
-sound_cdda_set_volume(uint32_t volume)
+sound_master_set_volume(uint16_t volume)
 {
+    volume_master = volume;
     SpuSetCommonMasterVolume(volume, volume);
+}
+
+void
+sound_cdda_set_volume(uint16_t volume)
+{
+    volume_cdda = volume;
     SpuSetCommonCDVolume(volume, volume);
+}
+
+void
+sound_vag_set_volume(uint16_t volume)
+{
+    volume_vag = volume;
 }
 
 void
@@ -166,6 +183,8 @@ void
 sound_cdda_init()
 {
     CdAutoPauseCallback(_cdda_loop_callback);
+
+    sound_master_set_volume(BGM_DEFAULT_VOLUME);
     sound_cdda_set_volume(BGM_DEFAULT_VOLUME);
 
     while((cdda_toc_size = CdGetToc((CdlLOC *)cdda_toc)) == 0) {
@@ -214,4 +233,22 @@ uint8_t
 sound_cdda_get_num_tracks()
 {
     return cdda_toc_size;
+}
+
+uint16_t
+sound_master_get_volume()
+{
+    return volume_master;
+}
+
+uint16_t
+sound_cdda_get_volume()
+{
+    return volume_cdda;
+}
+
+uint16_t
+sound_vag_get_volume()
+{
+    return volume_vag;
 }

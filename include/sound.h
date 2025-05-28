@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include <psxcd.h>
 
-#define BGM_DEFAULT_VOLUME  0x3fff
+#define BGM_MAX_VOLUME      0x3fff
+#define BGM_DEFAULT_VOLUME  BGM_MAX_VOLUME
 
 // .VAG audio header
 typedef struct {
@@ -38,9 +39,17 @@ void        sound_play_vag(SoundEffect sfx, uint8_t loops);
 void    sound_cdda_init();
 void    sound_cdda_play_track(uint8_t track, uint8_t loops);
 void    sound_cdda_stop();
-void    sound_cdda_set_volume(uint32_t volume);
 void    sound_cdda_set_mute(uint8_t state);
 uint8_t sound_cdda_get_num_tracks();
+
+/* Volume */
+void    sound_master_set_volume(uint16_t volume);
+void    sound_cdda_set_volume(uint16_t volume);
+void    sound_vag_set_volume(uint16_t volume);
+
+uint16_t sound_master_get_volume();
+uint16_t sound_cdda_get_volume();
+uint16_t sound_vag_get_volume();
 
 /* BGM audio table */
 typedef enum {

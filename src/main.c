@@ -73,7 +73,7 @@ main(void)
 
     // Set first scene
     scene_change(SCREEN_DISCLAIMER);
-    //scene_change(SCREEN_SPRITETEST);
+    /* scene_change(SCREEN_OPTIONS); */
 
     while(1) {
         // Update systems

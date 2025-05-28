@@ -13,6 +13,7 @@ typedef enum {
     SCREEN_CREDITS,
     SCREEN_SPRITETEST,
     SCREEN_CHARSELECT,
+    SCREEN_OPTIONS,
 } ScreenIndex;
 
 void scene_change(ScreenIndex scr);
