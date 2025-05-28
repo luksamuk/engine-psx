@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "screen.h"
 #include "screens/options.h"
@@ -174,23 +175,6 @@ screen_options_update(void *d)
     default: break;
     }
 
-    /* if(pad_pressed(PAD_RIGHT) && (data->character < CHARA_MAX)) { */
-    /*     data->character++; */
-    /*     sound_play_vag(sfx_switch, 0); */
-    /* } */
-    /* if(pad_pressed(PAD_LEFT) && (data->character > 0)) { */
-    /*     data->character--; */
-    /*     sound_play_vag(sfx_switch, 0); */
-    /* } */
-
-    /* if(pad_pressed(PAD_CROSS) || pad_pressed(PAD_START)) { */
-    /*     screen_level_setcharacter(data->character); */
-    /*     // NOTE: screen_level_setlevel should have */
-    /*     // been called from previous screen */
-    /*     screen_level_setmode(LEVEL_MODE_NORMAL); */
-    /*     scene_change(SCREEN_LEVEL); */
-    /* } */
-
     if(pad_pressed(PAD_CROSS) && (data->selection == 4)) {
         scene_change(SCREEN_TITLE);
     }
@@ -225,14 +209,17 @@ _draw_slider(int16_t vx, int16_t vy, int16_t width, int16_t value)
 void
 _draw_control(int16_t vy, const char *caption, int16_t value, uint8_t selected)
 {
-    char buffer[10];
-    
-    snprintf(buffer, 10, "%04x", value);
+    char buffer[4];
+
+    // 1% of 0x3fff is roughly 0xa3
+    uint16_t perc = value / 0xa3;
+    snprintf(buffer, 4, "%3u", perc);
+    uint16_t volsz = font_measurew_sm(buffer);
 
     if(selected) font_set_color(128, 128, 0);
     font_draw_sm(caption, 15, vy + 1);
     _draw_slider(150, vy, 120, value);
-    font_draw_sm(buffer, 280, vy + 1);
+    font_draw_sm(buffer, SCREEN_XRES - 15 - volsz, vy + 1);
     font_reset_color();
 }
 
@@ -248,21 +235,21 @@ screen_options_draw(void *d)
     uint16_t text_xpos = CENTERX - text_hsize;
     font_draw_big(title, text_xpos, SCREEN_YRES >> 3);
 
-    _draw_control(60, "Master Volume", data->master_volume, data->selection == 0);
-    _draw_control(80, "CD-DA BGM", data->bgm_volume, data->selection == 1);
-    _draw_control(100, "VAG SFX", data->sfx_volume, data->selection == 2);
+    _draw_control(60,  "Master Volume", data->master_volume, data->selection == 0);
+    _draw_control(80,  "Background Music", data->bgm_volume, data->selection == 1);
+    _draw_control(100, "Sound Effects", data->sfx_volume, data->selection == 2);
 
     if(data->selection == 3) font_set_color(128, 128, 0);
     font_draw_sm("Debug Mode", 15, 120);
 
     const char *dbgtxt =
         (debug_mode == 0)
-        ? "OFF"
+        ? "Off"
         : (debug_mode == 1)
-        ? "BASIC"
-        : "FULL";
+        ? "Basic Debug"
+        : "Collision Debug";
     uint16_t txtw = font_measurew_sm(dbgtxt);
-    font_draw_sm(dbgtxt, SCREEN_XRES - 10 - txtw, 120);
+    font_draw_sm(dbgtxt, SCREEN_XRES - 15 - txtw, 120);
 
     font_reset_color();
 
