@@ -173,6 +173,24 @@
 	</dir>
 
 	<dir name="R4">
+	  <file name="Z1.LVL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/Z1.LVL" />
+	  <file name="Z1.OMP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/Z1.OMP" />
+	  <file name="MAP128.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP128.MAP" />
+	  <file name="TILES.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/TILES.TIM" />
+	  <file name="MAP16.COL"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP16.COL" />
+	  <file name="MAP16.MAP"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP16.MAP" />
 	  <file name="BG0.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/BG0.TIM" />
