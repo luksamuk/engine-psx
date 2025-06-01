@@ -785,10 +785,15 @@ _player_update_collision_tb(Player *player)
                 player->angle = player->ev_grnd1.angle;
             else if(!player->ev_grnd1.collided && player->ev_grnd2.collided)
                 player->angle = player->ev_grnd2.angle;
-            // In case both are available, get the angle on the left.
-            // This introduces certain collision bugs but let's leave it
-            // like this for now
-            else player->angle = player->ev_grnd1.angle;
+            else {
+                if(player->ev_grnd1.coord < player->ev_grnd2.coord)
+                    player->angle = player->ev_grnd1.angle;
+                else player->angle = player->ev_grnd2.angle;
+            }
+            /* // In case both are available, get the angle on the left. */
+            /* // This introduces certain collision bugs but let's leave it */
+            /* // like this for now */
+            /* else player->angle = player->ev_grnd1.angle; */
 
             // Calculate which of the two coords we should use.
             int32_t new_coord = 0;
