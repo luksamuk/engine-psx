@@ -79,7 +79,7 @@ void prepare_renderer(LevelData *lvl);
 void render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     ObjectTable *tbl,
-    int32_t cam_x, int32_t cam_y);
+    int32_t cam_x, int32_t cam_y, uint8_t front);
 
 void update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y);
 

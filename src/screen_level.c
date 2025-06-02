@@ -482,7 +482,9 @@ screen_level_draw(void *d)
     object_pool_render(&obj_table_common, camera.pos.vx, camera.pos.vy);
 
     // Draw level and level objects
-    render_lvl(&leveldata, &map128, &map16, &obj_table_common, camera.pos.vx, camera.pos.vy);
+    render_lvl(&leveldata, &map128, &map16, &obj_table_common,
+               camera.pos.vx, camera.pos.vy,
+               data->level_round == 4); // Dawn Canyon: Draw in front
 
     // Draw background and parallax
     if(level_get_num_sprites() < 1312)

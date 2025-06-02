@@ -290,7 +290,8 @@ _render_16(
 void
 _render_128(
     TileMap128 *map128, TileMap16 *map16,
-    int16_t vx, int16_t vy, uint16_t frame)
+    int16_t vx, int16_t vy, uint16_t frame,
+    uint32_t otz)
 {
     // Clipping
     TILECLIP(128);
@@ -313,7 +314,7 @@ _render_128(
             vy + (deltay << 4),
             (tileframes[idx].props & MAP128_PROP_FRONT)
             ? OTZ_LAYER_LEVEL_FG_FRONT
-            : OTZ_LAYER_LEVEL_FG_BACK,
+            : otz,
             tileframes[idx].index);
     }
 }
@@ -323,7 +324,7 @@ _render_128(
 void
 _render_layer(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
-    int16_t vx, int16_t vy, uint8_t layer)
+    int16_t vx, int16_t vy, uint8_t layer, uint32_t otz)
 {
     LevelLayerData *l = &lvl->layers[layer];
     // vx and vy are the camera center.
@@ -367,7 +368,8 @@ _render_layer(
             _render_128(map128, map16,
                         ((ix - tilex) << 7) - deltax,
                         ((iy - tiley) << 7) - deltay,
-                        l->tiles[frame_idx]);
+                        l->tiles[frame_idx],
+                        otz);
         }
     }
 }
@@ -521,23 +523,27 @@ void
 render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
     ObjectTable *tbl,
-    int32_t cam_x, int32_t cam_y)
+    int32_t cam_x, int32_t cam_y,
+    uint8_t front)
 {
     _numsprites = 0;
     _current_spritebuf = !_current_spritebuf;
+    uint32_t layer =
+        front ? OTZ_LAYER_LEVEL_FG_BACK_M1 : OTZ_LAYER_LEVEL_FG_BACK;
 
     int16_t
         cx = (cam_x >> 12),
         cy = (cam_y >> 12);
 
     if(lvl->num_layers > 0)
-        _render_layer(lvl, map128, map16, cx, cy, 0);
+        _render_layer(lvl, map128, map16, cx, cy, 0, layer);
+
 
     // Texture TPAGE info for level foreground (back tiles)
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
     setDrawTPage(tpage, 0, 1, getTPage(lvl->clutmode & 0x3, 1, lvl->prectx, lvl->precty));
-    sort_prim(tpage, OTZ_LAYER_LEVEL_FG_BACK);
+    sort_prim(tpage, layer);
 
     // Texture TPAGE info for level foreground (front tiles)
     tpage = get_next_prim();

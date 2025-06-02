@@ -32,14 +32,15 @@
 
 
 /* LAYER INDICES (OTZ for 2D elements) */
-#define OTZ_LAYER_TOPMOST        0
-#define OTZ_LAYER_HUD            1
-#define OTZ_LAYER_LEVEL_FG_FRONT 2
-#define OTZ_LAYER_OBJECTS        3
-#define OTZ_LAYER_PLAYER         4
-#define OTZ_LAYER_UNDER_PLAYER   5
-#define OTZ_LAYER_LEVEL_FG_BACK  (OT_LENGTH - 3)
-#define OTZ_LAYER_LEVEL_BG       (OT_LENGTH - 2)
+#define OTZ_LAYER_TOPMOST          0
+#define OTZ_LAYER_HUD              1
+#define OTZ_LAYER_LEVEL_FG_FRONT   2
+#define OTZ_LAYER_LEVEL_FG_BACK_M1 3
+#define OTZ_LAYER_OBJECTS          4
+#define OTZ_LAYER_PLAYER           5
+#define OTZ_LAYER_UNDER_PLAYER     6
+#define OTZ_LAYER_LEVEL_FG_BACK    7
+#define OTZ_LAYER_LEVEL_BG         8
 
 
 /* Framebuffer/display list class */
