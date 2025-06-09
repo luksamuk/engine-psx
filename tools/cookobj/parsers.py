@@ -68,28 +68,6 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
             # ID's are sequential only for non-dummy objects.
             obj_id += 1
 
-            # Get tile collision
-            # collisions = tile.find("objectgroup")
-            # if collisions:
-            #     collisions = collisions.find_all("object", [])
-            #     if collisions[0].get("width"):
-            #         collision = {}
-            #         collision["type"] = "rect"
-            #         collision["x"] = int(collisions[0].get("x"))
-            #         collision["y"] = int(collisions[0].get("y"))
-            #         collision["width"] = int(collisions[0].get("width"))
-            #         collision["height"] = int(collisions[0].get("height"))
-            #     else:
-            #         collision = {}
-            #         collision["type"] = "polygon"
-            #         poly = collisions[0].find("polygon")
-            #         points = poly.get("points").split()
-            #         points = [
-            #             [int(float(p.split(",")[0])), int(float(p.split(",")[1]))]
-            #             for p in points
-            #         ]
-            #         collision["points"] = points
-
             o.obj_mapping[gid] = (
                 (gid - firstgid) if o.is_level_specific else ObjectId.get(od.name).value
             )
@@ -110,10 +88,6 @@ def parse_tileset(firstgid: int, set_src: str) -> (ObjectMap, str):
                     frag_animations.sort(key=lambda x: x.get("id"))
                     for data in frag_animations:
                         od.fragment.animations.append(_parse_animation(data))
-
-            # if collision:
-            #     # TODO: append collision
-            #     pass
 
             o.object_types[gid] = od
         else:
