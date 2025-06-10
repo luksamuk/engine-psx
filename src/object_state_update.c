@@ -67,12 +67,12 @@ static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 extern void object_update_R0(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
 
 // Player hitbox information. Calculated once per frame.
-static int32_t player_vx, player_vy; // Top left corner of player hitbox
-static uint8_t player_attacking;
+int32_t player_vx, player_vy; // Top left corner of player hitbox
+uint8_t player_attacking;
 
 // TODO: ADJUST ACCORDING TO CHARACTER
-static int32_t player_width = 16;
-static int32_t player_height = HEIGHT_RADIUS_NORMAL << 1;
+int32_t player_width = 16;
+int32_t player_height = HEIGHT_RADIUS_NORMAL << 1;
 
 int player_hitbox_shown;
 

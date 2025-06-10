@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="6" nextobjectid="258">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="7" nextobjectid="264">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="97" source="../COMMON/objects_common.tsx"/>
+ <tileset firstgid="117" source="objects.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -116,6 +117,13 @@
      <property name="frequency" type="int" value="2"/>
     </properties>
    </object>
+  </objectgroup>
+  <objectgroup id="6" name="LEVEL">
+   <object id="258" gid="117" x="1792" y="480" width="64" height="64"/>
+   <object id="259" gid="117" x="2944" y="3328" width="64" height="64"/>
+   <object id="260" gid="117" x="5248" y="3584" width="64" height="64"/>
+   <object id="262" gid="117" x="5460" y="3264" width="64" height="64"/>
+   <object id="263" gid="117" x="6721" y="3328" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

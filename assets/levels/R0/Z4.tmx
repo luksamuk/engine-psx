@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="6" nextobjectid="236">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="7" nextobjectid="248">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="97" source="../COMMON/objects_common.tsx"/>
+ <tileset firstgid="117" source="objects.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,19,19,2,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,12,12,12,12,12,12,12,12,12,12,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -195,6 +196,20 @@
      <property name="Kind" value="SHIELD"/>
     </properties>
    </object>
+  </objectgroup>
+  <objectgroup id="6" name="LEVEL">
+   <object id="236" gid="117" x="1408" y="640" width="64" height="64"/>
+   <object id="237" gid="117" x="2613" y="576" width="64" height="64"/>
+   <object id="238" gid="117" x="4131" y="832.5" width="64" height="64"/>
+   <object id="239" gid="117" x="3408" y="672" width="64" height="64"/>
+   <object id="240" gid="117" x="3712" y="1280" width="64" height="64"/>
+   <object id="241" gid="117" x="4480" y="1408" width="64" height="64"/>
+   <object id="242" gid="117" x="4352" y="1408" width="64" height="64"/>
+   <object id="243" gid="117" x="5504" y="1984" width="64" height="64"/>
+   <object id="244" gid="117" x="6767" y="1024" width="64" height="64"/>
+   <object id="245" gid="117" x="6528" y="2048" width="64" height="64"/>
+   <object id="246" gid="117" x="6784" y="2048" width="64" height="64"/>
+   <object id="247" gid="117" x="7100" y="1728" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>
