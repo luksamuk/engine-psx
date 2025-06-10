@@ -327,8 +327,8 @@ screen_level_update(void *d)
     }
 
     camera_update(&camera, &player);
-    update_obj_window(&leveldata, &obj_table_common, &obj_table_level, camera.pos.vx, camera.pos.vy);
-    object_pool_update(&obj_table_common, &obj_table_level);
+    update_obj_window(&leveldata, &obj_table_common, &obj_table_level, camera.pos.vx, camera.pos.vy, data->level_round);
+    object_pool_update(&obj_table_common, &obj_table_level, data->level_round);
 
     // Only update these if past fade in!
     if(data->level_transition > 0) {

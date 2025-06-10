@@ -97,11 +97,11 @@ void object_render(ObjectState *state, ObjectTableEntry *typedata,
 // ATTENTION: "pos" does not influence in object position, ever.
 // If the current object lives in object pool and can freely be moved, alter
 // its position and speed by using the 'freepos' field.
-void object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
+void object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8_t round);
 
 
 /* ============================== */
-/* OBJECTS OWNED BY OBJECT POOL */
+/* OBJECTS OWNED BY OBJECT POOL   */
 /* ============================== */
 
 // A single ring loss is at least 32 rings, so this is our minimum!
@@ -122,7 +122,7 @@ typedef struct {
 } PoolObject;
 
 void       object_pool_init();
-void       object_pool_update(ObjectTable *tbl, ObjectTable *ltbl);
+void       object_pool_update(ObjectTable *tbl, ObjectTable *ltbl, uint8_t round);
 void       object_pool_render(ObjectTable *tbl, ObjectTable *ltbl, int32_t camera_x, int32_t camera_y);
 PoolObject *object_pool_create(ObjectType t); // ...you should probably not create objects with extra data.
 uint32_t   object_pool_get_count();

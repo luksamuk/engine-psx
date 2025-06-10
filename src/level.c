@@ -446,7 +446,7 @@ _render_obj(ObjectState *obj, ObjectTableEntry *typedata,
 extern int player_hitbox_shown;
 
 void
-update_obj_window(LevelData *lvl, ObjectTable *tbl, ObjectTable *ltbl, int32_t cam_x, int32_t cam_y)
+update_obj_window(LevelData *lvl, ObjectTable *tbl, ObjectTable *ltbl, int32_t cam_x, int32_t cam_y, uint8_t round)
 {
     // If there is no level data, just forget it
     if(lvl->num_layers < 1) return;
@@ -482,7 +482,7 @@ update_obj_window(LevelData *lvl, ObjectTable *tbl, ObjectTable *ltbl, int32_t c
                             .vy = (int32_t)(cy << 7) + (int32_t)obj->ry,
                             .vz = 0
                         };
-                        object_update(obj, typedata, &pos);
+                        object_update(obj, typedata, &pos, round);
                     }
                 }
             }

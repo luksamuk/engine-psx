@@ -82,7 +82,7 @@ void render_lvl(
     ObjectTable *ltbl,
     int32_t cam_x, int32_t cam_y, uint8_t front);
 
-void update_obj_window(LevelData *lvl, ObjectTable *tbl, ObjectTable *ltbl, int32_t cam_x, int32_t cam_y);
+void update_obj_window(LevelData *lvl, ObjectTable *tbl, ObjectTable *ltbl, int32_t cam_x, int32_t cam_y, uint8_t round);
 
 // Object-related. These are defined in object_state.c
 void load_object_placement(const char *filename, void *lvl_data);

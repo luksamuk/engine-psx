@@ -34,7 +34,7 @@ object_pool_init()
 }
 
 void
-object_pool_update(ObjectTable *tbl, ObjectTable *ltbl)
+object_pool_update(ObjectTable *tbl, ObjectTable *ltbl, uint8_t round)
 {
     for(uint32_t i = 0; i < OBJECT_POOL_SIZE; i++) {
         PoolObject *obj = &_object_pool[i];
@@ -44,7 +44,8 @@ object_pool_update(ObjectTable *tbl, ObjectTable *ltbl)
                           (obj->state.id >= MIN_LEVEL_OBJ_GID)
                           ? &ltbl->entries[obj->state.id - MIN_LEVEL_OBJ_GID]
                           : &tbl->entries[obj->state.id],
-                          &pos);
+                          &pos,
+                          round);
 
             if(obj->props & OBJ_FLAG_DESTROYED) {
                 _pool_count--;

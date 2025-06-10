@@ -63,6 +63,9 @@ static void _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
+// Level-specific update functions
+extern void object_update_R0(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
+
 // Player hitbox information. Calculated once per frame.
 static int32_t player_vx, player_vy; // Top left corner of player hitbox
 static uint8_t player_attacking;
@@ -91,7 +94,7 @@ int player_hitbox_shown;
 /* } */
 
 void
-object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8_t round)
 {
     if(state->props & OBJ_FLAG_DESTROYED) return;
 
@@ -112,6 +115,8 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     /*     _draw_player_hitbox(); */
     /* } */
 
+    if(typedata->is_level_specific) goto level_specific_update;
+
     switch(state->id) {
     default: break;
     case OBJ_RING:                   _ring_update(state, typedata, pos);               break;
@@ -129,8 +134,13 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_SWITCH:                 _switch_update(state, typedata, pos);             break;
     case OBJ_BUBBLE_PATCH:           _bubble_patch_update(state, typedata, pos);       break;
     case OBJ_BUBBLE:                 _bubble_update(state, typedata, pos);             break;
+    }
+    return;
 
-        // TODO: ID's >= MIN_LEVEL_OBJ_GID relate to level-specific objects
+level_specific_update:
+    switch(round) {
+    default: break;
+    case 0: object_update_R0(state, typedata, pos);
     }
 }
 
