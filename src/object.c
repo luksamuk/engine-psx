@@ -55,6 +55,7 @@ load_object_table(const char *filename, ObjectTable *tbl)
 
     for(uint16_t i = 0; i < tbl->num_entries; i++) {
         ObjectTableEntry *entry = &tbl->entries[i];
+        entry->is_level_specific = tbl->is_level_specific;
         entry->animations = NULL;
         entry->fragment = NULL;
 

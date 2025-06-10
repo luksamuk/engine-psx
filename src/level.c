@@ -446,7 +446,7 @@ _render_obj(ObjectState *obj, ObjectTableEntry *typedata,
 extern int player_hitbox_shown;
 
 void
-update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y)
+update_obj_window(LevelData *lvl, ObjectTable *tbl, ObjectTable *ltbl, int32_t cam_x, int32_t cam_y)
 {
     // If there is no level data, just forget it
     if(lvl->num_layers < 1) return;
@@ -473,7 +473,10 @@ update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y
                 if(objdata) {
                     for(uint8_t k = 0; k < objdata->num_objects; k++) {
                         ObjectState *obj = &objdata->objects[k];
-                        ObjectTableEntry *typedata = &tbl->entries[obj->id];
+                        ObjectTableEntry *typedata =
+                            (obj->id >= MIN_LEVEL_OBJ_GID)
+                            ? &ltbl->entries[obj->id - MIN_LEVEL_OBJ_GID]
+                            : &tbl->entries[obj->id];
                         VECTOR pos = {
                             .vx = (int32_t)(cx << 7) + (int32_t)obj->rx,
                             .vy = (int32_t)(cy << 7) + (int32_t)obj->ry,
@@ -488,7 +491,7 @@ update_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cam_x, int32_t cam_y
 }
 
 void
-_render_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cx, int32_t cy)
+_render_obj_window(LevelData *lvl, ObjectTable *tbl, ObjectTable *ltbl, int32_t cx, int32_t cy)
 {
     if(lvl->num_layers < 1) return;
 
@@ -501,12 +504,14 @@ _render_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cx, int32_t cy)
     if(chunk > 0) {                                                      \
         ChunkObjectData *objdata = lvl->objects[chunk];                  \
         if(objdata) {                                                    \
-            for(uint8_t i = 0; i < objdata->num_objects; i++) {          \
-                ObjectState *obj = &objdata->objects[i];                 \
-                ObjectTableEntry *typedata = &tbl->entries[obj->id];     \
-                _render_obj(obj, typedata, cx, cy, (x) >> 7, (y) >> 7);  \
-            }                                                            \
-        }                                                                \
+            for(uint8_t i = 0; i < objdata->num_objects; i++) {         \
+                ObjectState *obj = &objdata->objects[i];                \
+                ObjectTableEntry *typedata = (obj->id >= MIN_LEVEL_OBJ_GID) \
+                    ? &ltbl->entries[obj->id - MIN_LEVEL_OBJ_GID]       \
+                    : &tbl->entries[obj->id];                           \
+                _render_obj(obj, typedata, cx, cy, (x) >> 7, (y) >> 7); \
+            }                                                           \
+        }                                                               \
     }
 
     // Render a 5x5 grid of objects.
@@ -522,7 +527,7 @@ _render_obj_window(LevelData *lvl, ObjectTable *tbl, int32_t cx, int32_t cy)
 void
 render_lvl(
     LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
-    ObjectTable *tbl,
+    ObjectTable *tbl, ObjectTable *ltbl,
     int32_t cam_x, int32_t cam_y,
     uint8_t front)
 {
@@ -552,6 +557,6 @@ render_lvl(
     sort_prim(tpage, OTZ_LAYER_LEVEL_FG_FRONT);
 
     // Render objects on nearest window
-    _render_obj_window(lvl, tbl, cx, cy);
+    _render_obj_window(lvl, tbl, ltbl, cx, cy);
 }
 

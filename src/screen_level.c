@@ -33,6 +33,7 @@ TileMap128  map128;
 LevelData   leveldata;
 Camera      camera;
 ObjectTable obj_table_common;
+ObjectTable obj_table_level;
 uint8_t     level_fade;
 uint8_t     level_ring_count;
 uint32_t    level_score_count;
@@ -326,8 +327,8 @@ screen_level_update(void *d)
     }
 
     camera_update(&camera, &player);
-    update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
-    object_pool_update(&obj_table_common);
+    update_obj_window(&leveldata, &obj_table_common, &obj_table_level, camera.pos.vx, camera.pos.vy);
+    object_pool_update(&obj_table_common, &obj_table_level);
 
     // Only update these if past fade in!
     if(data->level_transition > 0) {
@@ -479,10 +480,10 @@ screen_level_draw(void *d)
     }
 
     // Draw free objects
-    object_pool_render(&obj_table_common, camera.pos.vx, camera.pos.vy);
+    object_pool_render(&obj_table_common, &obj_table_level, camera.pos.vx, camera.pos.vy);
 
     // Draw level and level objects
-    render_lvl(&leveldata, &map128, &map16, &obj_table_common,
+    render_lvl(&leveldata, &map128, &map16, &obj_table_common, &obj_table_level,
                camera.pos.vx, camera.pos.vy,
                data->level_round == 4); // Dawn Canyon: Draw in front
 
@@ -949,12 +950,16 @@ level_load_level(screen_level_data *data)
     // Load level objects
     // TODO: Act 3 must load boss texture instead
     snprintf(filename0, 255, "%s\\OBJ.TIM;1", basepath);
-    printf("Loading %s\n", filename0);
+    printf("Loading level object texture...\n");
     timfile = file_read(filename0, &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
         free(timfile);
     } else printf("Warning: No level object texture found, skipping\n");
+
+    printf("Loading level object table...\n");
+    snprintf(filename0, 255, "%s\\OBJ.OTD;1", basepath);
+    load_object_table(filename0, &obj_table_level);
 
     // Load object positioning on level
     snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, data->level_act + 1);

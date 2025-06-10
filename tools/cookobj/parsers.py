@@ -176,6 +176,7 @@ def parse_map(map_src: str) -> (typing.Dict[str, ObjectMap], ObjectLevelLayout):
     for tileset in tilesets:
         tileset_src = realpath(dirname(map_src) + "/" + tileset["source"])
         loaded_set, ts_name = parse_tileset(int(tileset["firstgid"]), tileset_src)
+        print(f"Loaded tileset {ts_name} ({loaded_set.out})")
         objmaps[ts_name] = loaded_set
 
     # Retrieve objects placement

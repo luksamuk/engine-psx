@@ -129,6 +129,8 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_SWITCH:                 _switch_update(state, typedata, pos);             break;
     case OBJ_BUBBLE_PATCH:           _bubble_patch_update(state, typedata, pos);       break;
     case OBJ_BUBBLE:                 _bubble_update(state, typedata, pos);             break;
+
+        // TODO: ID's >= MIN_LEVEL_OBJ_GID relate to level-specific objects
     }
 }
 

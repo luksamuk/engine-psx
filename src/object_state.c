@@ -26,7 +26,7 @@ _emplace_object(
     ObjectState *state = &data->objects[data->num_objects++];
     assert(data->num_objects < MAX_OBJECTS_PER_CHUNK);
 
-    state->id = type + (is_level_specific ? 100 : 0);
+    state->id = type + (is_level_specific ? MIN_LEVEL_OBJ_GID : 0);
     state->flipmask = flipmask;
 
     state->rx = vx - (tx << 7);
@@ -286,12 +286,19 @@ begin_render_routine:
         setUVWH(poly, frame->u0, frame->v0, frame->w, frame->h);
     }
 
-    // COMMON OBJECTS have the following VRAM coords:
-    // Sprites: 576x0
-    // CLUT: 0x481
-    
-    poly->tpage = getTPage(1, 0, 576, 0);
-    poly->clut = getClut(0, 481);
+    if(!typedata->is_level_specific) {
+        // COMMON OBJECTS have the following VRAM coords:
+        // Sprites: 576x0
+        // CLUT: 0x481
+        poly->tpage = getTPage(1, 0, 576, 0);
+        poly->clut = getClut(0, 481);
+    } else {
+        // LEVEL OBJECTS have these VRAM coords:
+        // Sprites: 704x0
+        // CLUT: 0x485
+        poly->tpage = getTPage(1, 0, 704, 0);
+        poly->clut = getClut(0, 485);
+    }
 
     uint32_t layer = ((state->id == OBJ_RING)
                       || (state->id == OBJ_SHIELD)

@@ -53,6 +53,8 @@ typedef enum {
 /*  OBJECT TABLE STRUCTURE */
 /* ======================== */
 
+#define MIN_LEVEL_OBJ_GID 100
+
 typedef struct {
     uint8_t u0, v0;
     uint8_t w, h;
@@ -76,6 +78,7 @@ typedef struct {
     ObjectAnim *animations;
     ObjectFrag *fragment;
     uint16_t num_animations;
+    uint8_t is_level_specific;
 } ObjectTableEntry;
 
 typedef struct {

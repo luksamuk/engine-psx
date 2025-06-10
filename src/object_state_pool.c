@@ -34,14 +34,16 @@ object_pool_init()
 }
 
 void
-object_pool_update(ObjectTable *tbl)
+object_pool_update(ObjectTable *tbl, ObjectTable *ltbl)
 {
     for(uint32_t i = 0; i < OBJECT_POOL_SIZE; i++) {
         PoolObject *obj = &_object_pool[i];
         if(!(obj->props & OBJ_FLAG_DESTROYED)) {
             VECTOR pos = { obj->freepos.vx >> 12, obj->freepos.vy >> 12, 0 };
             object_update((ObjectState *)&obj->state,
-                          &tbl->entries[obj->state.id],
+                          (obj->state.id >= MIN_LEVEL_OBJ_GID)
+                          ? &ltbl->entries[obj->state.id - MIN_LEVEL_OBJ_GID]
+                          : &tbl->entries[obj->state.id],
                           &pos);
 
             if(obj->props & OBJ_FLAG_DESTROYED) {
@@ -52,7 +54,7 @@ object_pool_update(ObjectTable *tbl)
 }
 
 void
-object_pool_render(ObjectTable *tbl, int32_t camera_x, int32_t camera_y)
+object_pool_render(ObjectTable *tbl, ObjectTable *ltbl, int32_t camera_x, int32_t camera_y)
 {
     camera_x = (camera_x >> 12) - CENTERX;
     camera_y = (camera_y >> 12) - CENTERY;
@@ -67,7 +69,11 @@ object_pool_render(ObjectTable *tbl, int32_t camera_x, int32_t camera_y)
         int16_t px = (obj->freepos.vx >> 12) - camera_x;
         int16_t py = (obj->freepos.vy >> 12) - camera_y;
 
-        object_render(&obj->state, &tbl->entries[obj->state.id], px, py);
+        object_render(&obj->state,
+                      (obj->state.id >= MIN_LEVEL_OBJ_GID)
+                      ? &ltbl->entries[obj->state.id - MIN_LEVEL_OBJ_GID]
+                      : &tbl->entries[obj->state.id],
+                      px, py);
     }
 }
 

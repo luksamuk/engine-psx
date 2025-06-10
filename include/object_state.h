@@ -122,8 +122,8 @@ typedef struct {
 } PoolObject;
 
 void       object_pool_init();
-void       object_pool_update();
-void       object_pool_render(ObjectTable *tbl, int32_t camera_x, int32_t camera_y);
+void       object_pool_update(ObjectTable *tbl, ObjectTable *ltbl);
+void       object_pool_render(ObjectTable *tbl, ObjectTable *ltbl, int32_t camera_x, int32_t camera_y);
 PoolObject *object_pool_create(ObjectType t); // ...you should probably not create objects with extra data.
 uint32_t   object_pool_get_count();
 
