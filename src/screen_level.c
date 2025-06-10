@@ -947,7 +947,14 @@ level_load_level(screen_level_data *data)
     load_object_table("\\LEVELS\\COMMON\\OBJ.OTD;1", &obj_table_common);
 
     // Load level objects
-    // TODO
+    // TODO: Act 3 must load boss texture instead
+    snprintf(filename0, 255, "%s\\OBJ.TIM;1", basepath);
+    printf("Loading %s\n", filename0);
+    timfile = file_read(filename0, &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    } else printf("Warning: No level object texture found, skipping\n");
 
     // Load object positioning on level
     snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, data->level_act + 1);

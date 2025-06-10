@@ -1,0 +1,13 @@
+[ballhog]
+
+[[ballhog.animations]]
+name = "Idle"
+id = 0
+duration = 6
+frames = [
+       [0, 0, 24, 40],
+       [24, 0, 24, 40],
+]
+loopback = 0
+
+# ============

@@ -62,6 +62,9 @@
 	</dir>
 
 	<dir name="R0">
+	  <file name="OBJ.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/OBJ.TIM" />
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z1.LVL" />
