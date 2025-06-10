@@ -3,7 +3,7 @@
 [[ballhog.animations]]
 name = "Idle"
 id = 0
-duration = 6
+duration = 12
 frames = [
        [0, 0, 24, 40],
        [24, 0, 24, 40],
