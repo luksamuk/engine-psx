@@ -44,7 +44,7 @@ object_update_R0(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_BOUNCEBOMB: _bouncebomb_update(state, typedata, pos); break;
     }
 }
-#include <stdio.h>
+
 static void
 _ballhog_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
@@ -84,7 +84,8 @@ _ballhog_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // Ballhog should throw a bomb if player is close enough
     // Further,
     if(state->anim_state.animation == 0) {
-        if(state->timer == 0) state->timer = 240;
+        // First bomb happens after 180 frames
+        if(state->timer == 0) state->timer = 180;
         else {
             if(state->timer == 1) {
                 // Switch to throw bomb animation
@@ -107,6 +108,9 @@ _ballhog_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             // Reset animation
             state->anim_state.animation = 0;
             state->anim_state.frame = 0;
+
+            // Next bomb takes a shorter time
+            state->timer = 135;
         }
     }
 }
@@ -154,11 +158,10 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     }
 
     // Despawn if too far from camera
-    if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))
-       || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 13))
-       || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 13))
-       || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 13))
-       || (state->timer >= 256)) {
+    if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
+       || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
+       || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
+       || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12))) {
         state->props |= OBJ_FLAG_DESTROYED;
         return;
     }
