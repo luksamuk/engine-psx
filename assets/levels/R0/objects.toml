@@ -10,4 +10,26 @@ frames = [
 ]
 loopback = 0
 
+[[ballhog.animations]]
+name = "Release"
+id = 1
+duration = 12
+frames = [
+       [0, 40, 24, 40],
+       [24, 40, 24, 40],
+       [24, 40, 24, 40],
+]
+loopback = 2
+
 # ============
+[bouncebomb]
+
+[[bouncebomb.animations]]
+name = "Default"
+id = 0
+duration = 6
+frames = [
+       [48, 0, 16, 16],
+       [48, 16, 16, 16],
+]
+loopback = 0
