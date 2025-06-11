@@ -198,7 +198,7 @@
    </object>
   </objectgroup>
   <objectgroup id="6" name="LEVEL">
-   <object id="236" gid="117" x="1408" y="640" width="64" height="64"/>
+   <object id="236" gid="117" x="1024" y="704" width="64" height="64"/>
    <object id="237" gid="117" x="2613" y="576" width="64" height="64"/>
    <object id="238" gid="117" x="4131" y="832.5" width="64" height="64"/>
    <object id="239" gid="117" x="3408" y="672" width="64" height="64"/>

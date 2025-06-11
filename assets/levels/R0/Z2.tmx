@@ -257,10 +257,8 @@
    <object id="193" gid="99" x="303" y="2080" width="64" height="64"/>
   </objectgroup>
   <objectgroup id="6" name="LEVEL">
-   <object id="194" gid="117" x="256" y="320" width="64" height="64"/>
    <object id="195" gid="117" x="183" y="192" width="64" height="64"/>
    <object id="196" gid="117" x="1650" y="1664" width="64" height="64"/>
-   <object id="197" gid="117" x="983" y="224" width="64" height="64"/>
    <object id="198" gid="117" x="1060" y="224" width="64" height="64"/>
    <object id="199" gid="117" x="1130" y="224" width="64" height="64"/>
    <object id="200" gid="117" x="640" y="2304" width="64" height="64"/>
