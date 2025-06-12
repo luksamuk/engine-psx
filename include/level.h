@@ -75,14 +75,10 @@ void load_map128(TileMap128 *mapping, const char *filename);
 void load_lvl(LevelData *lvl, const char *filename);
 uint16_t level_get_num_sprites();
 
-void prepare_renderer(LevelData *lvl);
-void render_lvl(
-    LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
-    ObjectTable *tbl,
-    ObjectTable *ltbl,
-    int32_t cam_x, int32_t cam_y, uint8_t front);
+void prepare_renderer();
+void render_lvl(int32_t cam_x, int32_t cam_y, uint8_t front);
 
-void update_obj_window(LevelData *lvl, ObjectTable *tbl, ObjectTable *ltbl, int32_t cam_x, int32_t cam_y, uint8_t round);
+void update_obj_window(int32_t cam_x, int32_t cam_y, uint8_t round);
 
 // Object-related. These are defined in object_state.c
 void load_object_placement(const char *filename, void *lvl_data);

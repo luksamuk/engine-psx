@@ -11,6 +11,9 @@ extern ArenaAllocator _level_arena;
 static PoolObject *_object_pool;
 static uint32_t   _pool_count = 0;
 
+extern ObjectTable obj_table_common;
+extern ObjectTable obj_table_level;
+
 // Defined in level.c
 extern void _render_obj(
     ObjectState *obj, ObjectTableEntry *typedata,
@@ -34,7 +37,7 @@ object_pool_init()
 }
 
 void
-object_pool_update(ObjectTable *tbl, ObjectTable *ltbl, uint8_t round)
+object_pool_update(uint8_t round)
 {
     for(uint32_t i = 0; i < OBJECT_POOL_SIZE; i++) {
         PoolObject *obj = &_object_pool[i];
@@ -42,8 +45,8 @@ object_pool_update(ObjectTable *tbl, ObjectTable *ltbl, uint8_t round)
             VECTOR pos = { obj->freepos.vx >> 12, obj->freepos.vy >> 12, 0 };
             object_update((ObjectState *)&obj->state,
                           (obj->state.id >= MIN_LEVEL_OBJ_GID)
-                          ? &ltbl->entries[obj->state.id - MIN_LEVEL_OBJ_GID]
-                          : &tbl->entries[obj->state.id],
+                          ? &obj_table_level.entries[obj->state.id - MIN_LEVEL_OBJ_GID]
+                          : &obj_table_common.entries[obj->state.id],
                           &pos,
                           round);
 
@@ -55,7 +58,7 @@ object_pool_update(ObjectTable *tbl, ObjectTable *ltbl, uint8_t round)
 }
 
 void
-object_pool_render(ObjectTable *tbl, ObjectTable *ltbl, int32_t camera_x, int32_t camera_y)
+object_pool_render(int32_t camera_x, int32_t camera_y)
 {
     camera_x = (camera_x >> 12) - CENTERX;
     camera_y = (camera_y >> 12) - CENTERY;
@@ -72,8 +75,8 @@ object_pool_render(ObjectTable *tbl, ObjectTable *ltbl, int32_t camera_x, int32_
 
         object_render(&obj->state,
                       (obj->state.id >= MIN_LEVEL_OBJ_GID)
-                      ? &ltbl->entries[obj->state.id - MIN_LEVEL_OBJ_GID]
-                      : &tbl->entries[obj->state.id],
+                      ? &obj_table_level.entries[obj->state.id - MIN_LEVEL_OBJ_GID]
+                      : &obj_table_common.entries[obj->state.id],
                       px, py);
     }
 }

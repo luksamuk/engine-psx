@@ -41,13 +41,6 @@ uint8_t     level_finished;
 int32_t     level_water_y;
 LEVELMODE   level_mode;
 
-
-// Forward function declarations
-static void level_load_player(PlayerCharacter character);
-static void level_load_level();
-static void level_set_clearcolor();
-static void level_play_music(uint8_t round, uint8_t act);
-
 typedef struct {
     uint8_t    level_transition;
     Parallax   parallax;
@@ -78,6 +71,12 @@ typedef struct {
     uint8_t  waterbuffer;
     uint8_t  water_last_fade[2];
 } screen_level_data;
+
+// Forward function declarations
+static void level_load_player(PlayerCharacter character);
+static void level_load_level(screen_level_data *);
+static void level_set_clearcolor();
+static void level_play_music(uint8_t round, uint8_t act);
 
 void
 screen_level_load()
@@ -144,8 +143,9 @@ screen_level_load()
 }
 
 void
-screen_level_unload(void *)
+screen_level_unload(void *d)
 {
+    (void)(d);
     level_fade = 0;
     sound_cdda_stop();
     level_reset();
@@ -327,8 +327,8 @@ screen_level_update(void *d)
     }
 
     camera_update(&camera, &player);
-    update_obj_window(&leveldata, &obj_table_common, &obj_table_level, camera.pos.vx, camera.pos.vy, data->level_round);
-    object_pool_update(&obj_table_common, &obj_table_level, data->level_round);
+    update_obj_window(camera.pos.vx, camera.pos.vy, data->level_round);
+    object_pool_update(data->level_round);
 
     // Only update these if past fade in!
     if(data->level_transition > 0) {
@@ -480,11 +480,10 @@ screen_level_draw(void *d)
     }
 
     // Draw free objects
-    object_pool_render(&obj_table_common, &obj_table_level, camera.pos.vx, camera.pos.vy);
+    object_pool_render(camera.pos.vx, camera.pos.vy);
 
     // Draw level and level objects
-    render_lvl(&leveldata, &map128, &map16, &obj_table_common, &obj_table_level,
-               camera.pos.vx, camera.pos.vy,
+    render_lvl(camera.pos.vx, camera.pos.vy,
                data->level_round == 4); // Dawn Canyon: Draw in front
 
     // Draw background and parallax
@@ -972,7 +971,7 @@ level_load_level(screen_level_data *data)
 
     /* === RENDERING PREPARATION === */
     // Pre-allocate and initialize level primitive buffer
-    prepare_renderer(&leveldata);
+    prepare_renderer();
 
     level_debrief();
 
