@@ -142,7 +142,7 @@
    <object id="124" gid="101" x="120" y="384" width="64" height="64"/>
    <object id="125" gid="98" x="48" y="160" width="64" height="64">
     <properties>
-     <property name="Kind" value="1UP"/>
+     <property name="Kind" value="SPEEDSHOES"/>
     </properties>
    </object>
    <object id="133" gid="97" x="1422.83" y="402.5" width="64" height="64"/>
