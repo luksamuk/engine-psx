@@ -35,6 +35,7 @@ extern SoundEffect sfx_shield;
 extern SoundEffect sfx_yea;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_bubble;
+extern SoundEffect sfx_sign;
 
 extern int debug_mode;
 
@@ -260,6 +261,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             state->timer = 180;
             level_finished = 1;
             pause_elapsed_frames();
+            sound_play_vag(sfx_sign, 0);
         }
     } else if(state->anim_state.animation == 1) {
         state->timer--;

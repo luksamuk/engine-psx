@@ -393,6 +393,12 @@
 	<file name="BUBBLE.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/BUBBLE.VAG" />
+	<file name="SIGN.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SIGN.VAG" />
+	<file name="BOMB.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/BOMB.VAG" />
       </dir>
 
       <dummy sectors="1024"/>

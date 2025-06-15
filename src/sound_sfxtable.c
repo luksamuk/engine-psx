@@ -18,6 +18,8 @@ SoundEffect sfx_switch = { 0 };
 SoundEffect sfx_splash = { 0 };
 SoundEffect sfx_count  = { 0 };
 SoundEffect sfx_bubble = { 0 };
+SoundEffect sfx_sign   = { 0 };
+SoundEffect sfx_bomb   = { 0 };
 
 void
 sound_sfx_init()
@@ -40,4 +42,6 @@ sound_sfx_init()
     if(sfx_splash.addr == 0) sfx_splash  = sound_load_vag("\\SFX\\SPLASH.VAG;1");
     if(sfx_count.addr == 0)  sfx_count   = sound_load_vag("\\SFX\\COUNT.VAG;1");
     if(sfx_bubble.addr == 0) sfx_bubble  = sound_load_vag("\\SFX\\BUBBLE.VAG;1");
+    if(sfx_sign.addr == 0)   sfx_sign    = sound_load_vag("\\SFX\\SIGN.VAG;1");
+    if(sfx_bomb.addr == 0)   sfx_bomb    = sound_load_vag("\\SFX\\BOMB.VAG;1");
 }

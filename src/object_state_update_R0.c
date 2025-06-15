@@ -17,6 +17,7 @@ extern int32_t player_height;
 extern uint32_t level_score_count;
 
 extern SoundEffect sfx_pop;
+extern SoundEffect sfx_bomb;
 
 extern TileMap16  map16;
 extern TileMap128 map128;
@@ -181,5 +182,5 @@ explode:
     explosion->freepos.vy = (pos->vy << 12);
     explosion->state.anim_state.animation = 1; // Big explosion
     state->props |= OBJ_FLAG_DESTROYED;
-    // TODO: Add sound effect
+    sound_play_vag(sfx_bomb, 0);
 }
