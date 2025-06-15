@@ -1529,7 +1529,7 @@ player_update(Player *player)
 
             case ANIM_CLIMBUP:
             case ANIM_CLIMBDOWN:
-                player_set_frame_duration(player, 6);
+                player_set_frame_duration(player, 5);
                 break;
 
             case ANIM_CLIMBRISE:
