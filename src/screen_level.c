@@ -564,8 +564,8 @@ screen_level_draw(void *d)
             POLY_G4 *polyg = get_next_prim();
             increment_prim(sizeof(POLY_G4));
             setPolyG4(polyg);
-            setRGB0(polyg, 0xfc, 0xfc, 0xfc);
-            setRGB1(polyg, 0xfc, 0xfc, 0xfc);
+            setRGB0(polyg, 0xc9, 0xc9, 0xc9);
+            setRGB1(polyg, 0xc9, 0xc9, 0xc9);
             switch(level_character) {
             case CHARA_SONIC:
                 setRGB2(polyg, 0x00, 0x24, 0xd8);
