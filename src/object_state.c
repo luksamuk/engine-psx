@@ -60,7 +60,21 @@ _emplace_object(
     case OBJ_MONITOR:
         state->props |= OBJ_FLAG_ANIM_LOCK;
         // Set initial animation with respect to kind
-        state->frag_anim_state->animation = (uint16_t)((MonitorExtra *)state->extra)->kind;
+        {
+            uint16_t animation = (uint16_t)((MonitorExtra *)state->extra)->kind;
+            if(animation == MONITOR_KIND_1UP) {
+                // If this is a 1-UP monitor, change animation again with
+                // respect to current character
+                switch(player.character) {
+                default:
+                case CHARA_SONIC:    animation = 5; break;
+                case CHARA_MILES:    animation = 7; break;
+                case CHARA_KNUCKLES: animation = 8; break;
+                }
+            }
+            state->frag_anim_state->animation = animation;
+        }
+        
         break;
     case OBJ_GOAL_SIGN:
         camera_set_right_bound(&camera, (vx << 12) + ((CENTERX >> 1) << 12));

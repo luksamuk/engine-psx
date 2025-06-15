@@ -105,7 +105,7 @@ loopback = 0
 
 [[monitor.fragment.animations]]
 id = 5
-name = "1up"
+name = "sonic"
 duration = 2
 frames = [
     [168, 0, 16, 16],
@@ -122,6 +122,28 @@ frames = [
     [168, 0, 16, 16],
     [216, 16, 16, 16],
     [216, 16, 16, 16],
+]
+loopback = 0
+
+[[monitor.fragment.animations]]
+id = 7
+name = "miles"
+duration = 2
+frames = [
+    [168, 0, 16, 16],
+    [232, 16, 16, 16],
+    [232, 16, 16, 16],
+]
+loopback = 0
+
+[[monitor.fragment.animations]]
+id = 8
+name = "knuckles"
+duration = 2
+frames = [
+    [168, 0, 16, 16],
+    [144, 112, 16, 16],
+    [144, 112, 16, 16],
 ]
 loopback = 0
 
@@ -399,7 +421,7 @@ loopback = 0
 
 [[monitor_image.animations]]
 id = 5
-name = "1up"
+name = "sonic"
 duration = 2
 frames = [[200, 16, 16, 16]]
 loopback = 0
@@ -409,6 +431,20 @@ id = 6
 name = "super"
 duration = 2
 frames = [[216, 16, 16, 16]]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 7
+name = "miles"
+duration = 2
+frames = [[232, 16, 16, 16]]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 8
+name = "knuckles"
+duration = 2
+frames = [[144, 112, 16, 16]]
 loopback = 0
 
 # ============
