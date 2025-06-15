@@ -32,7 +32,8 @@ extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
-extern SoundEffect sfx_yea;
+/* extern SoundEffect sfx_yea; */
+extern SoundEffect sfx_event;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_sign;
@@ -624,7 +625,8 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
             sound_play_vag(sfx_death, 0);
             break;
         case MONITOR_KIND_1UP:
-            sound_play_vag(sfx_yea, 0);
+            /* sound_play_vag(sfx_yea, 0); */
+            sound_play_vag(sfx_event, 0);
             break;
         case MONITOR_KIND_RING:
             sound_play_vag(sfx_ring, 0);

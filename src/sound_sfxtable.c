@@ -13,7 +13,8 @@ SoundEffect sfx_chek   = { 0 };
 SoundEffect sfx_death  = { 0 };
 SoundEffect sfx_ringl  = { 0 };
 SoundEffect sfx_shield = { 0 };
-SoundEffect sfx_yea    = { 0 };
+/* SoundEffect sfx_yea    = { 0 }; */
+SoundEffect sfx_event  = { 0 };
 SoundEffect sfx_switch = { 0 };
 SoundEffect sfx_splash = { 0 };
 SoundEffect sfx_count  = { 0 };
@@ -39,7 +40,8 @@ sound_sfx_init()
     if(sfx_death.addr == 0)  sfx_death   = sound_load_vag("\\SFX\\DEATH.VAG;1");
     if(sfx_ringl.addr == 0)  sfx_ringl   = sound_load_vag("\\SFX\\RINGLOSS.VAG;1");
     if(sfx_shield.addr == 0) sfx_shield  = sound_load_vag("\\SFX\\SHIELD.VAG;1");
-    if(sfx_yea.addr == 0)    sfx_yea     = sound_load_vag("\\SFX\\YEA.VAG;1");
+    /* if(sfx_yea.addr == 0)    sfx_yea     = sound_load_vag("\\SFX\\YEA.VAG;1"); */
+    if(sfx_event.addr == 0)  sfx_event   = sound_load_vag("\\SFX\\EVENT.VAG;1");
     if(sfx_switch.addr == 0) sfx_switch  = sound_load_vag("\\SFX\\SWITCH.VAG;1");
     if(sfx_splash.addr == 0) sfx_splash  = sound_load_vag("\\SFX\\SPLASH.VAG;1");
     if(sfx_count.addr == 0)  sfx_count   = sound_load_vag("\\SFX\\COUNT.VAG;1");

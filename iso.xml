@@ -378,9 +378,12 @@
 	<file name="SHIELD.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SHIELD.VAG" />
-	<file name="YEA.VAG"
+	<!-- <file name="YEA.VAG" -->
+	<!--       type="data" -->
+	<!--       source="${PROJECT_SOURCE_DIR}/assets/sfx/YEA.VAG" /> -->
+	<file name="EVENT.VAG"
 	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/sfx/YEA.VAG" />
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/EVENT.VAG" />
 	<file name="SWITCH.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SWITCH.VAG" />
