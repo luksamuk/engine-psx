@@ -130,18 +130,15 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     if(state->timer == 0) goto explode;
 
     // When colliding with ground, bounce at a specific speed
-    if(linecast(&leveldata, &map128, &map16,
-                pos->vx, pos->vy - 8,
+    if(linecast(pos->vx, pos->vy - 8,
                 CDIR_FLOOR, 8, CDIR_FLOOR).collided) {
         state->freepos->spdy = -0x3800; // -2
     }
 
     // When colliding with a wall, explode
-    if(((state->freepos->spdx < 0) && linecast(&leveldata, &map128, &map16,
-                                               pos->vx, pos->vy - 8,
+    if(((state->freepos->spdx < 0) && linecast(pos->vx, pos->vy - 8,
                                                CDIR_LWALL, 10, CDIR_FLOOR).collided)
-       || ((state->freepos->spdx > 0) && linecast(&leveldata, &map128, &map16,
-                                                  pos->vx, pos->vy - 8,
+       || ((state->freepos->spdx > 0) && linecast(pos->vx, pos->vy - 8,
                                                   CDIR_RWALL, 10, CDIR_FLOOR).collided)) {
         goto explode;
     }

@@ -204,11 +204,9 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 // Use Sonic's own linecast algorithm, since it is aware of
                 // level geometry -- and oh, level data is stored in external
                 // variables as well. Check the file header.
-                ((state->freepos->spdy > 0) && linecast(&leveldata, &map128, &map16,
-                                                        pos->vx + 8, pos->vy + 8,
+                ((state->freepos->spdy > 0) && linecast(pos->vx + 8, pos->vy + 8,
                                                         CDIR_FLOOR, 10, CDIR_FLOOR).collided)
-                || ((state->freepos->spdy < 0) && linecast(&leveldata, &map128, &map16,
-                                                           pos->vx + 8, pos->vy + 8,
+                || ((state->freepos->spdy < 0) && linecast(pos->vx + 8, pos->vy + 8,
                                                            CDIR_CEILING, 10, CDIR_FLOOR).collided)) {
                 // Multiply Y speed by -0.75
                 state->freepos->spdy = (state->freepos->spdy * -0x00000c00) >> 12;
@@ -216,11 +214,9 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 
             if(/*!(state->timer % 4) &&*/
                 // Do the same thing; except for lateral collision
-                ((state->freepos->spdx < 0) && linecast(&leveldata, &map128, &map16,
-                                                       pos->vx + 8, pos->vy + 8,
+                ((state->freepos->spdx < 0) && linecast(pos->vx + 8, pos->vy + 8,
                                                         CDIR_LWALL, 10, CDIR_FLOOR).collided)
-               || ((state->freepos->spdx > 0) && linecast(&leveldata, &map128, &map16,
-                                                          pos->vx + 8, pos->vy + 8,
+               || ((state->freepos->spdx > 0) && linecast(pos->vx + 8, pos->vy + 8,
                                                           CDIR_RWALL, 10, CDIR_FLOOR).collided))
                 // Multiply X speed by -0.75
                 state->freepos->spdx = (state->freepos->spdx * -0x00000c00) >> 12;
