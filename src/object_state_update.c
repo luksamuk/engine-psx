@@ -200,18 +200,22 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
              * (~7.6MHz vs ~33.87MHz).
              * So we're checking for ground and wall collisions every frame.
              */
-            if(/*!(state->timer % 4) &&*/ state->freepos->spdy > 0) {
+            if(/*!(state->timer % 4) &&*/
                 // Use Sonic's own linecast algorithm, since it is aware of
                 // level geometry -- and oh, level data is stored in external
                 // variables as well. Check the file header.
-                if(linecast(&leveldata, &map128, &map16,
-                            pos->vx + 8, pos->vy + 8,
-                            CDIR_FLOOR, 10, CDIR_FLOOR).collided)
-                    // Multiply Y speed by -0.75
-                    state->freepos->spdy = (state->freepos->spdy * -0x00000c00) >> 12;
+                ((state->freepos->spdy > 0) && linecast(&leveldata, &map128, &map16,
+                                                        pos->vx + 8, pos->vy + 8,
+                                                        CDIR_FLOOR, 10, CDIR_FLOOR).collided)
+                || ((state->freepos->spdy < 0) && linecast(&leveldata, &map128, &map16,
+                                                           pos->vx + 8, pos->vy + 8,
+                                                           CDIR_CEILING, 10, CDIR_FLOOR).collided)) {
+                // Multiply Y speed by -0.75
+                state->freepos->spdy = (state->freepos->spdy * -0x00000c00) >> 12;
             }
 
             if(/*!(state->timer % 4) &&*/
+                // Do the same thing; except for lateral collision
                 ((state->freepos->spdx < 0) && linecast(&leveldata, &map128, &map16,
                                                        pos->vx + 8, pos->vy + 8,
                                                         CDIR_LWALL, 10, CDIR_FLOOR).collided)
