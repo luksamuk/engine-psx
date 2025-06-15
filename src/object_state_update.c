@@ -345,7 +345,16 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 PoolObject *image = object_pool_create(OBJ_MONITOR_IMAGE);
                 image->freepos.vx = (pos->vx << 12) + ((int32_t)entry->fragment->offsetx << 12);
                 image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
-                image->state.anim_state.animation = ((MonitorExtra *)state->extra)->kind;
+                uint16_t animation = ((MonitorExtra *)state->extra)->kind;
+                if(animation == MONITOR_KIND_1UP) {
+                    switch(player.character) {
+                    default:
+                    case CHARA_SONIC:    animation = 5; break;
+                    case CHARA_MILES:    animation = 7; break;
+                    case CHARA_KNUCKLES: animation = 8; break;
+                    }
+                }
+                image->state.anim_state.animation = animation;
 
                 // Create explosion effect
                 PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
@@ -625,6 +634,8 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
             sound_play_vag(sfx_death, 0);
             break;
         case MONITOR_KIND_1UP:
+        case 7: // !-up (Miles)
+        case 8: // 1-up (Knuckles)
             /* sound_play_vag(sfx_yea, 0); */
             sound_play_vag(sfx_event, 0);
             break;

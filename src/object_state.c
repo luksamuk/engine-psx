@@ -74,7 +74,6 @@ _emplace_object(
             }
             state->frag_anim_state->animation = animation;
         }
-        
         break;
     case OBJ_GOAL_SIGN:
         camera_set_right_bound(&camera, (vx << 12) + ((CENTERX >> 1) << 12));
