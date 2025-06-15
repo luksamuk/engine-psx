@@ -399,6 +399,12 @@
 	<file name="BOMB.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/BOMB.VAG" />
+	<file name="GRAB.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/GRAB.VAG" />
+	<file name="LAND.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/LAND.VAG" />
       </dir>
 
       <dummy sectors="1024"/>

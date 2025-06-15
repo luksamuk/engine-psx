@@ -74,11 +74,12 @@ extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
-extern SoundEffect sfx_yea;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_splash;
 extern SoundEffect sfx_count;
 extern SoundEffect sfx_bubble;
+extern SoundEffect sfx_grab;
+extern SoundEffect sfx_land;
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -743,6 +744,7 @@ _player_update_collision_tb(Player *player)
                 player->framecount = 12;
                 player->vel.vz = 0;
                 player->airdirlock = 0;
+                sound_play_vag(sfx_land, 0);
             }
         } else {
             // If NOT touching the ground.
@@ -1118,6 +1120,7 @@ player_update(Player *player)
                 player->vel.vx = 0;
                 player->vel.vz = 0;
                 player_set_action(player, ACTION_CLIMB);
+                sound_play_vag(sfx_grab, 0);
             }
         } else if((player->ctrllock == 0)
                   && (player->action != ACTION_CLIMB)
