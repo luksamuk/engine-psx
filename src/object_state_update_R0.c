@@ -206,4 +206,8 @@ static void
 _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     // TODO
+    state->flipmask =
+        ((player.pos.vx >> 12) <= pos->vx)
+        ? MASK_FLIP_FLIPX
+        : 0;
 }

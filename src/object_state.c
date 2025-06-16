@@ -337,8 +337,12 @@ after_render:
         anim = state->frag_anim_state;
         if(anim->animation >= typedata->fragment->num_animations) return;
         an = &typedata->fragment->animations[anim->animation];
-        ovx += typedata->fragment->offsetx;
-        ovy += typedata->fragment->offsety;
+        if(flipmask & MASK_FLIP_FLIPX)
+            ovx -= typedata->fragment->offsetx;
+        else ovx += typedata->fragment->offsetx;
+        if(flipmask & MASK_FLIP_FLIPY)
+            ovy -= typedata->fragment->offsety;
+        else ovy += typedata->fragment->offsety;
         
         goto begin_render_routine;
     }
