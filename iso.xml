@@ -65,6 +65,9 @@
 	  <file name="OBJ.TIM"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/OBJ.TIM" />
+	  <file name="BOSS.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/BOSS.TIM" />
 	  <file name="OBJ.OTD"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/objects.OTD" />

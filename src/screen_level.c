@@ -956,6 +956,16 @@ level_load_level(screen_level_data *data)
         free(timfile);
     } else printf("Warning: No level object texture found, skipping\n");
 
+    if(data->level_act >= 2) {
+        printf("Loading level boss...\n");
+        snprintf(filename0, 255, "%s\\BOSS.TIM;1", basepath);
+        timfile = file_read(filename0, &filelength);
+        if(timfile) {
+            load_texture(timfile, &tim);
+            free(timfile);
+        } else printf("Warning: No level boss texture found, skipping\n");
+    }
+
     printf("Loading level object table...\n");
     snprintf(filename0, 255, "%s\\OBJ.OTD;1", basepath);
     load_object_table(filename0, &obj_table_level);
