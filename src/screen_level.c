@@ -40,6 +40,7 @@ uint32_t    level_score_count;
 uint8_t     level_finished;
 int32_t     level_water_y;
 LEVELMODE   level_mode;
+uint8_t     level_has_boss;
 
 typedef struct {
     uint8_t    level_transition;
@@ -771,6 +772,7 @@ static void
 level_load_level(screen_level_data *data)
 {
     paused = 0;
+    level_has_boss = 0;
 
     // Negative water means no water
     level_water_y = -1;
@@ -962,6 +964,7 @@ level_load_level(screen_level_data *data)
         snprintf(filename0, 255, "%s\\BOSS.TIM;1", basepath);
         timfile = file_read(filename0, &filelength);
         if(timfile) {
+            level_has_boss = 1;
             load_texture(timfile, &tim);
             free(timfile);
         } else printf("Warning: No level boss texture found, skipping\n");

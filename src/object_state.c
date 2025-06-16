@@ -16,6 +16,7 @@ extern uint8_t        paused;
 extern Player         player;
 extern Camera         camera;
 extern uint8_t        level_fade;
+extern uint8_t        level_has_boss;
 
 void
 _emplace_object(
@@ -310,7 +311,7 @@ begin_render_routine:
         // Sprites: 704x0
         // CLUT: 0x485
         poly->tpage = getTPage(1, 0, 704, frame->tpage ? 256 : 0);
-        poly->clut = getClut(0, 485);
+        poly->clut = getClut(0, (frame->tpage && level_has_boss) ? 486 : 485);
     }
 
     uint32_t layer = ((state->id == OBJ_RING)
