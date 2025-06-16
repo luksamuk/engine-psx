@@ -3,4 +3,6 @@
  <image source="obj_designtiles.png" width="256" height="64"/>
  <tile id="0" type="ballhog"/>
  <tile id="1" type="bouncebomb"/>
+ <tile id="2" type="boss_spawner"/>
+ <tile id="3" type="boss"/>
 </tileset>

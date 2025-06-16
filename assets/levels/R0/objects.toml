@@ -33,3 +33,51 @@ frames = [
        [48, 16, 16, 16],
 ]
 loopback = 0
+
+# ===========
+
+[boss_spawner]
+# Spawner object has no animations
+# When triggered, destroys itself and spawns a free object
+
+# ============
+[boss]
+
+[[boss.animations]]
+name = "Default"
+id = 0
+duration = 12
+frames = [[0, 256, 64, 64]]
+loopback = 0
+
+[boss.fragment]
+offset = [4, -40]
+
+[[boss.fragment.animations]]
+id = 0
+name = "head_normal"
+duration = 12
+frames = [[64, 256, 56, 16]]
+loopback = 0
+
+[[boss.fragment.animations]]
+id = 1
+name = "head_down"
+duration = 12
+frames = [[64, 272, 56, 16]]
+loopback = 0
+
+[[boss.fragment.animations]]
+id = 2
+name = "head_hit"
+duration = 12
+frames = [[64, 288, 56, 16]]
+loopback = 0
+
+[[boss.fragment.animations]]
+id = 3
+name = "head_dead"
+duration = 12
+frames = [[64, 304, 56, 16]]
+loopback = 0
+

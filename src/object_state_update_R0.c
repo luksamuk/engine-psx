@@ -29,20 +29,26 @@ extern LevelData  leveldata;
 #define OBJ_GRAVITY 0x00380
 
 // Object type enums
-#define OBJ_BALLHOG    (MIN_LEVEL_OBJ_GID + 0)
-#define OBJ_BOUNCEBOMB (MIN_LEVEL_OBJ_GID + 1)
+#define OBJ_BALLHOG      (MIN_LEVEL_OBJ_GID + 0)
+#define OBJ_BOUNCEBOMB   (MIN_LEVEL_OBJ_GID + 1)
+#define OBJ_BOSS_SPAWNER (MIN_LEVEL_OBJ_GID + 2)
+#define OBJ_BOSS         (MIN_LEVEL_OBJ_GID + 3)
 
 // Update functions
 static void _ballhog_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _bouncebomb_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _boss_spawner_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _boss_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 void
 object_update_R0(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     switch(state->id) {
     default: break;
-    case OBJ_BALLHOG:    _ballhog_update(state, typedata, pos);    break;
-    case OBJ_BOUNCEBOMB: _bouncebomb_update(state, typedata, pos); break;
+    case OBJ_BALLHOG:      _ballhog_update(state, typedata, pos);      break;
+    case OBJ_BOUNCEBOMB:   _bouncebomb_update(state, typedata, pos);   break;
+    case OBJ_BOSS_SPAWNER: _boss_spawner_update(state, typedata, pos); break;
+    case OBJ_BOSS:         _boss_update(state, typedata, pos);         break;
     }
 }
 
@@ -180,4 +186,24 @@ explode:
     explosion->state.anim_state.animation = 1; // Big explosion
     state->props |= OBJ_FLAG_DESTROYED;
     sound_play_vag(sfx_bomb, 0);
+}
+
+
+static void
+_boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    // Create boss once camera position fits
+    if((camera.pos.vx >> 12) >= pos->vx) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        PoolObject *boss = object_pool_create(OBJ_BOSS);
+        boss->freepos.vx = (pos->vx << 12);
+        boss->freepos.vy = (pos->vy << 12);
+        boss->state.anim_state.animation = 0;
+    }
+}
+
+static void
+_boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    // TODO
 }
