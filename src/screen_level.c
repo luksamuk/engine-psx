@@ -947,7 +947,6 @@ level_load_level(screen_level_data *data)
     load_object_table("\\LEVELS\\COMMON\\OBJ.OTD;1", &obj_table_common);
 
     // Load level objects
-    // TODO: Act 3 must load boss texture instead
     snprintf(filename0, 255, "%s\\OBJ.TIM;1", basepath);
     printf("Loading level object texture...\n");
     timfile = file_read(filename0, &filelength);
@@ -956,6 +955,8 @@ level_load_level(screen_level_data *data)
         free(timfile);
     } else printf("Warning: No level object texture found, skipping\n");
 
+    // Load level boss object, if existing.
+    // Warning: This supersedes the second half of level object textures!
     if(data->level_act >= 2) {
         printf("Loading level boss...\n");
         snprintf(filename0, 255, "%s\\BOSS.TIM;1", basepath);
