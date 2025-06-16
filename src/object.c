@@ -26,6 +26,7 @@ _load_animation(ObjectAnim *animation, uint8_t *bytes, uint32_t *b)
             frame->w = get_byte(bytes, b);
             frame->h = get_byte(bytes, b);
             frame->flipmask = get_byte(bytes, b);
+            frame->tpage = get_byte(bytes, b);
         }
     }
 }

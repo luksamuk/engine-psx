@@ -66,7 +66,7 @@ class ObjectId(Enum):
         return result
 
 
-# OBJECT TABLE DEFINITION (.OTN) LAYOUT
+# OBJECT TABLE DEFINITION (.OTD) LAYOUT
 # - is_level_specific (u8)
 # - num_classes (u16)
 # - Classes of Objects:
@@ -83,6 +83,7 @@ class ObjectId(Enum):
 #       - width (u8)
 #       - height (u8)
 #       - flipmask (u8)
+#       - tpage (u8 -- either 0 or 1)
 #   - Fragment: (single, exists depending on Type)
 #     - offsetx (s16)
 #     - offsety (s16)
@@ -101,11 +102,14 @@ class Frame:
 
     def write_to(self, f):
         flipmask = ((1 << 0) if self.flipx else 0) | ((1 << 1) if self.flipy else 0)
+        real_v0 = (self.v0 % 256)
+        tpage = 1 if (self.v0 >= 256) else 0
         f.write(c_ubyte(self.u0))
-        f.write(c_ubyte(self.v0))
+        f.write(c_ubyte(real_v0))
         f.write(c_ubyte(self.width))
         f.write(c_ubyte(self.height))
         f.write(c_ubyte(flipmask))
+        f.write(c_ubyte(tpage))
 
 
 @dataclass

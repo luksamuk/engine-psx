@@ -258,7 +258,7 @@ begin_render_routine:
     increment_prim(sizeof(POLY_FT4));
     setPolyFT4(poly);
     setRGB0(poly, level_fade, level_fade, level_fade);
-    
+
     if((flipmask & MASK_FLIP_FLIPX) && (flipmask & MASK_FLIP_FLIPY)) {
         setXYWH(poly, vx, vy, frame->w, frame->h);
         setUV4(poly,
@@ -303,13 +303,13 @@ begin_render_routine:
         // COMMON OBJECTS have the following VRAM coords:
         // Sprites: 576x0
         // CLUT: 0x481
-        poly->tpage = getTPage(1, 0, 576, 0);
+        poly->tpage = getTPage(1, 0, 576, frame->tpage ? 256 : 0);
         poly->clut = getClut(0, 481);
     } else {
         // LEVEL OBJECTS have these VRAM coords:
         // Sprites: 704x0
         // CLUT: 0x485
-        poly->tpage = getTPage(1, 0, 704, 0);
+        poly->tpage = getTPage(1, 0, 704, frame->tpage ? 256 : 0);
         poly->clut = getClut(0, 485);
     }
 

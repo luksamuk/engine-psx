@@ -59,6 +59,7 @@ typedef struct {
     uint8_t u0, v0;
     uint8_t w, h;
     uint8_t flipmask;
+    uint8_t tpage;
 } ObjectAnimFrame;
 
 typedef struct {

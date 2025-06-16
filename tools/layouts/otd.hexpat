@@ -26,6 +26,7 @@ struct Frame {
     u8 width;
     u8 height;
     FlipMask flipmask;
+    u8 tpage;
 };
 
 struct ObjectAnimation {
