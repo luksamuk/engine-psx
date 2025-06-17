@@ -202,8 +202,10 @@ extern BossState *boss;
 #define BOSS_STATE_SWINGFRONT 4
 
 #define BOSS_DESCENT_SPEED    0x03800
-#define BOSS_WALK_SPEED       0x01800
+#define BOSS_WALK_SPEED       0x01200
 #define BOSS_SWING_SPEED      0x00020
+#define BOSS_WOBBLE_SPEED     0x00040
+#define BOSS_SWING_DELAY      60
 
 static void
 _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -221,35 +223,44 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
         boss->health = 8;
         boss->anchor.vx = (pos->vx << 12);
         boss->anchor.vy = (pos->vy << 12);
+        boss->counter4 = boss_obj->freepos.vy;
 
         camera_focus(&camera, boss->anchor.vx, boss->anchor.vy - (100 << 12));
     }
 }
 
-// f(x) = sin(x/2)
+
 static void
 _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     // Have a sinoid describe the swing behaviour.
     // We're not looking for a full cycle here, just the first crest!
     // f(x) = top_y + (amplitude * sin(x/2))
+
+    // counter1: Lap counter
+    // counter2: Frame wait before swing
+    // counter3: Used on angle operations (wobble, swing)
+    // counter4: Stores calculated Y position (without wobble effect)
+
     switch(boss->state) {
     default: break;
     case BOSS_STATE_INIT:
-        if(state->freepos->vy < (boss->anchor.vy - (128 << 12))) {
+        if(boss->counter4 < (boss->anchor.vy - (128 << 12))) {
             state->flipmask = MASK_FLIP_FLIPX;
             state->freepos->spdy = BOSS_DESCENT_SPEED;
         } else {
-            state->freepos->vy = boss->anchor.vy - (128 << 12);
+            boss->counter4 = boss->anchor.vy - (128 << 12);
             state->freepos->spdy = 0;
             boss->counter1 = 0;
             boss->state = BOSS_STATE_WALKBACK;
             state->flipmask = MASK_FLIP_FLIPX;
+            boss->counter3 = 0;
         }
         break;
     case BOSS_STATE_WALKBACK:
         if(state->freepos->vx > (boss->anchor.vx - (128 << 12))) {
             state->freepos->spdx = -BOSS_WALK_SPEED;
+            boss->counter3 += BOSS_WOBBLE_SPEED;
         } else {
             state->freepos->vx = boss->anchor.vx - (128 << 12);
             state->flipmask = 0;
@@ -259,6 +270,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 boss->counter1 = 0;
                 boss->counter3 = 0;
                 state->freepos->spdx = 0;
+                boss->counter2 = BOSS_SWING_DELAY;
                 boss->state = BOSS_STATE_SWINGFRONT;
             } else boss->state = BOSS_STATE_WALKFRONT;
         }
@@ -266,6 +278,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case BOSS_STATE_WALKFRONT:
         if(state->freepos->vx < (boss->anchor.vx + (128 << 12))) {
             state->freepos->spdx = BOSS_WALK_SPEED;
+            boss->counter3 += BOSS_WOBBLE_SPEED;
         } else {
             state->freepos->vx = boss->anchor.vx + (128 << 12);
             state->flipmask = MASK_FLIP_FLIPX;
@@ -275,42 +288,51 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 boss->counter1 = 0;
                 boss->counter3 = ONE;
                 state->freepos->spdx = 0;
+                boss->counter2 = BOSS_SWING_DELAY;
                 boss->state = BOSS_STATE_SWINGBACK;
             } else boss->state = BOSS_STATE_WALKBACK;
         }
         break;
     case BOSS_STATE_SWINGBACK:
         if(state->freepos->vx > (boss->anchor.vx - (128 << 12))) {
-            boss->counter3 -= BOSS_SWING_SPEED;
+            if(boss->counter2 > 0) boss->counter2--;
+            else boss->counter3 -= BOSS_SWING_SPEED;
+            state->freepos->vx =
+                (boss->anchor.vx - (128 << 12)) + (boss->counter3 * 0x100);
+            boss->counter4 =
+                (boss->anchor.vy - (128 << 12)) +
+            (rsin(boss->counter3 >> 1) * 128);
         } else {
             state->freepos->vx = boss->anchor.vx - (128 << 12);
             state->flipmask = 0;
             boss->state = BOSS_STATE_WALKFRONT;
             boss->counter1++;
+            boss->counter3 = 0;
         }
-        state->freepos->vx =
-            (boss->anchor.vx - (128 << 12)) + (boss->counter3 * 0x100);
-        state->freepos->vy =
-            (boss->anchor.vy - (128 << 12)) +
-            ((rsin(boss->counter3 >> 1) * (128 << 12)) >> 12);
         break;       
     case BOSS_STATE_SWINGFRONT:
         if(state->freepos->vx < (boss->anchor.vx + (128 << 12))) {
-            boss->counter3 += BOSS_SWING_SPEED;
+            if(boss->counter2 > 0) boss->counter2--;
+            else boss->counter3 += BOSS_SWING_SPEED;
+            state->freepos->vx =
+                (boss->anchor.vx - (128 << 12)) + (boss->counter3 * 0x100);
+            boss->counter4 =
+                (boss->anchor.vy - (128 << 12)) +
+                (rsin(boss->counter3 >> 1) * 128);
         } else {
             state->freepos->vx = boss->anchor.vx + (128 << 12);
             state->flipmask = MASK_FLIP_FLIPX;
             boss->state = BOSS_STATE_WALKBACK;
             boss->counter1++;
+            boss->counter3 = 0;
         }
-        state->freepos->vx =
-            (boss->anchor.vx - (128 << 12)) + (boss->counter3 * 0x100);
-        state->freepos->vy =
-            (boss->anchor.vy - (128 << 12)) +
-            ((rsin(boss->counter3 >> 1) * (128 << 12)) >> 12);
         break;
     }
 
     state->freepos->vx += state->freepos->spdx;
-    state->freepos->vy += state->freepos->spdy;
+    boss->counter4 += state->freepos->spdy;
+    state->freepos->vy = boss->counter4
+        + ((boss->state >= BOSS_STATE_SWINGBACK)
+           ? 0
+           : (rsin(boss->counter3 >> 1) * 8));
 }

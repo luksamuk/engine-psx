@@ -9,8 +9,9 @@ typedef struct {
     uint8_t state;
     uint8_t health;
     uint8_t counter1;
-    uint8_t _unused;
+    uint8_t counter2;
     int32_t counter3;
+    int32_t counter4;
 } BossState;
 
 #endif
