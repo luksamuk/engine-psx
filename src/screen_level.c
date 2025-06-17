@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <strings.h>
 #include <inline_c.h>
 #include "util.h"
 #include "player.h"
@@ -19,6 +20,7 @@
 #include "parallax.h"
 #include "basic_font.h"
 #include "demo.h"
+#include "boss.h"
 
 extern int debug_mode;
 
@@ -41,6 +43,7 @@ uint8_t     level_finished;
 int32_t     level_water_y;
 LEVELMODE   level_mode;
 uint8_t     level_has_boss;
+BossState   *boss;
 
 typedef struct {
     uint8_t    level_transition;
@@ -124,8 +127,6 @@ screen_level_load()
     data->waterbuffer = 0;
     data->water_last_fade[0] = 0;
     data->water_last_fade[1] = 0;
-
-    // Init water wave quads
 
     demo_init();
 
@@ -968,6 +969,10 @@ level_load_level(screen_level_data *data)
             load_texture(timfile, &tim);
             free(timfile);
         } else printf("Warning: No level boss texture found, skipping\n");
+
+        // Init boss structure
+        boss = screen_alloc(sizeof(BossState));
+        bzero(boss, sizeof(BossState));
     }
 
     printf("Loading level object table...\n");
