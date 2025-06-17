@@ -221,6 +221,8 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
         boss->health = 8;
         boss->anchor.vx = (pos->vx << 12);
         boss->anchor.vy = (pos->vy << 12);
+
+        camera_focus(&camera, boss->anchor.vx, boss->anchor.vy - (100 << 12));
     }
 }
 

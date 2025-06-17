@@ -142,6 +142,8 @@ screen_level_load()
     // Recover control if mode is "hold forward"
     if(level_mode == LEVEL_MODE_FINISHED)
         level_mode = LEVEL_MODE_NORMAL;
+
+    camera_follow_player(&camera);
 }
 
 void
@@ -351,6 +353,28 @@ screen_level_update(void *d)
         player.pos.vy = (16 << 12);
         player.vel.vy = 0;
         if(player.action == ACTION_FLY) player.spinrev = 0;
+    }
+
+    // Limit player position when camera is fixed
+    if(
+        (!camera.follow_player)
+        && (player.pos.vx - (PUSH_RADIUS << 12)) < (camera.pos.vx - (CENTERX << 12)))
+    {
+        player.pos.vx = camera.pos.vx - (CENTERX << 12) + (PUSH_RADIUS << 12);
+        if(player.vel.vx < 0) {
+            if(player.grnd) player.vel.vz = 0;
+            else player.vel.vx = 0;
+        }
+    } else if(
+        !level_finished
+        && (!camera.follow_player)
+        && (player.pos.vx + (PUSH_RADIUS << 12)) > (camera.pos.vx + (CENTERX << 12)))
+    {
+        player.pos.vx = camera.pos.vx + (CENTERX << 12) - (PUSH_RADIUS << 12);
+        if(player.vel.vx > 0) {
+            if(player.grnd) player.vel.vz = 0;
+            else player.vel.vx = 0;
+        }
     }
 
     // If speed shoes are finished, we use the player's values

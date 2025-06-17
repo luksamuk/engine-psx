@@ -258,7 +258,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         if(pos->vx <= (player.pos.vx >> 12)) {
             state->anim_state.animation = 1;
             state->anim_state.frame = 0;
-            camera_set_left_bound(&camera, ((pos->vx + 80) << 12));
+            camera_focus(&camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
             state->timer = 180;
             level_finished = 1;
             pause_elapsed_frames();
