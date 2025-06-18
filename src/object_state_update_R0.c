@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "render.h"
 #include "boss.h"
+#include "timer.h"
 
 // Extern elements
 extern Player player;
@@ -205,13 +206,17 @@ extern BossState *boss;
 #define BOSS_WALK_SPEED       0x01200
 #define BOSS_SWING_SPEED      0x00020
 #define BOSS_WOBBLE_SPEED     0x00040
+#define BOSS_SWING_HEIGHT     120
+#define BOSS_TURN_DELAY       30
 #define BOSS_SWING_DELAY      60
+#define BOSS_BOMB_INTERVAL    75
+#define BOSS_BOMB_LIFETIME    160
 
 static void
 _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     // Create boss once camera position fits
-    if((camera.pos.vx >> 12) >= pos->vx) {
+    if((camera.pos.vx >> 12) >= (pos->vx - (CENTERX >> 1))) {
         state->props |= OBJ_FLAG_DESTROYED;
         PoolObject *boss_obj = object_pool_create(OBJ_BOSS);
         boss_obj->freepos.vx = ((pos->vx + 128) << 12);
@@ -231,12 +236,27 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
     }
 }
 
+static void
+_boss_spawn_bomb(ObjectState *state, VECTOR *pos)
+{
+    if((get_elapsed_frames() % BOSS_BOMB_INTERVAL) == 0) {
+        PoolObject *bomb = object_pool_create(OBJ_BOUNCEBOMB);
+        bomb->freepos.vx = (pos->vx << 12);
+        bomb->freepos.vy = ((pos->vy + 8) << 12);
+        bomb->state.anim_state.animation = 0;
+        bomb->freepos.spdx = 0;
+        bomb->freepos.spdy = 0;
+        bomb->state.timer = BOSS_BOMB_LIFETIME;
+    }
+}
 
 static void
 _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
-    // Have a sinoid describe the swing behaviour.
+    (void)(typedata);
+    // Have a sinusoid describe the swing behaviour.
     // We're not looking for a full cycle here, just the first crest!
+    // (Remember that (1 << 12) == (2*pi))
     // f(x) = top_y + (amplitude * sin(x/2))
 
     // counter1: Lap counter
@@ -264,12 +284,15 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
         break;
     case BOSS_STATE_WALKBACK:
-        if(boss->counter2 > 0) boss->counter2--;
-        else if(state->freepos->vx > (boss->anchor.vx - (128 << 12))) {
+        state->flipmask = MASK_FLIP_FLIPX;
+        if(boss->counter2 > 0) {
+            boss->counter2--;
+            _boss_spawn_bomb(state, pos);
+        } else if(state->freepos->vx > (boss->anchor.vx - (128 << 12))) {
             state->freepos->spdx = -BOSS_WALK_SPEED;
+            _boss_spawn_bomb(state, pos);
         } else {
             state->freepos->vx = boss->anchor.vx - (128 << 12);
-            state->flipmask = 0;
             boss->counter1++;
             // Either flip or descent; it depends.
             if(boss->counter1 == 3) {
@@ -278,16 +301,23 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 state->freepos->spdx = 0;
                 boss->counter2 = BOSS_SWING_DELAY;
                 boss->state = BOSS_STATE_SWINGFRONT;
-            } else boss->state = BOSS_STATE_WALKFRONT;
+            } else {
+                boss->counter2 = BOSS_TURN_DELAY;
+                boss->state = BOSS_STATE_WALKFRONT;
+                state->freepos->spdx = 0;
+            }
         }
         break;
     case BOSS_STATE_WALKFRONT:
-        if(boss->counter2 > 0) boss->counter2--;
-        else if(state->freepos->vx < (boss->anchor.vx + (128 << 12))) {
+        state->flipmask = 0;
+        if(boss->counter2 > 0) {
+            boss->counter2--;
+            _boss_spawn_bomb(state, pos);
+        } else if(state->freepos->vx < (boss->anchor.vx + (128 << 12))) {
             state->freepos->spdx = BOSS_WALK_SPEED;
+            _boss_spawn_bomb(state, pos);
         } else {
             state->freepos->vx = boss->anchor.vx + (128 << 12);
-            state->flipmask = MASK_FLIP_FLIPX;
             boss->counter1++;
             // Either flip or descent; it depends.
             if(boss->counter1 == 3) {
@@ -296,10 +326,15 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 state->freepos->spdx = 0;
                 boss->counter2 = BOSS_SWING_DELAY;
                 boss->state = BOSS_STATE_SWINGBACK;
-            } else boss->state = BOSS_STATE_WALKBACK;
+            } else {
+                boss->counter2 = BOSS_TURN_DELAY;
+                boss->state = BOSS_STATE_WALKBACK;
+                state->freepos->spdx = 0;
+            }
         }
         break;
     case BOSS_STATE_SWINGBACK:
+        state->flipmask = MASK_FLIP_FLIPX;
         if(state->freepos->vx > (boss->anchor.vx - (128 << 12))) {
             if(boss->counter2 > 0) boss->counter2--;
             else boss->counter3 -= BOSS_SWING_SPEED;
@@ -307,7 +342,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 (boss->anchor.vx - (128 << 12)) + (boss->counter3 * 0x100);
             boss->counter4 =
                 (boss->anchor.vy - (128 << 12)) +
-            (rsin(boss->counter3 >> 1) * 128);
+                (rsin(boss->counter3 >> 1) * BOSS_SWING_HEIGHT);
         } else {
             state->freepos->vx = boss->anchor.vx - (128 << 12);
             state->flipmask = 0;
@@ -318,6 +353,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
         break;       
     case BOSS_STATE_SWINGFRONT:
+        state->flipmask = 0;
         if(state->freepos->vx < (boss->anchor.vx + (128 << 12))) {
             if(boss->counter2 > 0) boss->counter2--;
             else boss->counter3 += BOSS_SWING_SPEED;
@@ -325,7 +361,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 (boss->anchor.vx - (128 << 12)) + (boss->counter3 * 0x100);
             boss->counter4 =
                 (boss->anchor.vy - (128 << 12)) +
-                (rsin(boss->counter3 >> 1) * 128);
+                (rsin(boss->counter3 >> 1) * BOSS_SWING_HEIGHT);
         } else {
             state->freepos->vx = boss->anchor.vx + (128 << 12);
             state->flipmask = MASK_FLIP_FLIPX;
