@@ -211,6 +211,7 @@ extern BossState *boss;
 #define BOSS_SWING_DELAY      60
 #define BOSS_BOMB_INTERVAL    75
 #define BOSS_BOMB_LIFETIME    160
+#define BOSS_BOMB_XDELTA      8
 
 static void
 _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -241,7 +242,8 @@ _boss_spawn_bomb(ObjectState *state, VECTOR *pos)
 {
     if((get_elapsed_frames() % BOSS_BOMB_INTERVAL) == 0) {
         PoolObject *bomb = object_pool_create(OBJ_BOUNCEBOMB);
-        bomb->freepos.vx = (pos->vx << 12);
+        int32_t deltax = (state->flipmask & MASK_FLIP_FLIPX) ? -BOSS_BOMB_XDELTA : BOSS_BOMB_XDELTA;
+        bomb->freepos.vx = ((pos->vx + deltax) << 12);
         bomb->freepos.vy = ((pos->vy + 8) << 12);
         bomb->state.anim_state.animation = 0;
         bomb->freepos.spdx = 0;
