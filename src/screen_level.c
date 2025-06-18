@@ -36,6 +36,8 @@ LevelData   leveldata;
 Camera      camera;
 ObjectTable obj_table_common;
 ObjectTable obj_table_level;
+uint8_t     level_round; // Defined after load
+uint8_t     level_act;   // Defined after load
 uint8_t     level_fade;
 uint8_t     level_ring_count;
 uint32_t    level_score_count;
@@ -54,8 +56,6 @@ typedef struct {
     int32_t    parallax_cx;
     int32_t    parallax_cy;
     const char *level_name;
-    uint8_t    level_round;
-    uint8_t    level_act;
     uint16_t   level_counter;
 
     // Title card variables
@@ -80,7 +80,6 @@ typedef struct {
 static void level_load_player(PlayerCharacter character);
 static void level_load_level(screen_level_data *);
 static void level_set_clearcolor();
-static void level_play_music(uint8_t round, uint8_t act);
 
 void
 screen_level_load()
@@ -88,7 +87,7 @@ screen_level_load()
     screen_level_data *data = screen_alloc(sizeof(screen_level_data));
     data->level_transition = 0;
     data->level_name = "PLAYGROUND";
-    data->level_act  = 0;
+    level_act  = 0;
 
     camera_init(&camera);
 
@@ -331,8 +330,8 @@ screen_level_update(void *d)
     }
 
     camera_update(&camera, &player);
-    update_obj_window(camera.pos.vx, camera.pos.vy, data->level_round);
-    object_pool_update(data->level_round);
+    update_obj_window(camera.pos.vx, camera.pos.vy, level_round);
+    object_pool_update(level_round);
 
     // Only update these if past fade in!
     if(data->level_transition > 0) {
@@ -382,7 +381,7 @@ screen_level_update(void *d)
     // Player constants are managed within player update
     if(player.speedshoes_frames == 0) {
         if(!level_finished)
-            level_play_music(data->level_round, data->level_act);
+            screen_level_play_music(level_round, level_act);
         player.speedshoes_frames = -1;
     }
 }
@@ -510,7 +509,7 @@ screen_level_draw(void *d)
 
     // Draw level and level objects
     render_lvl(camera.pos.vx, camera.pos.vy,
-               data->level_round == 4); // Dawn Canyon: Draw in front
+               level_round == 4); // Dawn Canyon: Draw in front
 
     // Draw background and parallax
     if(level_get_num_sprites() < 1312)
@@ -540,7 +539,7 @@ screen_level_draw(void *d)
                 LERPC(level_fade, 0xb5));
         sort_prim(poly, OTZ_LAYER_LEVEL_BG);
     }
-    else if(data->level_round == 5) {
+    else if(level_round == 5) {
         // If we're in R5, draw a dark gradient on 
     }
     // If we're in R8, draw a gradient as well, but at a lower position.
@@ -575,7 +574,7 @@ screen_level_draw(void *d)
 
         // ACT card
         char buffer[5];
-        uint8_t act_number = (level == 3) ? 2 : data->level_act;
+        uint8_t act_number = (level == 3) ? 2 : level_act;
         snprintf(buffer, 5, "*%d", act_number + 1);
         font_draw_hg(buffer, data->tc_act_x, 70 + GLYPH_HG_WHITE_HEIGHT + 40);
 
@@ -807,58 +806,58 @@ level_load_level(screen_level_data *data)
     switch(level) {
     case 0: case 1: case 2: case 3: // Test level
         data->level_name = "TEST LEVEL";
-        data->level_round = 0;
+        level_round = 0;
         // Act 4 is Knuckles act 3
-        data->level_act = level;
+        level_act = level;
         if(level == 2) {
             level_water_y = 0x00c43401;
         }
         break;
     case 4: case 5:
         data->level_name = "GREEN HILL";
-        data->level_round = 2;
-        data->level_act = level - 4;
+        level_round = 2;
+        level_act = level - 4;
         break;
     case 6: case 7:
         data->level_name = "SURELY WOOD";
-        data->level_round = 3;
-        data->level_act = level - 6;
+        level_round = 3;
+        level_act = level - 6;
         break;
     case 8: case 9:
         data->level_name = "DAWN CANYON";
-        data->level_round = 4;
-        data->level_act = level - 8;
+        level_round = 4;
+        level_act = level - 8;
         break;
     case 10: case 11:
         data->level_name = "AMAZING OCEAN";
-        data->level_round = 5;
-        data->level_act = level - 10;
+        level_round = 5;
+        level_act = level - 10;
         level_water_y = 0x002c0000;
         break;
     case 12: case 13:
         /* data->level_name = "R6"; */
-        data->level_round = 6;
-        data->level_act = level - 12;
+        level_round = 6;
+        level_act = level - 12;
         break;
     case 14: case 15:
         /* data->level_name = "R7"; */
-        data->level_round = 7;
-        data->level_act = level - 14;
+        level_round = 7;
+        level_act = level - 14;
         break;
     case 16: case 17: case 18:
         data->level_name = "EGGMANLAND";
-        data->level_round = 8;
-        data->level_act = level - 16;
+        level_round = 8;
+        level_act = level - 16;
         break;
     case 19:
         data->level_name = "WINDMILL ISLE";
-        data->level_round = 9;
-        data->level_act = level - 19;
+        level_round = 9;
+        level_act = level - 19;
         break;
     default:
         data->level_name = "TEST LEVEL";
-        data->level_round = 0xff;
-        data->level_act = 0;
+        level_round = 0xff;
+        level_act = 0;
         break;
     }
 
@@ -867,7 +866,7 @@ level_load_level(screen_level_data *data)
 
     level_set_clearcolor();
 
-    snprintf(basepath, 255, "\\LEVELS\\R%1u", data->level_round);
+    snprintf(basepath, 255, "\\LEVELS\\R%1u", level_round);
 
     TIM_IMAGE tim;
     uint32_t filelength;
@@ -956,7 +955,7 @@ level_load_level(screen_level_data *data)
 
 
     /* === LEVEL LAYOUT === */
-    snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, data->level_act + 1);
+    snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, level_act + 1);
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
 
@@ -984,7 +983,7 @@ level_load_level(screen_level_data *data)
 
     // Load level boss object, if existing.
     // Warning: This supersedes the second half of level object textures!
-    if(data->level_act >= 2) {
+    if(level_act >= 2) {
         printf("Loading level boss...\n");
         snprintf(filename0, 255, "%s\\BOSS.TIM;1", basepath);
         timfile = file_read(filename0, &filelength);
@@ -1004,7 +1003,7 @@ level_load_level(screen_level_data *data)
     load_object_table(filename0, &obj_table_level);
 
     // Load object positioning on level
-    snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, data->level_act + 1);
+    snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, level_act + 1);
     load_object_placement(filename0, &leveldata);
 
 
@@ -1021,7 +1020,7 @@ level_load_level(screen_level_data *data)
     printf("Number of level layers: %d\n", leveldata.num_layers);
 
     // Start playback after we don't need the CD anymore.
-    level_play_music(data->level_round, data->level_act);
+    screen_level_play_music(level_round, level_act);
 
     // Pre-calculate title card target X and Y positions
     {
@@ -1103,8 +1102,8 @@ screen_level_getcharacter()
 }
 
 
-static void
-level_play_music(uint8_t round, uint8_t act)
+void
+screen_level_play_music(uint8_t round, uint8_t act)
 {
     switch(round) {
     case 0:

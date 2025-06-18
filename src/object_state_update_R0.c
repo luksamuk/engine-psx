@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "screens/level.h"
+
 // Extern elements
 extern Player player;
 extern Camera camera;
@@ -27,6 +29,8 @@ extern SoundEffect sfx_bomb;
 extern TileMap16  map16;
 extern TileMap128 map128;
 extern LevelData  leveldata;
+extern uint8_t    level_round;
+extern uint8_t    level_act;
 
 
 
@@ -483,7 +487,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             boss->state = BOSS_STATE_FLEEING;
             camera_set_left_bound(&camera, boss->anchor.vx);
             camera_follow_player(&camera);
-            // TODO: Restore BGM
+            screen_level_play_music(level_round, level_act);
         }
     }
 
