@@ -7,6 +7,9 @@
 #include "render.h"
 #include "boss.h"
 #include "timer.h"
+#include "util.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 // Extern elements
 extern Player player;
@@ -190,9 +193,9 @@ explode:
     sound_play_vag(sfx_bomb, 0);
 }
 
-// ============================
-//      BOSS - EGG MOBILE
-// ============================
+// ===================================
+//      BOSS - EGG BOMB DISPENSER
+// ===================================
 
 // These variables relate to the boss only.
 extern BossState *boss;
@@ -201,6 +204,8 @@ extern BossState *boss;
 #define BOSS_STATE_WALKFRONT  2
 #define BOSS_STATE_SWINGBACK  3
 #define BOSS_STATE_SWINGFRONT 4
+#define BOSS_STATE_DEAD       5
+#define BOSS_STATE_FLEEING    6
 
 #define BOSS_TOSWING_COUNT    3
 #define BOSS_DESCENT_SPEED    0x01200
@@ -214,12 +219,15 @@ extern BossState *boss;
 #define BOSS_BOMB_LIFETIME    160
 #define BOSS_BOMB_XDELTA      8
 #define BOSS_BOMB_XSPD        0x00480
+#define BOSS_FLEE_XSPD        0x02400
+#define BOSS_FLEE_YSPD        0x01200
 
 static void
 _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
+    (void)(typedata);
     // Create boss once camera position fits
-    if((camera.pos.vx >> 12) >= (pos->vx - (CENTERX >> 1))) {
+    if((player.pos.vx >> 12) >= (pos->vx - (CENTERX >> 1))) {
         state->props |= OBJ_FLAG_DESTROYED;
         PoolObject *boss_obj = object_pool_create(OBJ_BOSS);
         boss_obj->freepos.vx = ((pos->vx + 128) << 12);
@@ -282,8 +290,8 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
     boss->counter5 += BOSS_WOBBLE_SPEED;
 
-    if((boss->state < BOSS_STATE_SWINGBACK)
-       && boss->counter6 > 0) boss->counter6--;
+    if((boss->state < BOSS_STATE_SWINGBACK) && boss->counter6 > 0)
+        boss->counter6--;
 
     switch(boss->state) {
     default: break;
@@ -398,9 +406,93 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             _boss_spawn_bomb(state, pos);
         }
         break;
+    case BOSS_STATE_FLEEING:
+        state->freepos->spdx = BOSS_FLEE_XSPD;
+        state->freepos->spdy = -BOSS_FLEE_YSPD;
+        state->flipmask = 0;
+
+        // Despawn if too far!
+        if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
+           || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
+           || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
+           || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12))) {
+            state->props |= OBJ_FLAG_DESTROYED;
+            return;
+        }
+        break;
     }
 
+    int32_t wobble_sin = (rsin(boss->counter5 >> 1) * 8);
     state->freepos->vx += state->freepos->spdx;
     boss->counter4 += state->freepos->spdy;
-    state->freepos->vy = boss->counter4 + (rsin(boss->counter5 >> 1) * 8);
+    state->freepos->vy = boss->counter4 + wobble_sin;
+
+
+    // Collision and hitbox
+    // Hitbox is a lot smaller than it looks, being 52x32, positioned at 9x17
+    // (relative to top left corner of entire eggmobile which is 64x64).
+    // Coordinates are calculated relative to bottom center.
+    if(boss->health > 0) {
+        if(boss->hit_cooldown > 0) {
+            boss->hit_cooldown--;
+        } else {
+            int32_t hitbox_vx = pos->vx - 23;
+            int32_t hitbox_vy = pos->vy - 47;
+            if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                               hitbox_vx, hitbox_vy, 52, 32)) {
+                if(player_attacking) {
+                    boss->health--;
+                    boss->hit_cooldown = 30;
+                    boss->counter2 = 15; // Stop for half the cooldown time
+                    sound_play_vag(sfx_bomb, 0);
+
+                    // Rebound Sonic
+                    if(!player.grnd) {
+                        player.vel.vx = -(player.vel.vx >> 1);
+                        player.vel.vy = -(player.vel.vy >> 1);
+                    } else player.vel.vz = -(player.vel.vz >> 1);
+                } else {
+                    if(player.action != ACTION_HURT && player.iframes == 0) {
+                        player_do_damage(&player, pos->vx << 12);
+                    }
+                }
+            }
+        }
+    } else {
+        if(boss->state < BOSS_STATE_DEAD) {
+            boss->state = BOSS_STATE_DEAD;
+            boss->counter6 = 0;
+            boss->counter2 = 180; // 3 seconds exploding
+        }
+
+        if(boss->counter2 > 0) {
+            boss->counter2--;
+            // When boss is dead, setup random explosions around the egg mobile
+            if(boss->counter6 == 0) {
+                boss->counter6 = 10;
+                int32_t rvx = (rand() % 54) << 12;
+                int32_t rvy = (rand() % 37) << 12;
+
+                PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+                explosion->freepos.vx = ((pos->vx - 25) << 12) + rvx;
+                explosion->freepos.vy = ((pos->vy - 32) << 12) + rvy + wobble_sin;
+                explosion->state.anim_state.animation = 1; // Big explosion
+                sound_play_vag(sfx_bomb, 0);
+            } else boss->counter6--;
+        } else if(boss->state == BOSS_STATE_DEAD) {
+            boss->state = BOSS_STATE_FLEEING;
+            camera_set_left_bound(&camera, boss->anchor.vx);
+            camera_follow_player(&camera);
+            // TODO: Restore BGM
+        }
+    }
+
+    // Animation control
+    if(boss->health == 0) {
+        state->frag_anim_state->animation = 3;
+    } else if(boss->hit_cooldown > 0) {
+        state->frag_anim_state->animation = 2;
+    } else {
+        state->frag_anim_state->animation = (player.action == ACTION_HURT ? 0 : 1);
+    }
 }

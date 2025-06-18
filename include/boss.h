@@ -14,6 +14,7 @@ typedef struct {
     int32_t counter4;
     int32_t counter5;
     uint8_t counter6;
+    uint8_t hit_cooldown;
 } BossState;
 
 #endif
