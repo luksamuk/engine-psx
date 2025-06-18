@@ -201,7 +201,7 @@ extern BossState *boss;
 #define BOSS_STATE_SWINGBACK  3
 #define BOSS_STATE_SWINGFRONT 4
 
-#define BOSS_DESCENT_SPEED    0x03800
+#define BOSS_DESCENT_SPEED    0x01200
 #define BOSS_WALK_SPEED       0x01200
 #define BOSS_SWING_SPEED      0x00020
 #define BOSS_WOBBLE_SPEED     0x00040
@@ -215,7 +215,7 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
         state->props |= OBJ_FLAG_DESTROYED;
         PoolObject *boss_obj = object_pool_create(OBJ_BOSS);
         boss_obj->freepos.vx = ((pos->vx + 128) << 12);
-        boss_obj->freepos.vy = ((pos->vy - 256) << 12);
+        boss_obj->freepos.vy = ((pos->vy - 320) << 12);
         boss_obj->state.anim_state.animation = 0;
 
         // Setup boss state
@@ -239,8 +239,11 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
     // counter1: Lap counter
     // counter2: Frame wait before swing
-    // counter3: Used on angle operations (wobble, swing)
+    // counter3: Used on angle operations (swing)
     // counter4: Stores calculated Y position (without wobble effect)
+    // counter5: Used on angle operations (wobble)
+
+    boss->counter5 += BOSS_WOBBLE_SPEED;
 
     switch(boss->state) {
     default: break;
@@ -260,7 +263,6 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case BOSS_STATE_WALKBACK:
         if(state->freepos->vx > (boss->anchor.vx - (128 << 12))) {
             state->freepos->spdx = -BOSS_WALK_SPEED;
-            boss->counter3 += BOSS_WOBBLE_SPEED;
         } else {
             state->freepos->vx = boss->anchor.vx - (128 << 12);
             state->flipmask = 0;
@@ -278,7 +280,6 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case BOSS_STATE_WALKFRONT:
         if(state->freepos->vx < (boss->anchor.vx + (128 << 12))) {
             state->freepos->spdx = BOSS_WALK_SPEED;
-            boss->counter3 += BOSS_WOBBLE_SPEED;
         } else {
             state->freepos->vx = boss->anchor.vx + (128 << 12);
             state->flipmask = MASK_FLIP_FLIPX;
@@ -331,8 +332,5 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
     state->freepos->vx += state->freepos->spdx;
     boss->counter4 += state->freepos->spdy;
-    state->freepos->vy = boss->counter4
-        + ((boss->state >= BOSS_STATE_SWINGBACK)
-           ? 0
-           : (rsin(boss->counter3 >> 1) * 8));
+    state->freepos->vy = boss->counter4 + (rsin(boss->counter5 >> 1) * 8);
 }

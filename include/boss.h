@@ -12,6 +12,7 @@ typedef struct {
     uint8_t counter2;
     int32_t counter3;
     int32_t counter4;
+    int32_t counter5;
 } BossState;
 
 #endif
