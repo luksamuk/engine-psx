@@ -18,6 +18,7 @@ static uint8_t _bgm_loops[] = {
     1,
     0,
     0,
+    1,
 };
 
 void

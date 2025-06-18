@@ -68,8 +68,9 @@ typedef enum {
     BGM_WINDMILLISLE = 12,
     BGM_LEVELCLEAR   = 13,
     BGM_CREDITS      = 14,
+    BGM_BOSS         = 15,
 
-    BGM_NUM_SONGS    = BGM_CREDITS + 1,
+    BGM_NUM_SONGS    = BGM_BOSS + 1,
 } BGMOption;
 
 void                sound_bgm_play(BGMOption);

@@ -226,6 +226,8 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
         boss->counter4 = boss_obj->freepos.vy;
 
         camera_focus(&camera, boss->anchor.vx, boss->anchor.vy - (100 << 12));
+
+        sound_bgm_play(BGM_BOSS);
     }
 }
 

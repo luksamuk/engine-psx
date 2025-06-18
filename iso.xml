@@ -430,6 +430,7 @@
       <file name="audio13.da" trackid="14" type="da" />
       <file name="audio14.da" trackid="15" type="da" />
       <file name="audio15.da" trackid="16" type="da" />
+      <file name="audio16.da" trackid="17" type="da" />
     </directory_tree>
   </track>
   <track type="audio" trackid="02" source="${PROJECT_SOURCE_DIR}/assets/bgm/amenbreak.flac" />
@@ -447,5 +448,6 @@
   <track type="audio" trackid="14" source="${PROJECT_SOURCE_DIR}/assets/bgm/apotos.flac" />
   <track type="audio" trackid="15" source="${PROJECT_SOURCE_DIR}/assets/bgm/levelclear.flac" />
   <track type="audio" trackid="16" source="${PROJECT_SOURCE_DIR}/assets/bgm/herormx.flac" />
+  <track type="audio" trackid="17" source="${PROJECT_SOURCE_DIR}/assets/bgm/boss.flac" />
 </iso_project>
 
