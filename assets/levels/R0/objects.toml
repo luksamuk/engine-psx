@@ -51,7 +51,7 @@ frames = [[0, 256, 64, 64]]
 loopback = 0
 
 [boss.fragment]
-offset = [0, -40]
+offset = [0, -47]
 
 [[boss.fragment.animations]]
 id = 0
