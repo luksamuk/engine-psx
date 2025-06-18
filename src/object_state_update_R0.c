@@ -223,8 +223,8 @@ extern BossState *boss;
 #define BOSS_BOMB_LIFETIME    160
 #define BOSS_BOMB_XDELTA      8
 #define BOSS_BOMB_XSPD        0x00480
-#define BOSS_FLEE_XSPD        0x02400
-#define BOSS_FLEE_YSPD        0x01200
+#define BOSS_FLEE_XSPD        0x04800
+#define BOSS_FLEE_YSPD        0x02400
 
 static void
 _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -452,8 +452,16 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
                     // Rebound Sonic
                     if(!player.grnd) {
-                        player.vel.vx = -(player.vel.vx >> 1);
                         player.vel.vy = -(player.vel.vy >> 1);
+                        if(player.action == ACTION_GLIDE) {
+                            player_set_action(&player, ACTION_DROP);
+                            player.airdirlock = 1;
+                            // To be a little more fair with Knuckles,
+                            // rebound him on the X axis by double the distance
+                            // otherwise Knuckles will always get hurt when
+                            // gliding onto the boss
+                            player.vel.vx = -player.vel.vx;
+                        } else player.vel.vx = -(player.vel.vx >> 1);
                     } else player.vel.vz = -(player.vel.vz >> 1);
                 } else {
                     if(player.action != ACTION_HURT && player.iframes == 0) {
