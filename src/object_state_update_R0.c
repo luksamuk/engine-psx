@@ -202,6 +202,7 @@ extern BossState *boss;
 #define BOSS_STATE_SWINGBACK  3
 #define BOSS_STATE_SWINGFRONT 4
 
+#define BOSS_TOSWING_COUNT    3
 #define BOSS_DESCENT_SPEED    0x01200
 #define BOSS_WALK_SPEED       0x01200
 #define BOSS_SWING_SPEED      0x00020
@@ -212,6 +213,7 @@ extern BossState *boss;
 #define BOSS_BOMB_INTERVAL    75
 #define BOSS_BOMB_LIFETIME    160
 #define BOSS_BOMB_XDELTA      8
+#define BOSS_BOMB_XSPD        0x00480
 
 static void
 _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -230,6 +232,7 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
         boss->anchor.vx = (pos->vx << 12);
         boss->anchor.vy = (pos->vy << 12);
         boss->counter4 = boss_obj->freepos.vy;
+        boss->counter6 = BOSS_BOMB_INTERVAL;
 
         camera_focus(&camera, boss->anchor.vx, boss->anchor.vy - (100 << 12));
 
@@ -240,15 +243,24 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
 static void
 _boss_spawn_bomb(ObjectState *state, VECTOR *pos)
 {
-    if((get_elapsed_frames() % BOSS_BOMB_INTERVAL) == 0) {
+    if(boss->counter6 == 0) {
+        uint8_t facing_left = (state->flipmask & MASK_FLIP_FLIPX);
         PoolObject *bomb = object_pool_create(OBJ_BOUNCEBOMB);
-        int32_t deltax = (state->flipmask & MASK_FLIP_FLIPX) ? -BOSS_BOMB_XDELTA : BOSS_BOMB_XDELTA;
+        int32_t deltax = 0;
+
+        if(state->freepos->spdx != 0) {
+            deltax = facing_left ? -BOSS_BOMB_XDELTA : BOSS_BOMB_XDELTA;
+            bomb->freepos.spdx = facing_left ? -BOSS_BOMB_XSPD : BOSS_BOMB_XSPD;
+        } else {
+            bomb->freepos.spdx = 0;
+            deltax = 0;
+        }
         bomb->freepos.vx = ((pos->vx + deltax) << 12);
         bomb->freepos.vy = ((pos->vy + 8) << 12);
         bomb->state.anim_state.animation = 0;
-        bomb->freepos.spdx = 0;
         bomb->freepos.spdy = 0;
         bomb->state.timer = BOSS_BOMB_LIFETIME;
+        boss->counter6 = BOSS_BOMB_INTERVAL;
     }
 }
 
@@ -266,12 +278,17 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // counter3: Used on angle operations (swing)
     // counter4: Stores calculated Y position (without wobble effect)
     // counter5: Used on angle operations (wobble)
+    // counter6: Countdown to next bomb
 
     boss->counter5 += BOSS_WOBBLE_SPEED;
+
+    if((boss->state < BOSS_STATE_SWINGBACK)
+       && boss->counter6 > 0) boss->counter6--;
 
     switch(boss->state) {
     default: break;
     case BOSS_STATE_INIT:
+        boss->counter6 = BOSS_BOMB_INTERVAL;
         if(boss->counter4 < (boss->anchor.vy - (128 << 12))) {
             state->flipmask = MASK_FLIP_FLIPX;
             state->freepos->spdy = BOSS_DESCENT_SPEED;
@@ -297,7 +314,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             state->freepos->vx = boss->anchor.vx - (128 << 12);
             boss->counter1++;
             // Either flip or descent; it depends.
-            if(boss->counter1 == 3) {
+            if(boss->counter1 == BOSS_TOSWING_COUNT) {
                 boss->counter1 = 0;
                 boss->counter3 = 0;
                 state->freepos->spdx = 0;
@@ -322,7 +339,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             state->freepos->vx = boss->anchor.vx + (128 << 12);
             boss->counter1++;
             // Either flip or descent; it depends.
-            if(boss->counter1 == 3) {
+            if(boss->counter1 == BOSS_TOSWING_COUNT) {
                 boss->counter1 = 0;
                 boss->counter3 = ONE;
                 state->freepos->spdx = 0;
@@ -352,6 +369,10 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             boss->counter1++;
             boss->counter3 = 0;
             boss->counter2 = 30;
+            boss->counter6 = 0;
+
+            // Spawn an extra bomb
+            _boss_spawn_bomb(state, pos);
         }
         break;       
     case BOSS_STATE_SWINGFRONT:
@@ -371,6 +392,10 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             boss->counter1++;
             boss->counter3 = 0;
             boss->counter2 = 30;
+            boss->counter6 = 0;
+
+            // Spawn an extra bomb
+            _boss_spawn_bomb(state, pos);
         }
         break;
     }
