@@ -260,10 +260,12 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             boss->state = BOSS_STATE_WALKBACK;
             state->flipmask = MASK_FLIP_FLIPX;
             boss->counter3 = 0;
+            boss->counter2 = 60;
         }
         break;
     case BOSS_STATE_WALKBACK:
-        if(state->freepos->vx > (boss->anchor.vx - (128 << 12))) {
+        if(boss->counter2 > 0) boss->counter2--;
+        else if(state->freepos->vx > (boss->anchor.vx - (128 << 12))) {
             state->freepos->spdx = -BOSS_WALK_SPEED;
         } else {
             state->freepos->vx = boss->anchor.vx - (128 << 12);
@@ -280,7 +282,8 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
         break;
     case BOSS_STATE_WALKFRONT:
-        if(state->freepos->vx < (boss->anchor.vx + (128 << 12))) {
+        if(boss->counter2 > 0) boss->counter2--;
+        else if(state->freepos->vx < (boss->anchor.vx + (128 << 12))) {
             state->freepos->spdx = BOSS_WALK_SPEED;
         } else {
             state->freepos->vx = boss->anchor.vx + (128 << 12);
@@ -311,6 +314,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             boss->state = BOSS_STATE_WALKFRONT;
             boss->counter1++;
             boss->counter3 = 0;
+            boss->counter2 = 30;
         }
         break;       
     case BOSS_STATE_SWINGFRONT:
@@ -328,6 +332,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             boss->state = BOSS_STATE_WALKBACK;
             boss->counter1++;
             boss->counter3 = 0;
+            boss->counter2 = 30;
         }
         break;
     }
