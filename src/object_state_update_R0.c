@@ -314,6 +314,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     switch(boss->state) {
     default: break;
     case BOSS_STATE_INIT:
+        state->frag_anim_state->animation = BOSS_ANIM_SMILING;
         boss->counter6 = BOSS_BOMB_INTERVAL;
         if(boss->counter4 < (boss->anchor.vy - (128 << 12))) {
             state->flipmask = MASK_FLIP_FLIPX;
@@ -541,7 +542,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     }
 
     // Animation control before defeat
-    if(boss->state < BOSS_STATE_DEAD) {
+    if((boss->state > BOSS_STATE_INIT) && (boss->state < BOSS_STATE_DEAD)) {
         if(boss->hit_cooldown > 0)
             state->frag_anim_state->animation = BOSS_ANIM_HIT;
         else state->frag_anim_state->animation =

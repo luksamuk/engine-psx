@@ -98,6 +98,9 @@ loopback = 0
 [[boss.fragment.animations]]
 id = 6
 name = "head_smiling"
-duration = 12
-frames = [[64, 352, 56, 16]]
+duration = 6
+frames = [
+       [64, 352, 56, 16],
+       [64, 368, 56, 16],
+]
 loopback = 0
