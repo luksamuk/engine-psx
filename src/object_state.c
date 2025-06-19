@@ -355,12 +355,10 @@ after_render:
     }
 }
 
-#define BOSS_HIT_GLOW_INTERVAL 5
-
 uint8_t
 boss_hit_glowing()
 {
     // Glow on odd intervals.
     // Being odd ensures that a hit cooldown equals 0 uses original palette
-    return (boss->hit_cooldown / BOSS_HIT_GLOW_INTERVAL) % 2 != 0;
+    return (boss->health > 0) && (boss->hit_cooldown >> 1) % 2 != 0;
 }
