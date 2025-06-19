@@ -203,6 +203,15 @@ explode:
 
 // These variables relate to the boss only.
 extern BossState *boss;
+
+#define BOSS_ANIM_NORMAL      0
+#define BOSS_ANIM_LOOKDOWN    1
+#define BOSS_ANIM_HIT         2
+#define BOSS_ANIM_DEAD        3
+#define BOSS_ANIM_RECOVERING  4
+#define BOSS_ANIM_DROPPING    5
+#define BOSS_ANIM_SMILING     6
+
 #define BOSS_STATE_INIT       0
 #define BOSS_STATE_WALKBACK   1
 #define BOSS_STATE_WALKFRONT  2
@@ -416,17 +425,17 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
         break;
     case BOSS_STATE_DEAD:
-        state->frag_anim_state->animation = 3;
+        state->frag_anim_state->animation = BOSS_ANIM_DEAD;
         break;
     case BOSS_STATE_DROPPING:
-        state->frag_anim_state->animation = 5;
+        state->frag_anim_state->animation = BOSS_ANIM_DROPPING;
         if(boss->counter4 < boss->anchor.vy + (CENTERY << 11)) {
             state->freepos->spdy += BOSS_FLEE_GRAVITY;
             boss->counter3 = 0;
         } else boss->state = BOSS_STATE_RECOVERING;
         break;
     case BOSS_STATE_RECOVERING:
-        state->frag_anim_state->animation = 4;
+        state->frag_anim_state->animation = BOSS_ANIM_RECOVERING;
         state->flipmask = 0;
         if(boss->counter4 > boss->anchor.vy - (CENTERY << 11)) {
             state->freepos->spdy = -BOSS_RISING_SPEED;
@@ -444,7 +453,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
         break;
     case BOSS_STATE_FLEEING:
-        state->frag_anim_state->animation = 1;
+        state->frag_anim_state->animation = BOSS_ANIM_LOOKDOWN;
         state->freepos->spdx = BOSS_FLEE_XSPD;
         state->freepos->spdy = -BOSS_FLEE_YSPD;
         state->flipmask = 0;
@@ -534,7 +543,10 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // Animation control before defeat
     if(boss->state < BOSS_STATE_DEAD) {
         if(boss->hit_cooldown > 0)
-            state->frag_anim_state->animation = 2;
-        else state->frag_anim_state->animation = (player.action == ACTION_HURT ? 0 : 1);
+            state->frag_anim_state->animation = BOSS_ANIM_HIT;
+        else state->frag_anim_state->animation =
+                 (player.action == ACTION_HURT)
+                 ? BOSS_ANIM_SMILING
+                 : BOSS_ANIM_NORMAL;
     }
 }
