@@ -81,3 +81,16 @@ duration = 12
 frames = [[64, 304, 56, 16]]
 loopback = 0
 
+[[boss.fragment.animations]]
+id = 4
+name = "head_recovering"
+duration = 12
+frames = [[64, 320, 56, 16]]
+loopback = 0
+
+[[boss.fragment.animations]]
+id = 5
+name = "head_dropping"
+duration = 12
+frames = [[64, 336, 56, 16]]
+loopback = 0

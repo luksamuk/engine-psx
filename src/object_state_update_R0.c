@@ -415,13 +415,18 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             _boss_spawn_bomb(state, pos);
         }
         break;
+    case BOSS_STATE_DEAD:
+        state->frag_anim_state->animation = 3;
+        break;
     case BOSS_STATE_DROPPING:
+        state->frag_anim_state->animation = 5;
         if(boss->counter4 < boss->anchor.vy + (CENTERY << 11)) {
             state->freepos->spdy += BOSS_FLEE_GRAVITY;
             boss->counter3 = 0;
         } else boss->state = BOSS_STATE_RECOVERING;
         break;
     case BOSS_STATE_RECOVERING:
+        state->frag_anim_state->animation = 4;
         state->flipmask = 0;
         if(boss->counter4 > boss->anchor.vy - (CENTERY << 11)) {
             state->freepos->spdy = -BOSS_RISING_SPEED;
@@ -439,6 +444,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
         break;
     case BOSS_STATE_FLEEING:
+        state->frag_anim_state->animation = 1;
         state->freepos->spdx = BOSS_FLEE_XSPD;
         state->freepos->spdy = -BOSS_FLEE_YSPD;
         state->flipmask = 0;
@@ -525,14 +531,10 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
     }
 
-    // Animation control
-    if(boss->state == BOSS_STATE_DEAD) {
-        state->frag_anim_state->animation = 3;
-    } else if((boss->hit_cooldown > 0)
-              || (boss->state == BOSS_STATE_DROPPING)
-              || (boss->state == BOSS_STATE_RECOVERING)) {
-        state->frag_anim_state->animation = 2;
-    } else {
-        state->frag_anim_state->animation = (player.action == ACTION_HURT ? 0 : 1);
+    // Animation control before defeat
+    if(boss->state < BOSS_STATE_DEAD) {
+        if(boss->hit_cooldown > 0)
+            state->frag_anim_state->animation = 2;
+        else state->frag_anim_state->animation = (player.action == ACTION_HURT ? 0 : 1);
     }
 }
