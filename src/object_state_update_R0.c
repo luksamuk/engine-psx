@@ -319,6 +319,10 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         if(boss->counter4 < (boss->anchor.vy - (128 << 12))) {
             state->flipmask = MASK_FLIP_FLIPX;
             state->freepos->spdy = BOSS_DESCENT_SPEED;
+            boss->counter2 = 60;
+        } else if(boss->counter2 > 0) {
+            state->freepos->spdy = 0;
+            boss->counter2--;
         } else {
             boss->counter4 = boss->anchor.vy - (128 << 12);
             state->freepos->spdy = 0;
@@ -326,7 +330,6 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             boss->state = BOSS_STATE_WALKBACK;
             state->flipmask = MASK_FLIP_FLIPX;
             boss->counter3 = 0;
-            boss->counter2 = 60;
         }
         break;
     case BOSS_STATE_WALKBACK:
