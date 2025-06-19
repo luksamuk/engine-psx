@@ -17,4 +17,7 @@ typedef struct {
     uint8_t hit_cooldown;
 } BossState;
 
+// Defined on object_state.c
+uint8_t boss_hit_glowing();
+
 #endif

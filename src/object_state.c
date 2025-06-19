@@ -10,6 +10,7 @@
 #include "render.h"
 #include "timer.h"
 #include "camera.h"
+#include "boss.h"
 
 extern ArenaAllocator _level_arena;
 extern uint8_t        paused;
@@ -17,6 +18,7 @@ extern Player         player;
 extern Camera         camera;
 extern uint8_t        level_fade;
 extern uint8_t        level_has_boss;
+extern BossState      *boss;
 
 void
 _emplace_object(
@@ -310,8 +312,13 @@ begin_render_routine:
         // LEVEL OBJECTS have these VRAM coords:
         // Sprites: 704x0
         // CLUT: 0x485
+        // Boss CLUT: 0x486 (normal); 0x487 (when hit)
         poly->tpage = getTPage(1, 0, 704, frame->tpage ? 256 : 0);
-        poly->clut = getClut(0, (frame->tpage && level_has_boss) ? 486 : 485);
+        poly->clut = getClut(
+            0,
+            (frame->tpage && level_has_boss)
+            ? (boss_hit_glowing() ? 487 : 486)
+            : 485);
     }
 
     uint32_t layer = ((state->id == OBJ_RING)
@@ -346,4 +353,14 @@ after_render:
         
         goto begin_render_routine;
     }
+}
+
+#define BOSS_HIT_GLOW_INTERVAL 5
+
+uint8_t
+boss_hit_glowing()
+{
+    // Glow on odd intervals.
+    // Being odd ensures that a hit cooldown equals 0 uses original palette
+    return (boss->hit_cooldown / BOSS_HIT_GLOW_INTERVAL) % 2 != 0;
 }
