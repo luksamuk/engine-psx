@@ -992,7 +992,7 @@ level_load_level(screen_level_data *data)
             load_texture(timfile, &tim);
             tim.crect->y += 1;
             // TODO: Color 11 is fixed as black color for now. Change that!
-            clut_set_color(&tim, 11, 255, 255, 255);
+            clut_set_color(&tim, 11, 0xd3, 0xd3, 0xd3);
             for(int i = 0; i < 13; i++) {
                 clut_print_color(&tim, i);
             }
