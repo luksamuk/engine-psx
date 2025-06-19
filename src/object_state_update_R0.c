@@ -422,6 +422,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         } else boss->state = BOSS_STATE_RECOVERING;
         break;
     case BOSS_STATE_RECOVERING:
+        state->flipmask = 0;
         if(boss->counter4 > boss->anchor.vy - (CENTERY << 11)) {
             state->freepos->spdy = -BOSS_RISING_SPEED;
             boss->counter3 = 30;
