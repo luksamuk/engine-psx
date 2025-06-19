@@ -192,9 +192,9 @@ explode:
     explosion = object_pool_create(OBJ_EXPLOSION);
     explosion->freepos.vx = (pos->vx << 12);
     explosion->freepos.vy = (pos->vy << 12);
-    explosion->state.anim_state.animation = 1; // Big explosion
+    explosion->state.anim_state.animation = 0; // Small explosion
     state->props |= OBJ_FLAG_DESTROYED;
-    sound_play_vag(sfx_bomb, 0);
+    sound_play_vag(sfx_pop, 0);
 }
 
 // ===================================
