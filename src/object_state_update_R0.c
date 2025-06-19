@@ -166,8 +166,8 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     {
         if(player.action != ACTION_HURT && player.iframes == 0) {
             player_do_damage(&player, pos->vx << 12);
+            goto explode;
         }
-        goto explode;
     }
 
     // Despawn if too far from camera
