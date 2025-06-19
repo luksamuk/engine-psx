@@ -990,13 +990,13 @@ level_load_level(screen_level_data *data)
         if(timfile) {
             level_has_boss = 1;
             load_texture(timfile, &tim);
+            /* clut_print_all_colors(&tim); */
+            // Setup glowing color palette and reupload it right below
+            // the original boss palette
             tim.crect->y += 1;
-            // TODO: Color 11 is fixed as black color for now. Change that!
-            clut_set_color(&tim, 11, 0xd3, 0xd3, 0xd3);
-            for(int i = 0; i < 13; i++) {
-                clut_print_color(&tim, i);
-            }
+            clut_set_glow_color(&tim, 0xd3, 0xd3, 0xd3);
             load_clut_only(&tim);
+
             free(timfile);
         } else printf("Warning: No level boss texture found, skipping\n");
 

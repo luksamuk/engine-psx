@@ -170,6 +170,48 @@ clut_print_color(TIM_IMAGE *tim, uint32_t n)
            stp);
 }
 
+void
+clut_print_all_colors(TIM_IMAGE *tim)
+{
+    // Get number of colors by pointer arithmetic.
+    // Number of colors is 64b before start of color array
+    uint32_t clut_length = *(tim->caddr - 2);
+    uint32_t rectsize = (tim->crect->w * tim->crect->h * 2048);
+    uint32_t num_colors = clut_length / rectsize;
+    printf("Number of colors: %d\n", num_colors);
+    for(uint32_t i = 0; i < num_colors; i++) {
+        clut_print_color(tim, i);
+    }
+}
+
+void
+clut_set_glow_color(TIM_IMAGE *tim, uint8_t r, uint8_t g, uint8_t b)
+{
+    uint32_t clut_length = *(tim->caddr - 2);
+    uint32_t rectsize = (tim->crect->w * tim->crect->h * 2048);
+    uint32_t num_colors = clut_length / rectsize;
+    for(uint32_t i = 0; i < num_colors; i++) {
+        uint16_t color = clut_get_color(tim, i);
+        uint8_t cr = (color & 0x001f);
+        uint8_t cg = (color & 0x03e0) >> 5;
+        uint8_t cb = (color & 0x7c00) >> 10;
+        uint8_t stp = (color & 0x8000) >> 15;
+        if(!cr && !cg && !cb && stp) {
+            clut_set_color(tim, i, r, g, b);
+            printf("Setting glow color %d: #%02x%02x%02x => #%02x%02x%02x\n",
+                   i,
+                   CLUT_TO_RGB(cr),
+                   CLUT_TO_RGB(cg),
+                   CLUT_TO_RGB(cb),
+                   r,
+                   g,
+                   b);
+            return;
+        }
+    }
+    printf("Could not set glow color\n");
+}
+
 uint8_t
 get_byte(uint8_t *bytes, uint32_t *b)
 {

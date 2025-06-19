@@ -43,7 +43,9 @@ void     load_texture(uint8_t *data, TIM_IMAGE *tim);
 void     load_clut_only(TIM_IMAGE *tim);
 uint16_t clut_get_color(TIM_IMAGE *tim, uint32_t n);
 void     clut_set_color(TIM_IMAGE *tim, uint32_t n, uint8_t r, uint8_t g, uint8_t b);
+void     clut_print_all_colors(TIM_IMAGE *tim);
 void     clut_print_color(TIM_IMAGE *tim, uint32_t n);
+void clut_set_glow_color(TIM_IMAGE *tim, uint8_t r, uint8_t g, uint8_t b); // Automatically finds a black color with STP = 1, dyes it
 
 uint8_t  get_byte(uint8_t *bytes, uint32_t *b);
 uint16_t get_short_be(uint8_t *bytes, uint32_t *b);
