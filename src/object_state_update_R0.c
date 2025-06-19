@@ -209,7 +209,9 @@ extern BossState *boss;
 #define BOSS_STATE_SWINGBACK  3
 #define BOSS_STATE_SWINGFRONT 4
 #define BOSS_STATE_DEAD       5
-#define BOSS_STATE_FLEEING    6
+#define BOSS_STATE_DROPPING   6
+#define BOSS_STATE_RECOVERING 7
+#define BOSS_STATE_FLEEING    8
 
 #define BOSS_TOSWING_COUNT    3
 #define BOSS_DESCENT_SPEED    0x01200
@@ -223,8 +225,10 @@ extern BossState *boss;
 #define BOSS_BOMB_LIFETIME    160
 #define BOSS_BOMB_XDELTA      8
 #define BOSS_BOMB_XSPD        0x00480
-#define BOSS_FLEE_XSPD        0x04800
-#define BOSS_FLEE_YSPD        0x02400
+#define BOSS_FLEE_XSPD        0x03600
+#define BOSS_FLEE_YSPD        0x01200
+#define BOSS_FLEE_GRAVITY     0x00380
+#define BOSS_RISING_SPEED     0x02400
 
 static void
 _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -292,7 +296,8 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // counter5: Used on angle operations (wobble)
     // counter6: Countdown to next bomb
 
-    boss->counter5 += BOSS_WOBBLE_SPEED;
+    if(boss->state != BOSS_STATE_DEAD)
+        boss->counter5 += BOSS_WOBBLE_SPEED;
 
     if((boss->state < BOSS_STATE_SWINGBACK) && boss->counter6 > 0)
         boss->counter6--;
@@ -410,6 +415,28 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             _boss_spawn_bomb(state, pos);
         }
         break;
+    case BOSS_STATE_DROPPING:
+        if(boss->counter4 < boss->anchor.vy + (CENTERY << 11)) {
+            state->freepos->spdy += BOSS_FLEE_GRAVITY;
+            boss->counter3 = 0;
+        } else boss->state = BOSS_STATE_RECOVERING;
+        break;
+    case BOSS_STATE_RECOVERING:
+        if(boss->counter4 > boss->anchor.vy - (CENTERY << 11)) {
+            state->freepos->spdy = -BOSS_RISING_SPEED;
+            boss->counter3 = 30;
+        } else {
+            if(boss->counter3 > 0) {
+                state->freepos->spdy = 0;
+                boss->counter3--;
+            } else {
+                camera_set_left_bound(&camera, boss->anchor.vx);
+                camera_follow_player(&camera);
+                screen_level_play_music(level_round, level_act);
+                boss->state = BOSS_STATE_FLEEING;
+            }
+        }
+        break;
     case BOSS_STATE_FLEEING:
         state->freepos->spdx = BOSS_FLEE_XSPD;
         state->freepos->spdy = -BOSS_FLEE_YSPD;
@@ -492,17 +519,17 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 sound_play_vag(sfx_bomb, 0);
             } else boss->counter6--;
         } else if(boss->state == BOSS_STATE_DEAD) {
-            boss->state = BOSS_STATE_FLEEING;
-            camera_set_left_bound(&camera, boss->anchor.vx);
-            camera_follow_player(&camera);
-            screen_level_play_music(level_round, level_act);
+            state->freepos->spdy = 0;
+            boss->state = BOSS_STATE_DROPPING;
         }
     }
 
     // Animation control
-    if(boss->health == 0) {
+    if(boss->state == BOSS_STATE_DEAD) {
         state->frag_anim_state->animation = 3;
-    } else if(boss->hit_cooldown > 0) {
+    } else if((boss->hit_cooldown > 0)
+              || (boss->state == BOSS_STATE_DROPPING)
+              || (boss->state == BOSS_STATE_RECOVERING)) {
         state->frag_anim_state->animation = 2;
     } else {
         state->frag_anim_state->animation = (player.action == ACTION_HURT ? 0 : 1);
