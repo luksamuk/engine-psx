@@ -26,6 +26,63 @@ static const char *creditstxt[] = {
     "luksamuk",
     "\r",
 
+    /* SFX */
+    "Sound Effects Ripping",
+    "luksamuk",
+    "Mr. Lange",
+    "\r",
+
+
+    /* Graphics credits */
+    /* "Character Sprites Ripping", */
+    /* "Triangly", */
+    /* "Paraemon", */
+    /* "TCRF Community", */
+    /* "Sonic Retro Community", */
+    /* "Devon", */
+    /* "Vector T", */
+    /* "\r", */
+
+    "Original Character Sprites",
+    "CartoonsAnimate22",
+    "\r",
+
+    "Level and Menu Graphics Ripping",
+    "Paraemon",
+    "WarCR",
+    "PicsAndPixels",
+    "\r",
+
+    "Original Level Graphics",
+    "NiteShadow",
+    "Techokami",
+    "Blue Frenzy",
+    "DerZocker",
+    "Enrico Cartmanuel",
+    "\r",
+
+    "Fonts Ripping",
+    "Flare",
+    "Storice",
+    "1001",
+    "GameMaster12",
+    "SupaChao",
+    "\r",
+
+    "Original Fonts",
+    "Mr. Alien",
+    "GameMaster12",
+    "Fred Bronze",
+    "\r",
+
+    "Objects Ripping",
+    "Paraemon",
+    "\r",
+
+    "Original Sprites and Tiles",
+    "Sonic Team",
+    "\r",
+
 
     /* BGM */
     "BGM Track Listing",
@@ -100,61 +157,9 @@ static const char *creditstxt[] = {
     "By Silent Dreams",
     "\r",
 
-    /* SFX */
-    "Sound Effects Ripping",
-    "luksamuk",
-    "Mr. Lange",
-    "\r",
-
-
-    /* Graphics credits */
-    /* "Character Sprites Ripping", */
-    /* "Triangly", */
-    /* "Paraemon", */
-    /* "TCRF Community", */
-    /* "Sonic Retro Community", */
-    /* "Devon", */
-    /* "Vector T", */
-    /* "\r", */
-
-    "Original Character Sprites",
-    "CartoonsAnimate22",
-    "\r",
-
-    "Level and Menu Graphics Ripping",
-    "Paraemon",
-    "WarCR",
-    "PicsAndPixels",
-    "\r",
-
-    "Original Level Graphics",
-    "NiteShadow",
-    "Techokami",
-    "Blue Frenzy",
-    "DerZocker",
-    "Enrico Cartmanuel",
-    "\r",
-
-    "Fonts Ripping",
-    "Flare",
-    "Storice",
-    "1001",
-    "GameMaster12",
-    "SupaChao",
-    "\r",
-
-    "Original Fonts",
-    "Mr. Alien",
-    "GameMaster12",
-    "Fred Bronze",
-    "\r",
-
-    "Objects Ripping",
-    "Paraemon",
-    "\r",
-
-    "Original Sprites and Tiles",
-    "Sonic Team",
+    "Boss Music",
+    "Sonic 3D Blast Boss Music",
+    "By Richard Jacques",
     "\r",
 
 
