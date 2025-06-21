@@ -523,6 +523,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             boss->state = BOSS_STATE_DEAD;
             boss->counter6 = 0;
             boss->counter2 = 180; // 3 seconds exploding
+            level_score_count += 1000;
         }
 
         if(boss->counter2 > 0) {
