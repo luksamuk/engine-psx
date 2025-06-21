@@ -251,6 +251,7 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
         boss_obj->freepos.vx = ((pos->vx + 128) << 12);
         boss_obj->freepos.vy = ((pos->vy - 320) << 12);
         boss_obj->state.anim_state.animation = 0;
+        boss_obj->state.flipmask = state->flipmask;
 
         // Setup boss state
         boss->state = BOSS_STATE_INIT;

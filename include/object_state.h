@@ -124,7 +124,8 @@ typedef struct {
         uint8_t props; // IMPORTANT: DO NOT MOVE THIS FIELD.
         ObjectState state;
     };
-    ObjectFreePos freepos;
+    ObjectFreePos   freepos;
+    ObjectAnimState frag_state; // Always allocated
 } PoolObject;
 
 void       object_pool_init();

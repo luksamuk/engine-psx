@@ -79,6 +79,7 @@ typedef struct {
     ObjectAnim *animations;
     ObjectFrag *fragment;
     uint16_t num_animations;
+    uint8_t has_fragment;
     uint8_t is_level_specific;
 } ObjectTableEntry;
 

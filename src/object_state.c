@@ -20,10 +20,13 @@ extern uint8_t        level_fade;
 extern uint8_t        level_has_boss;
 extern BossState      *boss;
 
+extern ObjectTable obj_table_common;
+extern ObjectTable obj_table_level;
+
 void
 _emplace_object(
     ChunkObjectData *data, int32_t tx, int32_t ty,
-    uint8_t is_level_specific,
+    uint8_t is_level_specific, uint8_t has_fragment,
     int8_t type, uint8_t flipmask, int32_t vx, int32_t vy, void *extra)
 {
     ObjectState *state = &data->objects[data->num_objects++];
@@ -50,7 +53,7 @@ _emplace_object(
 
     // Initialize animation state if this object
     // has a fragment
-    if(state->id == OBJ_MONITOR || state->id == OBJ_CHECKPOINT) {
+    if(has_fragment) {
         state->frag_anim_state = alloc_arena_malloc(
             &_level_arena,
             sizeof(ObjectAnimState));
@@ -146,15 +149,15 @@ load_object_placement(const char *filename, void *lvl_data)
             // This is a dummy object, so create others in its place.
             switch(type) {
             case OBJ_DUMMY_RINGS_3V:
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy - 24, NULL);
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy, NULL);
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy + 24, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy - 24, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy + 24, NULL);
                 created_objects += 3;
                 break;
             case OBJ_DUMMY_RINGS_3H:
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx - 24, vy, NULL);
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy, NULL);
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx + 24, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx - 24, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx + 24, vy, NULL);
                 created_objects += 3;
                 break;
             case OBJ_DUMMY_STARTPOS:
@@ -165,7 +168,11 @@ load_object_placement(const char *filename, void *lvl_data)
             default: break;
             }
         } else {
-            _emplace_object(data, cx, cy, is_level_specific, type, flipmask, vx, vy, extra);
+            ObjectTableEntry *entry = (type >= MIN_LEVEL_OBJ_GID)
+                ? &obj_table_level.entries[type - MIN_LEVEL_OBJ_GID]
+                : &obj_table_common.entries[type];
+            
+            _emplace_object(data, cx, cy, is_level_specific, entry->has_fragment, type, flipmask, vx, vy, extra);
             created_objects++;
         }
     }
@@ -218,13 +225,14 @@ begin_render_routine:
     frame = &an->frames[anim->frame];
 
     // Leverage "double flipping"
-    uint8_t flipmask = state->frag_anim_state ? 0 : (state->flipmask ^ frame->flipmask);
+    uint8_t flipmask = state->flipmask ^ frame->flipmask;
 
     // Some rules:
     // 1. If an object is flipped, it cannot be rotated.
     // 2. ct and cw rotations cancel out.
     // 3. As a rule of thumb... objects with fragments
-    //    cannot be flipped or rotated.
+    //    will have their fragment flipped or rotated through
+    //    their entire flip state.
     // We'll expect these values to work as they should.
 
     int16_t vx = ovx;
@@ -342,7 +350,7 @@ begin_render_routine:
 
 after_render:
 
-    if(!in_fragment && (typedata->fragment != NULL)) {
+    if(!in_fragment && typedata->has_fragment) {
         in_fragment = 1;
         anim = state->frag_anim_state;
         if(anim->animation >= typedata->fragment->num_animations) return;

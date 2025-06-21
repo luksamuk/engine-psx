@@ -257,30 +257,35 @@ _goal_sign_change_score()
 static void
 _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
-    if(state->anim_state.animation == 0) {
+    if(state->frag_anim_state->animation == 0) {
         if(pos->vx <= (player.pos.vx >> 12)) {
-            state->anim_state.animation = 1;
-            state->anim_state.frame = 0;
+            state->frag_anim_state->animation = 1;
+            state->frag_anim_state->frame = 0;
             camera_focus(&camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
             state->timer = 180;
             level_finished = 1;
             pause_elapsed_frames();
             sound_play_vag(sfx_sign, 0);
         }
-    } else if(state->anim_state.animation == 1) {
+    } else if(state->frag_anim_state->animation == 1) {
         state->timer--;
         if(state->timer < 0) {
-            // Set animation according to character
             state->timer = 360; // 6-seconds music
-            state->anim_state.animation = 2;
+
+            switch(screen_level_getcharacter()) {
+            default:             state->frag_anim_state->animation = 2; break;
+            case CHARA_MILES:    state->frag_anim_state->animation = 3; break;
+            case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
+            }
+
             player_set_action(&player, ACTION_NONE);
             screen_level_setmode(LEVEL_MODE_FINISHED);
             _goal_sign_change_score();
         }
-    } else if((state->anim_state.animation == 2)
+    } else if((state->frag_anim_state->animation > 1)
               && (player.pos.vx < camera.pos.vx + (CENTERX << 12))) {
         state->timer = 360; // 6-seconds music
-    } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {
+    } else if(state->frag_anim_state->animation < OBJ_ANIMATION_NO_ANIMATION) {
         if(state->timer == 360) {
             // First frame
             sound_bgm_play(BGM_LEVELCLEAR);

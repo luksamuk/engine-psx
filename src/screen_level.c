@@ -1009,7 +1009,8 @@ level_load_level(screen_level_data *data)
     snprintf(filename0, 255, "%s\\OBJ.OTD;1", basepath);
     load_object_table(filename0, &obj_table_level);
 
-    // Load object positioning on level
+    // Load object positioning on level.
+    // Always do this AFTER loading object definitions!
     snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, level_act + 1);
     load_object_placement(filename0, &leveldata);
 
