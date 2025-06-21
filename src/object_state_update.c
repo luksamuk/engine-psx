@@ -291,7 +291,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             screen_level_setstate(3);
         } else if(screen_level_getstate() == 4) {
             uint8_t lvl = screen_level_getlevel();
-            if(lvl == 3) {
+            if(lvl == 2 || lvl == 3) {
                 // Finished engine test
                 scene_change(SCREEN_TITLE);
             } else if(lvl < 10) {
