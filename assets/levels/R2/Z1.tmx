@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="11" nextobjectid="188">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="11" nextobjectid="196">
  <editorsettings>
   <export target="../../../../../Z1.json" format="json"/>
  </editorsettings>
@@ -196,11 +196,14 @@
    </object>
   </objectgroup>
   <objectgroup id="10" name="LEVEL">
-   <object id="182" gid="2147483809" x="3436" y="256" width="64" height="64"/>
-   <object id="183" gid="161" x="1792" y="216" width="64" height="64"/>
    <object id="185" gid="2147483809" x="1408" y="256" width="64" height="64"/>
-   <object id="186" gid="161" x="2432" y="324" width="64" height="64"/>
-   <object id="187" gid="161" x="3968" y="384" width="64" height="64"/>
+   <object id="186" gid="2147483809" x="2816" y="256" width="64" height="64"/>
+   <object id="189" gid="2147483809" x="3328" y="324" width="64" height="64"/>
+   <object id="190" gid="2147483809" x="4962" y="452" width="64" height="64"/>
+   <object id="192" gid="2147483809" x="7040" y="994" width="64" height="64"/>
+   <object id="193" gid="2147483809" x="8064" y="1024" width="64" height="64"/>
+   <object id="194" gid="2147483809" x="8772" y="994" width="64" height="64"/>
+   <object id="195" gid="2147483809" x="10280" y="784" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

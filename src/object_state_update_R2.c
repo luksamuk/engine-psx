@@ -15,12 +15,16 @@ extern uint8_t player_attacking;
 extern int32_t player_width;
 extern int32_t player_height;
 
+extern SoundEffect sfx_pop;
+
 extern uint32_t   level_score_count;
 extern uint8_t    level_round;
 extern uint8_t    level_act;
 
 // Object constants
 #define OBJ_GRAVITY 0x00380
+#define OBJ_MIN_SPAWN_DIST_X (CENTERX + (CENTERX >> 1))
+#define OBJ_MIN_SPAWN_DIST_Y (CENTERY + (CENTERY >> 1))
 
 // Object type enums
 #define OBJ_MOTOBUG (MIN_LEVEL_OBJ_GID + 0)
@@ -62,14 +66,13 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 && (pos->vy < (camera.pos.vy >> 12) + SCREEN_YRES)
             ) && (
                 // Outside center screen
-                (pos->vx < (camera.pos.vx >> 12) - CENTERX)
-                || (pos->vx > (camera.pos.vx >> 12) + CENTERX)
-                || (pos->vy < (camera.pos.vy >> 12) - CENTERY)
-                || (pos->vy > (camera.pos.vy >> 12) + CENTERY)
+                (pos->vx < (camera.pos.vx >> 12) - OBJ_MIN_SPAWN_DIST_X)
+                || (pos->vx > (camera.pos.vx >> 12) + OBJ_MIN_SPAWN_DIST_X)
+                || (pos->vy < (camera.pos.vy >> 12) - OBJ_MIN_SPAWN_DIST_Y)
+                || (pos->vy > (camera.pos.vy >> 12) + OBJ_MIN_SPAWN_DIST_Y)
                 )
             )
         {
-            printf("Spawned free motobug\n");
             PoolObject *self = object_pool_create(OBJ_MOTOBUG);
             self->freepos.vx = pos->vx << 12;
             self->freepos.vy = pos->vy << 12;
@@ -90,14 +93,14 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         return;
     }
 
-    // Despawn if too far from camera
+    // Despawn if too far from camera. Use a greater range to compensate
+    // the spawner
     if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
        || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
        || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
        || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12))) {
         state->props |= OBJ_FLAG_DESTROYED;
         // Reactivate parent
-        printf("Reactivated parent\n");
         if(state->parent) {
             state->parent->props &= ~OBJ_FLAG_DESTROYED;
             // Remove reference to this object
@@ -108,7 +111,7 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
     // Collision
     // Motobug walks on ground, so we make a linecast downwards to check
-    // where the ground is. We also have helpers at its left and its right.
+    // where the ground is.
     CollisionEvent grn = linecast(pos->vx, pos->vy - 16, CDIR_FLOOR, 16, CDIR_FLOOR);
 
     // Do ground collision and apply gravity if necessary
@@ -118,8 +121,13 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         state->freepos->spdy = 0;
         state->freepos->vy = grn.coord << 12;
 
-        CollisionEvent lft = linecast(pos->vx - 8, pos->vy - 16, CDIR_FLOOR, 64, CDIR_FLOOR);
-        CollisionEvent rgt = linecast(pos->vx + 8, pos->vy - 16, CDIR_FLOOR, 64, CDIR_FLOOR);
+        // Check for ledges while on ground.
+        CollisionEvent llft = linecast(pos->vx - 8, pos->vy - 16, CDIR_FLOOR, 32, CDIR_FLOOR);
+        CollisionEvent lrgt = linecast(pos->vx + 8, pos->vy - 16, CDIR_FLOOR, 32, CDIR_FLOOR);
+
+        // Also check for walls
+        CollisionEvent wlft = linecast(pos->vx, pos->vy - 16, CDIR_LWALL, 20, CDIR_FLOOR);
+        CollisionEvent wrgt = linecast(pos->vx, pos->vy - 16, CDIR_RWALL, 20, CDIR_FLOOR);
 
         if(state->timer > 0) state->timer--;
         
@@ -127,8 +135,8 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         // If facing and walking towards a certain direction, and a ledge is detected,
         // stop, wait a few frames, then turn.
         if(state->freepos->spdx != 0) {
-            if(((!lft.collided) && (state->freepos->spdx < 0))
-               || ((!rgt.collided) && (state->freepos->spdx > 0))) {
+            if(((!llft.collided || wlft.collided) && (state->freepos->spdx < 0))
+               || ((!lrgt.collided || wrgt.collided) && (state->freepos->spdx > 0))) {
                 // Prepare to turn
                 state->freepos->spdx = 0;
                 state->timer = 60;
@@ -147,4 +155,35 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // Transform position
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy += state->freepos->spdy;
+
+    // Hitbox and interaction with player
+    int32_t hitbox_vx = pos->vx - 20;
+    int32_t hitbox_vy = pos->vy - 30;
+    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                       hitbox_vx, hitbox_vy, 40, 30))
+    {
+        if(player_attacking) {
+            state->props |= OBJ_FLAG_DESTROYED;
+            if(state->parent) {
+                state->parent->props |= OBJ_FLAG_DESTROYED;
+                state->parent->parent = NULL;
+            }
+            level_score_count += 100;
+            sound_play_vag(sfx_pop, 0);
+
+            // Explosion
+            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+            explosion->freepos.vx = (pos->vx << 12);
+            explosion->freepos.vy = (pos->vy << 12);
+            explosion->state.anim_state.animation = 0; // Small explosion
+
+            if(!player.grnd && player.vel.vy > 0) {
+                player.vel.vy *= -1;
+            }
+        } else {
+            if(player.action != ACTION_HURT && player.iframes == 0) {
+                player_do_damage(&player, pos->vx << 12);
+            }
+        }
+    }
 }
