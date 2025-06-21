@@ -66,7 +66,8 @@ static void _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR 
 static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Level-specific update functions
-extern void object_update_R0(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
+extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
+extern void object_update_R2(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 // Player hitbox information. Calculated once per frame.
 int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -142,7 +143,9 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
 level_specific_update:
     switch(round) {
     default: break;
-    case 0: object_update_R0(state, typedata, pos);
+    case 0: object_update_R0(state, typedata, pos); break; // Test Level
+    case 1: break;
+    case 2: object_update_R2(state, typedata, pos); break; // Green Hill
     }
 }
 
@@ -806,6 +809,10 @@ static void
 _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
     // NOTE: this object can only exist as a free object. Do not insist.
+    if(state->freepos == NULL) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
 
     // FIRST OFF: If way too far from camera, destroy it
     if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))

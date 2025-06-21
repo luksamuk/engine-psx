@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="10" nextobjectid="181">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="11" nextobjectid="188">
  <editorsettings>
   <export target="../../../../../Z1.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="141" source="../COMMON/objects_common.tsx"/>
+ <tileset firstgid="161" source="objects.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
   <data encoding="csv">
 9,0,9,0,9,0,9,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,126,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,55,0,55,0,55,0,0,0,0,0,0,0,0,0,0,0,0,120,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -193,6 +194,13 @@
      <property name="Kind" value="1UP"/>
     </properties>
    </object>
+  </objectgroup>
+  <objectgroup id="10" name="LEVEL">
+   <object id="182" gid="2147483809" x="3436" y="256" width="64" height="64"/>
+   <object id="183" gid="161" x="1792" y="216" width="64" height="64"/>
+   <object id="185" gid="2147483809" x="1408" y="256" width="64" height="64"/>
+   <object id="186" gid="161" x="2432" y="324" width="64" height="64"/>
+   <object id="187" gid="161" x="3968" y="384" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

@@ -45,6 +45,9 @@ _emplace_object(
     // a "freepos" field either
     state->freepos = NULL;
 
+    // Parent entity is always NULL unless manually set.
+    state->parent = NULL;
+
     // Initialize animation state if this object
     // has a fragment
     if(state->id == OBJ_MONITOR || state->id == OBJ_CHECKPOINT) {

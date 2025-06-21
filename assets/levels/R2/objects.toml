@@ -1,0 +1,22 @@
+[motobug]
+
+[[motobug.animations]]
+name = "Stopped"
+id = 0
+duration = 12
+frames = [[0, 96, 40, 32]]
+loopback = 0
+
+[[motobug.animations]]
+name = "Walking"
+id = 1
+duration = 6
+frames = [
+       [0,  0, 40, 32],
+       [0, 32, 40, 32],
+       [0, 64, 40, 32],
+       [0, 96, 40, 32],
+]
+loopback = 0
+
+# ============

@@ -26,9 +26,6 @@ extern uint32_t level_score_count;
 extern SoundEffect sfx_pop;
 extern SoundEffect sfx_bomb;
 
-extern TileMap16  map16;
-extern TileMap128 map128;
-extern LevelData  leveldata;
 extern uint8_t    level_round;
 extern uint8_t    level_act;
 
@@ -138,6 +135,10 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     PoolObject *explosion;
     // This is a free object, always.
     // Object is assumed to have an X speed at startup
+    if(state->freepos == NULL) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
 
     // Setup the timer to explode at double the time a Ballhog needs to
     // create a new bomb. This way we'll have a max of two bombs on screen

@@ -56,6 +56,9 @@ typedef struct {
     uint8_t  counter;
 } ObjectAnimState;
 
+// Forward declaration
+typedef struct OBJECT_STATE ObjectState;
+
 typedef struct {
     // World XY position
     int32_t vx;
@@ -70,7 +73,7 @@ typedef struct {
     int32_t ry;
 } ObjectFreePos;
 
-typedef struct {
+typedef struct OBJECT_STATE {
     uint8_t props; // IMPORTANT: DO NOT MOVE THIS FIELD.
     uint8_t flipmask;
     uint16_t id;
@@ -81,6 +84,9 @@ typedef struct {
     ObjectAnimState anim_state;
     ObjectAnimState *frag_anim_state; // Only exists if fragment also exists
     ObjectFreePos *freepos; // Only exists if object lives in object pool
+
+    // Pointer to parent entity (NULL unless manually set!)
+    ObjectState *parent;
 } ObjectState;
 
 typedef struct {
