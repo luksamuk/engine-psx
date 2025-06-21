@@ -39,6 +39,7 @@ object_pool_init()
 void
 object_pool_update(uint8_t round)
 {
+    _pool_count = 0;
     for(uint32_t i = 0; i < OBJECT_POOL_SIZE; i++) {
         PoolObject *obj = &_object_pool[i];
         if(!(obj->props & OBJ_FLAG_DESTROYED)) {
@@ -49,10 +50,7 @@ object_pool_update(uint8_t round)
                           : &obj_table_common.entries[obj->state.id],
                           &pos,
                           round);
-
-            if(obj->props & OBJ_FLAG_DESTROYED) {
-                _pool_count--;
-            }
+            _pool_count += !(obj->props & OBJ_FLAG_DESTROYED);
         }
     }
 }
@@ -93,8 +91,6 @@ object_pool_create(ObjectType t)
 
             // A little pointer for the actual object position in the world
             _object_pool[i].state.freepos = (ObjectFreePos *)&_object_pool[i].freepos;
-
-            _pool_count++;
             return (PoolObject *) &_object_pool[i];
         }
     }
