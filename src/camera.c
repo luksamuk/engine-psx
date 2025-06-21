@@ -10,7 +10,7 @@
 #define SCREENX_BORDER_RADIUS (8 << 12)
 #define SCREENY_BORDER_RADIUS (32 << 12)
 #define SPEEDX_CAP            (16 << 12)
-#define SPEEDY_CAP            (24 << 12)
+#define SPEEDY_CAP            (20 << 12)
 #define CAMERAX_MAX           ((LEVEL_MAX_X_CHUNKS << 19) - CENTERX_FIXP)
 #define CAMERAY_MAX           ((LEVEL_MAX_Y_CHUNKS << 19) - CENTERY_FIXP)
 #define CAMERA_EXTEND_X_MAX   (64 << 12)
@@ -18,6 +18,8 @@
 #define CAMERA_EXTEND_Y_UP    (104 << 12)
 #define CAMERA_EXTEND_Y_DOWN  (88 << 12)
 #define CAMERA_MOVE_DELAY     120
+
+extern uint8_t paused;
 
 void
 camera_init(Camera *c)
@@ -59,9 +61,10 @@ camera_update(Camera *c, Player *player)
         }
 
         // Y movement
-        if(c->follow_player
-           && (player != NULL)
-           && !player->grnd) {
+        if(paused ||
+           (c->follow_player
+            && (player != NULL)
+            && !player->grnd)) {
             int32_t top_border = c->realpos.vy - SCREENY_BORDER_RADIUS;
             int32_t bottom_border = c->realpos.vy + SCREENY_BORDER_RADIUS;
 
