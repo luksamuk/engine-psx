@@ -143,7 +143,10 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // Setup the timer to explode at double the time a Ballhog needs to
     // create a new bomb. This way we'll have a max of two bombs on screen
     state->timer--;
-    if(state->timer == 0) goto explode;
+    if(state->timer == 0) {
+        sound_play_vag(sfx_pop, 0);
+        goto explode;
+    }
 
     // When colliding with ground, bounce at a specific speed
     if(linecast(pos->vx, pos->vy - 8,
@@ -156,6 +159,7 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                                                CDIR_LWALL, 10, CDIR_FLOOR).collided)
        || ((state->freepos->spdx > 0) && linecast(pos->vx, pos->vy - 8,
                                                   CDIR_RWALL, 10, CDIR_FLOOR).collided)) {
+        sound_play_vag(sfx_pop, 0);
         goto explode;
     }
 
@@ -195,7 +199,6 @@ explode:
     explosion->freepos.vy = (pos->vy << 12);
     explosion->state.anim_state.animation = 0; // Small explosion
     state->props |= OBJ_FLAG_DESTROYED;
-    sound_play_vag(sfx_pop, 0);
 }
 
 // ===================================
