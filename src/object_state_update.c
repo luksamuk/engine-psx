@@ -68,6 +68,7 @@ static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 // Level-specific update functions
 extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
 extern void object_update_R2(ObjectState *, ObjectTableEntry *, VECTOR *);
+extern void object_update_R3(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 // Player hitbox information. Calculated once per frame.
 int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -146,6 +147,7 @@ level_specific_update:
     case 0: object_update_R0(state, typedata, pos); break; // Test Level
     case 1: break;
     case 2: object_update_R2(state, typedata, pos); break; // Green Hill
+    case 3: object_update_R3(state, typedata, pos); break; // Surely Wood
     }
 }
 

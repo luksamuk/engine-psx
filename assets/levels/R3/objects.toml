@@ -1,0 +1,45 @@
+[stegway]
+
+[[stegway.animations]]
+name = "Stopped"
+id = 0
+duration = 0
+loopback = 0
+frames = [[96, 0, 48, 32]]
+
+[[stegway.animations]]
+name = "Walking"
+id = 1
+duration = 7
+loopback = 0
+frames = [
+   [ 0,  0, 48, 32],
+   [ 0, 32, 48, 32],
+   [ 0,  0, 48, 32],
+   [ 0, 32, 48, 32],
+   
+   [ 0,  0, 48, 32],
+   [48, 32, 48, 32],
+   [96,  0, 48, 32],
+
+   [ 0, 32, 48, 32],
+   [ 0,  0, 48, 32],
+   [ 0, 32, 48, 32],
+   [ 0,  0, 48, 32],
+
+   [ 0, 32, 48, 32],
+   [48,  0, 48, 32],
+   [96, 32, 48, 32],
+]
+
+[[stegway.animations]]
+name = "Running"
+id = 2
+duration = 2
+loopback = 0
+frames = [
+    [144,  0, 48, 32],
+    [144, 32, 48, 32],
+]
+
+# ===============
