@@ -327,7 +327,7 @@ _draw_sensor(uint16_t anchorx, uint16_t anchory, LinecastDirection dir,
     setLineF2(line);
     setRGB0(line, r, g, b);
     setXY2(line, anchorx, anchory, endx, endy);
-    sort_prim(line, OTZ_LAYER_TOPMOST);
+    sort_prim(line, OTZ_LAYER_OBJECTS);
 }
 
 void
