@@ -18,6 +18,17 @@ extern uint32_t   level_score_count;
 
 extern SoundEffect sfx_pop;
 
+uint8_t
+object_should_despawn(ObjectState *state)
+{
+    // Despawn if too far from camera.
+    return
+        ((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
+         || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
+         || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
+         || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12)));
+}
+
 ObjectBehaviour
 enemy_spawner_update(ObjectState *state, VECTOR *pos)
 {
@@ -58,12 +69,8 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
         return OBJECT_SPAWNER_ABORT_BEHAVIOUR;
     }
 
-    // Despawn if too far from camera. Use a greater range to compensate
-    // the spawner
-    if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
-       || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
-       || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
-       || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12))) {
+    // Despawn if too far from camera.
+    if(object_should_despawn(state)) {
         return OBJECT_DESPAWN;
     }
 
@@ -104,4 +111,16 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
         }
     }
     return OBJECT_DO_NOTHING;
+}
+
+void
+hazard_player_interaction(RECT *hitbox, VECTOR *pos)
+{
+    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                       hitbox->x, hitbox->y, hitbox->w, hitbox->h))
+    {
+        if(player.action != ACTION_HURT && player.iframes == 0) {
+            player_do_damage(&player, pos->vx << 12);
+        }
+    }
 }

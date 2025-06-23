@@ -18,14 +18,16 @@
 #define STEGWAY_SIGHT_DISTANCE_Y      64
 
 #define BUZZBOMBER_PATROL_RADIUS   (128 << 12)
-#define BUZZBOMBER_AIMING_FRAMES    60
+#define BUZZBOMBER_AIMING_FRAMES   60
 #define BUZZBOMBER_SHOOT_COOLDOWN  180
 #define BUZZBOMBER_SHOOT_RADIUS    (96 << 12)
 #define BUZZBOMBER_FLIGHT_SPEED    (2 << 12)
+#define BUZZBOMBER_PROJECTILE_SPD  (2 << 12)
 
 // Update functions
 static void _stegway_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _buzzbomber_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _projectile_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 // Extern variables
 extern Player player;
@@ -42,6 +44,7 @@ object_update_R3(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     default: break;
     case OBJ_STEGWAY:    _stegway_update(state, typedata, pos);    break;
     case OBJ_BUZZBOMBER: _buzzbomber_update(state, typedata, pos); break;
+    case OBJ_PROJECTILE: _projectile_update(state, typedata, pos); break;
     }
 }
 
@@ -257,7 +260,15 @@ _buzzbomber_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
     // If finishing aiming, shoot.
     if(state->timer == 3) {
-        // TODO: Shoot projectile
+        PoolObject *projectile = object_pool_create(OBJ_PROJECTILE);
+        projectile->freepos.vx = (sign > 0)
+            ? state->freepos->vx - (10 << 12)
+            : state->freepos->vx + (10 << 12);
+        projectile->freepos.vy = state->freepos->vy;
+        projectile->freepos.spdx = (2 * sign) << 12;
+        projectile->freepos.spdy = 2 << 12;
+        projectile->state.flipmask = state->flipmask;
+        
         state->timer2 = BUZZBOMBER_SHOOT_COOLDOWN;
     }
     
@@ -281,4 +292,40 @@ _buzzbomber_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     if(state->timer == 0 || state->timer > 30) {
         state->anim_state.animation = 0;
     } else state->anim_state.animation = 1;
+}
+
+static void
+_projectile_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    (void)(typedata);
+    // A generic level projectile.
+    // This object should always be a free object and it also expects
+    // its speed to be well-defined.
+
+    if((state->freepos == NULL) || object_should_despawn(state)) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
+
+    // Setup player interaction hitbox.
+    // Default size is 16x16, and then handle edge cases.
+    RECT hitbox = {
+        .x = pos->vx - 8,
+        .y = pos->vy - 16,
+        .w = 16,
+        .h = 16,
+    };
+
+    // Edge case: buzzbomber
+    if(state->anim_state.animation == 0) {
+        int32_t sign = ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+        if(sign > 0) hitbox.x = pos->vx;
+        hitbox.y = pos->vy - 8;
+        hitbox.w = hitbox.h = 8;
+    }
+
+    hazard_player_interaction(&hitbox, pos);
+
+    state->freepos->vx += state->freepos->spdx;
+    state->freepos->vy += state->freepos->spdy;
 }
