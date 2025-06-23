@@ -146,5 +146,6 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         .w = 40,
         .h = 30
     };
-    enemy_player_interaction(state, &hitbox, pos);
+    if(enemy_player_interaction(state, &hitbox, pos) == OBJECT_DESPAWN)
+        return;
 }

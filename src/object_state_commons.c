@@ -72,7 +72,7 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
 }
 
 
-void
+ObjectBehaviour
 enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
 {
     if(aabb_intersects(player_vx, player_vy, player_width, player_height,
@@ -96,10 +96,12 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
             if(!player.grnd && player.vel.vy > 0) {
                 player.vel.vy *= -1;
             }
+            return OBJECT_DESPAWN;
         } else {
             if(player.action != ACTION_HURT && player.iframes == 0) {
                 player_do_damage(&player, pos->vx << 12);
             }
         }
     }
+    return OBJECT_DO_NOTHING;
 }

@@ -143,6 +143,7 @@ uint32_t   object_pool_get_count();
 #define OBJ_GRAVITY 0x00380
 
 typedef enum {
+    OBJECT_DO_NOTHING,
     OBJECT_SPAWNER_ABORT_BEHAVIOUR,
     OBJECT_SPAWNER_CREATE_FREE,
     OBJECT_UPDATE_AS_FREE,
@@ -150,6 +151,6 @@ typedef enum {
 } ObjectBehaviour;
 
 ObjectBehaviour enemy_spawner_update(ObjectState *state, VECTOR *pos);
-void            enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos);
+ObjectBehaviour enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos);
 
 #endif

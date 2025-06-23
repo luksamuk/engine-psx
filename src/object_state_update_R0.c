@@ -75,7 +75,8 @@ _ballhog_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         .w = 24,
         .h = 40,
     };
-    enemy_player_interaction(state, &hitbox, pos);
+    if(enemy_player_interaction(state, &hitbox, pos) == OBJECT_DESPAWN)
+        return;
 
     // Ballhog should throw a bomb if player is close enough
     // Further,
