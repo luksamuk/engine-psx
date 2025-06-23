@@ -134,4 +134,18 @@ void       object_pool_render(int32_t camera_x, int32_t camera_y);
 PoolObject *object_pool_create(ObjectType t); // ...you should probably not create objects with extra data.
 uint32_t   object_pool_get_count();
 
+
+/* ============================== */
+/*    COMMON OBJECT BEHAVIOUR     */
+/* ============================== */
+
+typedef enum {
+    OBJECT_SPAWNER_ABORT_BEHAVIOUR,
+    OBJECT_SPAWNER_CREATE_FREE,
+    OBJECT_UPDATE_AS_FREE,
+    OBJECT_DESPAWN,
+} ObjectBehaviour;
+
+ObjectBehaviour enemy_spawner_update(ObjectState *state, VECTOR *pos);
+
 #endif

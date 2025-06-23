@@ -23,8 +23,6 @@ extern uint8_t    level_act;
 
 // Object constants
 #define OBJ_GRAVITY 0x00380
-#define OBJ_MIN_SPAWN_DIST_X (CENTERX + (CENTERX >> 1))
-#define OBJ_MIN_SPAWN_DIST_Y (CENTERY + (CENTERY >> 1))
 
 // Object type enums
 #define OBJ_MOTOBUG (MIN_LEVEL_OBJ_GID + 0)
@@ -53,60 +51,47 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // (Notice that being out of the screen also relies on the fact that this
     // object will not be updated if it is too far away, since it will not fit
     // the static object update window)
-    if(state->freepos == NULL) {
-        state->anim_state.animation = OBJ_ANIMATION_NO_ANIMATION;
-        // Spawn free object WHEN too close to camera,
-        // but still far away from  play area itself!
-        if((state->parent == NULL) && // Spawned motobug is not on screen, and...
-            (
-                // Within outside boundary, and...
-                (pos->vx > (camera.pos.vx >> 12) - SCREEN_XRES)
-                && (pos->vx < (camera.pos.vx >> 12) + SCREEN_XRES)
-                && (pos->vy > (camera.pos.vy >> 12) - SCREEN_YRES)
-                && (pos->vy < (camera.pos.vy >> 12) + SCREEN_YRES)
-            ) && (
-                // Outside center screen
-                (pos->vx < (camera.pos.vx >> 12) - OBJ_MIN_SPAWN_DIST_X)
-                || (pos->vx > (camera.pos.vx >> 12) + OBJ_MIN_SPAWN_DIST_X)
-                || (pos->vy < (camera.pos.vy >> 12) - OBJ_MIN_SPAWN_DIST_Y)
-                || (pos->vy > (camera.pos.vy >> 12) + OBJ_MIN_SPAWN_DIST_Y)
-                )
-            )
-        {
-            PoolObject *self = object_pool_create(OBJ_MOTOBUG);
-            self->freepos.vx = pos->vx << 12;
-            self->freepos.vy = pos->vy << 12;
-            self->state.anim_state.animation = 0;
-            self->state.flipmask = state->flipmask;
-            self->state.timer = 0;
-            self->state.freepos->spdx = ONE * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+
+    // Common behaviour
+    {
+        PoolObject *self = NULL;
+        switch(enemy_spawner_update(state, pos)) {
+        case OBJECT_SPAWNER_CREATE_FREE:
+            self = object_pool_create(OBJ_MOTOBUG);
+
+            // Save a reference to the new motobug on this spawner.
+            state->parent = &self->state;
+
             // Save a reference to this spawner on new object. The "moving"
             // motobug, when de-spawned, recreates this spawner since the
             // Motobug hasn't been destroyed yet
             self->state.parent = state;
 
-            // Save a reference to the new motobug on this spawner.
-            // Finally, deactivate spawner
-            state->parent = &self->state;
-            state->props |= OBJ_FLAG_DESTROYED;
-        }
-        return;
-    }
+            // Initialize new motobug
+            self->state.flipmask = state->flipmask;
+            self->freepos.vx = pos->vx << 12;
+            self->freepos.vy = pos->vy << 12;
+            self->state.anim_state.animation = 0;
+            self->state.timer = 0;
+            self->state.freepos->spdx = ONE * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
 
-    // Despawn if too far from camera. Use a greater range to compensate
-    // the spawner
-    if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
-       || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
-       || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
-       || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12))) {
-        state->props |= OBJ_FLAG_DESTROYED;
-        // Reactivate parent
-        if(state->parent) {
-            state->parent->props &= ~OBJ_FLAG_DESTROYED;
-            // Remove reference to this object
-            state->parent->parent = NULL;
+            // Finally, deactivate spawner
+            state->props |= OBJ_FLAG_DESTROYED;
+            return; // Nothing more to do
+        case OBJECT_SPAWNER_ABORT_BEHAVIOUR:
+            return; // Nothing to do
+        case OBJECT_DESPAWN:
+            // Reactivate parent
+            if(state->parent) {
+                state->parent->anim_state.animation = OBJ_ANIMATION_NO_ANIMATION;
+                state->parent->props &= ~OBJ_FLAG_DESTROYED;
+                // Remove reference to this object
+                state->parent->parent = NULL;
+            }
+            state->props |= OBJ_FLAG_DESTROYED;
+            return; // Nothing more to do
+        case OBJECT_UPDATE_AS_FREE: break; // Just go ahead
         }
-        return;
     }
 
     // Collision
