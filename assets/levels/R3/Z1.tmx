@@ -253,7 +253,7 @@
    <object id="160" gid="75" x="2287" y="384" width="64" height="64"/>
   </objectgroup>
   <objectgroup id="5" name="LEVEL">
-   <object id="161" gid="2147483741" x="414" y="576" width="64" height="64"/>
+   <object id="161" gid="2147483741" x="768" y="640" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>
