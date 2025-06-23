@@ -39,6 +39,9 @@ _stegway_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     (void)(typedata);
 
+    if(typedata->has_fragment && state->freepos == NULL)
+        state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+
     // Most code here is kind of copied from R2's Motobug, except the Stegway
     // charges at you when you're near and doesn't turn on ledges
 
@@ -138,11 +141,18 @@ _stegway_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
     }
 
-    if(state->freepos->spdx == 0)
+    if(state->freepos->spdx == 0) {
         state->anim_state.animation = 0;
-    else if(abs(state->freepos->spdx) < (3 << 12))
+        state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+    }
+    else if(abs(state->freepos->spdx) < (3 << 12)) {
         state->anim_state.animation = 1;
-    else state->anim_state.animation = 2;
+        state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+    }
+    else {
+        state->anim_state.animation = 2;
+        state->frag_anim_state->animation = 0;
+    }
 
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy += state->freepos->spdy;
