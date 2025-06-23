@@ -12,6 +12,40 @@ version.
 - Changes to R0Z4
 - Remove CD-XA BGM playback engine
 - Add CD-DA BGM playback engine
+- Add Options screen
+- Add visual data for Dawn Canyon (R4)
+- Add script  for generating  128x128 tilemap  from pre-existing  Aseprite files
+  (chunkmapper.py)
+- Add an option to draw some levels in front of player
+- Add level-specific object positioning and rendering
+- Duplicate size of common and level-specific object textures with same palette
+- [R0] Add Ballhog enemy and bouncing bomb
+- Change level  and object rendering  to leverage global/extern  variables, thus
+  accelerating the rendering process
+- Add extra sound effects (bomb, goal sign, Knuckles climb/drop)
+- Change 1-Up sound to be agnostic to player character
+- Add ceiling collision to dropped rings
+- Change goal sign art style to match characters
+- Add boss loading routine
+- [R0] Add boss
+- Add routines to generate alternate palette for boss (when it is hit)
+- Fix animation fragment positioning when it is flipped
+- Make changes to camera so we have limits for boss arena
+- Limit player behaviour when camera is fixed on certain kinds of events
+- [R2] Add Motobug
+- Fix a bug with counting free objects on the scene
+- Redirect Sonic/Tails Test Level 3 redirect to title screen when completed
+- Rename known levels on level select
+- Fix camera Y movement on debug mode
+- Decrease camera max Y speed
+- Add per-character goal sign animations
+- Fix a bug  with accessing unbounded memory when free  objects had an animation
+  fragment
+- [R3] Add Stegway
+- Add abstractions  to enemy and  hazard behaviour (player  interaction, spawner
+  behaviour, despawn routines)
+- Fix player sensor rendering on debug mode
+- [R3] Add buzzbomber and buzzbomber projectile
 
 * v0.1 (2025-04-24)
 
