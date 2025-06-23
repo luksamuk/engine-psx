@@ -79,8 +79,10 @@ typedef struct OBJECT_STATE {
     uint8_t flipmask;
     uint16_t id;
     int16_t rx, ry; // Positions relative to chunk top-left corner
-    void    *extra;
     int16_t timer;
+    int16_t timer2;
+    int16_t _padding0; // Unused for now
+    void    *extra;
 
     ObjectAnimState anim_state;
     ObjectAnimState *frag_anim_state; // Only exists if fragment also exists

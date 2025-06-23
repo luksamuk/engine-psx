@@ -6,16 +6,26 @@
 #include "camera.h"
 #include <stdlib.h>
 
+// Object type enums
+#define OBJ_STEGWAY    (MIN_LEVEL_OBJ_GID + 0)
+#define OBJ_BUZZBOMBER (MIN_LEVEL_OBJ_GID + 1)
+#define OBJ_PROJECTILE (MIN_LEVEL_OBJ_GID + 2)
+
+
 // Object constants
-#define STEGWAY_SIGHT_DISTANCE_X     174
-#define STEGWAY_SIGHT_DISTANCE_MIN_X 150
+#define STEGWAY_SIGHT_DISTANCE_X      96
+#define STEGWAY_SIGHT_DISTANCE_MIN_X  (STEGWAY_SIGHT_DISTANCE_X - 24)
 #define STEGWAY_SIGHT_DISTANCE_Y      64
 
-// Object type enums
-#define OBJ_STEGWAY (MIN_LEVEL_OBJ_GID + 0)
+#define BUZZBOMBER_PATROL_RADIUS   (128 << 12)
+#define BUZZBOMBER_AIMING_FRAMES    60
+#define BUZZBOMBER_SHOOT_COOLDOWN  180
+#define BUZZBOMBER_SHOOT_RADIUS    (96 << 12)
+#define BUZZBOMBER_FLIGHT_SPEED    (2 << 12)
 
 // Update functions
 static void _stegway_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _buzzbomber_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 // Extern variables
 extern Player player;
@@ -30,7 +40,8 @@ object_update_R3(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     switch(state->id) {
     default: break;
-    case OBJ_STEGWAY: _stegway_update(state, typedata, pos); break;
+    case OBJ_STEGWAY:    _stegway_update(state, typedata, pos);    break;
+    case OBJ_BUZZBOMBER: _buzzbomber_update(state, typedata, pos); break;
     }
 }
 
@@ -81,8 +92,9 @@ _stegway_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         .w = 48,
         .h = 32,
     };
-    if(enemy_player_interaction(state, &hitbox, pos) == OBJECT_DESPAWN)
+    if(enemy_player_interaction(state, &hitbox, pos) == OBJECT_DESPAWN) {
         return;
+    }
 
     CollisionEvent grn = linecast(pos->vx, pos->vy - 16, CDIR_FLOOR, 16, CDIR_FLOOR);
     if(!grn.collided) {
@@ -156,4 +168,117 @@ _stegway_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy += state->freepos->spdy;
+}
+
+
+static void
+_buzzbomber_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    (void)(typedata);
+
+    if(typedata->has_fragment && state->freepos == NULL)
+        state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+
+    // Spawner behaviour
+    {
+        PoolObject *self = NULL;
+        switch(enemy_spawner_update(state, pos)) {
+        default: return; // ???????
+        case OBJECT_SPAWNER_CREATE_FREE:
+            self = object_pool_create(OBJ_BUZZBOMBER);
+
+            state->parent = &self->state;
+            self->state.parent = state;
+
+            self->state.flipmask = state->flipmask;
+            self->freepos.vx = pos->vx << 12;
+            self->freepos.vy = pos->vy << 12;
+            self->freepos.rx = pos->vx << 12;
+            self->freepos.ry = pos->vy << 12;
+            self->state.timer = 0;
+            self->state.timer2 = 0;
+
+            state->props |= OBJ_FLAG_DESTROYED;
+            self->state.freepos->spdx = BUZZBOMBER_FLIGHT_SPEED * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+            return;
+        case OBJECT_SPAWNER_ABORT_BEHAVIOUR: return;
+        case OBJECT_DESPAWN:
+            if(state->parent) {
+                state->parent->props &= ~OBJ_FLAG_DESTROYED;
+                state->parent->parent = NULL;
+            }
+            state->props |= OBJ_FLAG_DESTROYED;
+            return;
+        case OBJECT_UPDATE_AS_FREE: break;
+        }
+    }
+
+    int32_t sign = ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+
+    // Patrol movement.
+    // Move left and right at constant speed. Distance is calculated from
+    // relative position, which is treated as anchor position (rx and ry).
+    if(state->timer == 0) {
+        if(((sign < 0) && (state->freepos->vx < state->freepos->rx - BUZZBOMBER_PATROL_RADIUS))
+           || ((sign > 0) && (state->freepos->vx > state->freepos->rx + BUZZBOMBER_PATROL_RADIUS))) {
+            state->flipmask ^= MASK_FLIP_FLIPX;
+            sign *= -1;
+        }
+        state->freepos->spdx = BUZZBOMBER_FLIGHT_SPEED * sign;
+
+        state->freepos->vx += state->freepos->spdx;
+        state->freepos->vy += state->freepos->spdy;
+    }
+
+    // Shooting at the player.
+    // Shooting is always diagonal, and we have two timers.
+    // "state->timer" is a cooldown where the buzzbomber will shoot at the end.
+    // "state->timer2" is a cooldown for shooting in general, so we don't have
+    // too many particles on screen.
+    if(state->timer > 0) state->timer--;
+
+    if(state->timer2 > 0) {
+        state->timer2--;
+    } else if(state->timer == 0) {
+        // Check for player and aim
+        int32_t shoot_min_x, shoot_max_x;
+        if(sign < 0) {
+            shoot_min_x = state->freepos->vx - BUZZBOMBER_SHOOT_RADIUS;
+            shoot_max_x = state->freepos->vx;
+        } else {
+            shoot_min_x = state->freepos->vx;
+            shoot_max_x = state->freepos->vx + BUZZBOMBER_SHOOT_RADIUS;
+        }
+
+        if(player.pos.vx >= shoot_min_x && player.pos.vx <= shoot_max_x) {
+            state->timer = BUZZBOMBER_AIMING_FRAMES;
+        }
+    }
+
+    // If finishing aiming, shoot.
+    if(state->timer == 3) {
+        // TODO: Shoot projectile
+        state->timer2 = BUZZBOMBER_SHOOT_COOLDOWN;
+    }
+    
+
+    // Hitbox is 48x16 when flying
+    // But is 40x32 when attacking
+    RECT hitbox = {
+        .x = pos->vx - 24,
+        .y = pos->vy - 32,
+        .w = 48,
+        .h = 16,
+    };
+    if(state->anim_state.animation == 1) {
+        hitbox.h = 24;
+    }
+    if(enemy_player_interaction(state, &hitbox, pos) == OBJECT_DESPAWN) {
+        return;
+    }
+
+    // Animation
+    if(state->timer == 0 || state->timer > 30) {
+        state->anim_state.animation = 0;
+    } else state->anim_state.animation = 1;
 }

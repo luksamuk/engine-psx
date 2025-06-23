@@ -56,3 +56,47 @@ frames = [
 ]
 
 # ===============
+
+[buzzbomber]
+
+[[buzzbomber.animations]]
+name = "Flying"
+id = 0
+duration = 0
+loopback = 0
+frames = [[0, 64, 48, 32]]
+
+[[buzzbomber.animations]]
+name = "Attacking"
+id = 1
+duration = 0
+loopback = 0
+frames = [[48, 64, 48, 32]]
+
+[buzzbomber.fragment]
+offset = [-6, -24]
+
+[[buzzbomber.fragment.animations]]
+id = 0
+name = "fire"
+duration = 4
+loopback = 0
+frames = [
+    [96, 64, 8, 8],
+    [96, 72, 8, 8],
+]
+
+# ===============
+
+[projectile]
+
+[[projectile.animations]]
+name = "buzzbomber_fire"
+id = 0
+duration = 4
+loopback = 0
+frames = [
+    [104, 64, 16, 16],
+    [104, 80, 16, 16],
+]
+
