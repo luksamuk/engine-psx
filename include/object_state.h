@@ -2,6 +2,7 @@
 #define OBJECT_STATE_H
 
 #include <stdint.h>
+#include <psxgpu.h>
 #include <psxgte.h>
 
 #include "object.h"
@@ -139,6 +140,8 @@ uint32_t   object_pool_get_count();
 /*    COMMON OBJECT BEHAVIOUR     */
 /* ============================== */
 
+#define OBJ_GRAVITY 0x00380
+
 typedef enum {
     OBJECT_SPAWNER_ABORT_BEHAVIOUR,
     OBJECT_SPAWNER_CREATE_FREE,
@@ -147,5 +150,6 @@ typedef enum {
 } ObjectBehaviour;
 
 ObjectBehaviour enemy_spawner_update(ObjectState *state, VECTOR *pos);
+void            enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos);
 
 #endif

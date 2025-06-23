@@ -21,8 +21,6 @@ extern uint32_t   level_score_count;
 extern uint8_t    level_round;
 extern uint8_t    level_act;
 
-// Object constants
-#define OBJ_GRAVITY 0x00380
 
 // Object type enums
 #define OBJ_MOTOBUG (MIN_LEVEL_OBJ_GID + 0)
@@ -56,6 +54,7 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     {
         PoolObject *self = NULL;
         switch(enemy_spawner_update(state, pos)) {
+        default: return; // ???????
         case OBJECT_SPAWNER_CREATE_FREE:
             self = object_pool_create(OBJ_MOTOBUG);
 
@@ -83,7 +82,6 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         case OBJECT_DESPAWN:
             // Reactivate parent
             if(state->parent) {
-                state->parent->anim_state.animation = OBJ_ANIMATION_NO_ANIMATION;
                 state->parent->props &= ~OBJ_FLAG_DESTROYED;
                 // Remove reference to this object
                 state->parent->parent = NULL;
@@ -142,33 +140,11 @@ _motobug_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     state->freepos->vy += state->freepos->spdy;
 
     // Hitbox and interaction with player
-    int32_t hitbox_vx = pos->vx - 20;
-    int32_t hitbox_vy = pos->vy - 30;
-    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                       hitbox_vx, hitbox_vy, 40, 30))
-    {
-        if(player_attacking) {
-            state->props |= OBJ_FLAG_DESTROYED;
-            if(state->parent) {
-                state->parent->props |= OBJ_FLAG_DESTROYED;
-                state->parent->parent = NULL;
-            }
-            level_score_count += 100;
-            sound_play_vag(sfx_pop, 0);
-
-            // Explosion
-            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
-            explosion->freepos.vx = (pos->vx << 12);
-            explosion->freepos.vy = (pos->vy << 12);
-            explosion->state.anim_state.animation = 0; // Small explosion
-
-            if(!player.grnd && player.vel.vy > 0) {
-                player.vel.vy *= -1;
-            }
-        } else {
-            if(player.action != ACTION_HURT && player.iframes == 0) {
-                player_do_damage(&player, pos->vx << 12);
-            }
-        }
-    }
+    RECT hitbox = {
+        .x = pos->vx - 20,
+        .y = pos->vy - 30,
+        .w = 40,
+        .h = 30
+    };
+    enemy_player_interaction(state, &hitbox, pos);
 }

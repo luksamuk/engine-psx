@@ -2,11 +2,21 @@
 #include "object_state.h"
 #include "camera.h"
 #include "render.h"
+#include "sound.h"
 
 #define OBJ_MIN_SPAWN_DIST_X (CENTERX + (CENTERX >> 1))
 #define OBJ_MIN_SPAWN_DIST_Y (CENTERY + (CENTERY >> 1))
 
+extern Player player;
 extern Camera camera;
+extern int32_t player_vx, player_vy; // Top left corner of player hitbox
+extern uint8_t player_attacking;
+extern int32_t player_width;
+extern int32_t player_height;
+
+extern uint32_t   level_score_count;
+
+extern SoundEffect sfx_pop;
 
 ObjectBehaviour
 enemy_spawner_update(ObjectState *state, VECTOR *pos)
@@ -59,4 +69,37 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
 
     // Otherwise this is a free object that should be updated
     return OBJECT_UPDATE_AS_FREE;
+}
+
+
+void
+enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
+{
+    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                       hitbox->x, hitbox->y, hitbox->w, hitbox->h))
+    {
+        if(player_attacking) {
+            state->props |= OBJ_FLAG_DESTROYED;
+            if(state->parent) {
+                state->parent->props |= OBJ_FLAG_DESTROYED;
+                state->parent->parent = NULL;
+            }
+            level_score_count += 100;
+            sound_play_vag(sfx_pop, 0);
+
+            // Explosion
+            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+            explosion->freepos.vx = (pos->vx << 12);
+            explosion->freepos.vy = (pos->vy << 12);
+            explosion->state.anim_state.animation = 0; // Small explosion
+
+            if(!player.grnd && player.vel.vy > 0) {
+                player.vel.vy *= -1;
+            }
+        } else {
+            if(player.action != ACTION_HURT && player.iframes == 0) {
+                player_do_damage(&player, pos->vx << 12);
+            }
+        }
+    }
 }

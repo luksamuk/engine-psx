@@ -68,31 +68,14 @@ _ballhog_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         ? MASK_FLIP_FLIPX
         : 0;
 
-    // Calculate hitbox
-    int32_t hitbox_vx = pos->vx - 12;
-    int32_t hitbox_vy = pos->vy - 40;
-    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                       hitbox_vx, hitbox_vy, 24, 40))
-    {
-        if(player_attacking) {
-            state->props |= OBJ_FLAG_DESTROYED;
-            level_score_count += 100;
-            sound_play_vag(sfx_pop, 0);
-
-            // Explosion
-            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
-            explosion->freepos.vx = (pos->vx << 12);
-            explosion->freepos.vy = (pos->vy << 12);
-            explosion->state.anim_state.animation = 0; // Small explosion
-            if(!player.grnd && player.vel.vy > 0) {
-                player.vel.vy *= -1;
-            }
-        } else {
-            if(player.action != ACTION_HURT && player.iframes == 0) {
-                player_do_damage(&player, pos->vx << 12);
-            }
-        }
-    }
+    // Player interaction
+    RECT hitbox = {
+        .x = pos->vx - 12,
+        .y = pos->vy - 40,
+        .w = 24,
+        .h = 40,
+    };
+    enemy_player_interaction(state, &hitbox, pos);
 
     // Ballhog should throw a bomb if player is close enough
     // Further,
