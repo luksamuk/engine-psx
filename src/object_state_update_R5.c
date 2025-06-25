@@ -12,15 +12,30 @@
 
 // Object constants
 #define BUBBLERSMOTHER_PATROL_RADIUS    (128 << 12)
-#define BUBBLERSMOTHER_SWIM_SPEED             0x800
+#define BUBBLERSMOTHER_SWIM_SPEED           0x00800
 #define BUBBLERSMOTHER_WOBBLE_SPEED         0x00040
 #define BUBBLERSMOTHER_WOBBLE_RADIUS              8
 #define BUBBLERSMOTHER_FIRST_BUBBLER_INTERVAL    30
 #define BUBBLERSMOTHER_BUBBLER_INTERVAL          90
 
+
+#define BUBBLER_ANIM_SEED           0
+#define BUBBLER_ANIM_BUBBLING       1
+#define BUBBLER_ANIM_POISON_GAS     2
+#define BUBBLER_ANIM_DISSOLVE       3
+
+#define BUBBLER_SEED_WOBBLE_SPEED    0x00030
+#define BUBBLER_SEED_WOBBLE_RADIUS         4
+#define BUBBLER_SEED_FALL_SPEED      0x00800
+#define BUBBLER_BUBBLING_MAX_FRAME         5
+#define BUBBLER_POISONGAS_RISE_SPEED 0x00800
+#define BUBBLER_POISONGAS_INTERVAL        60
+#define BUBBLER_DISSOLVE_INTERVAL          7
+
+
 // Update functions
 static void _bubblersmother_update(ObjectState *, ObjectTableEntry *, VECTOR *);
-//static void _bubbler_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _bubbler_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 void
 object_update_R5(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -28,6 +43,7 @@ object_update_R5(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     switch(state->id) {
     default: break;
     case OBJ_BUBBLERSMOTHER: _bubblersmother_update(state, typedata, pos); break;
+    case OBJ_BUBBLER:        _bubbler_update(state, typedata, pos);        break;
     }
 }
 
@@ -89,7 +105,17 @@ _bubblersmother_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
     if(state->timer > 0) state->timer--;
     else {
         state->timer = BUBBLERSMOTHER_BUBBLER_INTERVAL;
-        // TODO: Drop a bubbler
+        
+        // Drop a bubbler
+        PoolObject *bubbler = object_pool_create(OBJ_BUBBLER);
+        bubbler->freepos.rx = bubbler->freepos.vx = (sign > 0)
+            ? state->freepos->vx - (6 << 12)
+            : state->freepos->vx + (6 << 12);
+        bubbler->freepos.ry = bubbler->freepos.vy =
+            state->freepos->vy - (7 << 12);
+        bubbler->state.anim_state.animation = BUBBLER_ANIM_SEED;
+        bubbler->state.flipmask = state->flipmask;
+        bubbler->state.timer = 0;
     }
 
     // Wobble using a senoid
@@ -98,4 +124,67 @@ _bubblersmother_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
 
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy = state->freepos->ry + wobble;
+}
+#include <stdio.h>
+static void
+_bubbler_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    // Bubblers are usually not created on their own, so we'll just go ahead
+    // and destroy any statically-placed bubbler
+    if((state->freepos == NULL) || object_should_despawn(state)) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
+
+    if(state->anim_state.animation == BUBBLER_ANIM_SEED) {
+        // Fall at constant speed until reaching the ocean bed
+        state->timer += BUBBLER_SEED_WOBBLE_SPEED;
+        int32_t wobble = rsin(state->timer >> 1) * BUBBLER_SEED_WOBBLE_RADIUS;
+        state->freepos->vx = state->freepos->rx  + wobble;
+        state->freepos->spdy = BUBBLER_SEED_FALL_SPEED;
+        state->freepos->vy += state->freepos->spdy;
+
+        CollisionEvent grn = linecast(pos->vx, pos->vy - 4, CDIR_FLOOR, 4, CDIR_FLOOR);
+        if(grn.collided) {
+            // Move on to bubbling phase
+            state->freepos->vy = grn.coord << 12;
+            state->freepos->spdy = 0;
+            state->timer = 0;
+            state->anim_state.animation = BUBBLER_ANIM_BUBBLING;
+            state->anim_state.frame = 0;
+        }
+    }
+    
+    else if(state->anim_state.animation == BUBBLER_ANIM_BUBBLING) {
+        // TODO: Make interactable here
+        
+        if(state->anim_state.frame == BUBBLER_BUBBLING_MAX_FRAME) {
+            state->anim_state.animation = BUBBLER_ANIM_POISON_GAS;
+            state->anim_state.frame = 0;
+            state->timer = BUBBLER_POISONGAS_INTERVAL;
+        }
+    }
+
+    else if(state->anim_state.animation == BUBBLER_ANIM_POISON_GAS) {
+        state->freepos->spdy = -BUBBLER_POISONGAS_RISE_SPEED;
+        state->freepos->vy += state->freepos->spdy;
+
+        // TODO: Hurt player, like a hazard
+        
+        if(state->timer > 0) state->timer--;
+        else {
+            state->anim_state.animation = BUBBLER_ANIM_DISSOLVE;
+            state->anim_state.frame = 0;
+            state->timer = BUBBLER_DISSOLVE_INTERVAL;
+        }
+    }
+
+    else if(state->anim_state.animation == BUBBLER_ANIM_DISSOLVE) {
+        // Same as poison gas but doesn't hurt
+        state->freepos->spdy = -BUBBLER_POISONGAS_RISE_SPEED;
+        state->freepos->vy += state->freepos->spdy;
+        if(state->timer > 0) state->timer--;
+        else state->props |= OBJ_FLAG_DESTROYED;
+        
+    }
 }

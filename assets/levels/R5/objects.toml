@@ -40,7 +40,7 @@ frames = [
 [[bubbler.animations]]
 name = "Bubbling"
 id = 1
-duration = 16
+duration = 6
 loopback = 5
 frames = [
     [ 0, 40,  8,  8],
