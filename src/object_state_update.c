@@ -69,6 +69,7 @@ static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
 extern void object_update_R2(ObjectState *, ObjectTableEntry *, VECTOR *);
 extern void object_update_R3(ObjectState *, ObjectTableEntry *, VECTOR *);
+extern void object_update_R5(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 // Player hitbox information. Calculated once per frame.
 int32_t player_vx, player_vy; // Top left corner of player hitbox
@@ -145,9 +146,14 @@ level_specific_update:
     switch(round) {
     default: break;
     case 0: object_update_R0(state, typedata, pos); break; // Test Level
-    case 1: break;
     case 2: object_update_R2(state, typedata, pos); break; // Green Hill
     case 3: object_update_R3(state, typedata, pos); break; // Surely Wood
+    case 4: break;                                         // Dawn Canyon
+    case 5: object_update_R5(state, typedata, pos); break; // Amazing Ocean
+    case 6: break;                                         // R6
+    case 7: break;                                         // R7
+    case 8: break;                                         // Eggmanland
+    case 9: break;                                         // Windmill Isle
     }
 }
 

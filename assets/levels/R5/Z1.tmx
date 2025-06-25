@@ -39,7 +39,7 @@
 </data>
  </layer>
  <group id="2" name="OBJECTS">
-  <objectgroup id="3" name="COMMON">
+  <objectgroup id="3" name="COMMON" locked="1">
    <object id="3" gid="89" x="2912" y="848" width="64" height="64" rotation="-90"/>
    <object id="5" gid="87" x="3055" y="832" width="64" height="64"/>
    <object id="6" gid="87" x="3087" y="832" width="64" height="64"/>
@@ -158,12 +158,12 @@
    <object id="160" gid="89" x="7632" y="896" width="64" height="64"/>
    <object id="161" gid="86" x="8273" y="1344" width="64" height="64">
     <properties>
-     <property name="Kind" value="1UP"/>
+     <property name="Kind" value="RING"/>
     </properties>
    </object>
    <object id="162" gid="86" x="8305" y="1312" width="64" height="64">
     <properties>
-     <property name="Kind" value="1UP"/>
+     <property name="Kind" value="RING"/>
     </properties>
    </object>
    <object id="163" gid="86" x="8337" y="1312" width="64" height="64">
@@ -213,10 +213,10 @@
    <object id="196" gid="85" x="7215" y="968" width="64" height="64"/>
   </objectgroup>
   <objectgroup id="4" name="LEVEL">
-   <object id="198" gid="2147483753" x="2746" y="1112" width="64" height="64"/>
+   <object id="198" gid="2147483753" x="2716" y="1082" width="64" height="64"/>
    <object id="199" gid="2147483753" x="3504" y="826" width="64" height="64"/>
    <object id="200" gid="105" x="4664" y="964" width="64" height="64"/>
-   <object id="202" gid="2147483753" x="5464" y="1024" width="64" height="64"/>
+   <object id="202" gid="2147483753" x="5434" y="1014" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>
