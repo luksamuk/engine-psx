@@ -49,8 +49,8 @@ typedef struct {
 static const char *menutext[] = {
     "TEST LEVEL    1",
     "              2",
-    "              3",
-    "              3K",
+    "              3A",
+    "              3B",
     "GREEN HILL    1",
     "              2",
     "SURELY WOOD   1",
@@ -77,7 +77,7 @@ static const char *menutext[] = {
     "OPTIONS",
     "SPRITE TEST",
     "MODEL TEST",
-    "TITLESCREEN",
+    "TITLE SCREEN",
     "CREDITS",
     NULL,
 };
@@ -244,6 +244,15 @@ screen_levelselect_update(void *d)
         } else if(data->menu_choice == CHOICE_CHARACTER) {
             // Do nothing
         } else {
+            // Select a level
+
+            // When selecting Test Level A or B, check character
+            if(data->menu_choice == 2 && data->character_selection == CHARA_KNUCKLES) {
+                data->character_selection = CHARA_SONIC;
+            } else if(data->menu_choice == 3) {
+                data->character_selection = CHARA_KNUCKLES;
+            }
+
             screen_level_setlevel(data->menu_choice);
             screen_level_setmode(LEVEL_MODE_NORMAL);
             screen_level_setcharacter(data->character_selection);
