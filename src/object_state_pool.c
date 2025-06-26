@@ -84,10 +84,6 @@ object_pool_create(ObjectType t)
 {
     for(uint32_t i = 0; i < OBJECT_POOL_SIZE; i++) {
         if(_object_pool[i].props & OBJ_FLAG_DESTROYED) {
-            /* ObjectTableEntry *entry = (t >= MIN_LEVEL_OBJ_GID) */
-            /*     ? &obj_table_level.entries[t - MIN_LEVEL_OBJ_GID] */
-            /*     : &obj_table_common.entries[t]; */
-            
             // Prepare object for usage
             _object_pool[i] = (PoolObject){ 0 };
             _object_pool[i].props |= OBJ_FLAG_FREE_OBJECT;
