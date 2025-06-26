@@ -303,25 +303,26 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         if((state->timer < 0) && (screen_level_getstate() == 2)) {
             screen_level_setstate(3);
         } else if(screen_level_getstate() == 4) {
+            // TODO: THIS NEEDS TO BE REFACTORED AND MOVED TO SOMEWHERE ELSE.
             uint8_t lvl = screen_level_getlevel();
             if(lvl == 2 || lvl == 3) {
                 // Finished engine test
                 scene_change(SCREEN_TITLE);
-            } else if(lvl < 10) {
+            } else if(lvl != 4) {
                 // If on test level 2 and our character is Knuckles...
                 // Go to test level 4 (also an act 3)
                 if(lvl == 1) {
                     if(screen_level_getcharacter() == CHARA_KNUCKLES) {
                         screen_level_setlevel(3);
                     } else screen_level_setlevel(2);
-                } else if((lvl == 2) || (lvl == 3)) {
-                    // On act 3 (sonic and tails) or act 4 (knuckles), jump
-                    // to SWZ
-                    screen_level_setlevel(4);
                 } else if(lvl == 6) {
                     // Transition from SWZ1 to AOZ1
                     // TODO: THIS IS TEMPORARY
                     screen_level_setlevel(10);
+                } else if(lvl == 10) {
+                    // Transition from AOZ1 to GHZ1
+                    // TODO: THIS IS TEMPORARY
+                    screen_level_setlevel(4);
                 } else screen_level_setlevel(lvl + 1);
                 scene_change(SCREEN_LEVEL);
             } else {
