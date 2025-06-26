@@ -46,6 +46,12 @@ version.
   behaviour, despawn routines)
 - Fix player sensor rendering on debug mode
 - [R3] Add buzzbomber and buzzbomber projectile
+- [R5] Add Bubbler's Mother and Bubbler enemies
+- [R5] Add Gator enemy
+- Enforce or forbid Knuckles when accessing certain Test Levels
+- Change "Engine Test" option to "Play Test Levels" on title screen
+- Fix autodemos to showcase Sonic, Tails and Knuckles
+- Change levels sequence for the next demo
 
 * v0.1 (2025-04-24)
 
