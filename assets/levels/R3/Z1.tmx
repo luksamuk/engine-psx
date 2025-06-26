@@ -260,7 +260,6 @@
    </object>
   </objectgroup>
   <objectgroup id="5" name="LEVEL">
-   <object id="161" gid="2147483741" x="1280" y="640" width="64" height="64"/>
    <object id="163" gid="93" x="1842" y="832" width="64" height="64"/>
    <object id="164" gid="93" x="2432" y="512" width="64" height="64"/>
    <object id="165" gid="2147483741" x="4352" y="256" width="64" height="64"/>
