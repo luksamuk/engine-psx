@@ -9,6 +9,7 @@
 // Object type enums
 #define OBJ_BUBBLERSMOTHER (MIN_LEVEL_OBJ_GID + 0)
 #define OBJ_BUBBLER        (MIN_LEVEL_OBJ_GID + 1)
+#define OBJ_GATOR          (MIN_LEVEL_OBJ_GID + 2)
 
 // Object constants
 #define BUBBLERSMOTHER_PATROL_RADIUS    (128 << 12)

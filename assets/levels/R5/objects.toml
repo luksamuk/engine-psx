@@ -65,3 +65,41 @@ duration = 0
 loopback = 0
 frames = [[24, 64, 16, 16]]
 
+# ===============
+
+[gator]
+
+[[gator.animations]]
+name = "Idle"
+id = 0
+duration = 0
+loopback = 0
+frames = [[40, 0, 56, 32]]
+
+[[gator.animations]]
+name = "JawOpen"
+id = 1
+duration = 0
+loopback = 0
+frames = [[40, 32, 56, 32]]
+
+[gator.fragment]
+offset = [-16, 0]
+
+[[gator.fragment.animations]]
+name = "Stopped"
+id = 0
+duration = 0
+loopback = 0
+frames = [[96, 0, 24, 16]]
+
+[[gator.fragment.animations]]
+name = "Walking"
+id = 1
+duration = 7
+loopback = 0
+frames = [
+    [96,  0, 24, 16],
+    [96, 16, 24, 16],
+    [96, 32, 24, 16],
+]

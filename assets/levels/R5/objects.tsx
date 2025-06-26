@@ -3,4 +3,5 @@
  <image source="obj_designtiles.png" width="256" height="64"/>
  <tile id="0" type="bubblers_mother"/>
  <tile id="1" type="bubbler"/>
+ <tile id="2" type="gator"/>
 </tileset>
