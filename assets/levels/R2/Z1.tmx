@@ -130,7 +130,7 @@
    <object id="107" gid="151" x="4892.97" y="187.553" width="64" height="64"/>
    <object id="108" gid="151" x="4871.97" y="200.886" width="64" height="64"/>
    <object id="109" gid="151" x="4914.97" y="200.886" width="64" height="64"/>
-   <object id="110" gid="2147483796" x="5007.97" y="258.761" width="64" height="64"/>
+   <object id="110" gid="2147483796" x="5008" y="259" width="64" height="64"/>
    <object id="111" gid="151" x="5201.5" y="669.667" width="64" height="64"/>
    <object id="112" gid="151" x="5201.5" y="598.333" width="64" height="64"/>
    <object id="113" gid="151" x="5180.5" y="611.666" width="64" height="64"/>
