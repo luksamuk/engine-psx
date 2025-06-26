@@ -122,6 +122,17 @@ _bubblersmother_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
     state->timer2 += BUBBLERSMOTHER_WOBBLE_SPEED;
     int32_t wobble = rsin(state->timer2 >> 1) * BUBBLERSMOTHER_WOBBLE_RADIUS;
 
+    // Player interaction
+    RECT hitbox = {
+        .x = pos->vx - 16,
+        .y = pos->vy - 4 - 24,
+        .w = 32,
+        .h = 24,
+    };
+    if(enemy_player_interaction(state, &hitbox, pos) == OBJECT_DESPAWN) {
+        return;
+    }
+
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy = state->freepos->ry + wobble;
 }
@@ -156,7 +167,16 @@ _bubbler_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     }
     
     else if(state->anim_state.animation == BUBBLER_ANIM_BUBBLING) {
-        // TODO: Make interactable here
+        // Bubbler can only be killed when bubbling
+        RECT hitbox = {
+            .x = pos->vx - 8,
+            .y = pos->vy - 16,
+            .w = 16,
+            .h = 16,
+        };
+        if(enemy_player_interaction(state, &hitbox, pos) == OBJECT_DESPAWN) {
+            return;
+        }
         
         if(state->anim_state.frame == BUBBLER_BUBBLING_MAX_FRAME) {
             state->anim_state.animation = BUBBLER_ANIM_POISON_GAS;
@@ -169,7 +189,14 @@ _bubbler_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         state->freepos->spdy = -BUBBLER_POISONGAS_RISE_SPEED;
         state->freepos->vy += state->freepos->spdy;
 
-        // TODO: Hurt player, like a hazard
+        // Hurt player, like a hazard
+        RECT hitbox = {
+            .x = pos->vx - 12,
+            .y = pos->vy - 16,
+            .w = 24,
+            .h = 16,
+        };
+        hazard_player_interaction(&hitbox, pos);
         
         if(state->timer > 0) state->timer--;
         else {
