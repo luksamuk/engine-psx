@@ -30,7 +30,7 @@ typedef struct {
 static const char *title_text[] = {
     "PRESS START",
 
-    "ENGINE TEST",
+    "PLAY TEST LEVELS",
     "START GAME",
     "LEVEL SELECT",
     "OPTIONS",
