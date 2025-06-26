@@ -26,6 +26,7 @@ _load_animation(ObjectAnim *animation, uint8_t *bytes, uint32_t *b)
             frame->w = get_byte(bytes, b);
             frame->h = get_byte(bytes, b);
             frame->flipmask = get_byte(bytes, b);
+            frame->tpage = get_byte(bytes, b);
         }
     }
 }
@@ -55,6 +56,7 @@ load_object_table(const char *filename, ObjectTable *tbl)
 
     for(uint16_t i = 0; i < tbl->num_entries; i++) {
         ObjectTableEntry *entry = &tbl->entries[i];
+        entry->is_level_specific = tbl->is_level_specific;
         entry->animations = NULL;
         entry->fragment = NULL;
 
@@ -62,7 +64,7 @@ load_object_table(const char *filename, ObjectTable *tbl)
         uint8_t _id = get_byte(bytes, &b);                          (void)(_id);
         /* printf("Load object 0x%04x\n", _id); */
 
-        uint8_t has_fragment = get_byte(bytes, &b);
+        entry->has_fragment = get_byte(bytes, &b);
         entry->num_animations = get_short_be(bytes, &b);
 
         if(entry->num_animations > 0) {
@@ -76,7 +78,7 @@ load_object_table(const char *filename, ObjectTable *tbl)
             }
         }
 
-        if(has_fragment) {
+        if(entry->has_fragment) {
             ObjectFrag *fragment = alloc_arena_malloc(
                 &_level_arena,
                 sizeof(ObjectFrag));

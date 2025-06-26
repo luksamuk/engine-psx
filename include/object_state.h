@@ -2,6 +2,7 @@
 #define OBJECT_STATE_H
 
 #include <stdint.h>
+#include <psxgpu.h>
 #include <psxgte.h>
 
 #include "object.h"
@@ -56,6 +57,9 @@ typedef struct {
     uint8_t  counter;
 } ObjectAnimState;
 
+// Forward declaration
+typedef struct OBJECT_STATE ObjectState;
+
 typedef struct {
     // World XY position
     int32_t vx;
@@ -70,17 +74,22 @@ typedef struct {
     int32_t ry;
 } ObjectFreePos;
 
-typedef struct {
+typedef struct OBJECT_STATE {
     uint8_t props; // IMPORTANT: DO NOT MOVE THIS FIELD.
     uint8_t flipmask;
     uint16_t id;
     int16_t rx, ry; // Positions relative to chunk top-left corner
-    void    *extra;
     int16_t timer;
+    int16_t timer2;
+    int16_t _padding0; // Unused for now
+    void    *extra;
 
     ObjectAnimState anim_state;
     ObjectAnimState *frag_anim_state; // Only exists if fragment also exists
     ObjectFreePos *freepos; // Only exists if object lives in object pool
+
+    // Pointer to parent entity (NULL unless manually set!)
+    ObjectState *parent;
 } ObjectState;
 
 typedef struct {
@@ -97,11 +106,11 @@ void object_render(ObjectState *state, ObjectTableEntry *typedata,
 // ATTENTION: "pos" does not influence in object position, ever.
 // If the current object lives in object pool and can freely be moved, alter
 // its position and speed by using the 'freepos' field.
-void object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos);
+void object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8_t round);
 
 
 /* ============================== */
-/* OBJECTS OWNED BY OBJECT POOL */
+/* OBJECTS OWNED BY OBJECT POOL   */
 /* ============================== */
 
 // A single ring loss is at least 32 rings, so this is our minimum!
@@ -118,13 +127,34 @@ typedef struct {
         uint8_t props; // IMPORTANT: DO NOT MOVE THIS FIELD.
         ObjectState state;
     };
-    ObjectFreePos freepos;
+    ObjectFreePos   freepos;
+    ObjectAnimState frag_state; // Always allocated
 } PoolObject;
 
 void       object_pool_init();
-void       object_pool_update();
-void       object_pool_render(ObjectTable *tbl, int32_t camera_x, int32_t camera_y);
+void       object_pool_update(uint8_t round);
+void       object_pool_render(int32_t camera_x, int32_t camera_y);
 PoolObject *object_pool_create(ObjectType t); // ...you should probably not create objects with extra data.
 uint32_t   object_pool_get_count();
+
+
+/* ============================== */
+/*    COMMON OBJECT BEHAVIOUR     */
+/* ============================== */
+
+#define OBJ_GRAVITY 0x00380
+
+typedef enum {
+    OBJECT_DO_NOTHING,
+    OBJECT_SPAWNER_ABORT_BEHAVIOUR,
+    OBJECT_SPAWNER_CREATE_FREE,
+    OBJECT_UPDATE_AS_FREE,
+    OBJECT_DESPAWN,
+} ObjectBehaviour;
+
+ObjectBehaviour enemy_spawner_update(ObjectState *state, VECTOR *pos);
+ObjectBehaviour enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos);
+uint8_t         object_should_despawn(ObjectState *state);
+void            hazard_player_interaction(RECT *hitbox, VECTOR *pos);
 
 #endif

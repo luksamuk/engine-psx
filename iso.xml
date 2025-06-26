@@ -62,6 +62,15 @@
 	</dir>
 
 	<dir name="R0">
+	  <file name="OBJ.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/OBJ.TIM" />
+	  <file name="BOSS.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/BOSS.TIM" />
+	  <file name="OBJ.OTD"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/objects.OTD" />
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/Z1.LVL" />
@@ -107,6 +116,12 @@
 	</dir>
 
 	<dir name="R2">
+	  <file name="OBJ.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/OBJ.TIM" />
+	  <file name="OBJ.OTD"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/objects.OTD" />
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/Z1.LVL" />
@@ -137,6 +152,12 @@
 	</dir>
 
 	<dir name="R3">
+	  <file name="OBJ.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/OBJ.TIM" />
+	  <file name="OBJ.OTD"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/objects.OTD" />
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/Z1.LVL" />
@@ -203,6 +224,12 @@
 	</dir>
 
 	<dir name="R5">
+	  <file name="OBJ.TIM"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R5/OBJ.TIM" />
+	  <file name="OBJ.OTD"
+		type="data"
+		source="${PROJECT_SOURCE_DIR}/assets/levels/R5/objects.OTD" />
 	  <file name="Z1.LVL"
 		type="data"
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R5/Z1.LVL" />
@@ -372,9 +399,9 @@
 	<file name="SHIELD.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SHIELD.VAG" />
-	<file name="YEA.VAG"
+	<file name="EVENT.VAG"
 	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/sfx/YEA.VAG" />
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/EVENT.VAG" />
 	<file name="SWITCH.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SWITCH.VAG" />
@@ -387,6 +414,18 @@
 	<file name="BUBBLE.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/BUBBLE.VAG" />
+	<file name="SIGN.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/SIGN.VAG" />
+	<file name="BOMB.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/BOMB.VAG" />
+	<file name="GRAB.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/GRAB.VAG" />
+	<file name="LAND.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/LAND.VAG" />
       </dir>
 
       <dummy sectors="1024"/>
@@ -406,6 +445,7 @@
       <file name="audio13.da" trackid="14" type="da" />
       <file name="audio14.da" trackid="15" type="da" />
       <file name="audio15.da" trackid="16" type="da" />
+      <file name="audio16.da" trackid="17" type="da" />
     </directory_tree>
   </track>
   <track type="audio" trackid="02" source="${PROJECT_SOURCE_DIR}/assets/bgm/amenbreak.flac" />
@@ -423,5 +463,6 @@
   <track type="audio" trackid="14" source="${PROJECT_SOURCE_DIR}/assets/bgm/apotos.flac" />
   <track type="audio" trackid="15" source="${PROJECT_SOURCE_DIR}/assets/bgm/levelclear.flac" />
   <track type="audio" trackid="16" source="${PROJECT_SOURCE_DIR}/assets/bgm/herormx.flac" />
+  <track type="audio" trackid="17" source="${PROJECT_SOURCE_DIR}/assets/bgm/boss.flac" />
 </iso_project>
 

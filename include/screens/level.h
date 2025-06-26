@@ -22,5 +22,6 @@ uint8_t screen_level_getstate();
 void    screen_level_setmode(LEVELMODE mode);
 void    screen_level_setcharacter(PlayerCharacter character);
 PlayerCharacter screen_level_getcharacter();
+void screen_level_play_music(uint8_t round, uint8_t act);
 
 #endif

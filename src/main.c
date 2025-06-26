@@ -31,6 +31,9 @@
   Level tiles:    448x0;     CLUT: 0x482 (4 or 8-bit CLUT)
   Level BG0:      448x256;   CLUT: 0x483 (4-bit only)
   Level BG1:      512x256;   CLUT: 0x484 (4-bit only)
+  Level objects:  704x0;     CLUT: 0x485 (8-bit only)
+  Level boss:     704x256;   CLUT: 0x486 (8-bit only, loaded over level objects)
+                             CLUT: 0x487 (8-bit only, alt palette when hit)
 
   System fonts:   960x0      (CLUT on same TPAGE; reserved!)
   Basic fonts:    960x256;   CLUT: 0x490 (4-bit always)

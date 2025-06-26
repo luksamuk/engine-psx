@@ -11,6 +11,9 @@ extern ArenaAllocator _level_arena;
 static PoolObject *_object_pool;
 static uint32_t   _pool_count = 0;
 
+extern ObjectTable obj_table_common;
+extern ObjectTable obj_table_level;
+
 // Defined in level.c
 extern void _render_obj(
     ObjectState *obj, ObjectTableEntry *typedata,
@@ -34,25 +37,26 @@ object_pool_init()
 }
 
 void
-object_pool_update(ObjectTable *tbl)
+object_pool_update(uint8_t round)
 {
+    _pool_count = 0;
     for(uint32_t i = 0; i < OBJECT_POOL_SIZE; i++) {
         PoolObject *obj = &_object_pool[i];
         if(!(obj->props & OBJ_FLAG_DESTROYED)) {
             VECTOR pos = { obj->freepos.vx >> 12, obj->freepos.vy >> 12, 0 };
             object_update((ObjectState *)&obj->state,
-                          &tbl->entries[obj->state.id],
-                          &pos);
-
-            if(obj->props & OBJ_FLAG_DESTROYED) {
-                _pool_count--;
-            }
+                          (obj->state.id >= MIN_LEVEL_OBJ_GID)
+                          ? &obj_table_level.entries[obj->state.id - MIN_LEVEL_OBJ_GID]
+                          : &obj_table_common.entries[obj->state.id],
+                          &pos,
+                          round);
+            _pool_count += !(obj->props & OBJ_FLAG_DESTROYED);
         }
     }
 }
 
 void
-object_pool_render(ObjectTable *tbl, int32_t camera_x, int32_t camera_y)
+object_pool_render(int32_t camera_x, int32_t camera_y)
 {
     camera_x = (camera_x >> 12) - CENTERX;
     camera_y = (camera_y >> 12) - CENTERY;
@@ -67,7 +71,11 @@ object_pool_render(ObjectTable *tbl, int32_t camera_x, int32_t camera_y)
         int16_t px = (obj->freepos.vx >> 12) - camera_x;
         int16_t py = (obj->freepos.vy >> 12) - camera_y;
 
-        object_render(&obj->state, &tbl->entries[obj->state.id], px, py);
+        object_render(&obj->state,
+                      (obj->state.id >= MIN_LEVEL_OBJ_GID)
+                      ? &obj_table_level.entries[obj->state.id - MIN_LEVEL_OBJ_GID]
+                      : &obj_table_common.entries[obj->state.id],
+                      px, py);
     }
 }
 
@@ -81,10 +89,13 @@ object_pool_create(ObjectType t)
             _object_pool[i].props |= OBJ_FLAG_FREE_OBJECT;
             _object_pool[i].state.id = t;
 
+            // Fragment animation data is ALWAYS initialized since we cannot
+            // be certain if an object has a fragment or not. If it does,
+            // the space will already be available
+            _object_pool[i].state.frag_anim_state = &_object_pool[i].frag_state;
+
             // A little pointer for the actual object position in the world
             _object_pool[i].state.freepos = (ObjectFreePos *)&_object_pool[i].freepos;
-
-            _pool_count++;
             return (PoolObject *) &_object_pool[i];
         }
     }

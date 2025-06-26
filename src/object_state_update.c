@@ -32,9 +32,10 @@ extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
-extern SoundEffect sfx_yea;
+extern SoundEffect sfx_event;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_bubble;
+extern SoundEffect sfx_sign;
 
 extern int debug_mode;
 
@@ -63,13 +64,19 @@ static void _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
+// Level-specific update functions
+extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
+extern void object_update_R2(ObjectState *, ObjectTableEntry *, VECTOR *);
+extern void object_update_R3(ObjectState *, ObjectTableEntry *, VECTOR *);
+extern void object_update_R5(ObjectState *, ObjectTableEntry *, VECTOR *);
+
 // Player hitbox information. Calculated once per frame.
-static int32_t player_vx, player_vy; // Top left corner of player hitbox
-static uint8_t player_attacking;
+int32_t player_vx, player_vy; // Top left corner of player hitbox
+uint8_t player_attacking;
 
 // TODO: ADJUST ACCORDING TO CHARACTER
-static int32_t player_width = 16;
-static int32_t player_height = HEIGHT_RADIUS_NORMAL << 1;
+int32_t player_width = 16;
+int32_t player_height = HEIGHT_RADIUS_NORMAL << 1;
 
 int player_hitbox_shown;
 
@@ -91,7 +98,7 @@ int player_hitbox_shown;
 /* } */
 
 void
-object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8_t round)
 {
     if(state->props & OBJ_FLAG_DESTROYED) return;
 
@@ -112,6 +119,8 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     /*     _draw_player_hitbox(); */
     /* } */
 
+    if(typedata->is_level_specific) goto level_specific_update;
+
     switch(state->id) {
     default: break;
     case OBJ_RING:                   _ring_update(state, typedata, pos);               break;
@@ -129,6 +138,21 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_SWITCH:                 _switch_update(state, typedata, pos);             break;
     case OBJ_BUBBLE_PATCH:           _bubble_patch_update(state, typedata, pos);       break;
     case OBJ_BUBBLE:                 _bubble_update(state, typedata, pos);             break;
+    }
+    return;
+
+level_specific_update:
+    switch(round) {
+    default: break;
+    case 0: object_update_R0(state, typedata, pos); break; // Test Level
+    case 2: object_update_R2(state, typedata, pos); break; // Green Hill
+    case 3: object_update_R3(state, typedata, pos); break; // Surely Wood
+    case 4: break;                                         // Dawn Canyon
+    case 5: object_update_R5(state, typedata, pos); break; // Amazing Ocean
+    case 6: break;                                         // R6
+    case 7: break;                                         // R7
+    case 8: break;                                         // Eggmanland
+    case 9: break;                                         // Windmill Isle
     }
 }
 
@@ -186,23 +210,23 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
              * (~7.6MHz vs ~33.87MHz).
              * So we're checking for ground and wall collisions every frame.
              */
-            if(/*!(state->timer % 4) &&*/ state->freepos->spdy > 0) {
+            if(/*!(state->timer % 4) &&*/
                 // Use Sonic's own linecast algorithm, since it is aware of
                 // level geometry -- and oh, level data is stored in external
                 // variables as well. Check the file header.
-                if(linecast(&leveldata, &map128, &map16,
-                            pos->vx + 8, pos->vy + 8,
-                            CDIR_FLOOR, 10, CDIR_FLOOR).collided)
-                    // Multiply Y speed by -0.75
-                    state->freepos->spdy = (state->freepos->spdy * -0x00000c00) >> 12;
+                ((state->freepos->spdy > 0) && linecast(pos->vx + 8, pos->vy + 8,
+                                                        CDIR_FLOOR, 10, CDIR_FLOOR).collided)
+                || ((state->freepos->spdy < 0) && linecast(pos->vx + 8, pos->vy + 8,
+                                                           CDIR_CEILING, 10, CDIR_FLOOR).collided)) {
+                // Multiply Y speed by -0.75
+                state->freepos->spdy = (state->freepos->spdy * -0x00000c00) >> 12;
             }
 
             if(/*!(state->timer % 4) &&*/
-                ((state->freepos->spdx < 0) && linecast(&leveldata, &map128, &map16,
-                                                       pos->vx + 8, pos->vy + 8,
+                // Do the same thing; except for lateral collision
+                ((state->freepos->spdx < 0) && linecast(pos->vx + 8, pos->vy + 8,
                                                         CDIR_LWALL, 10, CDIR_FLOOR).collided)
-               || ((state->freepos->spdx > 0) && linecast(&leveldata, &map128, &map16,
-                                                          pos->vx + 8, pos->vy + 8,
+               || ((state->freepos->spdx > 0) && linecast(pos->vx + 8, pos->vy + 8,
                                                           CDIR_RWALL, 10, CDIR_FLOOR).collided))
                 // Multiply X speed by -0.75
                 state->freepos->spdx = (state->freepos->spdx * -0x00000c00) >> 12;
@@ -240,29 +264,35 @@ _goal_sign_change_score()
 static void
 _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
-    if(state->anim_state.animation == 0) {
+    if(state->frag_anim_state->animation == 0) {
         if(pos->vx <= (player.pos.vx >> 12)) {
-            state->anim_state.animation = 1;
-            state->anim_state.frame = 0;
-            camera_set_left_bound(&camera, ((pos->vx + 80) << 12));
+            state->frag_anim_state->animation = 1;
+            state->frag_anim_state->frame = 0;
+            camera_focus(&camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
             state->timer = 180;
             level_finished = 1;
             pause_elapsed_frames();
+            sound_play_vag(sfx_sign, 0);
         }
-    } else if(state->anim_state.animation == 1) {
+    } else if(state->frag_anim_state->animation == 1) {
         state->timer--;
         if(state->timer < 0) {
-            // Set animation according to character
             state->timer = 360; // 6-seconds music
-            state->anim_state.animation = 2;
+
+            switch(screen_level_getcharacter()) {
+            default:             state->frag_anim_state->animation = 2; break;
+            case CHARA_MILES:    state->frag_anim_state->animation = 3; break;
+            case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
+            }
+
             player_set_action(&player, ACTION_NONE);
             screen_level_setmode(LEVEL_MODE_FINISHED);
             _goal_sign_change_score();
         }
-    } else if((state->anim_state.animation == 2)
+    } else if((state->frag_anim_state->animation > 1)
               && (player.pos.vx < camera.pos.vx + (CENTERX << 12))) {
         state->timer = 360; // 6-seconds music
-    } else if(state->anim_state.animation < OBJ_ANIMATION_NO_ANIMATION) {
+    } else if(state->frag_anim_state->animation < OBJ_ANIMATION_NO_ANIMATION) {
         if(state->timer == 360) {
             // First frame
             sound_bgm_play(BGM_LEVELCLEAR);
@@ -272,25 +302,26 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         if((state->timer < 0) && (screen_level_getstate() == 2)) {
             screen_level_setstate(3);
         } else if(screen_level_getstate() == 4) {
+            // TODO: THIS NEEDS TO BE REFACTORED AND MOVED TO SOMEWHERE ELSE.
             uint8_t lvl = screen_level_getlevel();
-            if(lvl == 3) {
+            if(lvl == 2 || lvl == 3) {
                 // Finished engine test
                 scene_change(SCREEN_TITLE);
-            } else if(lvl < 10) {
+            } else if(lvl != 4) {
                 // If on test level 2 and our character is Knuckles...
                 // Go to test level 4 (also an act 3)
                 if(lvl == 1) {
                     if(screen_level_getcharacter() == CHARA_KNUCKLES) {
                         screen_level_setlevel(3);
                     } else screen_level_setlevel(2);
-                } else if((lvl == 2) || (lvl == 3)) {
-                    // On act 3 (sonic and tails) or act 4 (knuckles), jump
-                    // to SWZ
-                    screen_level_setlevel(4);
                 } else if(lvl == 6) {
                     // Transition from SWZ1 to AOZ1
                     // TODO: THIS IS TEMPORARY
                     screen_level_setlevel(10);
+                } else if(lvl == 10) {
+                    // Transition from AOZ1 to GHZ1
+                    // TODO: THIS IS TEMPORARY
+                    screen_level_setlevel(4);
                 } else screen_level_setlevel(lvl + 1);
                 scene_change(SCREEN_LEVEL);
             } else {
@@ -330,7 +361,16 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 PoolObject *image = object_pool_create(OBJ_MONITOR_IMAGE);
                 image->freepos.vx = (pos->vx << 12) + ((int32_t)entry->fragment->offsetx << 12);
                 image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
-                image->state.anim_state.animation = ((MonitorExtra *)state->extra)->kind;
+                uint16_t animation = ((MonitorExtra *)state->extra)->kind;
+                if(animation == MONITOR_KIND_1UP) {
+                    switch(player.character) {
+                    default:
+                    case CHARA_SONIC:    animation = 5; break;
+                    case CHARA_MILES:    animation = 7; break;
+                    case CHARA_KNUCKLES: animation = 8; break;
+                    }
+                }
+                image->state.anim_state.animation = animation;
 
                 // Create explosion effect
                 PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
@@ -610,7 +650,9 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
             sound_play_vag(sfx_death, 0);
             break;
         case MONITOR_KIND_1UP:
-            sound_play_vag(sfx_yea, 0);
+        case 7: // !-up (Miles)
+        case 8: // 1-up (Knuckles)
+            sound_play_vag(sfx_event, 0);
             break;
         case MONITOR_KIND_RING:
             sound_play_vag(sfx_ring, 0);
@@ -779,6 +821,10 @@ static void
 _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
     // NOTE: this object can only exist as a free object. Do not insist.
+    if(state->freepos == NULL) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
 
     // FIRST OFF: If way too far from camera, destroy it
     if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))

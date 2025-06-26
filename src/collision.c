@@ -8,6 +8,11 @@
 extern int debug_mode;
 extern Camera camera;
 
+// Level data
+extern TileMap16   map16;
+extern TileMap128  map128;
+extern LevelData   leveldata;
+
 void
 _move_point_linecast(uint8_t direction, int32_t vx, int32_t vy,
                      int32_t *lx, int32_t *ly,
@@ -56,10 +61,10 @@ _get_height_position(int32_t vx, int32_t vy, LinecastDirection direction)
 
 void
 _get_height_and_angle_from_mask(
-    TileMap16 *map16, uint16_t piece, LinecastDirection direction, uint8_t hpos,
+    uint16_t piece, LinecastDirection direction, uint8_t hpos,
     uint8_t *out_h, int32_t *out_angle)
 {
-    Collision *collision = map16->collision[piece];
+    Collision *collision = map16.collision[piece];
 
     if(collision == NULL) {
     abort_retrieve:
@@ -132,12 +137,11 @@ _get_tip_height(LinecastDirection direction,
 }
 
 CollisionEvent
-linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
-         int32_t vx, int32_t vy, LinecastDirection direction,
+linecast(int32_t vx, int32_t vy, LinecastDirection direction,
          uint8_t magnitude, LinecastDirection floor_direction)
 {
     // No level data? No collision.
-    if(lvl->num_layers < 1) return (CollisionEvent){ 0 };
+    if(leveldata.num_layers < 1) return (CollisionEvent){ 0 };
 
     const uint8_t layer = 0;
     assert(direction < 4);
@@ -166,19 +170,19 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
 
         // Get chunk id
         int32_t chunk_pos;
-        if((cx < 0) || (cx >= lvl->layers[layer].width)) chunk_pos = -1;
-        else if((cy < 0) || (cy >= lvl->layers[layer].height)) chunk_pos = -1;
-        else chunk_pos = (cy * lvl->layers[layer].width) + cx;
+        if((cx < 0) || (cx >= leveldata.layers[layer].width)) chunk_pos = -1;
+        else if((cy < 0) || (cy >= leveldata.layers[layer].height)) chunk_pos = -1;
+        else chunk_pos = (cy * leveldata.layers[layer].width) + cx;
 
-        int16_t chunk = lvl->layers[layer].tiles[chunk_pos];
+        int16_t chunk = leveldata.layers[layer].tiles[chunk_pos];
         
         if(chunk >= 0) {
             // Piece coordinates within chunk
             int32_t px = (lx & 0x7f) >> 4;
             int32_t py = (ly & 0x7f) >> 4;
             uint16_t piece_pos = ((py << 3) + px) + (chunk << 6);
-            uint16_t piece = map128->frames[piece_pos].index;
-            uint8_t piece_props = map128->frames[piece_pos].props;
+            uint16_t piece = map128.frames[piece_pos].index;
+            uint8_t piece_props = map128.frames[piece_pos].props;
 
             if((piece > 0) &&
                (piece_props != MAP128_PROP_NONE) &&
@@ -190,8 +194,7 @@ linecast(LevelData *lvl, TileMap128 *map128, TileMap16 *map16,
 
                 hpos = _get_height_position(lx, ly, direction) & 0x0f;
 
-                _get_height_and_angle_from_mask(
-                    map16, piece, direction, hpos, &h, &angle);
+                _get_height_and_angle_from_mask(piece, direction, hpos, &h, &angle);
 
                 if(h > 0) {
                     int32_t tip_height = _get_tip_height(direction, lx, ly);

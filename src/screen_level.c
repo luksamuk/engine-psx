@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <strings.h>
 #include <inline_c.h>
 #include "util.h"
 #include "player.h"
@@ -19,6 +20,7 @@
 #include "parallax.h"
 #include "basic_font.h"
 #include "demo.h"
+#include "boss.h"
 
 extern int debug_mode;
 
@@ -33,19 +35,17 @@ TileMap128  map128;
 LevelData   leveldata;
 Camera      camera;
 ObjectTable obj_table_common;
+ObjectTable obj_table_level;
+uint8_t     level_round; // Defined after load
+uint8_t     level_act;   // Defined after load
 uint8_t     level_fade;
 uint8_t     level_ring_count;
 uint32_t    level_score_count;
 uint8_t     level_finished;
 int32_t     level_water_y;
 LEVELMODE   level_mode;
-
-
-// Forward function declarations
-static void level_load_player(PlayerCharacter character);
-static void level_load_level();
-static void level_set_clearcolor();
-static void level_play_music(uint8_t round, uint8_t act);
+uint8_t     level_has_boss;
+BossState   *boss;
 
 typedef struct {
     uint8_t    level_transition;
@@ -56,8 +56,6 @@ typedef struct {
     int32_t    parallax_cx;
     int32_t    parallax_cy;
     const char *level_name;
-    uint8_t    level_round;
-    uint8_t    level_act;
     uint16_t   level_counter;
 
     // Title card variables
@@ -78,13 +76,18 @@ typedef struct {
     uint8_t  water_last_fade[2];
 } screen_level_data;
 
+// Forward function declarations
+static void level_load_player(PlayerCharacter character);
+static void level_load_level(screen_level_data *);
+static void level_set_clearcolor();
+
 void
 screen_level_load()
 {
     screen_level_data *data = screen_alloc(sizeof(screen_level_data));
     data->level_transition = 0;
     data->level_name = "PLAYGROUND";
-    data->level_act  = 0;
+    level_act  = 0;
 
     camera_init(&camera);
 
@@ -124,8 +127,6 @@ screen_level_load()
     data->water_last_fade[0] = 0;
     data->water_last_fade[1] = 0;
 
-    // Init water wave quads
-
     demo_init();
 
     // init proper RNG per level
@@ -140,11 +141,14 @@ screen_level_load()
     // Recover control if mode is "hold forward"
     if(level_mode == LEVEL_MODE_FINISHED)
         level_mode = LEVEL_MODE_NORMAL;
+
+    camera_follow_player(&camera);
 }
 
 void
-screen_level_unload(void *)
+screen_level_unload(void *d)
 {
+    (void)(d);
     level_fade = 0;
     sound_cdda_stop();
     level_reset();
@@ -326,8 +330,8 @@ screen_level_update(void *d)
     }
 
     camera_update(&camera, &player);
-    update_obj_window(&leveldata, &obj_table_common, camera.pos.vx, camera.pos.vy);
-    object_pool_update(&obj_table_common);
+    update_obj_window(camera.pos.vx, camera.pos.vy, level_round);
+    object_pool_update(level_round);
 
     // Only update these if past fade in!
     if(data->level_transition > 0) {
@@ -350,12 +354,34 @@ screen_level_update(void *d)
         if(player.action == ACTION_FLY) player.spinrev = 0;
     }
 
+    // Limit player position when camera is fixed
+    if(
+        (!camera.follow_player)
+        && (player.pos.vx - (PUSH_RADIUS << 12)) < (camera.pos.vx - (CENTERX << 12)))
+    {
+        player.pos.vx = camera.pos.vx - (CENTERX << 12) + (PUSH_RADIUS << 12);
+        if(player.vel.vx < 0) {
+            if(player.grnd) player.vel.vz = 0;
+            else player.vel.vx = 0;
+        }
+    } else if(
+        !level_finished
+        && (!camera.follow_player)
+        && (player.pos.vx + (PUSH_RADIUS << 12)) > (camera.pos.vx + (CENTERX << 12)))
+    {
+        player.pos.vx = camera.pos.vx + (CENTERX << 12) - (PUSH_RADIUS << 12);
+        if(player.vel.vx > 0) {
+            if(player.grnd) player.vel.vz = 0;
+            else player.vel.vx = 0;
+        }
+    }
+
     // If speed shoes are finished, we use the player's values
     // as a flag to resume music playback.
     // Player constants are managed within player update
     if(player.speedshoes_frames == 0) {
         if(!level_finished)
-            level_play_music(data->level_round, data->level_act);
+            screen_level_play_music(level_round, level_act);
         player.speedshoes_frames = -1;
     }
 }
@@ -479,12 +505,11 @@ screen_level_draw(void *d)
     }
 
     // Draw free objects
-    object_pool_render(&obj_table_common, camera.pos.vx, camera.pos.vy);
+    object_pool_render(camera.pos.vx, camera.pos.vy);
 
     // Draw level and level objects
-    render_lvl(&leveldata, &map128, &map16, &obj_table_common,
-               camera.pos.vx, camera.pos.vy,
-               data->level_round == 4); // Dawn Canyon: Draw in front
+    render_lvl(camera.pos.vx, camera.pos.vy,
+               level_round == 4); // Dawn Canyon: Draw in front
 
     // Draw background and parallax
     if(level_get_num_sprites() < 1312)
@@ -514,7 +539,7 @@ screen_level_draw(void *d)
                 LERPC(level_fade, 0xb5));
         sort_prim(poly, OTZ_LAYER_LEVEL_BG);
     }
-    else if(data->level_round == 5) {
+    else if(level_round == 5) {
         // If we're in R5, draw a dark gradient on 
     }
     // If we're in R8, draw a gradient as well, but at a lower position.
@@ -549,7 +574,7 @@ screen_level_draw(void *d)
 
         // ACT card
         char buffer[5];
-        uint8_t act_number = (level == 3) ? 2 : data->level_act;
+        uint8_t act_number = (level == 3) ? 2 : level_act;
         snprintf(buffer, 5, "*%d", act_number + 1);
         font_draw_hg(buffer, data->tc_act_x, 70 + GLYPH_HG_WHITE_HEIGHT + 40);
 
@@ -564,8 +589,8 @@ screen_level_draw(void *d)
             POLY_G4 *polyg = get_next_prim();
             increment_prim(sizeof(POLY_G4));
             setPolyG4(polyg);
-            setRGB0(polyg, 0xfc, 0xfc, 0xfc);
-            setRGB1(polyg, 0xfc, 0xfc, 0xfc);
+            setRGB0(polyg, 0xc9, 0xc9, 0xc9);
+            setRGB1(polyg, 0xc9, 0xc9, 0xc9);
             switch(level_character) {
             case CHARA_SONIC:
                 setRGB2(polyg, 0x00, 0x24, 0xd8);
@@ -771,6 +796,7 @@ static void
 level_load_level(screen_level_data *data)
 {
     paused = 0;
+    level_has_boss = 0;
 
     // Negative water means no water
     level_water_y = -1;
@@ -780,58 +806,58 @@ level_load_level(screen_level_data *data)
     switch(level) {
     case 0: case 1: case 2: case 3: // Test level
         data->level_name = "TEST LEVEL";
-        data->level_round = 0;
+        level_round = 0;
         // Act 4 is Knuckles act 3
-        data->level_act = level;
+        level_act = level;
         if(level == 2) {
             level_water_y = 0x00c43401;
         }
         break;
     case 4: case 5:
         data->level_name = "GREEN HILL";
-        data->level_round = 2;
-        data->level_act = level - 4;
+        level_round = 2;
+        level_act = level - 4;
         break;
     case 6: case 7:
         data->level_name = "SURELY WOOD";
-        data->level_round = 3;
-        data->level_act = level - 6;
+        level_round = 3;
+        level_act = level - 6;
         break;
     case 8: case 9:
         data->level_name = "DAWN CANYON";
-        data->level_round = 4;
-        data->level_act = level - 8;
+        level_round = 4;
+        level_act = level - 8;
         break;
     case 10: case 11:
         data->level_name = "AMAZING OCEAN";
-        data->level_round = 5;
-        data->level_act = level - 10;
+        level_round = 5;
+        level_act = level - 10;
         level_water_y = 0x002c0000;
         break;
     case 12: case 13:
         /* data->level_name = "R6"; */
-        data->level_round = 6;
-        data->level_act = level - 12;
+        level_round = 6;
+        level_act = level - 12;
         break;
     case 14: case 15:
         /* data->level_name = "R7"; */
-        data->level_round = 7;
-        data->level_act = level - 14;
+        level_round = 7;
+        level_act = level - 14;
         break;
     case 16: case 17: case 18:
         data->level_name = "EGGMANLAND";
-        data->level_round = 8;
-        data->level_act = level - 16;
+        level_round = 8;
+        level_act = level - 16;
         break;
     case 19:
         data->level_name = "WINDMILL ISLE";
-        data->level_round = 9;
-        data->level_act = level - 19;
+        level_round = 9;
+        level_act = level - 19;
         break;
     default:
         data->level_name = "TEST LEVEL";
-        data->level_round = 0xff;
-        data->level_act = 0;
+        level_round = 0xff;
+        level_act = 0;
         break;
     }
 
@@ -840,7 +866,7 @@ level_load_level(screen_level_data *data)
 
     level_set_clearcolor();
 
-    snprintf(basepath, 255, "\\LEVELS\\R%1u", data->level_round);
+    snprintf(basepath, 255, "\\LEVELS\\R%1u", level_round);
 
     TIM_IMAGE tim;
     uint32_t filelength;
@@ -929,7 +955,7 @@ level_load_level(screen_level_data *data)
 
 
     /* === LEVEL LAYOUT === */
-    snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, data->level_act + 1);
+    snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, level_act + 1);
     printf("Loading %s...\n", filename0);
     load_lvl(&leveldata, filename0);
 
@@ -947,10 +973,45 @@ level_load_level(screen_level_data *data)
     load_object_table("\\LEVELS\\COMMON\\OBJ.OTD;1", &obj_table_common);
 
     // Load level objects
-    // TODO
+    snprintf(filename0, 255, "%s\\OBJ.TIM;1", basepath);
+    printf("Loading level object texture...\n");
+    timfile = file_read(filename0, &filelength);
+    if(timfile) {
+        load_texture(timfile, &tim);
+        free(timfile);
+    } else printf("Warning: No level object texture found, skipping\n");
 
-    // Load object positioning on level
-    snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, data->level_act + 1);
+    // Load level boss object, if existing.
+    // Warning: This supersedes the second half of level object textures!
+    if(level_act >= 2) {
+        printf("Loading level boss...\n");
+        snprintf(filename0, 255, "%s\\BOSS.TIM;1", basepath);
+        timfile = file_read(filename0, &filelength);
+        if(timfile) {
+            level_has_boss = 1;
+            load_texture(timfile, &tim);
+            /* clut_print_all_colors(&tim); */
+            // Setup glowing color palette and reupload it right below
+            // the original boss palette
+            tim.crect->y += 1;
+            clut_set_glow_color(&tim, 0xd3, 0xd3, 0xd3);
+            load_clut_only(&tim);
+
+            free(timfile);
+        } else printf("Warning: No level boss texture found, skipping\n");
+
+        // Init boss structure
+        boss = screen_alloc(sizeof(BossState));
+        bzero(boss, sizeof(BossState));
+    }
+
+    printf("Loading level object table...\n");
+    snprintf(filename0, 255, "%s\\OBJ.OTD;1", basepath);
+    load_object_table(filename0, &obj_table_level);
+
+    // Load object positioning on level.
+    // Always do this AFTER loading object definitions!
+    snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, level_act + 1);
     load_object_placement(filename0, &leveldata);
 
 
@@ -960,14 +1021,14 @@ level_load_level(screen_level_data *data)
 
     /* === RENDERING PREPARATION === */
     // Pre-allocate and initialize level primitive buffer
-    prepare_renderer(&leveldata);
+    prepare_renderer();
 
     level_debrief();
 
     printf("Number of level layers: %d\n", leveldata.num_layers);
 
     // Start playback after we don't need the CD anymore.
-    level_play_music(data->level_round, data->level_act);
+    screen_level_play_music(level_round, level_act);
 
     // Pre-calculate title card target X and Y positions
     {
@@ -1049,8 +1110,8 @@ screen_level_getcharacter()
 }
 
 
-static void
-level_play_music(uint8_t round, uint8_t act)
+void
+screen_level_play_music(uint8_t round, uint8_t act)
 {
     switch(round) {
     case 0:

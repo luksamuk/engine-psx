@@ -10,23 +10,29 @@
 #include "render.h"
 #include "timer.h"
 #include "camera.h"
+#include "boss.h"
 
 extern ArenaAllocator _level_arena;
 extern uint8_t        paused;
 extern Player         player;
 extern Camera         camera;
 extern uint8_t        level_fade;
+extern uint8_t        level_has_boss;
+extern BossState      *boss;
+
+extern ObjectTable obj_table_common;
+extern ObjectTable obj_table_level;
 
 void
 _emplace_object(
     ChunkObjectData *data, int32_t tx, int32_t ty,
-    uint8_t is_level_specific,
+    uint8_t is_level_specific, uint8_t has_fragment,
     int8_t type, uint8_t flipmask, int32_t vx, int32_t vy, void *extra)
 {
     ObjectState *state = &data->objects[data->num_objects++];
     assert(data->num_objects < MAX_OBJECTS_PER_CHUNK);
 
-    state->id = type + (is_level_specific ? 100 : 0);
+    state->id = type + (is_level_specific ? MIN_LEVEL_OBJ_GID : 0);
     state->flipmask = flipmask;
 
     state->rx = vx - (tx << 7);
@@ -42,9 +48,12 @@ _emplace_object(
     // a "freepos" field either
     state->freepos = NULL;
 
+    // Parent entity is always NULL unless manually set.
+    state->parent = NULL;
+
     // Initialize animation state if this object
     // has a fragment
-    if(state->id == OBJ_MONITOR || state->id == OBJ_CHECKPOINT) {
+    if(has_fragment) {
         state->frag_anim_state = alloc_arena_malloc(
             &_level_arena,
             sizeof(ObjectAnimState));
@@ -60,7 +69,20 @@ _emplace_object(
     case OBJ_MONITOR:
         state->props |= OBJ_FLAG_ANIM_LOCK;
         // Set initial animation with respect to kind
-        state->frag_anim_state->animation = (uint16_t)((MonitorExtra *)state->extra)->kind;
+        {
+            uint16_t animation = (uint16_t)((MonitorExtra *)state->extra)->kind;
+            if(animation == MONITOR_KIND_1UP) {
+                // If this is a 1-UP monitor, change animation again with
+                // respect to current character
+                switch(player.character) {
+                default:
+                case CHARA_SONIC:    animation = 5; break;
+                case CHARA_MILES:    animation = 7; break;
+                case CHARA_KNUCKLES: animation = 8; break;
+                }
+            }
+            state->frag_anim_state->animation = animation;
+        }
         break;
     case OBJ_GOAL_SIGN:
         camera_set_right_bound(&camera, (vx << 12) + ((CENTERX >> 1) << 12));
@@ -127,15 +149,15 @@ load_object_placement(const char *filename, void *lvl_data)
             // This is a dummy object, so create others in its place.
             switch(type) {
             case OBJ_DUMMY_RINGS_3V:
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy - 24, NULL);
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy, NULL);
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy + 24, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy - 24, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy + 24, NULL);
                 created_objects += 3;
                 break;
             case OBJ_DUMMY_RINGS_3H:
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx - 24, vy, NULL);
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx, vy, NULL);
-                _emplace_object(data, cx, cy, 0, OBJ_RING, 0, vx + 24, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx - 24, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx + 24, vy, NULL);
                 created_objects += 3;
                 break;
             case OBJ_DUMMY_STARTPOS:
@@ -146,7 +168,11 @@ load_object_placement(const char *filename, void *lvl_data)
             default: break;
             }
         } else {
-            _emplace_object(data, cx, cy, is_level_specific, type, flipmask, vx, vy, extra);
+            ObjectTableEntry *entry = (type >= MIN_LEVEL_OBJ_GID)
+                ? &obj_table_level.entries[type - MIN_LEVEL_OBJ_GID]
+                : &obj_table_common.entries[type];
+            
+            _emplace_object(data, cx, cy, is_level_specific, entry->has_fragment, type, flipmask, vx, vy, extra);
             created_objects++;
         }
     }
@@ -199,13 +225,14 @@ begin_render_routine:
     frame = &an->frames[anim->frame];
 
     // Leverage "double flipping"
-    uint8_t flipmask = state->frag_anim_state ? 0 : (state->flipmask ^ frame->flipmask);
+    uint8_t flipmask = state->flipmask ^ frame->flipmask;
 
     // Some rules:
     // 1. If an object is flipped, it cannot be rotated.
     // 2. ct and cw rotations cancel out.
     // 3. As a rule of thumb... objects with fragments
-    //    cannot be flipped or rotated.
+    //    will have their fragment flipped or rotated through
+    //    their entire flip state.
     // We'll expect these values to work as they should.
 
     int16_t vx = ovx;
@@ -245,7 +272,7 @@ begin_render_routine:
     increment_prim(sizeof(POLY_FT4));
     setPolyFT4(poly);
     setRGB0(poly, level_fade, level_fade, level_fade);
-    
+
     if((flipmask & MASK_FLIP_FLIPX) && (flipmask & MASK_FLIP_FLIPY)) {
         setXYWH(poly, vx, vy, frame->w, frame->h);
         setUV4(poly,
@@ -286,12 +313,24 @@ begin_render_routine:
         setUVWH(poly, frame->u0, frame->v0, frame->w, frame->h);
     }
 
-    // COMMON OBJECTS have the following VRAM coords:
-    // Sprites: 576x0
-    // CLUT: 0x481
-    
-    poly->tpage = getTPage(1, 0, 576, 0);
-    poly->clut = getClut(0, 481);
+    if(!typedata->is_level_specific) {
+        // COMMON OBJECTS have the following VRAM coords:
+        // Sprites: 576x0
+        // CLUT: 0x481
+        poly->tpage = getTPage(1, 0, 576, frame->tpage ? 256 : 0);
+        poly->clut = getClut(0, 481);
+    } else {
+        // LEVEL OBJECTS have these VRAM coords:
+        // Sprites: 704x0
+        // CLUT: 0x485
+        // Boss CLUT: 0x486 (normal); 0x487 (when hit)
+        poly->tpage = getTPage(1, 0, 704, frame->tpage ? 256 : 0);
+        poly->clut = getClut(
+            0,
+            (frame->tpage && level_has_boss)
+            ? (boss_hit_glowing() ? 487 : 486)
+            : 485);
+    }
 
     uint32_t layer = ((state->id == OBJ_RING)
                       || (state->id == OBJ_SHIELD)
@@ -311,14 +350,26 @@ begin_render_routine:
 
 after_render:
 
-    if(!in_fragment && (typedata->fragment != NULL)) {
+    if(!in_fragment && typedata->has_fragment) {
         in_fragment = 1;
         anim = state->frag_anim_state;
         if(anim->animation >= typedata->fragment->num_animations) return;
         an = &typedata->fragment->animations[anim->animation];
-        ovx += typedata->fragment->offsetx;
-        ovy += typedata->fragment->offsety;
+        if(flipmask & MASK_FLIP_FLIPX)
+            ovx -= typedata->fragment->offsetx;
+        else ovx += typedata->fragment->offsetx;
+        if(flipmask & MASK_FLIP_FLIPY)
+            ovy -= typedata->fragment->offsety;
+        else ovy += typedata->fragment->offsety;
         
         goto begin_render_routine;
     }
+}
+
+uint8_t
+boss_hit_glowing()
+{
+    // Glow on odd intervals.
+    // Being odd ensures that a hit cooldown equals 0 uses original palette
+    return (boss->health > 0) && (boss->hit_cooldown >> 1) % 2 != 0;
 }

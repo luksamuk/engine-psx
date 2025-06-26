@@ -20,6 +20,7 @@ extern int      debug_mode;
 extern uint32_t level_score_count;
 
 uint16_t demo_number = 6;
+uint8_t  demo_character = CHARA_SONIC;
 
 typedef struct {
     int32_t prect_x;
@@ -30,7 +31,7 @@ typedef struct {
 static const char *title_text[] = {
     "PRESS START",
 
-    "ENGINE TEST",
+    "PLAY TEST LEVELS",
     "START GAME",
     "LEVEL SELECT",
     "OPTIONS",
@@ -227,6 +228,7 @@ screen_title_update(void *d)
     else {
         if(data->autodemo_timer >= AUTODEMO_WAIT_FRAMES) {
             screen_level_setlevel(demo_number);
+            screen_level_setcharacter(demo_character);
             screen_level_setmode(LEVEL_MODE_DEMO);
             level_score_count = 0;
             // Cycle to next demo if we ever come back here
@@ -431,11 +433,27 @@ screen_title_cycle_demo()
 {
     switch(demo_number) {
     /* case 0:  demo_number = 4;  break; */
-    /* case 4:  demo_number = 6;  break; */
-    case 6:  demo_number = 10; break;
-    /* case 10: demo_number = 16; break; */
+    case 4:
+        // Go to Surely Wood Zone 1, Sonic
+        demo_character = CHARA_SONIC;
+        demo_number = 6;
+        break;
+    case 6:
+        // Go to Amazing Ocean Zone, Tails
+        demo_character = CHARA_MILES;
+        demo_number = 10;
+        break;
+    case 10:
+        // Go to Green Hill Zone, Knuckles
+        demo_character = CHARA_KNUCKLES;
+        demo_number = 4;
+        break;
     /* case 16: demo_number = 0;  break; */
     /* default: demo_number = 0;  break; */
-    default: demo_number = 6;  break;
+    default:
+        // Go to Surely Wood Zone 1, Sonic
+        demo_character = CHARA_SONIC;
+        demo_number = 6;
+        break;
     }
 }

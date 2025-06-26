@@ -1,0 +1,102 @@
+[stegway]
+
+[[stegway.animations]]
+name = "Stopped"
+id = 0
+duration = 0
+loopback = 0
+frames = [[96, 0, 48, 32]]
+
+[[stegway.animations]]
+name = "Walking"
+id = 1
+duration = 7
+loopback = 0
+frames = [
+   [ 0,  0, 48, 32],
+   [ 0, 32, 48, 32],
+   [ 0,  0, 48, 32],
+   [ 0, 32, 48, 32],
+   
+   [ 0,  0, 48, 32],
+   [48, 32, 48, 32],
+   [96,  0, 48, 32],
+
+   [ 0, 32, 48, 32],
+   [ 0,  0, 48, 32],
+   [ 0, 32, 48, 32],
+   [ 0,  0, 48, 32],
+
+   [ 0, 32, 48, 32],
+   [48,  0, 48, 32],
+   [96, 32, 48, 32],
+]
+
+[[stegway.animations]]
+name = "Running"
+id = 2
+duration = 2
+loopback = 0
+frames = [
+    [144,  0, 48, 32],
+    [144, 32, 48, 32],
+]
+
+[stegway.fragment]
+offset = [-28, -5]
+
+[[stegway.fragment.animations]]
+id = 0
+name = "fire"
+duration = 4
+loopback = 0
+frames = [
+    [192, 0, 8, 8],
+    [192, 8, 8, 8],
+]
+
+# ===============
+
+[buzzbomber]
+
+[[buzzbomber.animations]]
+name = "Flying"
+id = 0
+duration = 0
+loopback = 0
+frames = [[0, 64, 48, 32]]
+
+[[buzzbomber.animations]]
+name = "Attacking"
+id = 1
+duration = 0
+loopback = 0
+frames = [[48, 64, 48, 32]]
+
+[buzzbomber.fragment]
+offset = [-6, -24]
+
+[[buzzbomber.fragment.animations]]
+id = 0
+name = "fire"
+duration = 4
+loopback = 0
+frames = [
+    [96, 64, 8, 8],
+    [96, 72, 8, 8],
+]
+
+# ===============
+
+[projectile]
+
+[[projectile.animations]]
+name = "buzzbomber_fire"
+id = 0
+duration = 4
+loopback = 0
+frames = [
+    [104, 64, 16, 16],
+    [104, 80, 16, 16],
+]
+

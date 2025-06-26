@@ -128,7 +128,7 @@ sort_prim(void *prim, uint32_t otz)
 {
     // Place the primitive after all previously allocated primitives, then
     // insert it into the OT and bump the allocation pointer.
-    addPrim(get_ot_at(otz), (uint8_t *) prim);
+    AddPrim(get_ot_at(otz), (uint8_t *) prim);
 
     // Make sure we haven't yet run out of space for future primitives.
     assert(ctx.next_packet <= &ctx.buffers[ctx.active_buffer].buffer[BUFFER_LENGTH]);
@@ -137,7 +137,7 @@ sort_prim(void *prim, uint32_t otz)
 void
 sort_sub_prim(void *prim, uint32_t otz)
 {
-    addPrim(get_sub_ot_at(otz), (uint8_t *) prim);
+    AddPrim(get_sub_ot_at(otz), (uint8_t *) prim);
     assert(ctx.next_packet <= &ctx.buffers[ctx.active_buffer].buffer[BUFFER_LENGTH]);
 }
 

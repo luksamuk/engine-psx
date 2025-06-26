@@ -1,0 +1,105 @@
+[bubblers_mother]
+
+[[bubblers_mother.animations]]
+name = "Default"
+id = 0
+duration = 0
+loopback = 0
+frames = [[0, 0, 32, 32]]
+
+[bubblers_mother.fragment]
+offset = [-20, -8]
+
+[[bubblers_mother.fragment.animations]]
+id = 0
+name = "fire"
+duration = 4
+loopback = 0
+frames = [
+    [32,  0,  8, 16],
+    [32, 16,  8, 16],
+]
+
+
+# ===============
+
+[bubbler]
+
+[[bubbler.animations]]
+name = "Seed"
+id = 0
+duration = 4
+loopback = 0
+frames = [
+    [ 0, 32, 8, 8],
+    [ 8, 32, 8, 8],
+    [16, 32, 8, 8],
+    [24, 32, 8, 8],
+]
+
+[[bubbler.animations]]
+name = "Bubbling"
+id = 1
+duration = 6
+loopback = 5
+frames = [
+    [ 0, 40,  8,  8],
+    [ 8, 40,  8,  8],
+    [16, 40, 16,  8],
+    [ 0, 48, 16, 16],
+    [16, 48, 24, 16],
+    [16, 48, 24, 16],
+]
+
+[[bubbler.animations]]
+name = "PoisonGas"
+id = 2
+duration = 0
+loopback = 0
+frames = [[0, 64, 24, 16]]
+
+[[bubbler.animations]]
+name = "Dissolve"
+id = 3
+duration = 0
+loopback = 0
+frames = [[24, 64, 16, 16]]
+
+# ===============
+
+[gator]
+
+[[gator.animations]]
+name = "Idle"
+id = 0
+duration = 0
+loopback = 0
+frames = [[40, 0, 56, 32]]
+
+[[gator.animations]]
+name = "JawOpen"
+id = 1
+duration = 0
+loopback = 0
+frames = [[40, 32, 56, 32]]
+
+[gator.fragment]
+offset = [-16, 0]
+
+[[gator.fragment.animations]]
+name = "Stopped"
+id = 0
+duration = 0
+loopback = 0
+frames = [[96, 0, 24, 16]]
+
+[[gator.fragment.animations]]
+name = "Walking"
+id = 1
+duration = 5
+loopback = 0
+frames = [
+    [96,  0, 24, 16],
+    [96, 16, 24, 16],
+    [96, 32, 24, 16],
+]

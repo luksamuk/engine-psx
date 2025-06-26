@@ -74,11 +74,12 @@ extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
-extern SoundEffect sfx_yea;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_splash;
 extern SoundEffect sfx_count;
 extern SoundEffect sfx_bubble;
+extern SoundEffect sfx_grab;
+extern SoundEffect sfx_land;
 
 // TODO: Maybe shouldn't be extern?
 extern TileMap16  map16;
@@ -326,7 +327,7 @@ _draw_sensor(uint16_t anchorx, uint16_t anchory, LinecastDirection dir,
     setLineF2(line);
     setRGB0(line, r, g, b);
     setXY2(line, anchorx, anchory, endx, endy);
-    sort_prim(line, OTZ_LAYER_TOPMOST);
+    sort_prim(line, OTZ_LAYER_OBJECTS);
 }
 
 void
@@ -356,8 +357,7 @@ _player_update_collision_lr(Player *player)
         int16_t drop_anchory = anchory + HEIGHT_RADIUS_CLIMB;
         int16_t clamber_anchory = anchory - HEIGHT_RADIUS_CLIMB;
 
-        player->ev_climbdrop = linecast(&leveldata, &map128, &map16,
-                                        anchorx, drop_anchory,
+        player->ev_climbdrop = linecast(anchorx, drop_anchory,
                                         dir, radius, CDIR_FLOOR);
 
         // If the clamber Y anchor is negative, always return the collision
@@ -365,8 +365,7 @@ _player_update_collision_lr(Player *player)
         // are offscreen
         if(clamber_anchory <= 0) player->ev_clamber.collided = 1;
         else {
-            player->ev_clamber = linecast(&leveldata, &map128, &map16,
-                                          anchorx, clamber_anchory,
+            player->ev_clamber = linecast(anchorx, clamber_anchory,
                                           dir, radius, CDIR_FLOOR);
         }
         return;
@@ -417,8 +416,7 @@ _player_update_collision_lr(Player *player)
         // "E" sensor
         if(!player->ev_left.collided) {
             if(vel_x < 0) {
-                player->ev_left = linecast(&leveldata, &map128, &map16,
-                                           anchorx, push_anchory,
+                player->ev_left = linecast(anchorx, push_anchory,
                                            ldir, left_mag, player->gsmode);
             }
         }
@@ -426,8 +424,7 @@ _player_update_collision_lr(Player *player)
         // "F" sensor
         if(!player->ev_right.collided) {
             if(vel_x > 0) {
-                player->ev_right = linecast(&leveldata, &map128, &map16,
-                                            anchorx, push_anchory,
+                player->ev_right = linecast(anchorx, push_anchory,
                                             rdir, right_mag, player->gsmode);
             }
         }
@@ -565,20 +562,17 @@ _player_update_collision_tb(Player *player)
 
     // Ground sensors
     if(!player->ev_grnd1.collided) {
-        player->ev_grnd1 = linecast(&leveldata, &map128, &map16,
-                                    anchorx_left, anchory_left,
+        player->ev_grnd1 = linecast(anchorx_left, anchory_left,
                                     grndir, grn_mag, player->gsmode);
     }
     if(!player->ev_grnd2.collided) {
-        player->ev_grnd2 = linecast(&leveldata, &map128, &map16,
-                                    anchorx_right, anchory_right,
+        player->ev_grnd2 = linecast(anchorx_right, anchory_right,
                                     grndir, grn_mag, player->gsmode);
     }
 
     // Ledge sensor
     if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
-        CollisionEvent ev_ledge = linecast(&leveldata, &map128, &map16,
-                                           anchorx, anchory_left,
+        CollisionEvent ev_ledge = linecast(anchorx, anchory_left,
                                            CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
                                            CDIR_FLOOR);
         player->col_ledge = ev_ledge.collided;
@@ -587,13 +581,11 @@ _player_update_collision_tb(Player *player)
     if(!player->grnd) {
         // Ceiling sensors
         if(!player->ev_ceil1.collided) {
-            player->ev_ceil1 = linecast(&leveldata, &map128, &map16,
-                                        anchorx_left, anchory_left,
+            player->ev_ceil1 = linecast(anchorx_left, anchory_left,
                                         ceildir, ceil_mag, player->gsmode);
         }
         if(!player->ev_ceil2.collided) {
-            player->ev_ceil2 = linecast(&leveldata, &map128, &map16,
-                                        anchorx_right, anchory_right,
+            player->ev_ceil2 = linecast(anchorx_right, anchory_right,
                                         ceildir, ceil_mag, player->gsmode);
         }
     }
@@ -743,6 +735,7 @@ _player_update_collision_tb(Player *player)
                 player->framecount = 12;
                 player->vel.vz = 0;
                 player->airdirlock = 0;
+                sound_play_vag(sfx_land, 0);
             }
         } else {
             // If NOT touching the ground.
@@ -1118,6 +1111,7 @@ player_update(Player *player)
                 player->vel.vx = 0;
                 player->vel.vz = 0;
                 player_set_action(player, ACTION_CLIMB);
+                sound_play_vag(sfx_grab, 0);
             }
         } else if((player->ctrllock == 0)
                   && (player->action != ACTION_CLIMB)
@@ -1526,7 +1520,7 @@ player_update(Player *player)
 
             case ANIM_CLIMBUP:
             case ANIM_CLIMBDOWN:
-                player_set_frame_duration(player, 6);
+                player_set_frame_duration(player, 5);
                 break;
 
             case ANIM_CLIMBRISE:
