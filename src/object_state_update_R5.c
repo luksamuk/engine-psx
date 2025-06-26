@@ -33,10 +33,21 @@
 #define BUBBLER_POISONGAS_INTERVAL        60
 #define BUBBLER_DISSOLVE_INTERVAL          7
 
+#define GATOR_PROXIMITY_RANGE_W   88
+#define GATOR_PROXIMITY_RANGE_H   64
+
 
 // Update functions
 static void _bubblersmother_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _bubbler_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _gator_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+
+// Extern variables
+extern int32_t player_vx, player_vy; // Top left corner of player hitbox
+extern uint8_t player_attacking;
+extern int32_t player_width;
+extern int32_t player_height;
+
 
 void
 object_update_R5(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -45,6 +56,7 @@ object_update_R5(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     default: break;
     case OBJ_BUBBLERSMOTHER: _bubblersmother_update(state, typedata, pos); break;
     case OBJ_BUBBLER:        _bubbler_update(state, typedata, pos);        break;
+    case OBJ_GATOR:          _gator_update(state, typedata, pos);          break;
     }
 }
 
@@ -137,10 +149,11 @@ _bubblersmother_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy = state->freepos->ry + wobble;
 }
-#include <stdio.h>
+
 static void
 _bubbler_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
+    (void)(typedata);
     // Bubblers are usually not created on their own, so we'll just go ahead
     // and destroy any statically-placed bubbler
     if((state->freepos == NULL) || object_should_despawn(state)) {
@@ -215,4 +228,120 @@ _bubbler_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         else state->props |= OBJ_FLAG_DESTROYED;
         
     }
+}
+
+static void
+_gator_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    (void)(typedata);
+    // The Gator is a glorified motobug (See Green Hill, R2).
+    // Its main difference from the motobug is that, when it is close to
+    // the player, it opens its mouth, which creates a wide hurtbox, forcing
+    // the player to work around it and hit it in its body.
+
+    // Hide fragment on spawner
+    if(typedata->has_fragment && state->freepos == NULL)
+        state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+
+    // Spawn, etc
+    {
+        PoolObject *self = NULL;
+        switch(enemy_spawner_update(state, pos)) {
+        default: return; // ???????
+        case OBJECT_SPAWNER_CREATE_FREE:
+            self = object_pool_create(OBJ_GATOR);
+            state->parent = &self->state;
+            self->state.parent = state;
+
+            self->state.flipmask = state->flipmask;
+            self->freepos.vx = pos->vx << 12;
+            self->freepos.vy = pos->vy << 12;
+            self->state.anim_state.animation = 0;
+            self->state.timer = 0;
+            self->state.freepos->spdx = ONE * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+            state->props |= OBJ_FLAG_DESTROYED;
+            return; // Nothing more to do
+        case OBJECT_SPAWNER_ABORT_BEHAVIOUR:
+            return; // Nothing to do
+        case OBJECT_DESPAWN:
+            // Reactivate parent
+            if(state->parent) {
+                state->parent->props &= ~OBJ_FLAG_DESTROYED;
+                // Remove reference to this object
+                state->parent->parent = NULL;
+            }
+            state->props |= OBJ_FLAG_DESTROYED;
+            return; // Nothing more to do
+        case OBJECT_UPDATE_AS_FREE: break; // Just go ahead
+        }
+    }
+
+    // Motobug walk movement
+    CollisionEvent grn = linecast(pos->vx, pos->vy - 16, CDIR_FLOOR, 16, CDIR_FLOOR);
+    if(!grn.collided) {
+        state->freepos->spdy += OBJ_GRAVITY;
+    } else {
+        state->freepos->spdy = 0;
+        state->freepos->vy = grn.coord << 12;
+        CollisionEvent llft = linecast(pos->vx - 8, pos->vy - 16, CDIR_FLOOR, 32, CDIR_FLOOR);
+        CollisionEvent lrgt = linecast(pos->vx + 8, pos->vy - 16, CDIR_FLOOR, 32, CDIR_FLOOR);
+        CollisionEvent wlft = linecast(pos->vx, pos->vy - 16, CDIR_LWALL, 20, CDIR_FLOOR);
+        CollisionEvent wrgt = linecast(pos->vx, pos->vy - 16, CDIR_RWALL, 20, CDIR_FLOOR);
+        if(state->timer > 0) state->timer--;
+        if(state->freepos->spdx != 0) {
+            if(((!llft.collided || wlft.collided) && (state->freepos->spdx < 0))
+               || ((!lrgt.collided || wrgt.collided) && (state->freepos->spdx > 0))) {
+                state->freepos->spdx = 0;
+                state->timer = 60;
+            }
+        } else {
+            if(state->timer == 0) {
+                state->flipmask ^= MASK_FLIP_FLIPX;
+                state->freepos->spdx = ONE * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+            }
+        }
+    }
+
+    // Animation (fragment only)
+    state->frag_anim_state->animation = (state->freepos->spdx == 0) ? 0 : 1;
+
+    int32_t sign = ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+
+    // Proximity box, open jaws when close to player
+    RECT proximity_box = {
+        .x = pos->vx - ((sign > 0) ? 24 : GATOR_PROXIMITY_RANGE_W - 24),
+        .y = pos->vy - GATOR_PROXIMITY_RANGE_H + 8,
+        .w = GATOR_PROXIMITY_RANGE_W,
+        .h = GATOR_PROXIMITY_RANGE_H,
+    };
+    state->anim_state.animation =
+        aabb_intersects(
+           player_vx, player_vy, player_width, player_height,
+           proximity_box.x, proximity_box.y, proximity_box.w, proximity_box.h);
+
+
+    // Hitbox
+    RECT hitbox = {
+        .x = pos->vx - ((sign > 0) ? 28 : 12),
+        .y = pos->vy - 24,
+        .w = 40,
+        .h = 24,
+    };
+    if(enemy_player_interaction(state, &hitbox, pos) == OBJECT_DESPAWN) {
+        return;
+    }
+
+    // When the jaws are open, add a hurtbox
+    if(state->anim_state.animation == 1) {
+        RECT hurtbox = {
+            .x = pos->vx + ((sign > 0) ? 14 : -22),
+            .y = pos->vy - 32,
+            .w = 8,
+            .h = 32,
+        };
+        hazard_player_interaction(&hurtbox, pos);
+    }
+
+    state->freepos->vx += state->freepos->spdx;
+    state->freepos->vy += state->freepos->spdy;
 }
