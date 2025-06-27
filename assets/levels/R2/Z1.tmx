@@ -194,16 +194,14 @@
    </object>
   </objectgroup>
   <objectgroup id="10" name="LEVEL">
-   <object id="185" gid="2147483809" x="1542" y="316" width="64" height="64"/>
-   <object id="186" gid="2147483809" x="2816" y="256" width="64" height="64"/>
+   <object id="186" gid="2147483809" x="2256" y="226" width="64" height="64"/>
    <object id="189" gid="2147483809" x="3200" y="178" width="64" height="64"/>
    <object id="190" gid="2147483809" x="4962" y="452" width="64" height="64"/>
    <object id="192" gid="2147483809" x="7040" y="994" width="64" height="64"/>
-   <object id="193" gid="2147483809" x="8064" y="1024" width="64" height="64"/>
    <object id="194" gid="2147483809" x="8772" y="994" width="64" height="64"/>
    <object id="195" gid="2147483809" x="10280" y="784" width="64" height="64"/>
    <object id="196" gid="2147483809" x="6074" y="640" width="64" height="64"/>
-   <object id="199" gid="2147483809" x="768" y="324" width="64" height="64"/>
+   <object id="199" gid="2147483809" x="1280" y="260" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

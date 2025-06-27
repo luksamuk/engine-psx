@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="228">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="230">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="85" source="../COMMON/objects_common.tsx"/>
  <tileset firstgid="105" source="objects.tsx"/>
@@ -222,25 +222,25 @@
    <object id="205" gid="105" x="3102" y="1152" width="64" height="64"/>
    <object id="206" gid="105" x="9314" y="1112" width="64" height="64"/>
    <object id="208" gid="105" x="6224" y="974" width="64" height="64"/>
-   <object id="209" gid="2147483755" x="768" y="640" width="64" height="64"/>
-   <object id="210" gid="2147483755" x="3496" y="896" width="64" height="64"/>
+   <object id="209" gid="2147483755" x="1960" y="640" width="64" height="64"/>
+   <object id="210" gid="2147483755" x="3522" y="896" width="64" height="64"/>
    <object id="211" gid="2147483755" x="3810" y="448" width="64" height="64"/>
-   <object id="212" gid="2147483755" x="5440" y="768" width="64" height="64"/>
+   <object id="212" gid="107" x="5300" y="768" width="64" height="64"/>
    <object id="213" gid="2147483755" x="1320" y="128" width="64" height="64"/>
    <object id="214" gid="107" x="1152" y="128" width="64" height="64"/>
    <object id="215" gid="107" x="896" y="128" width="64" height="64"/>
    <object id="216" gid="2147483755" x="3712" y="1152" width="64" height="64"/>
    <object id="217" gid="2147483755" x="7738" y="1472" width="64" height="64"/>
-   <object id="218" gid="2147483755" x="8192" y="768" width="64" height="64"/>
-   <object id="219" gid="2147483755" x="7936" y="768" width="64" height="64"/>
+   <object id="219" gid="2147483755" x="7008" y="672" width="64" height="64"/>
    <object id="220" gid="2147483755" x="10176" y="320" width="64" height="64"/>
-   <object id="221" gid="2147483755" x="7040" y="384" width="64" height="64"/>
+   <object id="221" gid="107" x="6706" y="384" width="64" height="64"/>
    <object id="222" gid="2147483755" x="6528" y="832" width="64" height="64"/>
    <object id="223" gid="2147483755" x="6464" y="1024" width="64" height="64"/>
    <object id="224" gid="2147483755" x="7448" y="960" width="64" height="64"/>
    <object id="225" gid="2147483755" x="4912" y="1024" width="64" height="64"/>
    <object id="226" gid="105" x="8144" y="1230" width="64" height="64"/>
-   <object id="227" gid="105" x="9150" y="758" width="64" height="64"/>
+   <object id="228" gid="2147483753" x="7936" y="748" width="64" height="64"/>
+   <object id="229" gid="107" x="9148" y="768" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>
