@@ -187,11 +187,7 @@ chara_draw_offscreen(Chara *chara, int16_t framenum, int flipx, int otz)
             setRGB0(poly, 128, 128, 128);
             setTPage(poly, 1, 1, chara->prectx, precty);
             setClut(poly, chara->crectx, chara->crecty);
-            setUV4(poly,
-                   u0,     v0,
-                   u0 + 8, v0,
-                   u0,     v0 + 8,
-                   u0 + 8, v0 + 8);
+            setUVWH(poly, u0, v0, 8, 8);
             setXYWH(poly, tilex, tiley, 8, 8);
             sort_sub_prim(poly, otz);
         }
