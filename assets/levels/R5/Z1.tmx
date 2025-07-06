@@ -40,7 +40,7 @@
  </layer>
  <group id="2" name="OBJECTS">
   <objectgroup id="3" name="COMMON">
-   <object id="3" gid="89" x="2912" y="848" width="64" height="64" rotation="-90"/>
+   <object id="3" gid="89" x="2912" y="849" width="64" height="64" rotation="-90"/>
    <object id="5" gid="87" x="3055" y="832" width="64" height="64"/>
    <object id="6" gid="87" x="3087" y="832" width="64" height="64"/>
    <object id="7" gid="87" x="3119" y="832" width="64" height="64"/>
@@ -63,7 +63,7 @@
    <object id="12" gid="94" x="4192" y="448" width="64" height="64"/>
    <object id="13" gid="89" x="4048" y="896" width="64" height="64"/>
    <object id="14" gid="90" x="2992" y="848" width="64" height="64"/>
-   <object id="15" gid="2147483739" x="3536" y="539" width="64" height="64"/>
+   <object id="15" gid="2147483739" x="3536" y="544" width="64" height="64"/>
    <object id="16" gid="89" x="4544" y="976" width="64" height="64" rotation="90"/>
    <object id="18" gid="86" x="5425" y="1408" width="64" height="64">
     <properties>
@@ -108,7 +108,7 @@
     </properties>
    </object>
    <object id="98" gid="97" x="128" y="608" width="64" height="64"/>
-   <object id="99" gid="91" x="1008" y="659" width="64" height="64"/>
+   <object id="99" gid="91" x="1008" y="666" width="64" height="64"/>
    <object id="100" gid="93" x="542.127" y="639.102" width="64" height="64"/>
    <object id="101" gid="93" x="1051.13" y="616.102" width="64" height="64"/>
    <object id="102" gid="93" x="1214" y="553" width="64" height="64"/>
