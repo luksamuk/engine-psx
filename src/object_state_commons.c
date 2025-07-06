@@ -205,8 +205,10 @@ solid_object_player_interaction(RECT *solidity)
         if(y_distance < 0) {
             // If not moving vertically and standing on the ground,
             // get crushed
-            //if((player.vel.vy == 0) && (player.grnd)) {} // TODO
-            // Else...
+            if((player.vel.vy == 0) && (player.grnd)) {
+                // TODO: Get crushed
+                return;
+            }
             if(player.vel.vy >= 0) return;
             player.pos.vy -= (y_distance << 12);
             player.vel.vy = 0;
