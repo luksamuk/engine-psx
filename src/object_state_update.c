@@ -412,75 +412,118 @@ static void
 _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
 {
     if(state->anim_state.animation == 0) {
-        int32_t solidity_vx = pos->vx - 15;
-        int32_t solidity_vy = pos->vy - 16; // Spring is 32x16 solid
-        int32_t solidity_w  = 31;
-        int32_t solidity_h  = 16;
-        
+        // Spring is 32x16 solid
+        RECT solidity = {
+            .x = pos->vx - 16,
+            .y = pos->vy - 16,
+            .w = 32,
+            .h = 16,
+        };
+        ObjectCollision bump_side = OBJ_SIDE_TOP;
+
+        // Handle possible rotations
         if(state->flipmask & MASK_FLIP_ROTCW) {
-            solidity_vx = pos->vx - 32;
-            solidity_vy = pos->vy + 16;
-            solidity_w  = 16;
-            solidity_h  = 32;
+            solidity.x = pos->vx - 32;
+            solidity.y = pos->vy + 16;
+            solidity.w  = 16;
+            solidity.h  = 32;
+            bump_side = OBJ_SIDE_RIGHT;
         } else if(state->flipmask & MASK_FLIP_ROTCT) {
-            solidity_vx = pos->vx - 48;
-            solidity_vy = pos->vy - 48;
-            solidity_w  = 16;
-            solidity_h  = 32;
+            solidity.x = pos->vx - 48;
+            solidity.y = pos->vy - 48;
+            solidity.w  = 16;
+            solidity.h  = 32;
+            bump_side = OBJ_SIDE_LEFT;
         } else if(state->flipmask & MASK_FLIP_FLIPY) {
-            solidity_vy -= 48;
+            solidity.y -= 48;
+            bump_side = OBJ_SIDE_BOTTOM;
         }
 
         ObjectCollision collision_side =
-            hitbox_collision(player_vx, player_vy, player_width, player_height,
-                             solidity_vx, solidity_vy, solidity_w, solidity_h);
+            solid_object_player_interaction(state, &solidity);
 
-        // Simple spring collision.
-        // In this case, springs are not solid, and the player's spring action
-        // relate to where the spring is pointing at.
+        // The player's spring action relate to where the spring is pointing at.
         if(collision_side == OBJ_SIDE_NONE)
             return;
-        else if(state->flipmask & MASK_FLIP_ROTCT) { // Left-pointing spring
-            //player.pos.vx = (solidity_vx - player_width) << 12;
-            player.ev_right.collided = 0; // Detach player from right wall if needed
-            player.vel.vz = is_red ? -0x10000 : -0xa000;
-            if(!player.grnd) player.vel.vx = is_red ? -0x10000 : -0xa000;
-            player.ctrllock = 16;
-            player.anim_dir = -1;
-            state->anim_state.animation = 1;
-            sound_play_vag(sfx_sprn, 0);
-            if(player.action != ACTION_ROLLING)
-                player_set_action(&player, ACTION_NONE);
-        } else if(state->flipmask & MASK_FLIP_ROTCW) { // Right-pointing spring
-            //player.pos.vx = (solidity_vx + solidity_w + player_width + 8) << 12;
-            player.ev_left.collided = 0; // Detach player from left wall if needed
-            player.vel.vz = is_red ? 0x10000 : 0xa000;
-            if(!player.grnd) player.vel.vx = is_red ? 0x10000 : 0xa000;
-            player.ctrllock = 16;
-            player.anim_dir = 1;
-            state->anim_state.animation = 1;
-            sound_play_vag(sfx_sprn, 0);
-            if(player.action != ACTION_ROLLING)
-                player_set_action(&player, ACTION_NONE);
-        } else if(state->flipmask == 0) { // Top-pointing spring
-            player.pos.vy = (solidity_vy - (player_height >> 1)) << 12;
-            player.grnd = 0;
-            player.vel.vy = is_red ? -0x10000 : -0xa000;
-            player.angle = 0;
-            player.ctrllock = 0;
-            player_set_action(&player, ACTION_SPRING);
-            state->anim_state.animation = 1;
-            sound_play_vag(sfx_sprn, 0);
-        } else if(state->flipmask & MASK_FLIP_FLIPY) { // Bottom-pointing spring
-            player.pos.vy = (solidity_vy + solidity_h + (player_height >> 1)) << 12;
-            player.grnd = 0;
-            player.vel.vy = is_red ? 0x10000 : 0xa000;
-            player.angle = 0;
-            player.ctrllock = 0;
+        else if(collision_side == bump_side) {
+            switch(bump_side) {
+            default: break; // ?????
+            case OBJ_SIDE_TOP:
+                player.grnd = 0;
+                player.vel.vy = is_red ? -0x10000 : -0xa000;
+                player.angle = 0;
+                player.ctrllock = 0;
+                player.over_object = NULL;
+                break;
+            case OBJ_SIDE_BOTTOM:
+                player.grnd = 0;
+                player.vel.vy = is_red ? 0x10000 : 0xa000;
+                player.angle = 0;
+                player.ctrllock = 0;
+                break;
+            case OBJ_SIDE_RIGHT:
+                player.vel.vz = is_red ? 0x10000 : 0xa000;
+                if(!player.grnd) player.vel.vx = is_red ? 0x10000 : 0xa000;
+                player.ctrllock = 16;
+                player.anim_dir = 1;
+                if(player.action != ACTION_ROLLING)
+                    player_set_action(&player, ACTION_NONE);
+                break;
+            case OBJ_SIDE_LEFT:
+                player.vel.vz = is_red ? -0x10000 : -0xa000;
+                if(!player.grnd) player.vel.vx = is_red ? -0x10000 : -0xa000;
+                player.ctrllock = 16;
+                player.anim_dir = -1;
+                if(player.action != ACTION_ROLLING)
+                    player_set_action(&player, ACTION_NONE);
+                break;
+            };
             player_set_action(&player, ACTION_SPRING);
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
         }
+
+        /* else if(state->flipmask & MASK_FLIP_ROTCT) { // Left-pointing spring */
+        /*     //player.pos.vx = (solidity_vx - player_width) << 12; */
+        /*     player.ev_right.collided = 0; // Detach player from right wall if needed */
+        /*     player.vel.vz = is_red ? -0x10000 : -0xa000; */
+        /*     if(!player.grnd) player.vel.vx = is_red ? -0x10000 : -0xa000; */
+        /*     player.ctrllock = 16; */
+        /*     player.anim_dir = -1; */
+        /*     state->anim_state.animation = 1; */
+        /*     sound_play_vag(sfx_sprn, 0); */
+        /*     if(player.action != ACTION_ROLLING) */
+        /*         player_set_action(&player, ACTION_NONE); */
+        /* } else if(state->flipmask & MASK_FLIP_ROTCW) { // Right-pointing spring */
+        /*     //player.pos.vx = (solidity_vx + solidity_w + player_width + 8) << 12; */
+        /*     player.ev_left.collided = 0; // Detach player from left wall if needed */
+        /*     player.vel.vz = is_red ? 0x10000 : 0xa000; */
+        /*     if(!player.grnd) player.vel.vx = is_red ? 0x10000 : 0xa000; */
+        /*     player.ctrllock = 16; */
+        /*     player.anim_dir = 1; */
+        /*     state->anim_state.animation = 1; */
+        /*     sound_play_vag(sfx_sprn, 0); */
+        /*     if(player.action != ACTION_ROLLING) */
+        /*         player_set_action(&player, ACTION_NONE); */
+        /* } else if(state->flipmask == 0) { // Top-pointing spring */
+        /*     player.pos.vy = (solidity_vy - (player_height >> 1)) << 12; */
+        /*     player.grnd = 0; */
+        /*     player.vel.vy = is_red ? -0x10000 : -0xa000; */
+        /*     player.angle = 0; */
+        /*     player.ctrllock = 0; */
+        /*     player_set_action(&player, ACTION_SPRING); */
+        /*     state->anim_state.animation = 1; */
+        /*     sound_play_vag(sfx_sprn, 0); */
+        /* } else if(state->flipmask & MASK_FLIP_FLIPY) { // Bottom-pointing spring */
+        /*     player.pos.vy = (solidity_vy + solidity_h + (player_height >> 1)) << 12; */
+        /*     player.grnd = 0; */
+        /*     player.vel.vy = is_red ? 0x10000 : 0xa000; */
+        /*     player.angle = 0; */
+        /*     player.ctrllock = 0; */
+        /*     player_set_action(&player, ACTION_SPRING); */
+        /*     state->anim_state.animation = 1; */
+        /*     sound_play_vag(sfx_sprn, 0); */
+        /* } */
     } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION) {
         state->anim_state.animation = 0;
         state->anim_state.frame = 0;
@@ -551,9 +594,9 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
             solidity_vy -= 32;
         } else solidity_vy += shrink;
 
-        ObjectCollision collision_side =
-            hitbox_collision(player_vx, player_vy, player_width, player_height,
-                             solidity_vx, solidity_vy, solidity_w, solidity_h);
+        ObjectCollision collision_side;/*  = */
+            /* hitbox_collision(player_vx, player_vy, player_width, player_height, */
+            /*                  solidity_vx, solidity_vy, solidity_w, solidity_h); */
 
         if(collision_side == OBJ_SIDE_NONE) return;
         
@@ -584,45 +627,36 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
 static void
 _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
-    // TODO: For now, only spikes pointing upwards check for collision
-    if(state->flipmask != 0) return;
+    // Spikes are a 32x32 solid box
+    RECT solidity = {
+        .x = pos->vx - 16,
+        .y = pos->vy - 32,
+        .w = 32,
+        .h = 32,
+    };
+    ObjectCollision hurt_side = OBJ_SIDE_TOP;
 
-    // Collision logic is very similar to monitors
-    // Calculate solidity
-    int32_t solidity_vx = pos->vx - 16;
-    int32_t solidity_vy = pos->vy - 32; // Spikes are a 32x32 solid box
-        
-    // Perform collision detection
-    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                       solidity_vx, solidity_vy, 32, 32))
-    {
-       
-        // Landing on top
-        if(((player_vy + player_height) < solidity_vy + 16) &&
-           ((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32)))
-        {
-            if(player.action != ACTION_HURT && player.iframes == 0) {
-                player_do_damage(&player, (solidity_vx + 16) << 12);
-                return;
-            }
+    // Handle possible rotations
+    if(state->flipmask & MASK_FLIP_ROTCW) {
+        solidity.x = pos->vx - 32;
+        solidity.y = pos->vy + 16;
+        hurt_side = OBJ_SIDE_RIGHT;
+    } else if(state->flipmask & MASK_FLIP_ROTCT) {
+        solidity.x = pos->vx - 64;
+        solidity.y = pos->vy - 48;
+        hurt_side = OBJ_SIDE_LEFT;
+    } else if(state->flipmask & MASK_FLIP_FLIPY) {
+        solidity.y -= 32;
+        hurt_side = OBJ_SIDE_BOTTOM;
+    }
 
-            player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
-            player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
-            player.ev_grnd1.coord = player.ev_grnd2.coord =
-                solidity_vy + (player_attacking
-                               ? (HEIGHT_RADIUS_NORMAL - HEIGHT_RADIUS_ROLLING)
-                               : 0);
-        } else if((player_vy + 8) > solidity_vy) {
-            // Check for intersection on left/right
-            if((player_vx + 8) < pos->vx) {
-                player.ev_right.collided = 1;
-                player.ev_right.coord = (solidity_vx + 2);
-                player.ev_right.angle = 0;
-            } else {
-                player.ev_left.collided = 1;
-                player.ev_left.coord = solidity_vx + 16;
-                player.ev_right.angle = 0;
-            }
+    ObjectCollision side = solid_object_player_interaction(state, &solidity);
+    if(side == hurt_side) {
+        if(player.action != ACTION_HURT && player.iframes == 0) {
+            player_do_damage(&player, (solidity.x + 16) << 12);
+            if(side == OBJ_SIDE_TOP)
+                player.over_object = NULL;
+            return;
         }
     }
 }

@@ -277,6 +277,7 @@ screen_level_update(void *d)
             }
 
             if(updated) {
+                player.over_object = NULL;
                 camera_update(&camera, &player);
             }
         }

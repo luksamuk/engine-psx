@@ -127,7 +127,7 @@ hazard_player_interaction(RECT *hitbox, VECTOR *pos)
     }
 }
 
-void
+ObjectCollision
 solid_object_player_interaction(ObjectState *obj, RECT *solidity)
 {
     if(debug_mode > 1) draw_collision_hitbox(solidity->x, solidity->y, solidity->w, solidity->h);
@@ -154,6 +154,7 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
         if((x_left_distance < 0) || (x_left_distance >= combined_x_diameter)) {
             player.over_object = NULL;
             player.grnd = 0;
+            return OBJ_SIDE_NONE;
         } else {
             // Balance on ledges
             int32_t left_difference = (player_center.vx - object_center.vx) + combined_x_radius;
@@ -167,7 +168,7 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
                 else player.ev_grnd2.collided = 1;
             }
         }
-        return;
+        return OBJ_SIDE_TOP;
     }
 
 
@@ -175,13 +176,13 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
     int32_t left_difference = (player_center.vx - object_center.vx) + combined_x_radius;
     // Cancel if player is too far to the left or the right to be touching object
     if((left_difference < 0) || (left_difference > combined_x_diameter))
-       return;
+       return OBJ_SIDE_NONE;
 
     // Vertical overlap
     int32_t top_difference = (player_center.vy - object_center.vy) + 4 + combined_y_radius;
     // Cancel if player is too far to the top or bottom to be touching object
     if((top_difference < 0) || (top_difference > combined_y_diameter))
-        return;
+        return OBJ_SIDE_NONE;
 
     
     // Find direction of collision.
@@ -216,15 +217,16 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
             // get crushed
             if((player.vel.vy == 0) && (player.grnd)) {
                 // TODO: Get crushed
-                return;
+                return OBJ_SIDE_BOTTOM;
             }
-            if(player.vel.vy >= 0) return;
+            if(player.vel.vy >= 0) return OBJ_SIDE_NONE;
             player.pos.vy -= (y_distance << 12);
             player.vel.vy = 0;
+            return OBJ_SIDE_BOTTOM;
         } else {
             // Popped upwards: Land on object
             // y_distance must not be larger or equal to 16
-            if(y_distance >= 16) return;
+            if(y_distance >= 16) return OBJ_SIDE_NONE;
             y_distance -= 4; // Subtract 4px added earlier
 
             // Forget the combined_x_radius; use the actual width radius of
@@ -239,10 +241,10 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
             // If the player is too far to the right; or...
             // If the player is too far to the left...
             if((x_comparison < 0) || (x_comparison >= combined_x_diameter))
-                return;
+                return OBJ_SIDE_NONE;
 
             // If player is moving upwards, cancel too
-            if(player.vel.vy < 0) return;
+            if(player.vel.vy < 0) return OBJ_SIDE_NONE;
 
             // Land over object
             player.pos.vy -= (y_distance + 1) << 12;
@@ -251,6 +253,7 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
             player.angle = 0;
             player.over_object = obj;
             player.vel.vz = player.vel.vx;
+            return OBJ_SIDE_TOP;
         }
     } else {
         // Collide horizontally
@@ -263,5 +266,6 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
             if(player.grnd) player.push = 1;
         }
         player.pos.vx -= (x_distance << 12);
+        return (x_distance < 0) ? OBJ_SIDE_RIGHT : OBJ_SIDE_LEFT;
     }
 }

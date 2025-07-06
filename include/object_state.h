@@ -152,10 +152,18 @@ typedef enum {
     OBJECT_DESPAWN,
 } ObjectBehaviour;
 
+typedef enum {
+    OBJ_SIDE_NONE   = 0,
+    OBJ_SIDE_LEFT   = 1,
+    OBJ_SIDE_RIGHT  = 2,
+    OBJ_SIDE_TOP    = 3,
+    OBJ_SIDE_BOTTOM = 4,
+} ObjectCollision;
+
 ObjectBehaviour enemy_spawner_update(ObjectState *state, VECTOR *pos);
 ObjectBehaviour enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos);
 uint8_t         object_should_despawn(ObjectState *state);
 void            hazard_player_interaction(RECT *hitbox, VECTOR *pos);
-void            solid_object_player_interaction(ObjectState *obj, RECT *solidity);
+ObjectCollision solid_object_player_interaction(ObjectState *obj, RECT *solidity);
 
 #endif
