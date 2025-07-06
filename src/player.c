@@ -151,7 +151,7 @@ load_player(Player *player,
     player->anim_dir = 1;
     player->idle_timer = ANIM_IDLE_TIMER_MAX;
     player->grnd = player->ceil = player->push = 0;
-    player->over_object = 0;
+    player->over_object = NULL;
 
     player->ev_grnd1 = (CollisionEvent){ 0 };
     player->ev_grnd2 = (CollisionEvent){ 0 };
@@ -765,7 +765,7 @@ _player_update_collision_tb(Player *player)
            && !input_pressing(&player->input, PAD_CROSS)) {
             player_set_action(player, ACTION_JUMPING);
         }
-    } else if(!player->over_object) {
+    } else if(player->over_object == NULL) {
         if(!player->ev_ceil1.collided && !player->ev_ceil2.collided) {
             player->ceil = 0;
         }
@@ -1310,7 +1310,7 @@ player_update(Player *player)
             sound_play_vag(sfx_jump, 0);
             player_set_action(player, ACTION_JUMPING);
             player->holding_jump = 1;
-            player->over_object = 0;
+            player->over_object = NULL;
         }
     }
 

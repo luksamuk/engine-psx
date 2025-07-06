@@ -156,6 +156,6 @@ ObjectBehaviour enemy_spawner_update(ObjectState *state, VECTOR *pos);
 ObjectBehaviour enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos);
 uint8_t         object_should_despawn(ObjectState *state);
 void            hazard_player_interaction(RECT *hitbox, VECTOR *pos);
-void            solid_object_player_interaction(RECT *solidity);
+void            solid_object_player_interaction(ObjectState *obj, RECT *solidity);
 
 #endif

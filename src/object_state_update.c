@@ -939,5 +939,5 @@ _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         .h = 60,
     };
 
-    solid_object_player_interaction(&solidity);
+    solid_object_player_interaction(state, &solidity);
 }

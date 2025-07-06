@@ -7,6 +7,7 @@
 #include "collision.h"
 #include "input.h"
 #include "player_constants.h"
+#include "object_state.h"
 
 // Constants for adjusting hitbox and sensors
 #define WIDTH_RADIUS_NORMAL      9
@@ -99,7 +100,7 @@ typedef struct {
     uint8_t   underwater;
     int8_t    glide_turn_dir;
     uint8_t   sliding;
-    uint8_t   over_object;
+    ObjectState *over_object;
 
     // Collision modes
     CollMode  gsmode;

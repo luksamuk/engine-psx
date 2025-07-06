@@ -128,7 +128,7 @@ hazard_player_interaction(RECT *hitbox, VECTOR *pos)
 }
 
 void
-solid_object_player_interaction(RECT *solidity)
+solid_object_player_interaction(ObjectState *obj, RECT *solidity)
 {
     if(debug_mode > 1) draw_collision_hitbox(solidity->x, solidity->y, solidity->w, solidity->h);
 
@@ -147,11 +147,11 @@ solid_object_player_interaction(RECT *solidity)
     int32_t combined_x_diameter = (combined_x_radius << 1);
     int32_t combined_y_diameter = (combined_y_radius << 1);
 
-    // 1. Check if standing on top of object.
-    if(player.over_object) {
+    // If we're standing over the current object, do something about this
+    if(player.over_object == obj) {
         int32_t x_left_distance = (player_center.vx - object_center.vx) + combined_x_radius;
-        if((x_left_distance < 0) || (x_left_distance > combined_x_diameter)) {
-            player.over_object = 0;
+        if((x_left_distance < 0) || (x_left_distance >= combined_x_diameter)) {
+            player.over_object = NULL;
             player.grnd = 0;
         }
         return;
@@ -174,7 +174,8 @@ solid_object_player_interaction(RECT *solidity)
     // is the player too far down to be touching?
     if((top_difference < 0) || (top_difference > combined_y_diameter))
         return;
-        
+
+    
     // Find direction of collision.
     // Directions will be known through the signs of x_distance and y_distance.
 
@@ -212,7 +213,7 @@ solid_object_player_interaction(RECT *solidity)
             if(player.vel.vy >= 0) return;
             player.pos.vy -= (y_distance << 12);
             player.vel.vy = 0;
-        } else if(y_distance > 0){
+        } else {
             // Popped upwards: Land on object
             // y_distance must not be larger or equal to 16
             if(y_distance >= 16) return;
@@ -240,7 +241,7 @@ solid_object_player_interaction(RECT *solidity)
             player.grnd = 1;
             player.vel.vy = 0;
             player.angle = 0;
-            player.over_object = 1;
+            player.over_object = obj;
             player.vel.vz = player.vel.vx;
         }
     } else {
