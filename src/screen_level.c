@@ -680,7 +680,7 @@ screen_level_draw(void *d)
         font_draw_sm(buffer, 248, 12);
 
         // Free object debug
-        snprintf(buffer, 255, "OBJS %3d", object_pool_get_count());
+        snprintf(buffer, 255, "SPR  %3d", object_pool_get_count());
         font_draw_sm(buffer, 248, 20);
 
         // Rings, time and air for convenience
@@ -693,14 +693,11 @@ screen_level_draw(void *d)
         snprintf(buffer, 255, "AIR   %02d", player.remaining_air_frames / 60);
         font_draw_sm(buffer, 248, 44);
 
-        snprintf(buffer, 255, "REV %4d", player.spinrev);
+        snprintf(buffer, 255, "TILE%4d", level_get_num_sprites());
         font_draw_sm(buffer, 248, 52);
 
-        snprintf(buffer, 255, "SPR %4d", level_get_num_sprites());
+        snprintf(buffer, 255, "FRA%5d", player.framecount);
         font_draw_sm(buffer, 248, 60);
-
-        snprintf(buffer, 255, "FC %5d", player.framecount);
-        font_draw_sm(buffer, 248, 68);
 
         // Player debug
         if(debug_mode > 1) {
