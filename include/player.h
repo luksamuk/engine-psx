@@ -91,14 +91,15 @@ typedef struct {
     uint8_t   ctrllock;
     uint8_t   airdirlock;
     uint16_t  framecount;     // Used for many purposes incl. flight and glide
-    uint8_t   holding_jump;
     uint16_t  iframes;
+    uint8_t   holding_jump;
     uint8_t   shield;
     int32_t   speedshoes_frames;
-    uint8_t   underwater;
     uint16_t  remaining_air_frames;
+    uint8_t   underwater;
     int8_t    glide_turn_dir;
     uint8_t   sliding;
+    uint8_t   over_object;
 
     // Collision modes
     CollMode  gsmode;

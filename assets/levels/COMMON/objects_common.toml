@@ -657,6 +657,52 @@ frames = [
 ]
 loopback = -1
 
+
+# ============
+[end_capsule]
+
+[[end_capsule.animations]]
+id = 0
+name = "default"
+duration = 0
+frames = [[96, 320, 64, 64]]
+loopback = 0
+
+[[end_capsule.animations]]
+id = 0
+name = "open"
+duration = 0
+frames = [[96, 256, 64, 64]]
+loopback = 0
+
+# [end_capsule.fragment]
+# offset = [0, -16]
+
+# [[end_capsule.fragment.animations]]
+# id = 0
+# name = "default"
+# duration = 0
+# loopback = 0
+# frames = [[160, 288, 64, 24]]
+
+
+# ============
+[end_capsule_button]
+
+[[end_capsule_button.animations]]
+id = 0
+name = "default"
+duration = 0
+loopback = 0
+frames = [[160, 256, 32, 17]]
+
+[[end_capsule_button.animations]]
+id = 1
+name = "pressed"
+duration = 0
+loopback = 0
+frames = [[160, 256, 32, 8]]
+
 # ============
 # Dummy objects
 # ============

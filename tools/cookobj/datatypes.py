@@ -41,6 +41,8 @@ class ObjectId(Enum):
     SHIELD = 0x0C
     BUBBLE_PATCH = 0x0D
     BUBBLE = 0x0E
+    END_CAPSULE = 0x0F
+    END_CAPSULE_BUTTON = 0x10
 
     @staticmethod
     def get(name):
@@ -60,6 +62,8 @@ class ObjectId(Enum):
             "shield": ObjectId.SHIELD,
             "bubble_patch": ObjectId.BUBBLE_PATCH,
             "bubble": ObjectId.BUBBLE,
+            "end_capsule": ObjectId.END_CAPSULE,
+            "end_capsule_button": ObjectId.END_CAPSULE_BUTTON,
         }
         result = switch.get(name.lower())
         assert result is not None, f"Unknown common object {name}"

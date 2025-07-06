@@ -218,7 +218,7 @@ linecast(int32_t vx, int32_t vy, LinecastDirection direction,
 }
 
 void
-_draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h)
+draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h)
 {
     uint16_t
         rel_vx = vx - (camera.pos.vx >> 12) + CENTERX,
@@ -236,7 +236,7 @@ int
 aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,
                 int32_t b_vx, int32_t b_vy, int32_t bw, int32_t bh)
 {
-    if(debug_mode > 1) _draw_collision_hitbox(b_vx, b_vy, bw, bh);
+    if(debug_mode > 1) draw_collision_hitbox(b_vx, b_vy, bw, bh);
 
     int32_t a_right  = a_vx + aw;
     int32_t a_bottom = a_vy + ah;
@@ -257,7 +257,7 @@ hitbox_collision(int32_t p_vx, int32_t p_vy, int32_t pw, int32_t ph,
     int32_t obj_x = o_vx + (ow >> 1);
     int32_t obj_y = o_vy + (oh >> 1);
 
-    if(debug_mode > 1) _draw_collision_hitbox(o_vx, o_vy, ow, oh);
+    if(debug_mode > 1) draw_collision_hitbox(o_vx, o_vy, ow, oh);
 
     // Check for overlap
     int32_t combined_x_radius = (ow >> 1) + (pw >> 1) + 1;

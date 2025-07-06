@@ -63,6 +63,7 @@ static void _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Level-specific update functions
 extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
@@ -138,6 +139,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     case OBJ_SWITCH:                 _switch_update(state, typedata, pos);             break;
     case OBJ_BUBBLE_PATCH:           _bubble_patch_update(state, typedata, pos);       break;
     case OBJ_BUBBLE:                 _bubble_update(state, typedata, pos);             break;
+    case OBJ_END_CAPSULE:            _end_capsule_update(state, typedata, pos);        break;
     }
     return;
 
@@ -925,4 +927,17 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             return;
         }
     }
+}
+
+static void
+_end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+{
+    RECT solidity = {
+        .x = pos->vx - 32,
+        .y = pos->vy - 60,
+        .w = 64,
+        .h = 60,
+    };
+
+    solid_object_player_interaction(&solidity);
 }

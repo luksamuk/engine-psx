@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "object.h"
 #include "object_state.h"
 #include "camera.h"
@@ -14,7 +15,8 @@ extern uint8_t player_attacking;
 extern int32_t player_width;
 extern int32_t player_height;
 
-extern uint32_t   level_score_count;
+extern uint32_t level_score_count;
+extern int      debug_mode;
 
 extern SoundEffect sfx_pop;
 
@@ -122,5 +124,133 @@ hazard_player_interaction(RECT *hitbox, VECTOR *pos)
         if(player.action != ACTION_HURT && player.iframes == 0) {
             player_do_damage(&player, pos->vx << 12);
         }
+    }
+}
+
+void
+solid_object_player_interaction(RECT *solidity)
+{
+    if(debug_mode > 1) draw_collision_hitbox(solidity->x, solidity->y, solidity->w, solidity->h);
+
+    VECTOR player_center = {
+        .vx = player_vx + (player_width >> 1),
+        .vy = player_vy + (player_height >> 1),
+    };
+
+    VECTOR object_center = {
+        .vx = solidity->x + (solidity->w >> 1),
+        .vy = solidity->y + (solidity->h >> 1),
+    };
+
+    int32_t combined_x_radius = (solidity->w >> 1) + PUSH_RADIUS + 1;
+    int32_t combined_y_radius = (solidity->h >> 1) + (player_height >> 1);
+    int32_t combined_x_diameter = (combined_x_radius << 1);
+    int32_t combined_y_diameter = (combined_y_radius << 1);
+
+    // 1. Check if standing on top of object.
+    if(player.over_object) {
+        int32_t x_left_distance = (player_center.vx - object_center.vx) + combined_x_radius;
+        if((x_left_distance < 0) || (x_left_distance > combined_x_diameter)) {
+            player.over_object = 0;
+            player.grnd = 0;
+        }
+        return;
+    }
+
+
+    // Horizontal overlap
+    int32_t left_difference = (player_center.vx - object_center.vx) + combined_x_radius;
+
+    // The player is too far to the left to be touching? or...
+    // the player is too far to the right to be touching?
+    if((left_difference < 0) || (left_difference > combined_x_diameter))
+       return;
+    // The player is overlapping on X axis, and it will continue.
+
+    // Vertical overlap
+    int32_t top_difference = (player_center.vy - object_center.vy) + 4 + combined_y_radius;
+    
+    // Is the player too far above to be touching? or...
+    // is the player too far down to be touching?
+    if((top_difference < 0) || (top_difference > combined_y_diameter))
+        return;
+        
+    // Find direction of collision.
+    // Directions will be known through the signs of x_distance and y_distance.
+
+    // Horizontal edge distance
+    int32_t x_distance;
+    if(player_center.vx > object_center.vx) {
+        // Player is on the right: flipped, will be a negative number
+        x_distance = left_difference - combined_x_diameter;
+    } else {
+        // Player is on the left
+        x_distance = left_difference;
+    }
+
+    // Vertical edge distance
+    int32_t y_distance;
+    if(player_center.vy > object_center.vy) {
+        // Player is on the bottom; flipped, will be a negative number, minus extra 4px
+        y_distance = top_difference - 4 - combined_y_diameter;
+    } else {
+        // Player is on top
+        y_distance = top_difference;
+    }
+
+    if((abs(x_distance) > abs(y_distance)) || (abs(y_distance) <= 4)) {
+        // Collide vertically.
+
+        // Pop downwards
+        if(y_distance < 0) {
+            // If not moving vertically and standing on the ground,
+            // get crushed
+            //if((player.vel.vy == 0) && (player.grnd)) {} // TODO
+            // Else...
+            if(player.vel.vy >= 0) return;
+            player.pos.vy -= (y_distance << 12);
+            player.vel.vy = 0;
+        } else if(y_distance > 0){
+            // Popped upwards: Land on object
+            // y_distance must not be larger or equal to 16
+            if(y_distance >= 16) return;
+            y_distance -= 4; // Subtract 4px added earlier
+
+            // Forget the combined_x_radius; use the actual width radius of
+            // the object, not combined with anything at all
+            combined_x_radius = solidity->w >> 1;
+            combined_x_diameter = solidity->w;
+
+            // Get a distance from the player's X position to the object's
+            // right edge
+            int32_t x_comparison = object_center.vx - player_center.vx + combined_x_radius;
+
+            // If the player is too far to the right; or...
+            // If the player is too far to the left...
+            if((x_comparison < 0) || (x_comparison >= combined_x_diameter))
+                return;
+
+            // If player is moving upwards, cancel too
+            if(player.vel.vy < 0) return;
+
+            // Land over object
+            player.pos.vy -= (y_distance + 1) << 12;
+            player.grnd = 1;
+            player.vel.vy = 0;
+            player.angle = 0;
+            player.over_object = 1;
+            player.vel.vz = player.vel.vx;
+        }
+    } else {
+        // Collide horizontally
+        // Do not affect speed if x_distance is zero.
+        if((x_distance != 0)
+           && (((x_distance > 0) && (player.vel.vx > 0))
+               || ((x_distance < 0) && (player.vel.vx < 0))))
+        {
+            player.vel.vx = player.vel.vz = 0;
+            if(player.grnd) player.push = 1;
+        }
+        player.pos.vx -= (x_distance << 12);
     }
 }

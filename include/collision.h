@@ -30,6 +30,8 @@ CollisionEvent linecast(int32_t vx, int32_t vy, LinecastDirection direction,
 
 /* Simpler collision detection algorithms */
 
+void draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h);
+
 // Intersection between two axis-aligned bounding boxes (AABBs).
 int
 aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,

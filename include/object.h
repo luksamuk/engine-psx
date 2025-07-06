@@ -29,6 +29,8 @@ typedef enum {
     OBJ_SHIELD                 = 0x0c,
     OBJ_BUBBLE_PATCH           = 0x0d,
     OBJ_BUBBLE                 = 0x0e,
+    OBJ_END_CAPSULE            = 0x0f,
+    OBJ_END_CAPSULE_BUTTON     = 0x10,
 } ObjectType;
 
 #define MASK_FLIP_FLIPX  0x1 // Flip on X axis

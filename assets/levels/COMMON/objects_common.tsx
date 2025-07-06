@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.0" name="objects_common" tilewidth="64" tileheight="64" tilecount="20" columns="4">
+<tileset version="1.10" tiledversion="1.11.2" name="objects_common" tilewidth="64" tileheight="64" tilecount="20" columns="4">
  <image source="obj_common_designtiles.png" width="256" height="320"/>
  <tile id="0" type="ring"/>
  <tile id="1" type="monitor">
@@ -58,4 +58,6 @@
   </properties>
  </tile>
  <tile id="17" type="bubble"/>
+ <tile id="18" type="end_capsule"/>
+ <tile id="19" type="end_capsule_button"/>
 </tileset>
