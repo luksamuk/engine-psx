@@ -454,12 +454,14 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
                 player.angle = 0;
                 player.ctrllock = 0;
                 player.over_object = NULL;
+                player_set_action(&player, ACTION_SPRING);
                 break;
             case OBJ_SIDE_BOTTOM:
                 player.grnd = 0;
                 player.vel.vy = is_red ? 0x10000 : 0xa000;
                 player.angle = 0;
                 player.ctrllock = 0;
+                player_set_action(&player, ACTION_SPRING);
                 break;
             case OBJ_SIDE_RIGHT:
                 player.vel.vz = is_red ? 0x10000 : 0xa000;
@@ -478,7 +480,6 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
                     player_set_action(&player, ACTION_NONE);
                 break;
             };
-            player_set_action(&player, ACTION_SPRING);
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
         }
@@ -563,10 +564,19 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
     // For diagonal springs, interaction should occur if and only if the player
     // is colliding with its top.
     if(state->anim_state.animation == 0) {
-        int32_t solidity_vx = pos->vx - 16;
-        int32_t solidity_vy = pos->vy - 32; // Spring is 32x32 solid
-        int32_t solidity_w  = 32;
-        int32_t solidity_h  = 32;
+        /* int32_t solidity_vx = pos->vx - 16; */
+        /* int32_t solidity_vy = pos->vy - 32; // Spring is 32x32 solid */
+        /* int32_t solidity_w  = 32; */
+        /* int32_t solidity_h  = 32; */
+
+        // Spring is 32x32 solid
+        RECT solidity = {
+            .x = pos->vx - 16,
+            .y = pos->vy - 32,
+            .w = 32,
+            .h = 32,
+        };
+        ObjectCollision bump_side = OBJ_SIDE_TOP;
 
         // Spring hitbox is actually calculated relative to player's X position
         // within it.
@@ -579,43 +589,43 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
         int32_t shrink = 0;
         int32_t delta = 0;
         if(state->flipmask & MASK_FLIP_FLIPX) {
-            delta = solidity_w - (player_vx - solidity_vx);
+            delta = solidity.w - (player_vx - solidity.x);
         } else {
-            delta = player_vx - solidity_vx + 16;
+            delta = player_vx - solidity.x + 16;
         }
 
         if(delta > 10 && delta < 33) {
             shrink = delta - 10;
         } else shrink = 22;
 
-        solidity_h -= shrink;
+        solidity.h -= shrink;
         
         if(state->flipmask & MASK_FLIP_FLIPY) {
-            solidity_vy -= 32;
-        } else solidity_vy += shrink;
+            solidity.y -= 32;
+            bump_side = OBJ_SIDE_BOTTOM;
+        } else solidity.y += shrink;
 
-        ObjectCollision collision_side;/*  = */
-            /* hitbox_collision(player_vx, player_vy, player_width, player_height, */
-            /*                  solidity_vx, solidity_vy, solidity_w, solidity_h); */
+        ObjectCollision collision_side =
+            solid_object_player_interaction(state, &solidity);
 
         if(collision_side == OBJ_SIDE_NONE) return;
-        
-        player.grnd = 0;
-        player.pos.vx = pos->vx << 12;
-        player.pos.vy = (pos->vy - 16) << 12;
-        player.vel.vx = is_red ? SPRND_ST_R : SPRND_ST_Y;
-        player.vel.vy = is_red ? SPRND_ST_R : SPRND_ST_Y;
-        if(!(state->flipmask & MASK_FLIP_FLIPY)) player.vel.vy *= -1;
-        if(state->flipmask & MASK_FLIP_FLIPX) {
-            player.vel.vx *= -1;
-            player.anim_dir = -1; // Flip on X: point player left
-        } else player.anim_dir = 1; // No flip on X: point player right
-        player.angle = 0;
-        player.airdirlock = 1;
-        player_set_action(&player, ACTION_SPRING);
-        state->anim_state.animation = 1;
-        sound_play_vag(sfx_sprn, 0);
-        
+        else if(collision_side == bump_side) {
+            player.grnd = 0;
+            player.vel.vx = is_red ? SPRND_ST_R : SPRND_ST_Y;
+            player.vel.vy = is_red ? SPRND_ST_R : SPRND_ST_Y;
+            if(!(state->flipmask & MASK_FLIP_FLIPY)) player.vel.vy *= -1;
+            if(state->flipmask & MASK_FLIP_FLIPX) {
+                player.vel.vx *= -1;
+                player.anim_dir = -1; // Flip on X: point player left
+            } else player.anim_dir = 1; // No flip on X: point player right
+            player.airdirlock = 1;
+            player_set_action(&player, ACTION_SPRING);
+            state->anim_state.animation = 1;
+            sound_play_vag(sfx_sprn, 0);
+            if(bump_side == OBJ_SIDE_TOP) {
+                player.over_object = NULL;
+            }
+        }
     } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION) {
         state->anim_state.animation = 0;
         state->anim_state.frame = 0;
