@@ -152,6 +152,7 @@ load_player(Player *player,
     player->idle_timer = ANIM_IDLE_TIMER_MAX;
     player->grnd = player->ceil = player->push = 0;
     player->over_object = NULL;
+    player->pushed_object = NULL;
 
     player->ev_grnd1 = (CollisionEvent){ 0 };
     player->ev_grnd2 = (CollisionEvent){ 0 };
@@ -885,6 +886,13 @@ player_update(Player *player)
     _player_update_collision_lr(player); // Push sensor collision detection
     _player_update_collision_tb(player); // Ground sensor collision detection
 
+    // Tweak object pushing.
+    // If no longer pressing a direction and still pushing an object,
+    // reset push state
+    if(player->pushed_object &&
+       !(input_pressing(&player->input, PAD_LEFT) || input_pressing(&player->input, PAD_RIGHT)))
+        player->pushed_object = NULL;
+
     // i-frames
     if(player->iframes > 0) player->iframes--;
 
@@ -1323,7 +1331,7 @@ player_update(Player *player)
 
     // Animation
     if(player->grnd) {
-        if(player->push) {
+        if(player->push || player->pushed_object) {
             player_set_animation_direct(player, ANIM_PUSHING);
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
         } else if(player->action == ACTION_GLIDERECOVER) {

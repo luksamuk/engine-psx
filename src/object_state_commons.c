@@ -175,8 +175,10 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
     // Horizontal overlap
     int32_t left_difference = (player_center.vx - object_center.vx) + combined_x_radius;
     // Cancel if player is too far to the left or the right to be touching object
-    if((left_difference < 0) || (left_difference > combined_x_diameter))
-       return OBJ_SIDE_NONE;
+    if((left_difference < 0) || (left_difference > combined_x_diameter)) {
+        if(player.pushed_object == obj) player.pushed_object = NULL;
+        return OBJ_SIDE_NONE;
+    }
 
     // Vertical overlap
     int32_t top_difference = (player_center.vy - object_center.vy) + 4 + combined_y_radius;
@@ -263,7 +265,7 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
                || ((x_distance < 0) && (player.vel.vx < 0))))
         {
             player.vel.vx = player.vel.vz = 0;
-            if(player.grnd) player.push = 1;
+            if(player.grnd) player.pushed_object = obj;
         }
         player.pos.vx -= (x_distance << 12);
         return (x_distance < 0) ? OBJ_SIDE_RIGHT : OBJ_SIDE_LEFT;

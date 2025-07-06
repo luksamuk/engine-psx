@@ -100,6 +100,7 @@ typedef struct {
     uint8_t   underwater;
     int8_t    glide_turn_dir;
     uint8_t   sliding;
+    ObjectState *pushed_object;
     ObjectState *over_object;
 
     // Collision modes
