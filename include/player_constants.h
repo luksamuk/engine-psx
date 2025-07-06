@@ -34,7 +34,7 @@ typedef struct {
         x_slope_rollup,
         x_slope_rolldown,
         x_max_spd,
-        x_map_slip_spd,
+        x_max_slip_spd,
         x_drpspd,
         x_drpmax,
         y_hurt_force,

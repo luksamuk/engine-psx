@@ -1008,18 +1008,23 @@ player_update(Player *player)
             if(abs(player->vel.vz) >= player->cnst->x_slope_min_spd)
                 player->vel.vz -= (player->cnst->x_slope_normal * rsin(player->angle)) >> 12;
 
-            // Slip down slopes if they are too steep
-            // TODO: FIX THIS!
-            /* if((abs(player->vel.vz) < X_MAX_SLIP_SPD) */
-            /*    && (abs(player->angle) > 0x1ec && abs(player->angle) < 0xe16) */
-            /*    && player->ctrllock == 0) { */
-            /*     player->ctrllock = 30; */
-            /*     if(player->gsmode != CDIR_FLOOR) { */
-            /*         player->grnd = 0; */
-            /*         player->gsmode = CDIR_FLOOR; */
-            /*         player->psmode = CDIR_FLOOR; */
-            /*     } */
-            /* } */
+            // Slip down slopes if they are too steep (Sonic 3 method)
+            if((player->ctrllock == 0) || (player->vel.vz == 0)) {
+                if((abs(player->vel.vz) < player->cnst->x_max_slip_spd)
+                   && ((player->angle >= 0x18e) && (player->angle <= 0xe7d))) {
+                    // Within slip range
+                    player->ctrllock = 30;
+                    if((player->angle >= 0x311) && (player->angle <= 0xd05)) {
+                        // Also within fall range; detach from ground
+                        player->grnd = 0;
+                    }
+                    if(player->angle < 0x0800) { // < 180º
+                        player->vel.vz -= 0x0800; // - 0.5
+                    } else {
+                        player->vel.vz += 0x0800; // +0.5
+                    }
+                }
+            }
 
             /* Action changers */
             if(input_pressing(&player->input, PAD_DOWN)) {
