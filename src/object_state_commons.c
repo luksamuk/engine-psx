@@ -147,12 +147,25 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
     int32_t combined_x_diameter = (combined_x_radius << 1);
     int32_t combined_y_diameter = (combined_y_radius << 1);
 
+
     // If we're standing over the current object, do something about this
     if(player.over_object == obj) {
         int32_t x_left_distance = (player_center.vx - object_center.vx) + combined_x_radius;
         if((x_left_distance < 0) || (x_left_distance >= combined_x_diameter)) {
             player.over_object = NULL;
             player.grnd = 0;
+        } else {
+            // Balance on ledges
+            int32_t left_difference = (player_center.vx - object_center.vx) + combined_x_radius;
+            if(player_center.vx > object_center.vx) {
+                left_difference = left_difference - combined_x_diameter;
+            }
+            player.col_ledge = (abs(left_difference) >= 12);
+            if(!player.col_ledge) {
+                if(left_difference < 0)
+                    player.ev_grnd1.collided = 1;
+                else player.ev_grnd2.collided = 1;
+            }
         }
         return;
     }
@@ -160,18 +173,13 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
 
     // Horizontal overlap
     int32_t left_difference = (player_center.vx - object_center.vx) + combined_x_radius;
-
-    // The player is too far to the left to be touching? or...
-    // the player is too far to the right to be touching?
+    // Cancel if player is too far to the left or the right to be touching object
     if((left_difference < 0) || (left_difference > combined_x_diameter))
        return;
-    // The player is overlapping on X axis, and it will continue.
 
     // Vertical overlap
     int32_t top_difference = (player_center.vy - object_center.vy) + 4 + combined_y_radius;
-    
-    // Is the player too far above to be touching? or...
-    // is the player too far down to be touching?
+    // Cancel if player is too far to the top or bottom to be touching object
     if((top_difference < 0) || (top_difference > combined_y_diameter))
         return;
 

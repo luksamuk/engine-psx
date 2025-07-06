@@ -572,11 +572,13 @@ _player_update_collision_tb(Player *player)
     }
 
     // Ledge sensor
-    if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
-        CollisionEvent ev_ledge = linecast(anchorx, anchory_left,
-                                           CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
-                                           CDIR_FLOOR);
-        player->col_ledge = ev_ledge.collided;
+    if(player->over_object == NULL) {
+        if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
+            CollisionEvent ev_ledge = linecast(anchorx, anchory_left,
+                                               CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
+                                               CDIR_FLOOR);
+            player->col_ledge = ev_ledge.collided;
+        }
     }
 
     if(!player->grnd) {
