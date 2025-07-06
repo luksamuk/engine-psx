@@ -16,6 +16,8 @@
 #define STEGWAY_SIGHT_DISTANCE_X      96
 #define STEGWAY_SIGHT_DISTANCE_MIN_X  (STEGWAY_SIGHT_DISTANCE_X - 24)
 #define STEGWAY_SIGHT_DISTANCE_Y      64
+#define STEGWAY_BASE_SPEED            ONE
+#define STEGWAY_RUN_SPEED             0x2800
 
 #define BUZZBOMBER_PATROL_RADIUS   (128 << 12)
 #define BUZZBOMBER_AIMING_FRAMES   60
@@ -150,9 +152,9 @@ _stegway_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                player_vx, player_vy, player_width, player_height,
                sight_vx, sight_vy, STEGWAY_SIGHT_DISTANCE_X, STEGWAY_SIGHT_DISTANCE_Y))
         {
-            state->freepos->spdx = (3 << 12) * sign;
+            state->freepos->spdx = STEGWAY_RUN_SPEED * sign;
         } else {
-            state->freepos->spdx = ONE * sign;
+            state->freepos->spdx = STEGWAY_BASE_SPEED * sign;
         }
     }
 
@@ -160,7 +162,7 @@ _stegway_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         state->anim_state.animation = 0;
         state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
     }
-    else if(abs(state->freepos->spdx) < (3 << 12)) {
+    else if(abs(state->freepos->spdx) < STEGWAY_RUN_SPEED) {
         state->anim_state.animation = 1;
         state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
     }
