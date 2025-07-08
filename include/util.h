@@ -28,6 +28,14 @@
 #define CLUT_TO_RGB(x) ((x << 3) | (x >> 2))
 #define RGB_TO_CLUT(x) (x >> 3)
 
+// Fixed-point RECT
+typedef struct _FRECT {
+    int32_t x;
+    int32_t y;
+    int32_t w;
+    int32_t h;
+} FRECT;
+
 int RotTransPers(SVECTOR *v, uint32_t *xy0);
 int RotAverageNclip3(SVECTOR *a, SVECTOR *b, SVECTOR *c,
                      uint32_t *xy0, uint32_t *xy1, uint32_t *xy2,

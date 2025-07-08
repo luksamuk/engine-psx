@@ -6,6 +6,7 @@
 #include <psxgte.h>
 
 #include "object.h"
+#include "util.h"
 
 /* ======================== */
 /*  OBJECT STATE STRUCTURE */
@@ -164,6 +165,6 @@ ObjectBehaviour enemy_spawner_update(ObjectState *state, VECTOR *pos);
 ObjectBehaviour enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos);
 uint8_t         object_should_despawn(ObjectState *state);
 void            hazard_player_interaction(RECT *hitbox, VECTOR *pos);
-ObjectCollision solid_object_player_interaction(ObjectState *obj, RECT *solidity);
+ObjectCollision solid_object_player_interaction(ObjectState *obj, FRECT *solidity);
 
 #endif

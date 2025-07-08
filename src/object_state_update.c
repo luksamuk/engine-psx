@@ -409,15 +409,16 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 }
 
 static void
-_spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
+_spring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t is_red)
 {
+    (void)(entry);
     if(state->anim_state.animation == 0) {
-        // Spring is 32x16 solid
-        RECT solidity = {
+        // Spring is 32x13 solid
+        FRECT solidity = {
             .x = pos->vx - 16,
-            .y = pos->vy - 16,
+            .y = pos->vy - 13,
             .w = 32,
-            .h = 16,
+            .h = 13,
         };
         ObjectCollision bump_side = OBJ_SIDE_TOP;
 
@@ -425,19 +426,27 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
         if(state->flipmask & MASK_FLIP_ROTCW) {
             solidity.x = pos->vx - 32;
             solidity.y = pos->vy + 16;
-            solidity.w  = 16;
-            solidity.h  = 32;
+            solidity.w  = 13;
+            solidity.h  = 30;
             bump_side = OBJ_SIDE_RIGHT;
         } else if(state->flipmask & MASK_FLIP_ROTCT) {
             solidity.x = pos->vx - 48;
             solidity.y = pos->vy - 48;
-            solidity.w  = 16;
-            solidity.h  = 32;
+            solidity.w  = 13;
+            solidity.h  = 30;
             bump_side = OBJ_SIDE_LEFT;
         } else if(state->flipmask & MASK_FLIP_FLIPY) {
             solidity.y -= 48;
             bump_side = OBJ_SIDE_BOTTOM;
         }
+
+        // Convert to 20.12 fixed
+        solidity = (FRECT){
+            .x = solidity.x << 12,
+            .y = solidity.y << 12,
+            .w = solidity.w << 12,
+            .h = solidity.h << 12,
+        };
 
         ObjectCollision collision_side =
             solid_object_player_interaction(state, &solidity);
@@ -483,48 +492,6 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
         }
-
-        /* else if(state->flipmask & MASK_FLIP_ROTCT) { // Left-pointing spring */
-        /*     //player.pos.vx = (solidity_vx - player_width) << 12; */
-        /*     player.ev_right.collided = 0; // Detach player from right wall if needed */
-        /*     player.vel.vz = is_red ? -0x10000 : -0xa000; */
-        /*     if(!player.grnd) player.vel.vx = is_red ? -0x10000 : -0xa000; */
-        /*     player.ctrllock = 16; */
-        /*     player.anim_dir = -1; */
-        /*     state->anim_state.animation = 1; */
-        /*     sound_play_vag(sfx_sprn, 0); */
-        /*     if(player.action != ACTION_ROLLING) */
-        /*         player_set_action(&player, ACTION_NONE); */
-        /* } else if(state->flipmask & MASK_FLIP_ROTCW) { // Right-pointing spring */
-        /*     //player.pos.vx = (solidity_vx + solidity_w + player_width + 8) << 12; */
-        /*     player.ev_left.collided = 0; // Detach player from left wall if needed */
-        /*     player.vel.vz = is_red ? 0x10000 : 0xa000; */
-        /*     if(!player.grnd) player.vel.vx = is_red ? 0x10000 : 0xa000; */
-        /*     player.ctrllock = 16; */
-        /*     player.anim_dir = 1; */
-        /*     state->anim_state.animation = 1; */
-        /*     sound_play_vag(sfx_sprn, 0); */
-        /*     if(player.action != ACTION_ROLLING) */
-        /*         player_set_action(&player, ACTION_NONE); */
-        /* } else if(state->flipmask == 0) { // Top-pointing spring */
-        /*     player.pos.vy = (solidity_vy - (player_height >> 1)) << 12; */
-        /*     player.grnd = 0; */
-        /*     player.vel.vy = is_red ? -0x10000 : -0xa000; */
-        /*     player.angle = 0; */
-        /*     player.ctrllock = 0; */
-        /*     player_set_action(&player, ACTION_SPRING); */
-        /*     state->anim_state.animation = 1; */
-        /*     sound_play_vag(sfx_sprn, 0); */
-        /* } else if(state->flipmask & MASK_FLIP_FLIPY) { // Bottom-pointing spring */
-        /*     player.pos.vy = (solidity_vy + solidity_h + (player_height >> 1)) << 12; */
-        /*     player.grnd = 0; */
-        /*     player.vel.vy = is_red ? 0x10000 : 0xa000; */
-        /*     player.angle = 0; */
-        /*     player.ctrllock = 0; */
-        /*     player_set_action(&player, ACTION_SPRING); */
-        /*     state->anim_state.animation = 1; */
-        /*     sound_play_vag(sfx_sprn, 0); */
-        /* } */
     } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION) {
         state->anim_state.animation = 0;
         state->anim_state.frame = 0;
@@ -570,7 +537,7 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
         /* int32_t solidity_h  = 32; */
 
         // Spring is 32x32 solid
-        RECT solidity = {
+        FRECT solidity = {
             .x = pos->vx - 16,
             .y = pos->vy - 32,
             .w = 32,
@@ -605,6 +572,14 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
             bump_side = OBJ_SIDE_BOTTOM;
         } else solidity.y += shrink;
 
+        // Convert to 20.12 fixed
+        solidity = (FRECT){
+            .x = solidity.x << 12,
+            .y = solidity.y << 12,
+            .w = solidity.w << 12,
+            .h = solidity.h << 12,
+        };
+
         ObjectCollision collision_side =
             solid_object_player_interaction(state, &solidity);
 
@@ -638,7 +613,7 @@ static void
 _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
     // Spikes are a 32x32 solid box
-    RECT solidity = {
+    FRECT solidity = {
         .x = pos->vx - 16,
         .y = pos->vy - 32,
         .w = 32,
@@ -659,6 +634,14 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         solidity.y -= 32;
         hurt_side = OBJ_SIDE_BOTTOM;
     }
+
+    // Convert to 20.12 fixed
+    solidity = (FRECT){
+        .x = solidity.x << 12,
+        .y = solidity.y << 12,
+        .w = solidity.w << 12,
+        .h = solidity.h << 12,
+    };
 
     ObjectCollision side = solid_object_player_interaction(state, &solidity);
     if(side == hurt_side) {
@@ -976,11 +959,19 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 static void
 _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
-    RECT solidity = {
+    FRECT solidity = {
         .x = pos->vx - 32,
         .y = pos->vy - 60,
         .w = 64,
         .h = 60,
+    };
+
+    // Convert to 20.12 fixed
+    solidity = (FRECT){
+        .x = solidity.x << 12,
+        .y = solidity.y << 12,
+        .w = solidity.w << 12,
+        .h = solidity.h << 12,
     };
 
     solid_object_player_interaction(state, &solidity);
