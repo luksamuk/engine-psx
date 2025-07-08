@@ -733,49 +733,30 @@ _shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 
 
 static void
-_switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
-    // Switches are always solid at same size and change animation
-    // while being upon.
-    int32_t solidity_vx = pos->vx - 16;
-    int32_t solidity_vy = pos->vy - 8;
+    (void)(entry);
+    // Switches have a single solidity box, but they change animation
+    // depending on whether the player is on top
+    FRECT solidity = {
+        .x = (pos->vx - 15) << 12,
+        .y = (pos->vy - 8) << 12,
+        .w = 30 << 12,
+        .h = 8 << 12,
+    };
 
-    // Set as not pressed by default
-    state->anim_state.animation = 0;
+    ObjectCollision collision_side =
+        solid_object_player_interaction(state, &solidity);
 
-    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                           solidity_vx, solidity_vy, 32, 8))
-    {
-        // Check for intersection on left/right
-        if((player_vy + 36) > solidity_vy
-            && !((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32))) {
-
-            if((player_vx + 8) < pos->vx) {
-                player.ev_right.collided = 1;
-                player.ev_right.coord = (solidity_vx + 2);
-                player.ev_right.angle = 0;
-            } else {
-                player.ev_left.collided = 1;
-                player.ev_left.coord = solidity_vx + 16;
-                player.ev_right.angle = 0;
-            }
+    if(collision_side == OBJ_SIDE_TOP) {
+        state->anim_state.animation = 1;
+        if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
+            // Switch was just pressed; play "beep"
+            sound_play_vag(sfx_switch, 0);
         }
-        // Landing on top; pressing
-        else if(((player_vy + player_height) < solidity_vy + 16))
-        {
-            player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
-            player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
-            player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy;
-            state->anim_state.animation = 1;
-            if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
-                // Switch was just pressed; play "beep"
-                sound_play_vag(sfx_switch, 0);
-            }
-
-            state->props |= OBJ_FLAG_SWITCH_PRESSED;
-        }
+        state->props |= OBJ_FLAG_SWITCH_PRESSED;
     } else {
-        // If button is pressed... un-press it
+        state->anim_state.animation = 0;
         state->props &= ~OBJ_FLAG_SWITCH_PRESSED;
     }
 }
