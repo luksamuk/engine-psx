@@ -1042,7 +1042,7 @@ player_update(Player *player)
                     player_set_action(player, ACTION_ROLLING);
                     player_set_animation_direct(player, ANIM_ROLLING);
                     sound_play_vag(sfx_roll, 0);
-                } else if((player->col_ledge || (player->over_object != NULL))
+                } else if(player->col_ledge
                           && player->vel.vz == 0
                           && input_pressed(&player->input, PAD_CROSS)) { // Spindash
                     player_set_action(player, ACTION_SPINDASH);
@@ -1052,7 +1052,7 @@ player_update(Player *player)
                 }
             } else if((player->character == CHARA_SONIC)
                 && input_pressing(&player->input, PAD_UP)) {
-                if((player->col_ledge || (player->over_object != NULL))
+                if(player->col_ledge
                    && player->vel.vz == 0
                    && input_pressed(&player->input, PAD_CROSS)) { // Peel-out
                     player_set_action(player, ACTION_PEELOUT);
@@ -1355,14 +1355,12 @@ player_update(Player *player)
                 // If grounded, then this means we climbed up the ledge and
                 // are just waiting for things to finish
                 player_set_animation_direct(player, ANIM_CLIMBEND);
-            } else if((player->col_ledge || (player->over_object != NULL))
-                      && input_pressing(&player->input, PAD_UP)) {
+            } else if(player->col_ledge && input_pressing(&player->input, PAD_UP)) {
                 // Look up (except when balancing)
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
                 player_set_action(player, ACTION_LOOKUP);
-            } else if((player->col_ledge || (player->over_object != NULL))
-                      && input_pressing(&player->input, PAD_DOWN)) {
+            } else if(player->col_ledge && input_pressing(&player->input, PAD_DOWN)) {
                 // Crouch down (except when balancing)
                 player_set_animation_direct(player, ANIM_CROUCHDOWN);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
