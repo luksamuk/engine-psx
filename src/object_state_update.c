@@ -612,11 +612,15 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
 static void
 _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 {
-    // Spikes are a 32x32 solid box
+    // Spikes are generally a 32x32 solid box,
+    // but when they're facing up (no transform), they're
+    // somewhat thinner so we don't have to deal with player
+    // ceiling collision and we can also put them on top of thin
+    // platforms.
     FRECT solidity = {
-        .x = pos->vx - 16,
+        .x = pos->vx - 14,
         .y = pos->vy - 32,
-        .w = 32,
+        .w = 27,
         .h = 32,
     };
     ObjectCollision hurt_side = OBJ_SIDE_TOP;
