@@ -340,10 +340,10 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     if(state->anim_state.animation == 0) {
         // Calculate solidity
         int32_t solidity_vx = pos->vx - 16;
-        int32_t solidity_vy = pos->vy - 32; // Monitor is a 32x32 solid box
+        int32_t solidity_vy = pos->vy - 34; // Monitor is a 32x34 solid box
 
         int32_t hitbox_vx = pos->vx - 15;
-        int32_t hitbox_vy = pos->vy - 32; // Monitor hitbox is a 28x32 solid box
+        int32_t hitbox_vy = pos->vy - 34; // Monitor hitbox is a 28x34 solid box
         
         // Perform collision detection
         if(aabb_intersects(player_vx, player_vy, player_width, player_height,

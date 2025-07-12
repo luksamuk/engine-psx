@@ -46,7 +46,7 @@ loopback = 0
 # ------------
 
 [monitor.fragment]
-offset = [0, -10]
+offset = [0, -12]
 
 [[monitor.fragment.animations]]
 id = 0
