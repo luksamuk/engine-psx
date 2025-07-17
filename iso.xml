@@ -61,6 +61,7 @@
 		source="${PROJECT_SOURCE_DIR}/assets/levels/COMMON/OBJ.TIM" />
 	</dir>
 
+	<!-- Test Level -->
 	<dir name="R0">
 	  <file name="OBJ.TIM"
 		type="data"
@@ -115,6 +116,7 @@
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R0/PRL.PRL" />
 	</dir>
 
+	<!-- Green Hill Zone -->
 	<dir name="R2">
 	  <file name="OBJ.TIM"
 		type="data"
@@ -151,6 +153,7 @@
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R2/PRL.PRL" />
 	</dir>
 
+	<!-- Surely Wood Zone -->
 	<dir name="R3">
 	  <file name="OBJ.TIM"
 		type="data"
@@ -193,36 +196,38 @@
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R3/PRL.PRL" />
 	</dir>
 
-	<dir name="R4">
-	  <file name="Z1.LVL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/Z1.LVL" />
-	  <file name="Z1.OMP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/Z1.OMP" />
-	  <file name="MAP128.MAP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP128.MAP" />
-	  <file name="TILES.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/TILES.TIM" />
-	  <file name="MAP16.COL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP16.COL" />
-	  <file name="MAP16.MAP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP16.MAP" />
-	  <file name="BG0.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/BG0.TIM" />
-	  <file name="BG1.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/BG1.TIM" />
-	  <file name="PRL.PRL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R4/PRL.PRL" />
-	</dir>
+	<!-- Dawn Canyon Zone -->
+	<!-- <dir name="R4"> -->
+	<!--   <file name="Z1.LVL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/Z1.LVL" /> -->
+	<!--   <file name="Z1.OMP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/Z1.OMP" /> -->
+	<!--   <file name="MAP128.MAP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP128.MAP" /> -->
+	<!--   <file name="TILES.TIM" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/TILES.TIM" /> -->
+	<!--   <file name="MAP16.COL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP16.COL" /> -->
+	<!--   <file name="MAP16.MAP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/MAP16.MAP" /> -->
+	<!--   <file name="BG0.TIM" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/BG0.TIM" /> -->
+	<!--   <file name="BG1.TIM" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/BG1.TIM" /> -->
+	<!--   <file name="PRL.PRL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R4/PRL.PRL" /> -->
+	<!-- </dir> -->
 
+	<!-- Amazing Ocean Zone -->
 	<dir name="R5">
 	  <file name="OBJ.TIM"
 		type="data"
@@ -259,68 +264,70 @@
 		source="${PROJECT_SOURCE_DIR}/assets/levels/R5/PRL.PRL" />
 	</dir>
 
-	<dir name="R8">
-	  <file name="Z1.LVL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z1.LVL" />
-	  <file name="Z1.OMP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z1.OMP" />
-	  <file name="Z2.LVL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z2.LVL" />
-	  <file name="Z2.OMP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z2.OMP" />
-	  <file name="MAP128.MAP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/MAP128.MAP" />
-	  <file name="MAP16.COL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/MAP16.COL" />
-	  <file name="MAP16.MAP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/MAP16.MAP" />
-	  <file name="TILES.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/TILES.TIM" />
-	  <file name="BG0.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/BG0.TIM" />
-	  <file name="PRL.PRL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R8/PRL.PRL" />
-	</dir>
+	<!-- Eggmanland Zone -->
+	<!-- <dir name="R8"> -->
+	<!--   <file name="Z1.LVL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z1.LVL" /> -->
+	<!--   <file name="Z1.OMP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z1.OMP" /> -->
+	<!--   <file name="Z2.LVL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z2.LVL" /> -->
+	<!--   <file name="Z2.OMP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/Z2.OMP" /> -->
+	<!--   <file name="MAP128.MAP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/MAP128.MAP" /> -->
+	<!--   <file name="MAP16.COL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/MAP16.COL" /> -->
+	<!--   <file name="MAP16.MAP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/MAP16.MAP" /> -->
+	<!--   <file name="TILES.TIM" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/TILES.TIM" /> -->
+	<!--   <file name="BG0.TIM" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/BG0.TIM" /> -->
+	<!--   <file name="PRL.PRL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R8/PRL.PRL" /> -->
+	<!-- </dir> -->
 
-	<dir name="R9">
-	  <file name="Z1.LVL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/Z1.LVL" />
-	  <file name="Z1.OMP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/Z1.OMP" />
-	  <file name="MAP128.MAP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/MAP128.MAP" />
-	  <file name="MAP16.COL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/MAP16.COL" />
-	  <file name="MAP16.MAP"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/MAP16.MAP" />
-	  <file name="TILES.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/TILES.TIM" />
-	  <file name="BG0.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/BG0.TIM" />
-	  <file name="BG1.TIM"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/BG1.TIM" />
-	  <file name="PRL.PRL"
-		type="data"
-		source="${PROJECT_SOURCE_DIR}/assets/levels/R9/PRL.PRL" />
-	</dir>
+	<!-- Windmill Isle Zone -->
+	<!-- <dir name="R9"> -->
+	<!--   <file name="Z1.LVL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/Z1.LVL" /> -->
+	<!--   <file name="Z1.OMP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/Z1.OMP" /> -->
+	<!--   <file name="MAP128.MAP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/MAP128.MAP" /> -->
+	<!--   <file name="MAP16.COL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/MAP16.COL" /> -->
+	<!--   <file name="MAP16.MAP" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/MAP16.MAP" /> -->
+	<!--   <file name="TILES.TIM" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/TILES.TIM" /> -->
+	<!--   <file name="BG0.TIM" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/BG0.TIM" /> -->
+	<!--   <file name="BG1.TIM" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/BG1.TIM" /> -->
+	<!--   <file name="PRL.PRL" -->
+	<!-- 	type="data" -->
+	<!-- 	source="${PROJECT_SOURCE_DIR}/assets/levels/R9/PRL.PRL" /> -->
+	<!-- </dir> -->
 	  
       </dir> <!-- LEVELS -->
 
@@ -354,6 +361,9 @@
 	<file name="SAGE2025.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/SAGE2025.TIM" />
+	<file name="THANKS.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/THANKS.TIM" />
 	<file name="LVLSEL.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/LVLSEL.TIM" />
@@ -446,9 +456,6 @@
       <file name="audio11.da" trackid="12" type="da" />
       <file name="audio12.da" trackid="13" type="da" />
       <file name="audio13.da" trackid="14" type="da" />
-      <file name="audio14.da" trackid="15" type="da" />
-      <file name="audio15.da" trackid="16" type="da" />
-      <file name="audio16.da" trackid="17" type="da" />
     </directory_tree>
   </track>
   <track type="audio" trackid="02" source="${PROJECT_SOURCE_DIR}/assets/bgm/amenbreak.flac" />
@@ -460,12 +467,12 @@
   <track type="audio" trackid="08" source="${PROJECT_SOURCE_DIR}/assets/bgm/letmomsleep2.flac" />
   <track type="audio" trackid="09" source="${PROJECT_SOURCE_DIR}/assets/bgm/saladplain.flac" />
   <track type="audio" trackid="10" source="${PROJECT_SOURCE_DIR}/assets/bgm/elgato2.flac" />
-  <track type="audio" trackid="11" source="${PROJECT_SOURCE_DIR}/assets/bgm/chaosisland2.flac" />
-  <track type="audio" trackid="12" source="${PROJECT_SOURCE_DIR}/assets/bgm/eggmanland.flac" />
-  <track type="audio" trackid="13" source="${PROJECT_SOURCE_DIR}/assets/bgm/amazing.flac" />
-  <track type="audio" trackid="14" source="${PROJECT_SOURCE_DIR}/assets/bgm/apotos.flac" />
-  <track type="audio" trackid="15" source="${PROJECT_SOURCE_DIR}/assets/bgm/levelclear.flac" />
-  <track type="audio" trackid="16" source="${PROJECT_SOURCE_DIR}/assets/bgm/herormx.flac" />
-  <track type="audio" trackid="17" source="${PROJECT_SOURCE_DIR}/assets/bgm/boss.flac" />
+  <track type="audio" trackid="11" source="${PROJECT_SOURCE_DIR}/assets/bgm/amazing.flac" />
+  <track type="audio" trackid="12" source="${PROJECT_SOURCE_DIR}/assets/bgm/levelclear.flac" />
+  <track type="audio" trackid="13" source="${PROJECT_SOURCE_DIR}/assets/bgm/herormx.flac" />
+  <track type="audio" trackid="14" source="${PROJECT_SOURCE_DIR}/assets/bgm/boss.flac" />
+  <!-- <track type="audio" trackid="" source="${PROJECT_SOURCE_DIR}/assets/bgm/chaosisland2.flac" /> -->
+  <!-- <track type="audio" trackid="" source="${PROJECT_SOURCE_DIR}/assets/bgm/eggmanland.flac" /> -->
+  <!-- <track type="audio" trackid="" source="${PROJECT_SOURCE_DIR}/assets/bgm/apotos.flac" /> -->
 </iso_project>
 

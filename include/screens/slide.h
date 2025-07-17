@@ -3,9 +3,10 @@
 
 typedef enum {
     SLIDE_COMINGSOON = 0,
-    SLIDE_SEGALOGO = 1,
-    SLIDE_CREATEDBY = 2,
-    SLIDE_SAGE2025 = 3,
+    SLIDE_THANKS = 1,
+    SLIDE_SEGALOGO = 2,
+    SLIDE_CREATEDBY = 3,
+    SLIDE_SAGE2025 = 4,
 
     SLIDE_NUM_SLIDES = (SLIDE_SAGE2025 + 1),
 } SlideOption;

@@ -21,6 +21,7 @@
 #define SLIDER_STEP 0x1e9
 
 extern SoundEffect sfx_switch;
+
 extern int         debug_mode;
 
 typedef struct {
@@ -170,7 +171,7 @@ screen_options_update(void *d)
             ? 2
             : (debug_mode > 2)
             ? 0
-                : debug_mode;
+            : debug_mode;
         break;
     default: break;
     }

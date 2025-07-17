@@ -16,7 +16,9 @@
 
 #define AUTODEMO_WAIT_FRAMES 1500
 
+#ifdef ALLOW_DEBUG
 extern int      debug_mode;
+#endif
 extern uint32_t level_score_count;
 
 uint16_t demo_number = 6;
@@ -145,10 +147,12 @@ screen_title_unload(void *)
 void
 screen_title_update(void *d)
 {
+#ifdef ALLOW_DEBUG
     if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
        (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
         debug_mode = (debug_mode + 1) % 3;
     }
+#endif
 
     screen_title_data *data = (screen_title_data *)d;
 
@@ -365,6 +369,7 @@ screen_title_draw(void *d)
                     LERPC(data->rgb_count, 104),
                     LERPC(data->rgb_count, 200));
 
+#ifdef ALLOW_DEBUG
     if(debug_mode) {
         char buffer[80];
         snprintf(buffer, 120,
@@ -384,6 +389,7 @@ screen_title_draw(void *d)
                   0, 0, 0, 1,
                   OTZ_LAYER_LEVEL_FG_FRONT);
     }
+#endif
     
     screen_title_drawtitle(data);
     screen_title_drawprl(data);

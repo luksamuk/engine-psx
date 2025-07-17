@@ -16,16 +16,29 @@
 #include "player.h"
 #include "screens/sprite_test.h"
 
-#define CHOICE_SOUNDTEST  20
-#define CHOICE_SLIDE      21
-#define CHOICE_CHARACTER  22
-#define CHOICE_OPTIONS    23
-#define CHOICE_SPRITETEST 24
-#define CHOICE_MODELTEST  25
-#define CHOICE_TITLE      26
-#define CHOICE_CREDITS    27
+/* // FULL LEVEL SELECT */
+/* #define CHOICE_SOUNDTEST  20 */
+/* #define CHOICE_SLIDE      21 */
+/* #define CHOICE_CHARACTER  22 */
+/* #define CHOICE_OPTIONS    23 */
+/* #define CHOICE_SPRITETEST 24 */
+/* #define CHOICE_MODELTEST  25 */
+/* #define CHOICE_TITLE      26 */
+/* #define CHOICE_CREDITS    27 */
+/* #define MAX_COLUMN_CHOICES 17 */
+
+// Demo level select (SAGE 2025 build)
+#define CHOICE_SOUNDTEST  12
+#define CHOICE_SLIDE      13
+#define CHOICE_CHARACTER  14
+#define CHOICE_OPTIONS    15
+#define CHOICE_SPRITETEST 16
+#define CHOICE_MODELTEST  17
+#define CHOICE_TITLE      18
+#define CHOICE_CREDITS    19
+#define MAX_COLUMN_CHOICES 16
+
 #define MAX_LEVELS   (CHOICE_CREDITS + 1)
-#define MAX_COLUMN_CHOICES 17
 
 extern uint32_t level_score_count;
 extern int debug_mode;
@@ -46,6 +59,43 @@ typedef struct {
     uint8_t  character_selection;
 } screen_levelselect_data;
 
+
+/* static const char *menutext[] = { */
+/*     "TEST LEVEL    1", */
+/*     "              2", */
+/*     "              3A", */
+/*     "              3B", */
+/*     "GREEN HILL    1", */
+/*     "              2", */
+/*     "SURELY WOOD   1", */
+/*     "              2", */
+/*     "DAWN CANYON   1", */
+/*     "              2", */
+/*     "AMAZING OCEAN 1", */
+/*     "              2", */
+/*     "R6            1", */
+/*     "              2", */
+/*     "R7            1", */
+/*     "              2", */
+/*     "EGGMANLAND    1", */
+/*     "              2", */
+/*     "              3", */
+/*     "WINDMILL ISLE 1", */
+/*     "\n", */
+/*     "SOUND TEST  *??*", */
+/*     "SLIDE TEST  *??*", */
+/*     "CHARA   ????????", */
+/*     "\n", */
+/*     "\n", */
+/*     "\n", */
+/*     "OPTIONS", */
+/*     "SPRITE TEST", */
+/*     "MODEL TEST", */
+/*     "TITLE SCREEN", */
+/*     "CREDITS", */
+/*     NULL, */
+/* }; */
+
 static const char *menutext[] = {
     "TEST LEVEL    1",
     "              2",
@@ -59,14 +109,6 @@ static const char *menutext[] = {
     "              2",
     "AMAZING OCEAN 1",
     "              2",
-    "R6            1",
-    "              2",
-    "R7            1",
-    "              2",
-    "EGGMANLAND    1",
-    "              2",
-    "              3",
-    "WINDMILL ISLE 1",
     "\n",
     "SOUND TEST  *??*",
     "SLIDE TEST  *??*",
@@ -129,10 +171,12 @@ screen_levelselect_unload(void *)
 void
 screen_levelselect_update(void *d)
 {
+#ifdef ALLOW_DEBUG
     if((pad_pressing(PAD_L1) && pad_pressed(PAD_R1)) ||
        (pad_pressed(PAD_L1) && pad_pressing(PAD_R1))) {
         debug_mode = (debug_mode + 1) % 3;
     }
+#endif
 
     screen_levelselect_data *data = (screen_levelselect_data *)d;
 
@@ -246,6 +290,17 @@ screen_levelselect_update(void *d)
         } else {
             // Select a level
 
+            // Check for blacklisted levels.
+            // (Important for SAGE 2025 demo)
+            if((data->menu_choice == 5) // GHZ2
+               || (data->menu_choice == 7) // SWZ2
+               || (data->menu_choice == 8) // DCZ1
+               || (data->menu_choice == 9) // DCZ2
+               || (data->menu_choice == 11) // AOZ2
+            ) {
+                return;
+            }
+
             // When selecting Test Level A or B, check character
             if(data->menu_choice == 2 && data->character_selection == CHARA_KNUCKLES) {
                 data->character_selection = CHARA_SONIC;
@@ -272,6 +327,7 @@ screen_levelselect_draw(void *d)
 {
     screen_levelselect_data *data = (screen_levelselect_data *)d;
 
+#ifdef ALLOW_DEBUG
     if(debug_mode) {
         char buffer[80];
         snprintf(buffer, 120,
@@ -291,6 +347,7 @@ screen_levelselect_draw(void *d)
                   0, 0, 0, 1,
                   OTZ_LAYER_LEVEL_FG_FRONT);
     }
+#endif
 
     // Draw background
     for(uint16_t y = 0; y < SCREEN_YRES; y += 32) {

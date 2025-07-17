@@ -162,6 +162,7 @@ screen_level_update(void *d)
     screen_level_data *data = (screen_level_data *)d;
 
     // Debug mode cycling
+#ifdef ALLOW_DEBUG
     {
         if(pad_pressing(PAD_L1) && pad_pressed(PAD_R1))
             debug_mode++;
@@ -170,6 +171,7 @@ screen_level_update(void *d)
         if(debug_mode > 2) debug_mode = 0;
         else if(debug_mode < 0) debug_mode = 2;
     }
+#endif
 
     level_set_clearcolor();
 
@@ -250,10 +252,6 @@ screen_level_update(void *d)
     }
     
     if(paused) {
-        if(pad_pressed(PAD_SELECT)) {
-            scene_change(SCREEN_LEVELSELECT);
-        }
-
         if(debug_mode) {
             uint8_t updated = 0;
             if(pad_pressing(PAD_UP)) {
@@ -279,6 +277,10 @@ screen_level_update(void *d)
             if(updated) {
                 player.over_object = NULL;
                 camera_update(&camera, &player);
+            }
+
+            if(pad_pressed(PAD_SELECT)) {
+                scene_change(SCREEN_LEVELSELECT);
             }
         }
         
@@ -1122,12 +1124,12 @@ screen_level_play_music(uint8_t round, uint8_t act)
         break;
     case 2: sound_bgm_play(BGM_GREENHILL);       break;
     case 3: sound_bgm_play(BGM_SURELYWOOD);      break;
-    case 4: sound_bgm_play(BGM_DAWNCANYON);      break;
+    /* case 4: sound_bgm_play(BGM_DAWNCANYON);      break; */
     case 5: sound_bgm_play(BGM_AMAZINGOCEAN);    break;
     case 6: break; // TODO
     case 7: break; // TODO
-    case 8: sound_bgm_play(BGM_EGGMANLAND);      break;
-    case 9: sound_bgm_play(BGM_WINDMILLISLE);    break;
+    /* case 8: sound_bgm_play(BGM_EGGMANLAND);      break; */
+    /* case 9: sound_bgm_play(BGM_WINDMILLISLE);    break; */
     default: break;
     }
 }

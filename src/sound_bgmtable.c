@@ -2,13 +2,29 @@
 
 // References whether each BGM loops.
 // See BGMOption definition for order of BGMs.
+/* static uint8_t _bgm_loops[] = { */
+/*     0, */
+/*     1, */
+/*     0, */
+/*     1, */
+/*     1, */
+/*     1, */
+/*     1, */
+/*     1, */
+/*     1, */
+/*     1, */
+/*     1, */
+/*     1, */
+/*     1, */
+/*     0, */
+/*     0, */
+/*     1, */
+/* }; */
+
 static uint8_t _bgm_loops[] = {
     0,
     1,
     0,
-    1,
-    1,
-    1,
     1,
     1,
     1,

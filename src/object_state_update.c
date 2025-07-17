@@ -80,23 +80,22 @@ int32_t player_width = 16;
 int32_t player_height = HEIGHT_RADIUS_NORMAL << 1;
 
 int player_hitbox_shown;
-
-/* void */
-/* _draw_player_hitbox() */
-/* { */
-/*     if(player_hitbox_shown) return; */
-/*     player_hitbox_shown = 1; */
-/*     uint16_t */
-/*         rel_vx = player_vx - (camera.pos.vx >> 12) + CENTERX, */
-/*         rel_vy = player_vy - (camera.pos.vy >> 12) + CENTERY; */
-/*     POLY_F4 *hitbox = get_next_prim(); */
-/*     increment_prim(sizeof(POLY_F4)); */
-/*     setPolyF4(hitbox); */
-/*     setSemiTrans(hitbox, 1); */
-/*     setXYWH(hitbox, rel_vx, rel_vy, 16, player_height); */
-/*     setRGB0(hitbox, 0xfb, 0x94, 0xdc); */
-/*     sort_prim(hitbox, OTZ_LAYER_OBJECTS); */
-/* } */
+void
+_draw_player_hitbox()
+{
+    if(player_hitbox_shown) return;
+    player_hitbox_shown = 1;
+    uint16_t
+        rel_vx = player_vx - (camera.pos.vx >> 12) + CENTERX,
+        rel_vy = player_vy - (camera.pos.vy >> 12) + CENTERY;
+    POLY_F4 *hitbox = get_next_prim();
+    increment_prim(sizeof(POLY_F4));
+    setPolyF4(hitbox);
+    setSemiTrans(hitbox, 1);
+    setXYWH(hitbox, rel_vx, rel_vy, 16, player_height);
+    setRGB0(hitbox, 0xfb, 0x94, 0xdc);
+    sort_prim(hitbox, OTZ_LAYER_OBJECTS);
+}
 
 void
 object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8_t round)
@@ -116,9 +115,9 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
                      : HEIGHT_RADIUS_NORMAL) << 1;
     player_vy = (player.pos.vy >> 12) - (player_height >> 1) - 1;
 
-    /* if(debug_mode > 1) { */
-    /*     _draw_player_hitbox(); */
-    /* } */
+    if(debug_mode > 1) {
+        _draw_player_hitbox();
+    }
 
     if(typedata->is_level_specific) goto level_specific_update;
 
@@ -327,7 +326,8 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 } else screen_level_setlevel(lvl + 1);
                 scene_change(SCREEN_LEVEL);
             } else {
-                screen_slide_set_next(SLIDE_COMINGSOON);
+                /* screen_slide_set_next(SLIDE_COMINGSOON); */
+                screen_slide_set_next(SLIDE_THANKS);
                 scene_change(SCREEN_SLIDE);
             }
         }

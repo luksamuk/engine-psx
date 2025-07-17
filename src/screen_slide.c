@@ -30,6 +30,13 @@ static volatile const struct {
         .duration = 1500
     },
     {
+        .image = "\\MISC\\THANKS.TIM;1",
+        .bgm = BGM_TITLESCREEN,
+        .next = SCREEN_CREDITS,
+        .next_slide = 0xff,
+        .duration = 1500
+    },
+    {
         .image = "\\MISC\\SEGALOGO.TIM;1",
         .bgm = 0xff,
         .next = SCREEN_SLIDE,
