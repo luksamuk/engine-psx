@@ -52,15 +52,19 @@ screen_disclaimer_update(void *d)
 
     data->disclaimer_timer++;
     if((data->disclaimer_timer > 1200) || pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
+#ifdef ALLOW_DEBUG
         if(pad_pressing(PAD_SQUARE)) {
             scene_change(SCREEN_LEVELSELECT);
+            return;
         } else if(pad_pressing(PAD_CIRCLE)) {
             scene_change(SCREEN_TITLE);
-        } else {
-            /* screen_slide_set_next(SLIDE_SAGE2025); */
-            screen_slide_set_next(SLIDE_SEGALOGO);
-            scene_change(SCREEN_SLIDE);
+            return;
         }
+#endif
+
+        screen_slide_set_next(SLIDE_SAGE2025);
+        /* screen_slide_set_next(SLIDE_SEGALOGO); */
+        scene_change(SCREEN_SLIDE);
     }
 }
 
