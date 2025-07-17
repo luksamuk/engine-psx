@@ -43,6 +43,13 @@ static volatile const struct {
         .next_slide = 0xff,
         .duration = 180
     },
+    {
+        .image = "\\MISC\\SAGE2025.TIM;1",
+        .bgm = 0xff,
+        .next = SCREEN_SLIDE,
+        .next_slide = SLIDE_CREATEDBY,
+        .duration = 180
+    },
 };
 
 typedef struct {

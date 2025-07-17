@@ -53,6 +53,7 @@ screen_disclaimer_update(void *d)
         } else if(pad_pressing(PAD_CIRCLE)) {
             scene_change(SCREEN_TITLE);
         } else {
+            /* screen_slide_set_next(SLIDE_SAGE2025); */
             screen_slide_set_next(SLIDE_SEGALOGO);
             scene_change(SCREEN_SLIDE);
         }

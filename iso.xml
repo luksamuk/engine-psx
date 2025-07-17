@@ -351,6 +351,9 @@
 	<file name="CREATED.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/CREATED.TIM" />
+	<file name="SAGE2025.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/SAGE2025.TIM" />
 	<file name="LVLSEL.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/LVLSEL.TIM" />
