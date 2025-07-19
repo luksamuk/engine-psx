@@ -332,19 +332,17 @@ screen_levelselect_draw(void *d)
     if(debug_mode) {
         char buffer[80];
         snprintf(buffer, 120,
-                 "DBG %1u\n"
-                 "%-29s\n"
-                 "%4s %3d Hz\n"
-                 "Build Date %11s %8s",
+                 "DBG %1d"
+                 "%29s  %3d Hz\n"
+                 "%31s %8s",
                  debug_mode,
-                 GIT_COMMIT,
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC",
                  get_frame_rate(),
                  __DATE__, __TIME__);
         font_set_color(0x00, 0x7f, 0x00);
         font_draw_sm(buffer, 8, 12);
         font_reset_color();
-        draw_quad(0, 0, SCREEN_XRES, 75,
+        draw_quad(0, 0, SCREEN_XRES, 35,
                   0, 0, 0, 1,
                   OTZ_LAYER_LEVEL_FG_FRONT);
     }
@@ -370,10 +368,13 @@ screen_levelselect_draw(void *d)
     
     // Draw text
     font_reset_color();
-    int16_t x;
-    const char *title = "Level Select";
-    x = CENTERX - (strlen(title) * 4);
-    font_draw_big(title, x, 12);
+
+    if(!debug_mode) {
+        int16_t x;
+        const char *title = "Level Select";
+        x = CENTERX - (strlen(title) * 4);
+        font_draw_big(title, x, 12);
+    }
 
     // Draw text
     uint8_t txtidx = 0;
