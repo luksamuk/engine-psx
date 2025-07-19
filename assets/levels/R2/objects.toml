@@ -20,3 +20,36 @@ frames = [
 loopback = 0
 
 # ============
+
+[buzzbomber]
+
+[[buzzbomber.animations]]
+name = "Idle"
+id = 0
+duration = 0
+loopback = 0
+frames = [[40, 0, 49, 29]]
+
+[[buzzbomber.animations]]
+name = "Firing"
+id = 1
+duration = 0
+loopback = 0
+frames = [[40, 32, 49, 29]]
+
+[buzzbomber.fragment]
+offset = [3, -23]
+
+[[buzzbomber.fragment.animations]]
+name = "Wings"
+id = 0
+duration = 2
+loopback = 0
+frames = [
+       [51, 61, 38, 8],
+       [51, 69, 38, 8],
+]
+
+# ============
+
+# projectile
