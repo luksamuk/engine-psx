@@ -52,4 +52,26 @@ frames = [
 
 # ============
 
-# projectile
+[projectile]
+
+[[projectile.animations]]
+name = "buzzbomber_charge"
+id = 0
+duration = 6
+loopback = 3
+frames = [
+       [89,  0, 16, 16],
+       [89,  0, 16, 16],
+       [89, 16, 16, 16],
+       [89, 16, 16, 16],
+]
+
+[[projectile.animations]]
+name = "buzzbomber_fire"
+id = 1
+duration = 12
+loopback = 0
+frames = [
+       [89, 32, 16, 16],
+       [89, 48, 16, 16],
+]

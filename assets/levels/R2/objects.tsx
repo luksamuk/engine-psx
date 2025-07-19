@@ -3,4 +3,5 @@
  <image source="obj_designtiles.png" width="256" height="64"/>
  <tile id="0" type="motobug"/>
  <tile id="1" type="buzzbomber"/>
+ <tile id="2" type="projectile"/>
 </tileset>
