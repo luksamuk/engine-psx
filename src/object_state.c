@@ -48,8 +48,9 @@ _emplace_object(
     // a "freepos" field either
     state->freepos = NULL;
 
-    // Parent entity is always NULL unless manually set.
+    // Parent and next entities is always NULL unless manually set.
     state->parent = NULL;
+    state->next = NULL;
 
     // Initialize animation state if this object
     // has a fragment

@@ -30,6 +30,7 @@ extern uint8_t    level_act;
 #define OBJ_CHOPPER      (MIN_LEVEL_OBJ_GID + 3) // Unused
 #define OBJ_BOSS_SPAWNER (MIN_LEVEL_OBJ_GID + 4)
 #define OBJ_BOSS         (MIN_LEVEL_OBJ_GID + 5)
+#define OBJ_BOSS_EXTRAS  (MIN_LEVEL_OBJ_GID + 6) // Wrecking ball and chain
 
 
 #define BUZZBOMBER_PATROL_RADIUS   (192 << 12)
@@ -44,17 +45,21 @@ static void _motobug_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _buzzbomber_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _projectile_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _boss_spawner_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _boss_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _boss_extras_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 void
 object_update_R2(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
     switch(state->id) {
     default: break;
-    case OBJ_MOTOBUG: _motobug_update(state, typedata, pos); break;
-    case OBJ_BUZZBOMBER: _buzzbomber_ghz_update(state, typedata, pos); break;
-    case OBJ_PROJECTILE: _projectile_ghz_update(state, typedata, pos); break;
+    case OBJ_MOTOBUG:      _motobug_update(state, typedata, pos);          break;
+    case OBJ_BUZZBOMBER:   _buzzbomber_ghz_update(state, typedata, pos);   break;
+    case OBJ_PROJECTILE:   _projectile_ghz_update(state, typedata, pos);   break;
     case OBJ_CHOPPER: break; // Unused
     case OBJ_BOSS_SPAWNER: _boss_spawner_ghz_update(state, typedata, pos); break;
+    case OBJ_BOSS:         _boss_ghz_update(state, typedata, pos);         break;
+    case OBJ_BOSS_EXTRAS:  _boss_extras_ghz_update(state, typedata, pos);  break;
     }
 }
 
@@ -342,6 +347,28 @@ _projectile_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
 
 extern BossState *boss;
 
+#define BOSS_STATE_INIT       0
+#define BOSS_STATE_MOCKPLAYER 1
+#define BOSS_STATE_DEAD       5
+
+#define BOSS_DESCENT_SPEED         0x01200
+#define BOSS_WALK_SPEED            0x01200
+#define BOSS_BALL_DESCENT_SPEED    0x01200
+#define WRECKINGBALL_SWING_RADIUS      111
+#define WRECKINGBALL_SWING_SPEED   0x00020
+
+#define BOSS_ANIM_STOP       0
+#define BOSS_ANIM_MOVE       1
+#define BOSS_ANIM_LAUGH      2
+#define BOSS_ANIM_HIT        3
+#define BOSS_ANIM_RECOVERING 4
+#define BOSS_ANIM_DEAD       5
+#define BOSS_ANIM_DROPPING   6
+
+// Extra object animations
+#define BOSS_EXTRA_WRECKINGBALL 0
+#define BOSS_EXTRA_CHAIN        1
+
 static void
 _boss_spawner_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
@@ -353,10 +380,10 @@ _boss_spawner_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR 
         boss_obj->freepos.vx = ((pos->vx + 128) << 12);
         boss_obj->freepos.vy = ((pos->vy - 320) << 12);
         boss_obj->state.anim_state.animation = 0;
-        boss_obj->state.flipmask = state->flipmask;
+        boss_obj->state.flipmask = state->flipmask; // Face left
 
         // Setup boss state
-        /* boss->state = BOSS_STATE_INIT; */
+        boss->state = BOSS_STATE_INIT;
         boss->health = 8;
         boss->anchor.vx = (pos->vx << 12);
         boss->anchor.vy = (pos->vy << 12);
@@ -366,5 +393,150 @@ _boss_spawner_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR 
         camera_focus(&camera, boss->anchor.vx, boss->anchor.vy - (100 << 12));
 
         sound_bgm_play(BGM_BOSS);
+    }
+}
+
+static ObjectState *
+_boss_ghz_spawn_wrecking_ball(ObjectState *state)
+{
+    // Chain links
+    PoolObject *chain[4];
+    PoolObject *ball;
+
+    // Create wrecking ball
+    ball = object_pool_create(OBJ_BOSS_EXTRAS);
+    //ball->freepos.vx = state->freepos->vx + (8 << 12);
+    ball->freepos.vx = state->freepos->vx;
+    ball->freepos.vy = state->freepos->vy - (14 << 12);
+    ball->state.anim_state.animation = BOSS_EXTRA_WRECKINGBALL;
+    ball->freepos.rx = ball->freepos.vx;
+    ball->freepos.ry = ball->freepos.vy;
+    ball->state.parent = state; // Point to boss state
+
+    for(int i = 0; i < 4; i++) {
+        chain[i] = object_pool_create(OBJ_BOSS_EXTRAS);
+        chain[i]->freepos.vx = ball->freepos.vx;
+        chain[i]->freepos.vy = ball->freepos.vy;
+        chain[i]->state.anim_state.animation = BOSS_EXTRA_CHAIN;
+    }
+
+    // Link chain parts
+    chain[0]->state.parent = state; // Point to boss
+    chain[0]->state.next   = &chain[1]->state;
+    for(int i = 1; i < 3; i++) {
+        // Link middle chain parts
+        chain[i]->state.parent = &chain[i-1]->state;
+        chain[i]->state.next   = &chain[i+1]->state;
+    }
+    chain[3]->state.parent = &chain[2]->state;
+    chain[3]->state.next   = &ball->state; // Point to ball
+
+    return &chain[0]->state;
+}
+
+static void
+_boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    (void)(typedata);
+    (void)(pos);
+
+    // counter3: Wrecking ball swing angle
+    // counter4: Wrecking ball swing auxiliary (angle range)
+
+    switch(boss->state) {
+    default: break;
+    case BOSS_STATE_INIT:
+        // Center boss atop the stage
+        if(state->freepos->vy < (boss->anchor.vy - (128 << 12))) {
+            // Descent
+            state->flipmask = MASK_FLIP_FLIPX;
+            state->freepos->spdy = BOSS_DESCENT_SPEED;
+        } else if(state->freepos->vx > boss->anchor.vx) {
+            // Move left
+            state->flipmask = MASK_FLIP_FLIPX;
+            state->freepos->spdy = 0;
+            state->freepos->spdx = -BOSS_WALK_SPEED;
+        } else {
+            state->freepos->spdy = 0;
+            state->freepos->spdx = 0;
+            state->next = _boss_ghz_spawn_wrecking_ball(state);
+            boss->state = BOSS_STATE_MOCKPLAYER;
+        }
+        break;
+    case BOSS_STATE_MOCKPLAYER:
+        // TODO
+        break;
+    }
+
+    state->freepos->vx += state->freepos->spdx;
+    state->freepos->vy += state->freepos->spdy;
+
+    // Animation (TODO)
+    if(boss->state == BOSS_STATE_MOCKPLAYER)
+        state->frag_anim_state->animation = BOSS_ANIM_LAUGH;
+    else if(boss->hit_cooldown > 0)
+        state->frag_anim_state->animation = BOSS_ANIM_HIT;
+    else state->frag_anim_state->animation =
+             (player.action == ACTION_HURT)
+             ? BOSS_ANIM_LAUGH
+             : ((state->freepos->spdx != 0)
+                ? BOSS_ANIM_MOVE
+                : BOSS_ANIM_STOP);
+    
+}
+
+static void
+_boss_extras_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    // This object is supposed to always spawn as a free object in the first
+    // place, so we'll make this quick and dirty.
+
+    // The boss state's next pointer points to the first chain link.
+
+    // A CHAIN always has a parent and a left pointers, pointing to the next
+    // link and finally to the wrecking ball.
+
+    // A WRECKING BALL points on *parent to the boss's state.
+    if(state->anim_state.animation == BOSS_EXTRA_WRECKINGBALL) {
+        // Setup relative Y position first. We need to position it a few
+        // places lower than the Boss's anchor.
+        // There are four chain links and the boss has 1px padding underneath,
+        // so its final position should be (16 * 4) + 48 - 1.
+        if(state->freepos->ry < state->parent->freepos->vy +
+           (WRECKINGBALL_SWING_RADIUS << 12)) {
+            state->freepos->vy += BOSS_BALL_DESCENT_SPEED;
+            state->freepos->ry = state->freepos->vy;
+        } else {
+            // Swing
+            if(boss->health > 0) {
+                boss->counter3 += WRECKINGBALL_SWING_SPEED;
+
+                // TODO: Hit player
+            }
+
+            state->freepos->vx = state->parent->freepos->vx +
+                (rsin(boss->counter3 >> 2) * WRECKINGBALL_SWING_RADIUS);
+            state->freepos->vy = state->parent->freepos->vy +
+                (rcos(boss->counter3 >> 2) * WRECKINGBALL_SWING_RADIUS);
+        }
+
+        return;
+    }
+
+    if(state->anim_state.animation == BOSS_EXTRA_CHAIN) {
+        int32_t next_vy = state->next->freepos->vy;
+        // If "next" is actually a wrecking ball, subtract its size
+        // (We take advantage here of the fact that "next" only points to
+        // an object of the current kind, and never to a boss or something
+        if(state->next->anim_state.animation == BOSS_EXTRA_WRECKINGBALL) {
+            next_vy -= ((48 - 16) << 12);
+        }
+        
+        state->freepos->vx =
+            (state->parent->freepos->vx + state->next->freepos->vx) >> 1;
+        state->freepos->vy =
+            (state->parent->freepos->vy + next_vy) >> 1;
+
+        return;
     }
 }

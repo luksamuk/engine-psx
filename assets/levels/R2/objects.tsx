@@ -7,4 +7,5 @@
  <tile id="3" type="unused1"/>
  <tile id="4" type="boss_spawner"/>
  <tile id="5" type="boss"/>
+ <tile id="6" type="boss_extras"/>
 </tileset>

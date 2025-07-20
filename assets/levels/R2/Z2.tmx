@@ -45,7 +45,6 @@
    <object id="4" gid="152" x="2846" y="3908" width="64" height="64"/>
   </objectgroup>
   <objectgroup id="4" name="LEVEL">
-   <object id="2" gid="2147483809" x="610" y="3838" width="64" height="64"/>
    <object id="5" gid="165" x="2086" y="3908" width="64" height="64"/>
   </objectgroup>
  </group>

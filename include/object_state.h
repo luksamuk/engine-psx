@@ -91,6 +91,8 @@ typedef struct OBJECT_STATE {
 
     // Pointer to parent entity (NULL unless manually set!)
     ObjectState *parent;
+    // Pointer to next object (NULL unless manually set!)
+    ObjectState *next;
 } ObjectState;
 
 typedef struct {
