@@ -379,6 +379,7 @@ extern BossState *boss;
 #define BOSS_BALL_DESCENT_SPEED    0x01200
 #define WRECKINGBALL_SWING_RADIUS      116
 #define WRECKINGBALL_SWING_SPEED   0x00010
+#define WRECKINGBALL_MAX_ANGLE     0x002aa
 
 #define BOSS_ANIM_STOP       0
 #define BOSS_ANIM_MOVE       1
@@ -493,31 +494,32 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         break;
     case BOSS_STATE_GO_LEFT:
         if(state->freepos->vx > state->freepos->rx - (CENTERX << 12) + (WRECKINGBALL_SWING_RADIUS << 12)) {
-            boss->counter1 = BOSS_WALK_COOLDOWN;
+            boss->counter1 = 1;
             state->freepos->spdx = -BOSS_WALK_SPEED;
-        } else if(boss->counter1 > 0) {
-            state->freepos->spdx = 0;
-            if(boss->counter1 == BOSS_WALK_COOLDOWN)
-                state->freepos->vx -= 8 << 12;
-            boss->counter1--;
-            state->flipmask = 0; // Turn back
         } else {
-            boss->state = BOSS_STATE_GO_RIGHT;
+            state->freepos->spdx = 0;
+            if(boss->counter1 == 1) {
+                state->freepos->vx -= 8 << 12;
+                state->flipmask = 0; // Turn back
+                boss->counter1 = 0;
+            }
         }
+        // Wrecking ball object moves boss right
         break;
     case BOSS_STATE_GO_RIGHT:
         if(state->freepos->vx < state->freepos->rx + (CENTERX << 12) - (WRECKINGBALL_SWING_RADIUS << 12) - (8 << 12)) {
-            boss->counter1 = BOSS_WALK_COOLDOWN;
+            boss->counter1 = 1;
             state->freepos->spdx = BOSS_WALK_SPEED;
-        } else if(boss->counter1 > 0) {
-            state->freepos->spdx = 0;
-            if(boss->counter1 == BOSS_WALK_COOLDOWN)
-                state->freepos->vx += 8 << 12;
-            boss->counter1--;
-            state->flipmask = MASK_FLIP_FLIPX; // Turn back
-        } else {
-            boss->state = BOSS_STATE_GO_LEFT;
         }
+        else {
+            state->freepos->spdx = 0;
+            if(boss->counter1 == 1) {
+                state->freepos->vx += 8 << 12;
+                state->flipmask = MASK_FLIP_FLIPX; // Turn back
+                boss->counter1 = 0;
+            }
+        }
+        // Wrecking ball object moves boss left
         break;
     }
 
@@ -583,6 +585,20 @@ _boss_extras_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *
                 (rsin(boss->counter4) * WRECKINGBALL_SWING_RADIUS);
             state->freepos->vy = state->parent->freepos->vy +
                 (rcos(boss->counter4) * WRECKINGBALL_SWING_RADIUS);
+
+            // Move boss left/right when ball reaches max height
+            if((boss->counter4 == -WRECKINGBALL_MAX_ANGLE)
+               && (boss->state == BOSS_STATE_GO_LEFT))
+                boss->state = BOSS_STATE_GO_RIGHT;
+            else if((boss->counter4 == WRECKINGBALL_MAX_ANGLE)
+                    && (boss->state == BOSS_STATE_GO_RIGHT))
+                boss->state = BOSS_STATE_GO_LEFT;
+
+            /* static int32_t min = 0; */
+            /* static int32_t max = 0; */
+            /* if(boss->counter4 < min) min = boss->counter4; */
+            /* if(boss->counter4 > max) max = boss->counter4; */
+            /* printf("min: %d\nmax: %d\n=====\n", min, max); */
         }
 
         return;
