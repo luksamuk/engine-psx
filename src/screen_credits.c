@@ -68,6 +68,8 @@ static const char *creditstxt[] = {
 
     "Objects Ripping",
     "Paraemon",
+    "Triangly",
+    "Dolphman",
     "\r",
 
     "Original Sprites and Tiles",

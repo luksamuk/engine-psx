@@ -27,7 +27,7 @@ extern uint8_t    level_act;
 #define OBJ_MOTOBUG      (MIN_LEVEL_OBJ_GID + 0)
 #define OBJ_BUZZBOMBER   (MIN_LEVEL_OBJ_GID + 1)
 #define OBJ_PROJECTILE   (MIN_LEVEL_OBJ_GID + 2)
-#define OBJ_UNUSED1      (MIN_LEVEL_OBJ_GID + 3)
+#define OBJ_CHOPPER      (MIN_LEVEL_OBJ_GID + 3) // Unused
 #define OBJ_BOSS_SPAWNER (MIN_LEVEL_OBJ_GID + 4)
 #define OBJ_BOSS         (MIN_LEVEL_OBJ_GID + 5)
 
@@ -53,7 +53,7 @@ object_update_R2(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_MOTOBUG: _motobug_update(state, typedata, pos); break;
     case OBJ_BUZZBOMBER: _buzzbomber_ghz_update(state, typedata, pos); break;
     case OBJ_PROJECTILE: _projectile_ghz_update(state, typedata, pos); break;
-    case OBJ_UNUSED1: break;
+    case OBJ_CHOPPER: break; // Unused
     case OBJ_BOSS_SPAWNER: _boss_spawner_ghz_update(state, typedata, pos); break;
     }
 }

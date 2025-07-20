@@ -4,6 +4,7 @@
  <tile id="0" type="motobug"/>
  <tile id="1" type="buzzbomber"/>
  <tile id="2" type="projectile"/>
+ <tile id="3" type="unused1"/>
  <tile id="4" type="boss_spawner"/>
  <tile id="5" type="boss"/>
 </tileset>

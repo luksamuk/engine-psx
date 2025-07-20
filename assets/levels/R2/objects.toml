@@ -79,7 +79,17 @@ frames = [
 
 # ============
 
-[unused1] # Unused object
+[chopper]
+
+[[chopper.animations]]
+name = "Idle"
+id = 0
+duration = 6
+loopback = 0
+frames = [
+       [106,  0, 32, 32],
+       [106, 32, 32, 32],
+]
 
 # ============
 
@@ -91,3 +101,12 @@ frames = [
 
 [boss]
 
+[[boss.animations]]
+name = "eggmobile"
+id = 0
+duration = 30
+loopback = 0
+frames = [
+       [0, 256, 64, 48],
+       [0, 320, 64, 48],
+]
