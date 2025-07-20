@@ -31,6 +31,8 @@ extern uint8_t    level_act;
 #define OBJ_BOSS_SPAWNER (MIN_LEVEL_OBJ_GID + 4)
 #define OBJ_BOSS         (MIN_LEVEL_OBJ_GID + 5)
 #define OBJ_BOSS_EXTRAS  (MIN_LEVEL_OBJ_GID + 6) // Wrecking ball and chain
+#define OBJ_ROCK         (MIN_LEVEL_OBJ_GID + 7)
+#define OBJ_PLATFORM     (MIN_LEVEL_OBJ_GID + 8)
 
 
 #define BUZZBOMBER_PATROL_RADIUS   (192 << 12)
@@ -47,6 +49,7 @@ static void _projectile_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _boss_spawner_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _boss_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _boss_extras_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _rock_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 void
 object_update_R2(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -60,6 +63,7 @@ object_update_R2(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_BOSS_SPAWNER: _boss_spawner_ghz_update(state, typedata, pos); break;
     case OBJ_BOSS:         _boss_ghz_update(state, typedata, pos);         break;
     case OBJ_BOSS_EXTRAS:  _boss_extras_ghz_update(state, typedata, pos);  break;
+    case OBJ_ROCK:         _rock_ghz_update(state, typedata, pos);         break;
     }
 }
 
@@ -341,6 +345,20 @@ _projectile_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
     state->freepos->vy += state->freepos->spdy;
 }
 
+static void
+_rock_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    (void)(typedata);
+
+    FRECT solidity = {
+        .x = ((pos->vx - 16) << 12) - (ONE >> 1),
+        .y = (pos->vy - 32) << 12,
+        .w = 33 << 12,
+        .h = 32 << 12,
+    };
+    solid_object_player_interaction(state, &solidity);
+}
+
 // ===================================
 //      BOSS -
 // ===================================
@@ -349,13 +367,18 @@ extern BossState *boss;
 
 #define BOSS_STATE_INIT       0
 #define BOSS_STATE_MOCKPLAYER 1
+#define BOSS_STATE_GO_LEFT    2
+#define BOSS_STATE_GO_RIGHT   3
 #define BOSS_STATE_DEAD       5
 
+#define BOSS_NUM_CHAINS                  6
 #define BOSS_DESCENT_SPEED         0x01200
 #define BOSS_WALK_SPEED            0x01200
+#define BOSS_WALK_SPEED_SWING      0x00680
+#define BOSS_WALK_COOLDOWN              60
 #define BOSS_BALL_DESCENT_SPEED    0x01200
-#define WRECKINGBALL_SWING_RADIUS      111
-#define WRECKINGBALL_SWING_SPEED   0x00020
+#define WRECKINGBALL_SWING_RADIUS      116
+#define WRECKINGBALL_SWING_SPEED   0x00010
 
 #define BOSS_ANIM_STOP       0
 #define BOSS_ANIM_MOVE       1
@@ -390,7 +413,7 @@ _boss_spawner_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR 
         boss->counter4 = boss_obj->freepos.vy;
         /* boss->counter6 = BOSS_BOMB_INTERVAL; */
 
-        camera_focus(&camera, boss->anchor.vx, boss->anchor.vy - (100 << 12));
+        camera_focus(&camera, boss->anchor.vx + (8 << 12), boss->anchor.vy - (100 << 12));
 
         sound_bgm_play(BGM_BOSS);
     }
@@ -400,7 +423,7 @@ static ObjectState *
 _boss_ghz_spawn_wrecking_ball(ObjectState *state)
 {
     // Chain links
-    PoolObject *chain[4];
+    PoolObject *chain[BOSS_NUM_CHAINS];
     PoolObject *ball;
 
     // Create wrecking ball
@@ -413,7 +436,7 @@ _boss_ghz_spawn_wrecking_ball(ObjectState *state)
     ball->freepos.ry = ball->freepos.vy;
     ball->state.parent = state; // Point to boss state
 
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < BOSS_NUM_CHAINS; i++) {
         chain[i] = object_pool_create(OBJ_BOSS_EXTRAS);
         chain[i]->freepos.vx = ball->freepos.vx;
         chain[i]->freepos.vy = ball->freepos.vy;
@@ -423,13 +446,13 @@ _boss_ghz_spawn_wrecking_ball(ObjectState *state)
     // Link chain parts
     chain[0]->state.parent = state; // Point to boss
     chain[0]->state.next   = &chain[1]->state;
-    for(int i = 1; i < 3; i++) {
+    for(int i = 1; i < BOSS_NUM_CHAINS-1; i++) {
         // Link middle chain parts
         chain[i]->state.parent = &chain[i-1]->state;
         chain[i]->state.next   = &chain[i+1]->state;
     }
-    chain[3]->state.parent = &chain[2]->state;
-    chain[3]->state.next   = &ball->state; // Point to ball
+    chain[BOSS_NUM_CHAINS-1]->state.parent = &chain[BOSS_NUM_CHAINS-2]->state;
+    chain[BOSS_NUM_CHAINS-1]->state.next   = &ball->state; // Point to ball
 
     return &chain[0]->state;
 }
@@ -440,6 +463,7 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     (void)(typedata);
     (void)(pos);
 
+    // counter1: Walk turn counter
     // counter3: Wrecking ball swing angle
     // counter4: Wrecking ball swing auxiliary (angle range)
 
@@ -464,7 +488,36 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
         break;
     case BOSS_STATE_MOCKPLAYER:
-        // TODO
+        // Wrecking ball object takes boss out of this state.
+        state->freepos->rx = state->freepos->vx;
+        break;
+    case BOSS_STATE_GO_LEFT:
+        if(state->freepos->vx > state->freepos->rx - (CENTERX << 12) + (WRECKINGBALL_SWING_RADIUS << 12)) {
+            boss->counter1 = BOSS_WALK_COOLDOWN;
+            state->freepos->spdx = -BOSS_WALK_SPEED;
+        } else if(boss->counter1 > 0) {
+            state->freepos->spdx = 0;
+            if(boss->counter1 == BOSS_WALK_COOLDOWN)
+                state->freepos->vx -= 8 << 12;
+            boss->counter1--;
+            state->flipmask = 0; // Turn back
+        } else {
+            boss->state = BOSS_STATE_GO_RIGHT;
+        }
+        break;
+    case BOSS_STATE_GO_RIGHT:
+        if(state->freepos->vx < state->freepos->rx + (CENTERX << 12) - (WRECKINGBALL_SWING_RADIUS << 12) - (8 << 12)) {
+            boss->counter1 = BOSS_WALK_COOLDOWN;
+            state->freepos->spdx = BOSS_WALK_SPEED;
+        } else if(boss->counter1 > 0) {
+            state->freepos->spdx = 0;
+            if(boss->counter1 == BOSS_WALK_COOLDOWN)
+                state->freepos->vx += 8 << 12;
+            boss->counter1--;
+            state->flipmask = MASK_FLIP_FLIPX; // Turn back
+        } else {
+            boss->state = BOSS_STATE_GO_LEFT;
+        }
         break;
     }
 
@@ -507,29 +560,44 @@ _boss_extras_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *
             state->freepos->vy += BOSS_BALL_DESCENT_SPEED;
             state->freepos->ry = state->freepos->vy;
         } else {
+            if(boss->state == BOSS_STATE_MOCKPLAYER) {
+                boss->state = BOSS_STATE_GO_LEFT;
+            }
+            
             // Swing
             if(boss->health > 0) {
                 boss->counter3 += WRECKINGBALL_SWING_SPEED;
+                boss->counter4 = rsin(boss->counter3) / 6;
 
-                // TODO: Hit player
+                // Hit player
+                RECT hitbox = {
+                    .x = pos->vx - 18,
+                    .y = pos->vy - 42,
+                    .w = 36,
+                    .h = 36,
+                };
+                hazard_player_interaction(&hitbox, pos);
             }
 
             state->freepos->vx = state->parent->freepos->vx +
-                (rsin(boss->counter3 >> 2) * WRECKINGBALL_SWING_RADIUS);
+                (rsin(boss->counter4) * WRECKINGBALL_SWING_RADIUS);
             state->freepos->vy = state->parent->freepos->vy +
-                (rcos(boss->counter3 >> 2) * WRECKINGBALL_SWING_RADIUS);
+                (rcos(boss->counter4) * WRECKINGBALL_SWING_RADIUS);
         }
 
         return;
     }
 
     if(state->anim_state.animation == BOSS_EXTRA_CHAIN) {
+        // todo
+        state->props |= OBJ_FLAG_DESTROYED;
+        
         int32_t next_vy = state->next->freepos->vy;
         // If "next" is actually a wrecking ball, subtract its size
         // (We take advantage here of the fact that "next" only points to
         // an object of the current kind, and never to a boss or something
         if(state->next->anim_state.animation == BOSS_EXTRA_WRECKINGBALL) {
-            next_vy -= ((48 - 16) << 12);
+            next_vy -= (48 << 12);
         }
         
         state->freepos->vx =

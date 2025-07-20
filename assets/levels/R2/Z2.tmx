@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="7">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3868c8" nextlayerid="5" nextobjectid="16">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="141" source="../COMMON/objects_common.tsx"/>
  <tileset firstgid="161" source="objects.tsx"/>
@@ -43,9 +43,18 @@
    <object id="1" gid="153" x="90" y="3840" width="64" height="64"/>
    <object id="3" gid="149" x="256" y="3840" width="64" height="64"/>
    <object id="4" gid="152" x="2846" y="3908" width="64" height="64"/>
+   <object id="8" gid="145" x="14" y="3812" width="64" height="64"/>
+   <object id="9" gid="151" x="13" y="3712" width="64" height="64"/>
+   <object id="10" gid="141" x="13" y="3664" width="64" height="64"/>
+   <object id="11" gid="141" x="13" y="3640" width="64" height="64"/>
+   <object id="12" gid="151" x="-6" y="3678" width="64" height="64"/>
+   <object id="13" gid="151" x="32" y="3678" width="64" height="64"/>
   </objectgroup>
   <objectgroup id="4" name="LEVEL">
-   <object id="5" gid="165" x="2086" y="3908" width="64" height="64"/>
+   <object id="5" gid="165" x="2078" y="3908" width="64" height="64"/>
+   <object id="7" gid="168" x="14" y="3844" width="64" height="64"/>
+   <object id="14" gid="169" x="1950" y="3857" width="64" height="64"/>
+   <object id="15" gid="169" x="2206" y="3857" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>
