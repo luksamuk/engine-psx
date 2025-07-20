@@ -50,6 +50,7 @@ static void _boss_spawner_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *
 static void _boss_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _boss_extras_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _rock_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _platform_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 void
 object_update_R2(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -64,6 +65,7 @@ object_update_R2(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_BOSS:         _boss_ghz_update(state, typedata, pos);         break;
     case OBJ_BOSS_EXTRAS:  _boss_extras_ghz_update(state, typedata, pos);  break;
     case OBJ_ROCK:         _rock_ghz_update(state, typedata, pos);         break;
+    case OBJ_PLATFORM:     _platform_ghz_update(state, typedata, pos);     break;
     }
 }
 
@@ -356,7 +358,21 @@ _rock_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         .w = 33 << 12,
         .h = 32 << 12,
     };
-    solid_object_player_interaction(state, &solidity);
+    solid_object_player_interaction(state, &solidity, 0);
+}
+
+static void
+_platform_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    (void)(typedata);
+
+    FRECT solidity = {
+        .x = (pos->vx - 30 + 4) << 12,
+        .y = (pos->vy - 26) << 12,
+        .w = 60 << 12,
+        .h = 26 << 12,
+    };
+    solid_object_player_interaction(state, &solidity, 1);
 }
 
 // ===================================

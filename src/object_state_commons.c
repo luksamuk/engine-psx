@@ -128,7 +128,7 @@ hazard_player_interaction(RECT *hitbox, VECTOR *pos)
 }
 
 ObjectCollision
-solid_object_player_interaction(ObjectState *obj, FRECT *box)
+solid_object_player_interaction(ObjectState *obj, FRECT *box, uint8_t is_platform)
 {
     if(debug_mode > 1) draw_collision_hitbox(box->x >> 12, box->y >> 12, box->w >> 12, box->h >> 12);
 
@@ -211,11 +211,11 @@ solid_object_player_interaction(ObjectState *obj, FRECT *box)
         y_distance = top_difference;
     }
 
-    if((abs(x_distance) > abs(y_distance)) || (abs(y_distance) <= (8 << 12))) {
+    if((abs(x_distance) > abs(y_distance)) || (abs(y_distance) <= (8 << 12)) || is_platform) {
         // Collide vertically.
 
         // Pop downwards
-        if(y_distance < 0) {
+        if(!is_platform && (y_distance < 0)) {
             // If not moving vertically and standing on the ground,
             // get crushed
             if((player.vel.vy == 0) && (player.grnd)) {
@@ -250,7 +250,10 @@ solid_object_player_interaction(ObjectState *obj, FRECT *box)
             if(player.vel.vy < 0) return OBJ_SIDE_NONE;
 
             // Land over object
-            player.pos.vy -= y_distance + ONE;
+            if(!is_platform)
+                player.pos.vy -= y_distance + ONE;
+            else
+                player.pos.vy = object_center.vy - (box->h >> 1) - (player_height << 11);
             player.grnd = 1;
             player.vel.vy = 0;
             player.angle = 0;

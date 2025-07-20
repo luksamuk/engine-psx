@@ -449,7 +449,7 @@ _spring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t
         };
 
         ObjectCollision collision_side =
-            solid_object_player_interaction(state, &solidity);
+            solid_object_player_interaction(state, &solidity, 0);
 
         // The player's spring action relate to where the spring is pointing at.
         if(collision_side == OBJ_SIDE_NONE)
@@ -581,7 +581,7 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
         };
 
         ObjectCollision collision_side =
-            solid_object_player_interaction(state, &solidity);
+            solid_object_player_interaction(state, &solidity, 0);
 
         if(collision_side == OBJ_SIDE_NONE) return;
         else if(collision_side == bump_side) {
@@ -647,7 +647,7 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         .h = solidity.h << 12,
     };
 
-    ObjectCollision side = solid_object_player_interaction(state, &solidity);
+    ObjectCollision side = solid_object_player_interaction(state, &solidity, 0);
     if(side == hurt_side) {
         if(player.action != ACTION_HURT && player.iframes == 0) {
             player_do_damage(&player, (solidity.x + 16) << 12);
@@ -750,7 +750,7 @@ _switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     };
 
     ObjectCollision collision_side =
-        solid_object_player_interaction(state, &solidity);
+        solid_object_player_interaction(state, &solidity, 0);
 
     if(collision_side == OBJ_SIDE_TOP) {
         state->anim_state.animation = 1;
@@ -959,5 +959,5 @@ _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         .h = solidity.h << 12,
     };
 
-    solid_object_player_interaction(state, &solidity);
+    solid_object_player_interaction(state, &solidity, 0);
 }
