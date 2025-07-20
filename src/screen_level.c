@@ -983,7 +983,8 @@ level_load_level(screen_level_data *data)
 
     // Load level boss object, if existing.
     // Warning: This supersedes the second half of level object textures!
-    if(level_act >= 2) {
+    if(((level_round == 0) && (level_act >= 2))
+       || (level_act >= 1)) {
         printf("Loading level boss...\n");
         snprintf(filename0, 255, "%s\\BOSS.TIM;1", basepath);
         timfile = file_read(filename0, &filelength);

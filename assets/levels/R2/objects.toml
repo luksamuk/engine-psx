@@ -75,3 +75,19 @@ frames = [
        [89, 32, 16, 16],
        [89, 48, 16, 16],
 ]
+
+
+# ============
+
+[unused1] # Unused object
+
+# ============
+
+[boss_spawner]
+# Spawner object has no animations
+# When triggered, destroys itself and spawns a free object
+
+# ============
+
+[boss]
+

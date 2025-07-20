@@ -5,6 +5,7 @@
 #include "sound.h"
 #include "camera.h"
 #include "render.h"
+#include "boss.h"
 #include <stdio.h>
 
 // Extern elements
@@ -23,9 +24,12 @@ extern uint8_t    level_act;
 
 
 // Object type enums
-#define OBJ_MOTOBUG    (MIN_LEVEL_OBJ_GID + 0)
-#define OBJ_BUZZBOMBER (MIN_LEVEL_OBJ_GID + 1)
-#define OBJ_PROJECTILE (MIN_LEVEL_OBJ_GID + 2)
+#define OBJ_MOTOBUG      (MIN_LEVEL_OBJ_GID + 0)
+#define OBJ_BUZZBOMBER   (MIN_LEVEL_OBJ_GID + 1)
+#define OBJ_PROJECTILE   (MIN_LEVEL_OBJ_GID + 2)
+#define OBJ_UNUSED1      (MIN_LEVEL_OBJ_GID + 3)
+#define OBJ_BOSS_SPAWNER (MIN_LEVEL_OBJ_GID + 4)
+#define OBJ_BOSS         (MIN_LEVEL_OBJ_GID + 5)
 
 
 #define BUZZBOMBER_PATROL_RADIUS   (192 << 12)
@@ -39,6 +43,7 @@ extern uint8_t    level_act;
 static void _motobug_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _buzzbomber_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _projectile_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
+static void _boss_spawner_ghz_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 void
 object_update_R2(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
@@ -48,6 +53,8 @@ object_update_R2(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     case OBJ_MOTOBUG: _motobug_update(state, typedata, pos); break;
     case OBJ_BUZZBOMBER: _buzzbomber_ghz_update(state, typedata, pos); break;
     case OBJ_PROJECTILE: _projectile_ghz_update(state, typedata, pos); break;
+    case OBJ_UNUSED1: break;
+    case OBJ_BOSS_SPAWNER: _boss_spawner_ghz_update(state, typedata, pos); break;
     }
 }
 
@@ -327,4 +334,37 @@ _projectile_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
 
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy += state->freepos->spdy;
+}
+
+// ===================================
+//      BOSS -
+// ===================================
+
+extern BossState *boss;
+
+static void
+_boss_spawner_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
+{
+    (void)(typedata);
+    // Create boss once camera position fits
+    if((player.pos.vx >> 12) >= (pos->vx - (CENTERX >> 1))) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        PoolObject *boss_obj = object_pool_create(OBJ_BOSS);
+        boss_obj->freepos.vx = ((pos->vx + 128) << 12);
+        boss_obj->freepos.vy = ((pos->vy - 320) << 12);
+        boss_obj->state.anim_state.animation = 0;
+        boss_obj->state.flipmask = state->flipmask;
+
+        // Setup boss state
+        /* boss->state = BOSS_STATE_INIT; */
+        boss->health = 8;
+        boss->anchor.vx = (pos->vx << 12);
+        boss->anchor.vy = (pos->vy << 12);
+        boss->counter4 = boss_obj->freepos.vy;
+        /* boss->counter6 = BOSS_BOMB_INTERVAL; */
+
+        camera_focus(&camera, boss->anchor.vx, boss->anchor.vy - (100 << 12));
+
+        sound_bgm_play(BGM_BOSS);
+    }
 }
