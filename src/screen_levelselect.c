@@ -293,8 +293,7 @@ screen_levelselect_update(void *d)
             // Check for blacklisted levels.
             // (Important for SAGE 2025 demo)
 #ifndef ALLOW_DEBUG
-            if((data->menu_choice == 5) // GHZ2
-               || (data->menu_choice == 7) // SWZ2
+            if((data->menu_choice == 7) // SWZ2
                || (data->menu_choice == 9) // DCZ2
                || (data->menu_choice == 11) // AOZ2
             ) {

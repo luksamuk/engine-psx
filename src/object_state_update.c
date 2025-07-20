@@ -308,7 +308,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             if(lvl == 2 || lvl == 3) {
                 // Finished engine test
                 scene_change(SCREEN_TITLE);
-            } else if(lvl != 4) {
+            } else if(lvl != 5) {
                 // If on test level 2 and our character is Knuckles...
                 // Go to test level 4 (also an act 3)
                 if(lvl == 1) {
