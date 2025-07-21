@@ -7,6 +7,9 @@
 #include "render.h"
 #include "boss.h"
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "screens/level.h"
 
 // Extern elements
 extern Player player;
@@ -377,17 +380,22 @@ _platform_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
 }
 
 // ===================================
-//      BOSS -
+//      BOSS - EGG WRECKER
 // ===================================
 
 extern BossState *boss;
 
+// State enumeration
 #define BOSS_STATE_INIT       0
 #define BOSS_STATE_MOCKPLAYER 1
 #define BOSS_STATE_GO_LEFT    2
 #define BOSS_STATE_GO_RIGHT   3
-#define BOSS_STATE_DEAD       5
+#define BOSS_STATE_DEAD       4
+#define BOSS_STATE_DROPPING   5
+#define BOSS_STATE_RECOVERING 6
+#define BOSS_STATE_FLEEING    7
 
+// Properties and physics
 #define BOSS_NUM_CHAINS                  4
 #define BOSS_DESCENT_SPEED         0x01200
 #define BOSS_WALK_SPEED            0x01200
@@ -397,7 +405,12 @@ extern BossState *boss;
 #define WRECKINGBALL_SWING_RADIUS      116
 #define WRECKINGBALL_SWING_SPEED   0x00010
 #define WRECKINGBALL_MAX_ANGLE     0x002aa
+#define BOSS_DROP_GRAVITY          0x00380
+#define BOSS_RISING_SPEED          0x02400
+#define BOSS_FLEE_XSPD             0x03600
+#define BOSS_FLEE_YSPD             0x01200
 
+// Animations
 #define BOSS_ANIM_STOP       0
 #define BOSS_ANIM_MOVE       1
 #define BOSS_ANIM_LAUGH      2
@@ -483,8 +496,10 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     (void)(pos);
 
     // counter1: Walk turn counter
-    // counter3: Wrecking ball swing angle
+    // counter2: Death explosion countdown
+    // counter3: Wrecking ball swing angle // After death: stopped timer after recover
     // counter4: Wrecking ball swing auxiliary (angle range)
+    // counter6: In-between explosions cooldown
 
     switch(boss->state) {
     default: break;
@@ -539,6 +554,48 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         }
         // Wrecking ball object moves boss left
         break;
+    case BOSS_STATE_DEAD:
+        state->freepos->spdx = 0;
+        break;
+    case BOSS_STATE_DROPPING:
+        if(state->freepos->vy < boss->anchor.vy + (CENTERY << 11)) {
+            state->freepos->spdy += BOSS_DROP_GRAVITY;
+            boss->counter3 = 0;
+        } else {
+            boss->state = BOSS_STATE_RECOVERING;
+        }
+        break;
+    case BOSS_STATE_RECOVERING:
+        state->flipmask = 0;
+        if(state->freepos->vy > boss->anchor.vy - (CENTERY << 11)) {
+            state->freepos->spdy = -BOSS_RISING_SPEED;
+            boss->counter3 = 30;
+        } else {
+            if(boss->counter3 > 0) {
+                state->freepos->spdy = 0;
+                boss->counter3--;
+            } else {
+                camera_set_left_bound(&camera, boss->anchor.vx);
+                camera_follow_player(&camera);
+                screen_level_play_music(level_round, level_act);
+                boss->state = BOSS_STATE_FLEEING;
+            }
+        }
+        break;
+    case BOSS_STATE_FLEEING:
+        state->freepos->spdx = BOSS_FLEE_XSPD;
+        state->freepos->spdy = -BOSS_FLEE_YSPD;
+        state->flipmask = 0;
+
+        // Despawn if too far!
+        if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
+           || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
+           || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
+           || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12))) {
+            state->props |= OBJ_FLAG_DESTROYED;
+            return;
+        }
+        break;
     }
 
     state->freepos->vx += state->freepos->spdx;
@@ -578,6 +635,58 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 }
             }
         }
+    } else {
+        if(boss->state < BOSS_STATE_DEAD) {
+            boss->state = BOSS_STATE_DEAD;
+            boss->counter6 = 0;
+            boss->counter2 = 180; // 3 seconds exploding
+            level_score_count += 1000;
+        }
+
+        if(boss->counter2 > 0) {
+            boss->counter2--;
+            // When boss is dead, setup random explosions around the egg mobile
+            if(boss->counter6 == 0) {
+                boss->counter6 = 10;
+                int32_t rvx = (rand() % 54) << 12;
+                int32_t rvy = (rand() % 37) << 12;
+
+                PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+                explosion->freepos.vx = ((pos->vx - 25) << 12) + rvx;
+                explosion->freepos.vy = ((pos->vy - 32) << 12) + rvy;
+                explosion->state.anim_state.animation = 1; // Big explosion
+
+                // Go down the chain creating explosions on each link
+                // and the wrecking ball
+                ObjectState *link = state;
+                do {
+                    link = link->next;
+                    explosion = object_pool_create(OBJ_EXPLOSION);
+                    explosion->state.anim_state.animation = 1; // Big explosion
+                    int32_t rangex = 16;
+                    int32_t rangey = 16;
+                    if(link->anim_state.animation == BOSS_EXTRA_WRECKINGBALL) {
+                        rangex = rangey = 48;
+                    }
+
+                    rvx = (rand() % (rangex + 5)) << 12;
+                    rvy = (rand() % (rangey + 5)) << 12;
+                    explosion->freepos.vx = link->freepos->vx - (rangex << 11) + rvx;
+                    explosion->freepos.vy = link->freepos->vy - (rangey << 12) + rvy;
+                } while(link->anim_state.animation != BOSS_EXTRA_WRECKINGBALL);
+                
+                sound_play_vag(sfx_bomb, 0);
+            } else boss->counter6--;
+        } else if(state->next != NULL) {
+            // Destroy all chain links
+            ObjectState *link = state;
+            do {
+                link = link->next;
+                link->props |= OBJ_FLAG_DESTROYED;
+            } while(link->anim_state.animation != BOSS_EXTRA_WRECKINGBALL);
+            boss->state = BOSS_STATE_DROPPING;
+            state->next = NULL;
+        }
     }
 
     // Update chain positions according to boss position itself
@@ -586,6 +695,14 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     // Animation
     if(boss->state == BOSS_STATE_MOCKPLAYER)
         state->frag_anim_state->animation = BOSS_ANIM_LAUGH;
+    else if(boss->state == BOSS_STATE_DEAD)
+        state->frag_anim_state->animation = BOSS_ANIM_DEAD;
+    else if(boss->state == BOSS_STATE_DROPPING)
+        state->frag_anim_state->animation = BOSS_ANIM_DROPPING;
+    else if(boss->state == BOSS_STATE_RECOVERING)
+        state->frag_anim_state->animation = BOSS_ANIM_RECOVERING;
+    else if(boss->state == BOSS_STATE_FLEEING)
+        state->frag_anim_state->animation = BOSS_ANIM_MOVE;
     else if(boss->hit_cooldown > 0)
         state->frag_anim_state->animation = BOSS_ANIM_HIT;
     else state->frag_anim_state->animation =
@@ -650,12 +767,6 @@ _boss_extras_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *
             else if((boss->counter4 == WRECKINGBALL_MAX_ANGLE)
                     && (boss->state == BOSS_STATE_GO_RIGHT))
                 boss->state = BOSS_STATE_GO_LEFT;
-
-            /* static int32_t min = 0; */
-            /* static int32_t max = 0; */
-            /* if(boss->counter4 < min) min = boss->counter4; */
-            /* if(boss->counter4 > max) max = boss->counter4; */
-            /* printf("min: %d\nmax: %d\n=====\n", min, max); */
         }
 
         return;
