@@ -17,6 +17,7 @@ extern int32_t player_width;
 extern int32_t player_height;
 
 extern SoundEffect sfx_pop;
+extern SoundEffect sfx_bomb;
 
 extern uint32_t   level_score_count;
 extern uint8_t    level_round;
@@ -367,10 +368,10 @@ _platform_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
     (void)(typedata);
 
     FRECT solidity = {
-        .x = (pos->vx - 30 + 4) << 12,
+        .x = (pos->vx - 30) << 12,
         .y = (pos->vy - 26) << 12,
         .w = 60 << 12,
-        .h = 26 << 12,
+        .h = 13 << 12,
     };
     solid_object_player_interaction(state, &solidity, 1);
 }
@@ -387,7 +388,7 @@ extern BossState *boss;
 #define BOSS_STATE_GO_RIGHT   3
 #define BOSS_STATE_DEAD       5
 
-#define BOSS_NUM_CHAINS                  6
+#define BOSS_NUM_CHAINS                  4
 #define BOSS_DESCENT_SPEED         0x01200
 #define BOSS_WALK_SPEED            0x01200
 #define BOSS_WALK_SPEED_SWING      0x00680
@@ -453,6 +454,7 @@ _boss_ghz_spawn_wrecking_ball(ObjectState *state)
     ball->freepos.ry = ball->freepos.vy;
     ball->state.parent = state; // Point to boss state
 
+    // As for the chains, 
     for(int i = 0; i < BOSS_NUM_CHAINS; i++) {
         chain[i] = object_pool_create(OBJ_BOSS_EXTRAS);
         chain[i]->freepos.vx = ball->freepos.vx;
@@ -542,7 +544,46 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy += state->freepos->spdy;
 
-    // Animation (TODO)
+    // Collision and hitbox
+    if(boss->health > 0) {
+        if(boss->hit_cooldown > 0) {
+            boss->hit_cooldown--;
+        } else if(boss->state > BOSS_STATE_MOCKPLAYER) {
+            int32_t hitbox_vx = pos->vx - 23;
+            int32_t hitbox_vy = pos->vy - 47;
+            if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                               hitbox_vx, hitbox_vy, 52, 32)) {
+                if(player_attacking) {
+                    boss->health--;
+                    boss->hit_cooldown = 30;
+                    sound_play_vag(sfx_bomb, 0);
+
+                    // Rebound Sonic
+                    if(!player.grnd) {
+                        player.vel.vy = -(player.vel.vy >> 1);
+                        if(player.action == ACTION_GLIDE) {
+                            player_set_action(&player, ACTION_DROP);
+                            player.airdirlock = 1;
+                            // To be a little more fair with Knuckles,
+                            // rebound him on the X axis by double the distance
+                            // otherwise Knuckles will always get hurt when
+                            // gliding onto the boss
+                            player.vel.vx = -player.vel.vx;
+                        } else player.vel.vx = -(player.vel.vx >> 1);
+                    } else player.vel.vz = -(player.vel.vz >> 1);
+                } else {
+                    if(player.action != ACTION_HURT && player.iframes == 0) {
+                        player_do_damage(&player, pos->vx << 12);
+                    }
+                }
+            }
+        }
+    }
+
+    // Update chain positions according to boss position itself
+    // TODO
+
+    // Animation
     if(boss->state == BOSS_STATE_MOCKPLAYER)
         state->frag_anim_state->animation = BOSS_ANIM_LAUGH;
     else if(boss->hit_cooldown > 0)
@@ -621,15 +662,12 @@ _boss_extras_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *
     }
 
     if(state->anim_state.animation == BOSS_EXTRA_CHAIN) {
-        // todo
-        state->props |= OBJ_FLAG_DESTROYED;
-        
         int32_t next_vy = state->next->freepos->vy;
         // If "next" is actually a wrecking ball, subtract its size
         // (We take advantage here of the fact that "next" only points to
         // an object of the current kind, and never to a boss or something
         if(state->next->anim_state.animation == BOSS_EXTRA_WRECKINGBALL) {
-            next_vy -= (48 << 12);
+            next_vy -= (32 << 12);
         }
         
         state->freepos->vx =
