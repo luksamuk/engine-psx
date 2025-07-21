@@ -77,10 +77,10 @@ main(void)
     sound_cdda_init();
 
     // Set first scene
-    /* scene_change(SCREEN_DISCLAIMER); */
+    scene_change(SCREEN_DISCLAIMER);
 
-    screen_level_setlevel(5);
-    scene_change(SCREEN_LEVEL);
+    /* screen_level_setlevel(5); */
+    /* scene_change(SCREEN_LEVEL); */
 
     while(1) {
         // Update systems
