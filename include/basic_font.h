@@ -35,6 +35,7 @@ void font_set_color(uint8_t r0, uint8_t g0, uint8_t b0);
 void font_set_color_sonic();
 void font_set_color_miles();
 void font_set_color_knuckles();
+void font_set_color_super();
 void font_reset_color();
 
 #endif

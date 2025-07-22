@@ -399,12 +399,34 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
             case '?': offset = 42; break;
             case '<': offset = 43; break;
             case '>': offset = 44; break;
+            case '\a':
+                text++;
+                switch(*text) {
+                case 's':
+                    font_set_color_sonic();
+                    break;
+                case 't':
+                    font_set_color_miles();
+                    break;
+                case 'k':
+                    font_set_color_knuckles();
+                    break;
+                case 'z':
+                    font_set_color_super();
+                    break;
+                }
+                offset = 0xfe;
+                break;
+            case '\r':
+                offset = 0xfe;
+                font_reset_color();
+                break;
             default:  offset = 0xff; break;
             }
         }
 
         uint8_t gw = ws_w;
-        if(offset != 0xff) {
+        if(offset < 0xfe) {
             uint8_t *info = &ginfo[offset * 4];
             if(info[0] == 0xff) {
                 // Glyph doesn't exist, so don't draw
@@ -415,7 +437,8 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
         }
 
     jump_ws:
-        vx += gw + gap;
+        if(offset != 0xfe)
+            vx += gw + gap;
         text++;
     }
 }
@@ -474,6 +497,12 @@ void
 font_set_color_knuckles()
 {
     font_set_color(0xfc, 0x24, 0x48);
+}
+
+void
+font_set_color_super()
+{
+    font_set_color(0xbb, 0x8a, 0x0d);
 }
 
 void
