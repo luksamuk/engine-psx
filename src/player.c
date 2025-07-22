@@ -696,51 +696,15 @@ _player_update_collision_tb(Player *player)
                 player_set_action(player, ACTION_NONE);
                 player->airdirlock = 0;
             }
-            else if(player->action == ACTION_DROPDASH) {
-                // Perform drop dash
-                player->framecount   = 0;
-                player->holding_jump = 0;
-                player_set_action(player, ACTION_ROLLING);
-                // We're going to need the previous vel.vx as usual,
-                // but we're going to manipulate gsp AFTER it has been calculated,
-                // so this code MUST come after landing speed calculation
-                uint8_t moving_backwards =
-                    (player->vel.vx > 0 && player->anim_dir == -1)
-                    || (player->vel.vx < 0 && player->anim_dir == 1);
-                if(!moving_backwards) {
-                    // gsp = (gsp / 4) + (drpspd * dir)
-                    player->vel.vz = (player->vel.vz >> 2)
-                        + (player->cnst->x_drpspd * player->anim_dir);
-                    if(player->vel.vz > 0)
-                        player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
-                            ? player->cnst->x_drpmax
-                            : player->vel.vz;
-                    else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
-                             ? -player->cnst->x_drpmax : player->vel.vz;
-                } else {
-                    if(player->angle == 0)
-                        player->vel.vz = player->cnst->x_drpspd * player->anim_dir;
-                    else {
-                        player->vel.vz = (player->vel.vz >> 1)
-                            + (player->cnst->x_drpspd * player->anim_dir);
-                        if(player->vel.vz > 0)
-                            player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
-                                ? player->cnst->x_drpmax
-                                : player->vel.vz;
-                        else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
-                                 ? -player->cnst->x_drpmax
-                                 : player->vel.vz;
-                    }
-                }
-                sound_play_vag(sfx_relea, 0);
-                camera.lag = 0x8000 >> 12;
-            } else if(player->action == ACTION_DROP) {
+            else if(player->action == ACTION_DROP) {
                 player_set_action(player, ACTION_DROPRECOVER);
                 player->framecount = 12;
                 player->vel.vz = 0;
                 player->airdirlock = 0;
                 sound_play_vag(sfx_land, 0);
             }
+
+            player_do_dropdash(player);
         } else {
             // If NOT touching the ground.
             if(player->sliding) {
@@ -1947,4 +1911,48 @@ player_set_action(Player *player, PlayerAction action)
     }
 
     player->action = action;
+}
+
+void
+player_do_dropdash(Player *player)
+{
+    if(player->action == ACTION_DROPDASH) {
+        // Perform drop dash
+        player->framecount   = 0;
+        player->holding_jump = 0;
+        player_set_action(player, ACTION_ROLLING);
+        // We're going to need the previous vel.vx as usual,
+        // but we're going to manipulate gsp AFTER it has been calculated,
+        // so this code MUST come after landing speed calculation
+        uint8_t moving_backwards =
+            (player->vel.vx > 0 && player->anim_dir == -1)
+            || (player->vel.vx < 0 && player->anim_dir == 1);
+        if(!moving_backwards) {
+            // gsp = (gsp / 4) + (drpspd * dir)
+            player->vel.vz = (player->vel.vz >> 2)
+                + (player->cnst->x_drpspd * player->anim_dir);
+            if(player->vel.vz > 0)
+                player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
+                    ? player->cnst->x_drpmax
+                    : player->vel.vz;
+            else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
+                     ? -player->cnst->x_drpmax : player->vel.vz;
+        } else {
+            if(player->angle == 0)
+                player->vel.vz = player->cnst->x_drpspd * player->anim_dir;
+            else {
+                player->vel.vz = (player->vel.vz >> 1)
+                    + (player->cnst->x_drpspd * player->anim_dir);
+                if(player->vel.vz > 0)
+                    player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
+                        ? player->cnst->x_drpmax
+                        : player->vel.vz;
+                else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
+                         ? -player->cnst->x_drpmax
+                         : player->vel.vz;
+            }
+        }
+        sound_play_vag(sfx_relea, 0);
+        camera.lag = 0x8000 >> 12;
+    }
 }

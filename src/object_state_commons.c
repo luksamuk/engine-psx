@@ -259,6 +259,7 @@ solid_object_player_interaction(ObjectState *obj, FRECT *box, uint8_t is_platfor
             player.angle = 0;
             player.over_object = obj;
             player.vel.vz = player.vel.vx;
+            player_do_dropdash(&player);
             return OBJ_SIDE_TOP;
         }
     } else {
