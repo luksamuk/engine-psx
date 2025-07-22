@@ -70,10 +70,12 @@ static const char *creditstxt[] = {
     "Paraemon",
     "Triangly",
     "Dolphman",
+    "MFF",
     "\r",
 
     "Original Sprites and Tiles",
     "Sonic Team",
+    "Devy",
     "\r",
 
 

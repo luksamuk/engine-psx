@@ -84,7 +84,7 @@ typedef struct {
 /*     "\n", */
 /*     "SOUND TEST  *??*", */
 /*     "SLIDE TEST  *??*", */
-/*     "CHARA   ????????", */
+/*     "PLAYER  ????????", */
 /*     "\n", */
 /*     "\n", */
 /*     "\n", */
@@ -112,7 +112,7 @@ static const char *menutext[] = {
     "\n",
     "SOUND TEST  *??*",
     "SLIDE TEST  *??*",
-    "CHARA   ????????",
+    "PLAYER  ????????",
     "\n",
     "\n",
     "\n",
@@ -144,6 +144,11 @@ screen_levelselect_load()
     data->bg_prect_y = bg.prect->y;
     free(img);
 
+    // Load icon images at 384x0 (16-bit colors because yes)
+    img = file_read("\\MISC\\STICONS.TIM;1", &length);
+    load_texture(img, &bg);
+    free(img);
+
     data->bg_frame = 0;
     data->bg_state = 0;
     data->bg_timer = BG_PAUSE;
@@ -162,8 +167,9 @@ screen_levelselect_load()
 }
 
 void
-screen_levelselect_unload(void *)
+screen_levelselect_unload(void *d)
 {
+    (void)(d);
     sound_cdda_stop();
     screen_free();
 }
@@ -322,6 +328,33 @@ screen_levelselect_update(void *d)
     }
 }
 
+static void
+draw_level_icons(int16_t vx, int16_t vy, uint8_t icon)
+{
+    POLY_FT4 *poly;
+
+    // Draw background
+    poly = (POLY_FT4 *)get_next_prim();
+    increment_prim(sizeof(POLY_FT4));
+    setPolyFT4(poly);
+    setRGB0(poly, 128, 128, 128);
+    setTPage(poly, 2, 0, 384, 0);
+    setUVWH(poly, 32, 0, 80, 50);
+    setXYWH(poly, vx, vy, 80, 50);
+    sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
+
+    // Icons are 32x24 and placed one below another
+    uint8_t v0 = icon * 24;
+    poly = (POLY_FT4 *)get_next_prim();
+    increment_prim(sizeof(POLY_FT4));
+    setPolyFT4(poly);
+    setRGB0(poly, 128, 128, 128);
+    setTPage(poly, 2, 0, 384, 0);
+    setUVWH(poly, 0, v0, 32, 24);
+    setXYWH(poly, vx + 24, vy + 12, 32, 24);
+    sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
+}
+
 void
 screen_levelselect_draw(void *d)
 {
@@ -364,6 +397,11 @@ screen_levelselect_draw(void *d)
             sort_prim(poly, OTZ_LAYER_LEVEL_BG);
         }
     }
+
+    // Level icons
+    draw_level_icons(SCREEN_XRES - 128,
+                     SCREEN_YRES - 86,
+                     data->character_selection);
     
     // Draw text
     font_reset_color();
@@ -404,7 +442,7 @@ screen_levelselect_draw(void *d)
             case CHARA_KNUCKLES: charaname = "KNUCKLES"; break;
             default:          charaname = "UNKNOWN"; break;
             }
-            snprintf(buffer, 80, "CHARA   %8s",
+            snprintf(buffer, 80, "PLAYER  %8s",
                      charaname);
             font_draw_sm(buffer, vx, vy);
         } else font_draw_sm(*txt, vx, vy);

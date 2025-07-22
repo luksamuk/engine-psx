@@ -376,6 +376,9 @@
 	<file name="LVLSEL.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/LVLSEL.TIM" />
+	<file name="STICONS.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/STICONS.TIM" />
 	<file name="CHARSEL.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/CHARSEL.TIM" />
