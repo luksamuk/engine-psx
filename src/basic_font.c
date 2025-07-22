@@ -490,7 +490,7 @@ font_set_color_sonic()
 void
 font_set_color_miles()
 {
-    font_set_color(0xfc, 0x90, 0x00);
+    font_set_color(0x9d, 0x4f, 0x1c);
 }
 
 void
