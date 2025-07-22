@@ -58,6 +58,7 @@ static const char *creditstxt[] = {
     "1001",
     "GameMaster12",
     "SupaChao",
+    "Gato",
     "\r",
 
     "Original Fonts",

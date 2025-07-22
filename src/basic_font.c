@@ -60,6 +60,59 @@ static uint8_t glyph_info_big[] = {
     121, 11, 6, 11, // >
 };
 
+static uint8_t glyph_info_md[] = {
+    // u0, v0, w, h
+    // a-z
+    0, 116, 18, 18,
+    16, 116, 16, 18,
+    34, 116, 18, 18,
+    52, 116, 18, 18,
+    70, 116, 14, 18,
+    84, 116, 14, 18,
+    98, 116, 18, 18,
+    116, 116, 17, 18,
+    133, 116, 13, 18,
+    146, 116, 15, 18,
+    161, 116, 14, 18,
+    175, 116, 12, 18,
+    187, 116, 18, 18,
+    205, 116, 17, 18,
+    222, 116, 18, 18,
+    0, 134, 16, 18,
+    16, 134, 19, 18,
+    35, 134, 17, 18,
+    52, 134, 15, 18,
+    67, 134, 15, 18,
+    82, 134, 15, 18,
+    97, 134, 19, 18,
+    116, 134, 25, 18,
+    141, 134, 19, 18,
+    160, 134, 18, 18,
+    178, 134, 17, 18,
+
+    // 0-9 (no char for any)
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+    0xff, 0, 0, 0, // no char
+
+    0xff, 0, 0, 0, // * (no char)
+    0xff, 0, 0, 0, // . (no char)
+    0xff, 0, 0, 0, // : (no char)
+    0xff, 0, 0, 0, // - (no char)
+    0xff, 0, 0, 0, // = (no char)
+    0xff, 0, 0, 0, // ! (no char)
+    0xff, 0, 0, 0, // ? (no char)
+    0xff, 0, 0, 0, // < (no char)
+    0xff, 0, 0, 0, // > (no char)
+};
+
 static uint8_t glyph_info_sm[] = {
     // u0, v0, w, h
     // a-z
@@ -283,6 +336,13 @@ font_measurew_big(const char *text)
 }
 
 uint16_t
+font_measurew_md(const char *text)
+{
+    return _font_measurew_generic(
+        text, GLYPH_MD_WHITE_WIDTH, GLYPH_MD_GAP, glyph_info_md);
+}
+
+uint16_t
 font_measurew_sm(const char *text)
 {
    return _font_measurew_generic(
@@ -369,6 +429,14 @@ font_draw_big(const char *text, int16_t vx, int16_t vy)
 }
 
 void
+font_draw_md(const char *text, int16_t vx, int16_t vy)
+{
+    _font_draw_generic(text, vx, vy,
+                       GLYPH_MD_WHITE_WIDTH, GLYPH_MD_WHITE_HEIGHT, GLYPH_MD_GAP,
+                       glyph_info_md);
+}
+
+void
 font_draw_sm(const char *text, int16_t vx, int16_t vy)
 {
     _font_draw_generic(text, vx, vy,
@@ -388,6 +456,24 @@ void
 font_set_color(uint8_t r0, uint8_t g0, uint8_t b0)
 {
     font_color[0] = r0; font_color[1] = g0; font_color[2] = b0;
+}
+
+void
+font_set_color_sonic()
+{
+    font_set_color(0x00, 0x48, 0xfc);
+}
+
+void
+font_set_color_miles()
+{
+    font_set_color(0xfc, 0x90, 0x00);
+}
+
+void
+font_set_color_knuckles()
+{
+    font_set_color(0xfc, 0x24, 0x48);
 }
 
 void
