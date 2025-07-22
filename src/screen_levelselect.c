@@ -328,6 +328,36 @@ screen_levelselect_update(void *d)
     }
 }
 
+static uint8_t
+get_level_icon(screen_levelselect_data *data)
+{
+    if(data->menu_choice <= 3)
+        // Test level
+        return 4;
+
+    if(data->menu_choice <= 5)
+        // Green Hill
+        return 5;
+
+    if(data->menu_choice <= 7)
+        // Surely Wood
+        return 6;
+
+    if(data->menu_choice <= 9)
+        // Dawn Canyon (no icon)
+        return 3;
+
+    if(data->menu_choice <= 11)
+        return 7;
+
+    // Player icons
+    if(data->menu_choice >= CHOICE_SOUNDTEST)
+        return data->character_selection;
+
+    // Interrogation
+    return 3;
+}
+
 static void
 draw_level_icons(int16_t vx, int16_t vy, uint8_t icon)
 {
@@ -401,7 +431,7 @@ screen_levelselect_draw(void *d)
     // Level icons
     draw_level_icons(SCREEN_XRES - 128,
                      SCREEN_YRES - 86,
-                     data->character_selection);
+                     get_level_icon(data));
     
     // Draw text
     font_reset_color();
