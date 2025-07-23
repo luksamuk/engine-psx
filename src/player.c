@@ -81,10 +81,6 @@ extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_grab;
 extern SoundEffect sfx_land;
 
-// TODO: Maybe shouldn't be extern?
-extern TileMap16  map16;
-extern TileMap128 map128;
-extern LevelData  leveldata;
 extern Camera     camera;
 extern uint8_t    level_ring_count;
 extern int32_t    level_water_y;

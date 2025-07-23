@@ -22,9 +22,6 @@
 // Extern elements
 extern Player player;
 extern Camera camera;
-extern TileMap16  map16;
-extern TileMap128 map128;
-extern LevelData  leveldata;
 extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
 extern SoundEffect sfx_sprn;
@@ -163,8 +160,9 @@ level_specific_update:
 
 
 static void
-_ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_ring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     if(state->anim_state.animation == 0) {
         // Calculate actual top left corner of ring AABB
         pos->vx -= 8;    pos->vy -= (8 + 32);
@@ -263,8 +261,9 @@ _goal_sign_change_score()
 }
 
 static void
-_goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     if(state->frag_anim_state->animation == 0) {
         if(pos->vx <= (player.pos.vx >> 12)) {
             state->frag_anim_state->animation = 1;
@@ -500,8 +499,9 @@ _spring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t
 
 
 static void
-_checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_checkpoint_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     if(!(state->props & OBJ_FLAG_CHECKPOINT_ACTIVE)) {
         int32_t hitbox_vx = pos->vx - 8;
         int32_t hitbox_vy = pos->vy - 48;
@@ -526,8 +526,9 @@ _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 #define SPRND_ST_Y 0x00007120 // 7.0703125
 
 static void
-_spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
+_spring_diagonal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t is_red)
 {
+    (void)(entry);
     // For diagonal springs, interaction should occur if and only if the player
     // is colliding with its top.
     if(state->anim_state.animation == 0) {
@@ -610,8 +611,9 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
 
 
 static void
-_spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_spikes_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     // Spikes are generally a 32x32 solid box,
     // but when they're facing up (no transform), they're
     // somewhat thinner so we don't have to deal with player
@@ -660,8 +662,10 @@ _spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 
 
 static void
-_explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+_explosion_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
+    (void)(pos);;
     // Explosions are simple particles: their animation is finished?
     // If so, destroy.
     if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION)
@@ -670,8 +674,10 @@ _explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 
 
 static void
-_monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+_monitor_image_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
+    (void)(pos);
     state->timer++;
     PoolObject *newobj;
 
@@ -715,8 +721,10 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 
 
 static void
-_shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+_shield_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
+    (void)(pos);
     // Just stay with the player and disappear if player gets hurt
     if(player.shield != 1)  {
         state->props |= OBJ_FLAG_DESTROYED;
@@ -767,8 +775,9 @@ _switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 
 
 static void
-_bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_bubble_patch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     // Fixed bubble patch sets
     static const uint8_t bubble_size_sets[4][6] = {
         {0, 0, 0, 0, 1, 0},
@@ -832,8 +841,9 @@ _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 }
 
 static void
-_bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_bubble_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     // NOTE: this object can only exist as a free object. Do not insist.
     if(state->freepos == NULL) {
         state->props |= OBJ_FLAG_DESTROYED;
@@ -942,8 +952,9 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 }
 
 static void
-_end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_end_capsule_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     FRECT solidity = {
         .x = pos->vx - 32,
         .y = pos->vy - 60,

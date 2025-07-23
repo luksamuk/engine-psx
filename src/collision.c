@@ -9,9 +9,9 @@ extern int debug_mode;
 extern Camera camera;
 
 // Level data
-extern TileMap16   map16;
-extern TileMap128  map128;
-extern LevelData   leveldata;
+extern TileMap16   *map16;
+extern TileMap128  *map128;
+extern LevelData   *leveldata;
 
 void
 _move_point_linecast(uint8_t direction, int32_t vx, int32_t vy,
@@ -64,7 +64,7 @@ _get_height_and_angle_from_mask(
     uint16_t piece, LinecastDirection direction, uint8_t hpos,
     uint8_t *out_h, int32_t *out_angle)
 {
-    Collision *collision = map16.collision[piece];
+    Collision *collision = map16->collision[piece];
 
     if(collision == NULL) {
     abort_retrieve:
@@ -141,7 +141,7 @@ linecast(int32_t vx, int32_t vy, LinecastDirection direction,
          uint8_t magnitude, LinecastDirection floor_direction)
 {
     // No level data? No collision.
-    if(leveldata.num_layers < 1) return (CollisionEvent){ 0 };
+    if(leveldata->num_layers < 1) return (CollisionEvent){ 0 };
 
     const uint8_t layer = 0;
     assert(direction < 4);
@@ -170,19 +170,19 @@ linecast(int32_t vx, int32_t vy, LinecastDirection direction,
 
         // Get chunk id
         int32_t chunk_pos;
-        if((cx < 0) || (cx >= leveldata.layers[layer].width)) chunk_pos = -1;
-        else if((cy < 0) || (cy >= leveldata.layers[layer].height)) chunk_pos = -1;
-        else chunk_pos = (cy * leveldata.layers[layer].width) + cx;
+        if((cx < 0) || (cx >= leveldata->layers[layer].width)) chunk_pos = -1;
+        else if((cy < 0) || (cy >= leveldata->layers[layer].height)) chunk_pos = -1;
+        else chunk_pos = (cy * leveldata->layers[layer].width) + cx;
 
-        int16_t chunk = leveldata.layers[layer].tiles[chunk_pos];
+        int16_t chunk = leveldata->layers[layer].tiles[chunk_pos];
         
         if(chunk >= 0) {
             // Piece coordinates within chunk
             int32_t px = (lx & 0x7f) >> 4;
             int32_t py = (ly & 0x7f) >> 4;
             uint16_t piece_pos = ((py << 3) + px) + (chunk << 6);
-            uint16_t piece = map128.frames[piece_pos].index;
-            uint8_t piece_props = map128.frames[piece_pos].props;
+            uint16_t piece = map128->frames[piece_pos].index;
+            uint8_t piece_props = map128->frames[piece_pos].props;
 
             if((piece > 0) &&
                (piece_props != MAP128_PROP_NONE) &&

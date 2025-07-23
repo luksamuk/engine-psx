@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <strings.h>
 
 #include "render.h"
 #include "memalloc.h"
@@ -147,7 +148,9 @@ scene_draw()
 void *
 screen_alloc(uint32_t size)
 {
-    return alloc_arena_malloc(&screen_arena, size);
+    void *ptr = alloc_arena_malloc(&screen_arena, size);
+    bzero(ptr, size);
+    return ptr;
 }
 
 void

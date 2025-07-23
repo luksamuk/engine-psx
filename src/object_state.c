@@ -29,6 +29,11 @@ _emplace_object(
     uint8_t is_level_specific, uint8_t has_fragment,
     int8_t type, uint8_t flipmask, int32_t vx, int32_t vy, void *extra)
 {
+    if(data->num_objects + 1 >= MAX_OBJECTS_PER_CHUNK) {
+        printf("WARNING: Not emplacing extra object. ID: %d, specific? %d\n",
+               type, is_level_specific);
+        return;
+    }
     ObjectState *state = &data->objects[data->num_objects++];
     assert(data->num_objects < MAX_OBJECTS_PER_CHUNK);
 

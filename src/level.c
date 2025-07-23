@@ -222,9 +222,9 @@ load_lvl(LevelData *lvl, const char *filename)
 // =====================================
 
 // Level data extern variables
-extern TileMap16  map16;
-extern TileMap128 map128;
-extern LevelData  leveldata;
+extern TileMap16   *map16;
+extern TileMap128  *map128;
+extern LevelData   *leveldata;
 extern ObjectTable obj_table_common;
 extern ObjectTable obj_table_level;
 
@@ -282,7 +282,7 @@ _render_16(int16_t vx, int16_t vy, int16_t otz,
     TILECLIP(16);
 
     // Frames per tile: 2 * 2 = 4
-    uint16_t *tileframes = &map16.frames[frame << 2];
+    uint16_t *tileframes = &map16->frames[frame << 2];
     for(int16_t idx = 0; idx < 4; idx++) {
         if(tileframes[idx] == 0) continue;
 
@@ -310,7 +310,7 @@ _render_128(int16_t vx, int16_t vy, uint16_t frame,
     // Since this is a constant, we will then write the optimized code
     // just like _render_16.
     // Frames per tile: 8 * 8 = 64 => rshift << 6
-    Frame128 *tileframes = &map128.frames[frame << 6];
+    Frame128 *tileframes = &map128->frames[frame << 6];
     for(int16_t idx = 0; idx < 64; idx++) {
         if(tileframes[idx].index == 0) continue;
 
@@ -333,7 +333,7 @@ _render_128(int16_t vx, int16_t vy, uint16_t frame,
 void
 _render_layer(int16_t vx, int16_t vy, uint8_t layer, uint32_t otz)
 {
-    LevelLayerData *l = &leveldata.layers[layer];
+    LevelLayerData *l = &leveldata->layers[layer];
     // vx and vy are the camera center.
     // We need to use these values to calculate:
     // - what are the coordinates for top left corner;
@@ -387,12 +387,12 @@ prepare_renderer()
         SPRT_8 *sprt = &_sprites[0][i];
         setSprt8(sprt);
         setRGB0(sprt, level_fade, level_fade, level_fade);
-        setClut(sprt, leveldata.crectx, leveldata.crecty);
+        setClut(sprt, leveldata->crectx, leveldata->crecty);
 
         sprt = &_sprites[1][i];
         setSprt8(sprt);
         setRGB0(sprt, level_fade, level_fade, level_fade);
-        setClut(sprt, leveldata.crectx, leveldata.crecty);
+        setClut(sprt, leveldata->crectx, leveldata->crecty);
     }
     _current_spritebuf = 0;
 }
@@ -454,7 +454,7 @@ void
 update_obj_window(int32_t cam_x, int32_t cam_y, uint8_t round)
 {
     // If there is no level data, just forget it
-    if(leveldata.num_layers < 1) return;
+    if(leveldata->num_layers < 1) return;
 
     cam_x = cam_x >> 12;
     cam_y = cam_y >> 12;
@@ -469,12 +469,12 @@ update_obj_window(int32_t cam_x, int32_t cam_y, uint8_t round)
             int32_t cx = new_cam_x >> 7;
             int32_t cy = new_cam_y >> 7;
             int32_t chunk_pos;
-            if((cx < 0) || (cx >= leveldata.layers[0].width)) chunk_pos = -1;
-            else if((cy < 0) || (cy >= leveldata.layers[0].height)) chunk_pos = -1;
-            else chunk_pos = (cy * leveldata.layers[0].width) + cx;
+            if((cx < 0) || (cx >= leveldata->layers[0].width)) chunk_pos = -1;
+            else if((cy < 0) || (cy >= leveldata->layers[0].height)) chunk_pos = -1;
+            else chunk_pos = (cy * leveldata->layers[0].width) + cx;
 
             if(chunk_pos > 0) {
-                ChunkObjectData *objdata = leveldata.objects[chunk_pos];
+                ChunkObjectData *objdata = leveldata->objects[chunk_pos];
                 if(objdata) {
                     for(uint8_t k = 0; k < objdata->num_objects; k++) {
                         ObjectState *obj = &objdata->objects[k];
@@ -498,16 +498,16 @@ update_obj_window(int32_t cam_x, int32_t cam_y, uint8_t round)
 void
 _render_obj_window(int32_t cx, int32_t cy)
 {
-    if(leveldata.num_layers < 1) return;
+    if(leveldata->num_layers < 1) return;
 
     int32_t chunk;
-    int32_t w = leveldata.layers[0].width;
-    int32_t h = leveldata.layers[0].height;
+    int32_t w = leveldata->layers[0].width;
+    int32_t h = leveldata->layers[0].height;
 
 #define _DO_RENDER(x, y)                                                 \
     chunk = get_chunk_pos(x, y, w, h);                                   \
     if(chunk > 0) {                                                      \
-        ChunkObjectData *objdata = leveldata.objects[chunk];            \
+        ChunkObjectData *objdata = leveldata->objects[chunk];            \
         if(objdata) {                                                    \
             for(uint8_t i = 0; i < objdata->num_objects; i++) {         \
                 ObjectState *obj = &objdata->objects[i];                \
@@ -543,20 +543,20 @@ render_lvl(
         cx = (cam_x >> 12),
         cy = (cam_y >> 12);
 
-    if(leveldata.num_layers > 0)
+    if(leveldata->num_layers > 0)
         _render_layer(cx, cy, 0, layer);
 
 
     // Texture TPAGE info for level foreground (back tiles)
     DR_TPAGE *tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
-    setDrawTPage(tpage, 0, 1, getTPage(leveldata.clutmode & 0x3, 1, leveldata.prectx, leveldata.precty));
+    setDrawTPage(tpage, 0, 1, getTPage(leveldata->clutmode & 0x3, 1, leveldata->prectx, leveldata->precty));
     sort_prim(tpage, layer);
 
     // Texture TPAGE info for level foreground (front tiles)
     tpage = get_next_prim();
     increment_prim(sizeof(DR_TPAGE));
-    setDrawTPage(tpage, 0, 1, getTPage(leveldata.clutmode & 0x3, 1, leveldata.prectx, leveldata.precty));
+    setDrawTPage(tpage, 0, 1, getTPage(leveldata->clutmode & 0x3, 1, leveldata->prectx, leveldata->precty));
     sort_prim(tpage, OTZ_LAYER_LEVEL_FG_FRONT);
 
     // Render objects on nearest window

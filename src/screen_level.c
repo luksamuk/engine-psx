@@ -30,9 +30,9 @@ static PlayerCharacter level_character = CHARA_SONIC;
 // Accessible in other source
 Player      player;
 uint8_t     paused = 0;
-TileMap16   map16;
-TileMap128  map128;
-LevelData   leveldata;
+TileMap16   *map16;
+TileMap128  *map128;
+LevelData   *leveldata;
 Camera      camera;
 ObjectTable obj_table_common;
 ObjectTable obj_table_level;
@@ -92,7 +92,12 @@ screen_level_load()
     camera_init(&camera);
 
     level_load_player(level_character);
+
+    map16 = screen_alloc(sizeof(TileMap16));
+    map128 = screen_alloc(sizeof(TileMap128));
+    leveldata = screen_alloc(sizeof(LevelData));
     level_load_level(data);
+
     camera_set(&camera, player.pos.vx, player.pos.vy);
 
     reset_elapsed_frames();
@@ -880,7 +885,7 @@ level_load_level(screen_level_data *data)
     uint8_t *timfile = file_read(filename0, &filelength);
     if(timfile) {
         load_texture(timfile, &tim);
-        leveldata.clutmode = tim.mode;
+        leveldata->clutmode = tim.mode;
         free(timfile);
     } else {
         // If not single "TILES.TIM" was found, then perharps try a
@@ -890,7 +895,7 @@ level_load_level(screen_level_data *data)
         timfile = file_read(filename0, &filelength);
         if(timfile) {
             load_texture(timfile, &tim);
-            leveldata.clutmode = tim.mode; // Use CLUT mode from 1st texture
+            leveldata->clutmode = tim.mode; // Use CLUT mode from 1st texture
             free(timfile);
         }
 
@@ -947,17 +952,17 @@ level_load_level(screen_level_data *data)
     snprintf(filename0, 255, "%s\\MAP16.MAP;1", basepath);
     snprintf(filename1, 255, "%s\\MAP16.COL;1", basepath);
     printf("Loading %s and %s...\n", filename0, filename1);
-    load_map16(&map16, filename0, filename1);
+    load_map16(map16, filename0, filename1);
     snprintf(filename0, 255, "%s\\MAP128.MAP;1", basepath);
     printf("Loading %s...\n", filename0);
-    load_map128(&map128, filename0);
+    load_map128(map128, filename0);
 
 
 
     /* === LEVEL LAYOUT === */
     snprintf(filename0, 255, "%s\\Z%1u.LVL;1", basepath, level_act + 1);
     printf("Loading %s...\n", filename0);
-    load_lvl(&leveldata, filename0);
+    load_lvl(leveldata, filename0);
 
 
 
@@ -1003,7 +1008,6 @@ level_load_level(screen_level_data *data)
 
         // Init boss structure
         boss = screen_alloc(sizeof(BossState));
-        bzero(boss, sizeof(BossState));
     }
 
     printf("Loading level object table...\n");
@@ -1013,7 +1017,7 @@ level_load_level(screen_level_data *data)
     // Load object positioning on level.
     // Always do this AFTER loading object definitions!
     snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, level_act + 1);
-    load_object_placement(filename0, &leveldata);
+    load_object_placement(filename0, leveldata);
 
 
     /* === OBJECT POOL / FREE OBJECTS === */
@@ -1026,7 +1030,7 @@ level_load_level(screen_level_data *data)
 
     level_debrief();
 
-    printf("Number of level layers: %d\n", leveldata.num_layers);
+    printf("Number of level layers: %d\n", leveldata->num_layers);
 
     // Start playback after we don't need the CD anymore.
     screen_level_play_music(level_round, level_act);
