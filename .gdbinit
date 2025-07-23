@@ -1,4 +1,4 @@
-define restart
+define restart-all
   symbol-file ./build/sonic.elf
   monitor reset shellhalt
   load ./build/sonic.elf
@@ -6,6 +6,6 @@ define restart
 end
 
 target remote localhost:3333
-restart
+restart-all
 tbreak main
 
