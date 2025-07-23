@@ -20,8 +20,8 @@ extern uint8_t        level_fade;
 extern uint8_t        level_has_boss;
 extern BossState      *boss;
 
-extern ObjectTable obj_table_common;
-extern ObjectTable obj_table_level;
+extern ObjectTable *obj_table_common;
+extern ObjectTable *obj_table_level;
 
 void
 _emplace_object(
@@ -175,8 +175,8 @@ load_object_placement(const char *filename, void *lvl_data)
             }
         } else {
             ObjectTableEntry *entry = (type >= MIN_LEVEL_OBJ_GID)
-                ? &obj_table_level.entries[type - MIN_LEVEL_OBJ_GID]
-                : &obj_table_common.entries[type];
+                ? &obj_table_level->entries[type - MIN_LEVEL_OBJ_GID]
+                : &obj_table_common->entries[type];
             
             _emplace_object(data, cx, cy, is_level_specific, entry->has_fragment, type, flipmask, vx, vy, extra);
             created_objects++;

@@ -34,8 +34,8 @@ TileMap16   *map16;
 TileMap128  *map128;
 LevelData   *leveldata;
 Camera      camera;
-ObjectTable obj_table_common;
-ObjectTable obj_table_level;
+ObjectTable *obj_table_common;
+ObjectTable *obj_table_level;
 uint8_t     level_round; // Defined after load
 uint8_t     level_act;   // Defined after load
 uint8_t     level_fade;
@@ -96,6 +96,9 @@ screen_level_load()
     map16 = screen_alloc(sizeof(TileMap16));
     map128 = screen_alloc(sizeof(TileMap128));
     leveldata = screen_alloc(sizeof(LevelData));
+    obj_table_common = screen_alloc(sizeof(ObjectTable));
+    obj_table_level = screen_alloc(sizeof(ObjectTable));
+
     level_load_level(data);
 
     camera_set(&camera, player.pos.vx, player.pos.vy);
@@ -975,7 +978,7 @@ level_load_level(screen_level_data *data)
         free(timfile);
     }
     printf("Loading common object table...\n");
-    load_object_table("\\LEVELS\\COMMON\\OBJ.OTD;1", &obj_table_common);
+    load_object_table("\\LEVELS\\COMMON\\OBJ.OTD;1", obj_table_common);
 
     // Load level objects
     snprintf(filename0, 255, "%s\\OBJ.TIM;1", basepath);
@@ -1012,7 +1015,7 @@ level_load_level(screen_level_data *data)
 
     printf("Loading level object table...\n");
     snprintf(filename0, 255, "%s\\OBJ.OTD;1", basepath);
-    load_object_table(filename0, &obj_table_level);
+    load_object_table(filename0, obj_table_level);
 
     // Load object positioning on level.
     // Always do this AFTER loading object definitions!

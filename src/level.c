@@ -31,9 +31,9 @@ level_reset()
 void
 level_debrief()
 {
-    printf("Arena start address: 0x%08x\n"
-           "Arena end address:   0x%08x\n"
-           "Arena bytes size:    %u\n"
+    printf("Arena start address: 0x%08lx\n"
+           "Arena end address:   0x%08lx\n"
+           "Arena bytes size:    %lu\n"
            "Arena bytes used:    %u\n"
            "Arena bytes free:    %u\n",
            _level_arena.start,
@@ -225,8 +225,8 @@ load_lvl(LevelData *lvl, const char *filename)
 extern TileMap16   *map16;
 extern TileMap128  *map128;
 extern LevelData   *leveldata;
-extern ObjectTable obj_table_common;
-extern ObjectTable obj_table_level;
+extern ObjectTable *obj_table_common;
+extern ObjectTable *obj_table_level;
 
 // Level sprite buffer.
 // We simply cannot afford to have so much information passing
@@ -480,8 +480,8 @@ update_obj_window(int32_t cam_x, int32_t cam_y, uint8_t round)
                         ObjectState *obj = &objdata->objects[k];
                         ObjectTableEntry *typedata =
                             (obj->id >= MIN_LEVEL_OBJ_GID)
-                            ? &obj_table_level.entries[obj->id - MIN_LEVEL_OBJ_GID]
-                            : &obj_table_common.entries[obj->id];
+                            ? &obj_table_level->entries[obj->id - MIN_LEVEL_OBJ_GID]
+                            : &obj_table_common->entries[obj->id];
                         VECTOR pos = {
                             .vx = (int32_t)(cx << 7) + (int32_t)obj->rx,
                             .vy = (int32_t)(cy << 7) + (int32_t)obj->ry,
@@ -512,8 +512,8 @@ _render_obj_window(int32_t cx, int32_t cy)
             for(uint8_t i = 0; i < objdata->num_objects; i++) {         \
                 ObjectState *obj = &objdata->objects[i];                \
                 ObjectTableEntry *typedata = (obj->id >= MIN_LEVEL_OBJ_GID) \
-                    ? &obj_table_level.entries[obj->id - MIN_LEVEL_OBJ_GID] \
-                    : &obj_table_common.entries[obj->id];               \
+                    ? &obj_table_level->entries[obj->id - MIN_LEVEL_OBJ_GID] \
+                    : &obj_table_common->entries[obj->id];               \
                 _render_obj(obj, typedata, cx, cy, (x) >> 7, (y) >> 7); \
             }                                                           \
         }                                                               \
