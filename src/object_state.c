@@ -14,8 +14,8 @@
 
 extern ArenaAllocator _level_arena;
 extern uint8_t        paused;
-extern Player         player;
-extern Camera         camera;
+extern Player         *player;
+extern Camera         *camera;
 extern uint8_t        level_fade;
 extern uint8_t        level_has_boss;
 extern BossState      *boss;
@@ -80,7 +80,7 @@ _emplace_object(
             if(animation == MONITOR_KIND_1UP) {
                 // If this is a 1-UP monitor, change animation again with
                 // respect to current character
-                switch(player.character) {
+                switch(player->character) {
                 default:
                 case CHARA_SONIC:    animation = 5; break;
                 case CHARA_MILES:    animation = 7; break;
@@ -91,7 +91,7 @@ _emplace_object(
         }
         break;
     case OBJ_GOAL_SIGN:
-        camera_set_right_bound(&camera, (vx << 12) + ((CENTERX >> 1) << 12));
+        camera_set_right_bound(camera, (vx << 12) + ((CENTERX >> 1) << 12));
         break;
     };
 }
@@ -168,8 +168,8 @@ load_object_placement(const char *filename, void *lvl_data)
                 break;
             case OBJ_DUMMY_STARTPOS:
                 // Initialize player at position
-                player.startpos = (VECTOR){ .vx = vx << 12, .vy = (vy - 8) << 12, .vz = 0 };
-                player.pos = player.respawnpos = player.startpos;
+                player->startpos = (VECTOR){ .vx = vx << 12, .vy = (vy - 8) << 12, .vz = 0 };
+                player->pos = player->respawnpos = player->startpos;
                 break;
             default: break;
             }

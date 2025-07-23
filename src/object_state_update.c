@@ -20,8 +20,8 @@
 #define ANIM_GASP             0x02d9012c
 
 // Extern elements
-extern Player player;
-extern Camera camera;
+extern Player *player;
+extern Camera *camera;
 extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
 extern SoundEffect sfx_sprn;
@@ -83,8 +83,8 @@ _draw_player_hitbox()
     if(player_hitbox_shown) return;
     player_hitbox_shown = 1;
     uint16_t
-        rel_vx = player_vx - (camera.pos.vx >> 12) + CENTERX,
-        rel_vy = player_vy - (camera.pos.vy >> 12) + CENTERY;
+        rel_vx = player_vx - (camera->pos.vx >> 12) + CENTERX,
+        rel_vy = player_vy - (camera->pos.vy >> 12) + CENTERY;
     POLY_F4 *hitbox = get_next_prim();
     increment_prim(sizeof(POLY_F4));
     setPolyF4(hitbox);
@@ -101,16 +101,16 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
 
     // Calculate top left corner of player AABB.
     // Note that player data is in fixed-point format!
-    player_vx = (player.pos.vx >> 12) - 8;
-    player_attacking = (player.action == ACTION_JUMPING ||
-                        player.action == ACTION_ROLLING ||
-                        player.action == ACTION_SPINDASH ||
-                        player.action == ACTION_DROPDASH ||
-                        player.action == ACTION_GLIDE);
+    player_vx = (player->pos.vx >> 12) - 8;
+    player_attacking = (player->action == ACTION_JUMPING ||
+                        player->action == ACTION_ROLLING ||
+                        player->action == ACTION_SPINDASH ||
+                        player->action == ACTION_DROPDASH ||
+                        player->action == ACTION_GLIDE);
     player_height = (player_attacking
                      ? HEIGHT_RADIUS_ROLLING
                      : HEIGHT_RADIUS_NORMAL) << 1;
-    player_vy = (player.pos.vy >> 12) - (player_height >> 1) - 1;
+    player_vy = (player->pos.vy >> 12) - (player_height >> 1) - 1;
 
     if(debug_mode > 1) {
         _draw_player_hitbox();
@@ -169,7 +169,7 @@ _ring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 
         // Hey -- if this is a moving ring (ring loss behaviour), only
         // allow the player to collect it if its action is not ACTION_HURT
-        if(!((state->props & OBJ_FLAG_RING_MOVING) && (player.action == ACTION_HURT))) {
+        if(!((state->props & OBJ_FLAG_RING_MOVING) && (player->action == ACTION_HURT))) {
             // Ring collision
             if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                                pos->vx, pos->vy, 16, 16))
@@ -190,10 +190,10 @@ _ring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             // If the ring is way too far from camera, just destroy it
             // By "too far", I mean two screens apart.
             // Also, moving rings only live for 256 frames
-            if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))
-               || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 13))
-               || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 13))
-               || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 13))
+            if((state->freepos->vx < camera->pos.vx - (SCREEN_XRES << 13))
+               || (state->freepos->vx > camera->pos.vx + (SCREEN_XRES << 13))
+               || (state->freepos->vy < camera->pos.vy - (SCREEN_YRES << 13))
+               || (state->freepos->vy > camera->pos.vy + (SCREEN_YRES << 13))
                || (state->timer >= 256)) {
                 state->props |= OBJ_FLAG_DESTROYED;
                 return;
@@ -265,10 +265,10 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
     (void)(entry);
     if(state->frag_anim_state->animation == 0) {
-        if(pos->vx <= (player.pos.vx >> 12)) {
+        if(pos->vx <= (player->pos.vx >> 12)) {
             state->frag_anim_state->animation = 1;
             state->frag_anim_state->frame = 0;
-            camera_focus(&camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
+            camera_focus(camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
             state->timer = 180;
             level_finished = 1;
             pause_elapsed_frames();
@@ -285,12 +285,12 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
             }
 
-            player_set_action(&player, ACTION_NONE);
+            player_set_action(player, ACTION_NONE);
             screen_level_setmode(LEVEL_MODE_FINISHED);
             _goal_sign_change_score();
         }
     } else if((state->frag_anim_state->animation > 1)
-              && (player.pos.vx < camera.pos.vx + (CENTERX << 12))) {
+              && (player->pos.vx < camera->pos.vx + (CENTERX << 12))) {
         state->timer = 360; // 6-seconds music
     } else if(state->frag_anim_state->animation < OBJ_ANIMATION_NO_ANIMATION) {
         if(state->timer == 360) {
@@ -364,7 +364,7 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
                 uint16_t animation = ((MonitorExtra *)state->extra)->kind;
                 if(animation == MONITOR_KIND_1UP) {
-                    switch(player.character) {
+                    switch(player->character) {
                     default:
                     case CHARA_SONIC:    animation = 5; break;
                     case CHARA_MILES:    animation = 7; break;
@@ -379,27 +379,27 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 explosion->freepos.vy = (pos->vy << 12);
                 explosion->state.anim_state.animation = 0; // Small explosion
 
-                if(!player.grnd && player.vel.vy > 0) {
-                    player.vel.vy *= -1;
+                if(!player->grnd && player->vel.vy > 0) {
+                    player->vel.vy *= -1;
                 }
             } else {
                 // Landing on top
                 if(((player_vy + player_height) < solidity_vy + 16) &&
                    ((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32)))
                 {
-                    player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
-                    player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
-                    player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy + 4;
+                    player->ev_grnd1.collided = player->ev_grnd2.collided = 1;
+                    player->ev_grnd1.angle = player->ev_grnd2.angle = 0;
+                    player->ev_grnd1.coord = player->ev_grnd2.coord = solidity_vy + 4;
                 } else if((player_vy + 8) > solidity_vy) {
                     // Check for intersection on left/right
                     if((player_vx + 8) < pos->vx) {
-                        player.ev_right.collided = 1;
-                        player.ev_right.coord = (solidity_vx + 2);
-                        player.ev_right.angle = 0;
+                        player->ev_right.collided = 1;
+                        player->ev_right.coord = (solidity_vx + 2);
+                        player->ev_right.angle = 0;
                     } else {
-                        player.ev_left.collided = 1;
-                        player.ev_left.coord = solidity_vx + 16;
-                        player.ev_right.angle = 0;
+                        player->ev_left.collided = 1;
+                        player->ev_left.coord = solidity_vx + 16;
+                        player->ev_right.angle = 0;
                     }
                 }
             }
@@ -457,35 +457,35 @@ _spring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t
             switch(bump_side) {
             default: break; // ?????
             case OBJ_SIDE_TOP:
-                player.grnd = 0;
-                player.vel.vy = is_red ? -0x10000 : -0xa000;
-                player.angle = 0;
-                player.ctrllock = 0;
-                player.over_object = NULL;
-                player_set_action(&player, ACTION_SPRING);
+                player->grnd = 0;
+                player->vel.vy = is_red ? -0x10000 : -0xa000;
+                player->angle = 0;
+                player->ctrllock = 0;
+                player->over_object = NULL;
+                player_set_action(player, ACTION_SPRING);
                 break;
             case OBJ_SIDE_BOTTOM:
-                player.grnd = 0;
-                player.vel.vy = is_red ? 0x10000 : 0xa000;
-                player.angle = 0;
-                player.ctrllock = 0;
-                player_set_action(&player, ACTION_SPRING);
+                player->grnd = 0;
+                player->vel.vy = is_red ? 0x10000 : 0xa000;
+                player->angle = 0;
+                player->ctrllock = 0;
+                player_set_action(player, ACTION_SPRING);
                 break;
             case OBJ_SIDE_RIGHT:
-                player.vel.vz = is_red ? 0x10000 : 0xa000;
-                if(!player.grnd) player.vel.vx = is_red ? 0x10000 : 0xa000;
-                player.ctrllock = 16;
-                player.anim_dir = 1;
-                if(player.action != ACTION_ROLLING)
-                    player_set_action(&player, ACTION_NONE);
+                player->vel.vz = is_red ? 0x10000 : 0xa000;
+                if(!player->grnd) player->vel.vx = is_red ? 0x10000 : 0xa000;
+                player->ctrllock = 16;
+                player->anim_dir = 1;
+                if(player->action != ACTION_ROLLING)
+                    player_set_action(player, ACTION_NONE);
                 break;
             case OBJ_SIDE_LEFT:
-                player.vel.vz = is_red ? -0x10000 : -0xa000;
-                if(!player.grnd) player.vel.vx = is_red ? -0x10000 : -0xa000;
-                player.ctrllock = 16;
-                player.anim_dir = -1;
-                if(player.action != ACTION_ROLLING)
-                    player_set_action(&player, ACTION_NONE);
+                player->vel.vz = is_red ? -0x10000 : -0xa000;
+                if(!player->grnd) player->vel.vx = is_red ? -0x10000 : -0xa000;
+                player->ctrllock = 16;
+                player->anim_dir = -1;
+                if(player->action != ACTION_ROLLING)
+                    player_set_action(player, ACTION_NONE);
                 break;
             };
             state->anim_state.animation = 1;
@@ -512,7 +512,7 @@ _checkpoint_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             state->props |= OBJ_FLAG_CHECKPOINT_ACTIVE;
             state->frag_anim_state->animation = 1;
             state->frag_anim_state->frame = 0;
-            player.respawnpos = (VECTOR){
+            player->respawnpos = (VECTOR){
                 .vx = pos->vx << 12,
                 .vy = (pos->vy - 8) << 12,
                 .vz = 0
@@ -586,20 +586,20 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos
 
         if(collision_side == OBJ_SIDE_NONE) return;
         else if(collision_side == bump_side) {
-            player.grnd = 0;
-            player.vel.vx = is_red ? SPRND_ST_R : SPRND_ST_Y;
-            player.vel.vy = is_red ? SPRND_ST_R : SPRND_ST_Y;
-            if(!(state->flipmask & MASK_FLIP_FLIPY)) player.vel.vy *= -1;
+            player->grnd = 0;
+            player->vel.vx = is_red ? SPRND_ST_R : SPRND_ST_Y;
+            player->vel.vy = is_red ? SPRND_ST_R : SPRND_ST_Y;
+            if(!(state->flipmask & MASK_FLIP_FLIPY)) player->vel.vy *= -1;
             if(state->flipmask & MASK_FLIP_FLIPX) {
-                player.vel.vx *= -1;
-                player.anim_dir = -1; // Flip on X: point player left
-            } else player.anim_dir = 1; // No flip on X: point player right
-            player.airdirlock = 1;
-            player_set_action(&player, ACTION_SPRING);
+                player->vel.vx *= -1;
+                player->anim_dir = -1; // Flip on X: point player left
+            } else player->anim_dir = 1; // No flip on X: point player right
+            player->airdirlock = 1;
+            player_set_action(player, ACTION_SPRING);
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
             if(bump_side == OBJ_SIDE_TOP) {
-                player.over_object = NULL;
+                player->over_object = NULL;
             }
         }
     } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION) {
@@ -651,10 +651,10 @@ _spikes_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 
     ObjectCollision side = solid_object_player_interaction(state, &solidity, 0);
     if(side == hurt_side) {
-        if(player.action != ACTION_HURT && player.iframes == 0) {
-            player_do_damage(&player, (solidity.x + 16) << 12);
+        if(player->action != ACTION_HURT && player->iframes == 0) {
+            player_do_damage(player, (solidity.x + 16) << 12);
             if(side == OBJ_SIDE_TOP)
-                player.over_object = NULL;
+                player->over_object = NULL;
             return;
         }
     }
@@ -698,18 +698,18 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             level_ring_count += 10;
             break;
         case MONITOR_KIND_SHIELD:
-            if(player.shield != 1) {
-                player.shield = 1;
+            if(player->shield != 1) {
+                player->shield = 1;
                 newobj = object_pool_create(OBJ_SHIELD);
-                newobj->freepos.vx = player.pos.vx;
-                newobj->freepos.vy = player.pos.vy + (20 << 12);
+                newobj->freepos.vx = player->pos.vx;
+                newobj->freepos.vy = player->pos.vy + (20 << 12);
             }
             sound_play_vag(sfx_shield, 0);
             break;
         case MONITOR_KIND_SPEEDSHOES:
             // Start speed shoes count
-            player.speedshoes_frames = 1200; // 20 seconds
-            player.cnst = getconstants(player.character, PC_SPEEDSHOES);
+            player->speedshoes_frames = 1200; // 20 seconds
+            player->cnst = getconstants(player->character, PC_SPEEDSHOES);
             sound_bgm_play(BGM_SPEEDSHOES);
             break;
         default: break;
@@ -726,21 +726,21 @@ _shield_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     (void)(entry);
     (void)(pos);
     // Just stay with the player and disappear if player gets hurt
-    if(player.shield != 1)  {
+    if(player->shield != 1)  {
         state->props |= OBJ_FLAG_DESTROYED;
         return;
     }
 
-    state->freepos->vx = player.pos.vx;
-    state->freepos->vy = player.pos.vy + (16 << 12);
+    state->freepos->vx = player->pos.vx;
+    state->freepos->vy = player->pos.vy + (16 << 12);
 
-    if(player_get_current_animation_hash(&player) == ANIM_ROLLING) {
+    if(player_get_current_animation_hash(player) == ANIM_ROLLING) {
         state->freepos->vy += 4 << 12;
     }
 
     // Compensate position since it is drawn before player update
-    state->freepos->vx += player.vel.vx;
-    state->freepos->vy += player.vel.vy;
+    state->freepos->vx += player->vel.vx;
+    state->freepos->vy += player->vel.vy;
 }
 
 
@@ -851,10 +851,10 @@ _bubble_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     }
 
     // FIRST OFF: If way too far from camera, destroy it
-    if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))
-       || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 13))
-       || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 13))
-       || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 13))
+    if((state->freepos->vx < camera->pos.vx - (SCREEN_XRES << 13))
+       || (state->freepos->vx > camera->pos.vx + (SCREEN_XRES << 13))
+       || (state->freepos->vy < camera->pos.vy - (SCREEN_YRES << 13))
+       || (state->freepos->vy > camera->pos.vy + (SCREEN_YRES << 13))
        || (state->timer >= 256)) {
         state->props |= OBJ_FLAG_DESTROYED;
         return;
@@ -875,8 +875,8 @@ _bubble_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         // relative to screen center, because it will hang around at the same
         // X and Y position on screen.
         if(state->anim_state.animation >= 3) {
-            state->freepos->rx = state->freepos->vx - camera.pos.vx;
-            state->freepos->ry = state->freepos->vy - camera.pos.vy;
+            state->freepos->rx = state->freepos->vx - camera->pos.vx;
+            state->freepos->ry = state->freepos->vy - camera->pos.vy;
         }
     }
 
@@ -913,8 +913,8 @@ _bubble_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     // Again: if this is a stick-around bubble (number bubble), our free position
     // should be relative to camera center
     if(state->anim_state.animation >= 3) {
-        state->freepos->vx = state->freepos->rx + camera.pos.vx;
-        state->freepos->vy = state->freepos->ry + camera.pos.vy;
+        state->freepos->vx = state->freepos->rx + camera->pos.vx;
+        state->freepos->vy = state->freepos->ry + camera->pos.vy;
     }
 
     // When a normal bubble's top interact with water surface, destroy it.
@@ -938,13 +938,13 @@ _bubble_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                            pos->vx - 16, pos->vy - 16, 32, 16)) {
             state->props |= OBJ_FLAG_DESTROYED;
-            player.remaining_air_frames = 1800;
+            player->remaining_air_frames = 1800;
             // TODO: Cancel any drowning music.
-            player_set_action(&player, ACTION_GASP);
-            player_set_animation_direct(&player, ANIM_GASP);
-            player.ctrllock = player.grnd ? 15 : 10;
-            player.grnd = 0;
-            player.vel.vx = player.vel.vy = player.vel.vz = 0;
+            player_set_action(player, ACTION_GASP);
+            player_set_animation_direct(player, ANIM_GASP);
+            player->ctrllock = player->grnd ? 15 : 10;
+            player->grnd = 0;
+            player->vel.vx = player->vel.vy = player->vel.vz = 0;
             sound_play_vag(sfx_bubble, 0);
             return;
         }

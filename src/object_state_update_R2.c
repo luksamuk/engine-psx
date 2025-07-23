@@ -12,8 +12,8 @@
 #include "screens/level.h"
 
 // Extern elements
-extern Player player;
-extern Camera camera;
+extern Player *player;
+extern Camera *camera;
 extern int32_t player_vx, player_vy; // Top left corner of player hitbox
 extern uint8_t player_attacking;
 extern int32_t player_width;
@@ -245,7 +245,7 @@ _buzzbomber_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
         state->freepos->vy += state->freepos->spdy;
     }
 
-    // Shooting at the player.
+    // Shooting at the player->
     // Shooting is always diagonal, and we have two timers.
     // "state->timer" is a cooldown where the buzzbomber will shoot at the end.
     // "state->timer2" is a cooldown for shooting in general, so we don't have
@@ -265,7 +265,7 @@ _buzzbomber_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *p
             shoot_max_x = state->freepos->vx + BUZZBOMBER_SHOOT_RADIUS;
         }
 
-        if(player.pos.vx >= shoot_min_x && player.pos.vx <= shoot_max_x) {
+        if(player->pos.vx >= shoot_min_x && player->pos.vx <= shoot_max_x) {
             state->timer = BUZZBOMBER_AIMING_FRAMES;
         }
     }
@@ -428,7 +428,7 @@ _boss_spawner_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR 
 {
     (void)(typedata);
     // Create boss once camera position fits
-    if((player.pos.vx >> 12) >= (pos->vx - (CENTERX >> 1))) {
+    if((player->pos.vx >> 12) >= (pos->vx - (CENTERX >> 1))) {
         state->props |= OBJ_FLAG_DESTROYED;
         PoolObject *boss_obj = object_pool_create(OBJ_BOSS);
         boss_obj->freepos.vx = ((pos->vx + 128) << 12);
@@ -444,7 +444,7 @@ _boss_spawner_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR 
         boss->counter4 = boss_obj->freepos.vy;
         /* boss->counter6 = BOSS_BOMB_INTERVAL; */
 
-        camera_focus(&camera, boss->anchor.vx + (8 << 12), boss->anchor.vy - (100 << 12));
+        camera_focus(camera, boss->anchor.vx + (8 << 12), boss->anchor.vy - (100 << 12));
 
         sound_bgm_play(BGM_BOSS);
     }
@@ -575,8 +575,8 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 state->freepos->spdy = 0;
                 boss->counter3--;
             } else {
-                camera_set_left_bound(&camera, boss->anchor.vx);
-                camera_follow_player(&camera);
+                camera_set_left_bound(camera, boss->anchor.vx);
+                camera_follow_player(camera);
                 screen_level_play_music(level_round, level_act);
                 boss->state = BOSS_STATE_FLEEING;
             }
@@ -588,10 +588,10 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         state->flipmask = 0;
 
         // Despawn if too far!
-        if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
-           || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
-           || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
-           || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12))) {
+        if((state->freepos->vx < camera->pos.vx - (SCREEN_XRES << 12))
+           || (state->freepos->vx > camera->pos.vx + (SCREEN_XRES << 12))
+           || (state->freepos->vy < camera->pos.vy - (SCREEN_YRES << 12))
+           || (state->freepos->vy > camera->pos.vy + (SCREEN_YRES << 12))) {
             state->props |= OBJ_FLAG_DESTROYED;
             return;
         }
@@ -616,21 +616,21 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                     sound_play_vag(sfx_bomb, 0);
 
                     // Rebound Sonic
-                    if(!player.grnd) {
-                        player.vel.vy = -(player.vel.vy >> 1);
-                        if(player.action == ACTION_GLIDE) {
-                            player_set_action(&player, ACTION_DROP);
-                            player.airdirlock = 1;
+                    if(!player->grnd) {
+                        player->vel.vy = -(player->vel.vy >> 1);
+                        if(player->action == ACTION_GLIDE) {
+                            player_set_action(player, ACTION_DROP);
+                            player->airdirlock = 1;
                             // To be a little more fair with Knuckles,
                             // rebound him on the X axis by double the distance
                             // otherwise Knuckles will always get hurt when
                             // gliding onto the boss
-                            player.vel.vx = -player.vel.vx;
-                        } else player.vel.vx = -(player.vel.vx >> 1);
-                    } else player.vel.vz = -(player.vel.vz >> 1);
+                            player->vel.vx = -player->vel.vx;
+                        } else player->vel.vx = -(player->vel.vx >> 1);
+                    } else player->vel.vz = -(player->vel.vz >> 1);
                 } else {
-                    if(player.action != ACTION_HURT && player.iframes == 0) {
-                        player_do_damage(&player, pos->vx << 12);
+                    if(player->action != ACTION_HURT && player->iframes == 0) {
+                        player_do_damage(player, pos->vx << 12);
                     }
                 }
             }
@@ -706,7 +706,7 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     else if(boss->hit_cooldown > 0)
         state->frag_anim_state->animation = BOSS_ANIM_HIT;
     else state->frag_anim_state->animation =
-             (player.action == ACTION_HURT)
+             (player->action == ACTION_HURT)
              ? BOSS_ANIM_LAUGH
              : ((state->freepos->spdx != 0)
                 ? BOSS_ANIM_MOVE
@@ -717,6 +717,7 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 static void
 _boss_extras_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
 {
+    (void)(typedata);
     // This object is supposed to always spawn as a free object in the first
     // place, so we'll make this quick and dirty.
 

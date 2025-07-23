@@ -28,12 +28,12 @@ static uint8_t level = 0;
 static PlayerCharacter level_character = CHARA_SONIC;
 
 // Accessible in other source
-Player      player;
+Player      *player;
 uint8_t     paused = 0;
 TileMap16   *map16;
 TileMap128  *map128;
 LevelData   *leveldata;
-Camera      camera;
+Camera      *camera;
 ObjectTable *obj_table_common;
 ObjectTable *obj_table_level;
 uint8_t     level_round; // Defined after load
@@ -89,19 +89,21 @@ screen_level_load()
     data->level_name = "PLAYGROUND";
     level_act  = 0;
 
-    camera_init(&camera);
-
-    level_load_player(level_character);
-
+    player = screen_alloc(sizeof(Player));
+    camera = screen_alloc(sizeof(Camera));
     map16 = screen_alloc(sizeof(TileMap16));
     map128 = screen_alloc(sizeof(TileMap128));
     leveldata = screen_alloc(sizeof(LevelData));
     obj_table_common = screen_alloc(sizeof(ObjectTable));
     obj_table_level = screen_alloc(sizeof(ObjectTable));
 
+    camera_init(camera);
+
+    level_load_player(level_character);
+
     level_load_level(data);
 
-    camera_set(&camera, player.pos.vx, player.pos.vy);
+    camera_set(camera, player->pos.vx, player->pos.vy);
 
     reset_elapsed_frames();
     pause_elapsed_frames();
@@ -150,7 +152,7 @@ screen_level_load()
     if(level_mode == LEVEL_MODE_FINISHED)
         level_mode = LEVEL_MODE_NORMAL;
 
-    camera_follow_player(&camera);
+    camera_follow_player(camera);
 }
 
 void
@@ -263,28 +265,28 @@ screen_level_update(void *d)
         if(debug_mode) {
             uint8_t updated = 0;
             if(pad_pressing(PAD_UP)) {
-                player.pos.vy -= 40960;
+                player->pos.vy -= 40960;
                 updated = 1;
             }
 
             if(pad_pressing(PAD_DOWN)) {
-                player.pos.vy += 40960;
+                player->pos.vy += 40960;
                 updated = 1;
             }
 
             if(pad_pressing(PAD_LEFT)) {
-                player.pos.vx -= 40960;
+                player->pos.vx -= 40960;
                 updated = 1;
             }
 
             if(pad_pressing(PAD_RIGHT)) {
-                player.pos.vx += 40960;
+                player->pos.vx += 40960;
                 updated = 1;
             }
 
             if(updated) {
-                player.over_object = NULL;
-                camera_update(&camera, &player);
+                player->over_object = NULL;
+                camera_update(camera, player);
             }
 
             if(pad_pressed(PAD_SELECT)) {
@@ -299,101 +301,101 @@ screen_level_update(void *d)
         // Create a little falling ring
         if(pad_pressed(PAD_TRIANGLE)) {
             PoolObject *ring = object_pool_create(OBJ_RING);
-            ring->freepos.vx = camera.pos.vx;
-            ring->freepos.vy = camera.pos.vy - (CENTERY << 12) + (20 << 12);
+            ring->freepos.vx = camera->pos.vx;
+            ring->freepos.vy = camera->pos.vy - (CENTERY << 12) + (20 << 12);
             ring->props |= OBJ_FLAG_ANIM_LOCK;
             ring->props |= OBJ_FLAG_RING_MOVING;
         }
 
         // Respawn
         if(pad_pressed(PAD_SELECT) && !level_finished) {
-            player.pos = player.respawnpos;
-            camera.pos = camera.realpos = player.respawnpos;
-            player.grnd = 0;
-            player.anim_dir = 1;
-            player.vel.vx = player.vel.vy = player.vel.vz = 0;
-            player.psmode = player.gsmode = CDIR_FLOOR;
-            player.underwater = 0;
-            player.cnst = getconstants(player.character, PC_DEFAULT);
-            player.speedshoes_frames = (player.speedshoes_frames > 0) ? 0 : -1;
+            player->pos = player->respawnpos;
+            camera->pos = camera->realpos = player->respawnpos;
+            player->grnd = 0;
+            player->anim_dir = 1;
+            player->vel.vx = player->vel.vy = player->vel.vz = 0;
+            player->psmode = player->gsmode = CDIR_FLOOR;
+            player->underwater = 0;
+            player->cnst = getconstants(player->character, PC_DEFAULT);
+            player->speedshoes_frames = (player->speedshoes_frames > 0) ? 0 : -1;
         }
 
         if(pad_pressed(PAD_CIRCLE)) {
-            player_do_damage(&player, player.pos.vx);
+            player_do_damage(player, player->pos.vx);
         }
     }
 
     // Record level demo. Uncomment to print.
     switch(level_mode) {
     case LEVEL_MODE_DEMO:
-        demo_update_playback(level, &player.input);
+        demo_update_playback(level, &player->input);
         break;
     case LEVEL_MODE_RECORD:
         demo_record();
-        input_get_state(&player.input);
+        input_get_state(&player->input);
         break;
     case LEVEL_MODE_FINISHED:
-        player.input.current = player.input.old = 0x0020;
+        player->input.current = player->input.old = 0x0020;
         break;
     default:
-        input_get_state(&player.input);
+        input_get_state(&player->input);
         break;
     }
 
-    camera_update(&camera, &player);
-    update_obj_window(camera.pos.vx, camera.pos.vy, level_round);
+    camera_update(camera, player);
+    update_obj_window(camera->pos.vx, camera->pos.vy, level_round);
     object_pool_update(level_round);
 
     // Only update these if past fade in!
     if(data->level_transition > 0) {
-        player_update(&player);
+        player_update(player);
     }
 
     // Limit player left position
-    if((player.pos.vx - (PUSH_RADIUS << 12)) < (camera.min_x - (CENTERX << 12))) {
-        player.pos.vx = camera.min_x - (CENTERX << 12) + (PUSH_RADIUS << 12);
-        if(player.vel.vx < 0) {
-            if(player.grnd) player.vel.vz = 0;
-            else player.vel.vx = 0;
+    if((player->pos.vx - (PUSH_RADIUS << 12)) < (camera->min_x - (CENTERX << 12))) {
+        player->pos.vx = camera->min_x - (CENTERX << 12) + (PUSH_RADIUS << 12);
+        if(player->vel.vx < 0) {
+            if(player->grnd) player->vel.vz = 0;
+            else player->vel.vx = 0;
         }
     }
 
     // Limit player top position
-    if((player.pos.vy - (16 << 12) < 0) && (player.vel.vy < 0)) {
-        player.pos.vy = (16 << 12);
-        player.vel.vy = 0;
-        if(player.action == ACTION_FLY) player.spinrev = 0;
+    if((player->pos.vy - (16 << 12) < 0) && (player->vel.vy < 0)) {
+        player->pos.vy = (16 << 12);
+        player->vel.vy = 0;
+        if(player->action == ACTION_FLY) player->spinrev = 0;
     }
 
     // Limit player position when camera is fixed
     if(
-        (!camera.follow_player)
-        && (player.pos.vx - (PUSH_RADIUS << 12)) < (camera.pos.vx - (CENTERX << 12)))
+        (!camera->follow_player)
+        && (player->pos.vx - (PUSH_RADIUS << 12)) < (camera->pos.vx - (CENTERX << 12)))
     {
-        player.pos.vx = camera.pos.vx - (CENTERX << 12) + (PUSH_RADIUS << 12);
-        if(player.vel.vx < 0) {
-            if(player.grnd) player.vel.vz = 0;
-            else player.vel.vx = 0;
+        player->pos.vx = camera->pos.vx - (CENTERX << 12) + (PUSH_RADIUS << 12);
+        if(player->vel.vx < 0) {
+            if(player->grnd) player->vel.vz = 0;
+            else player->vel.vx = 0;
         }
     } else if(
         !level_finished
-        && (!camera.follow_player)
-        && (player.pos.vx + (PUSH_RADIUS << 12)) > (camera.pos.vx + (CENTERX << 12)))
+        && (!camera->follow_player)
+        && (player->pos.vx + (PUSH_RADIUS << 12)) > (camera->pos.vx + (CENTERX << 12)))
     {
-        player.pos.vx = camera.pos.vx + (CENTERX << 12) - (PUSH_RADIUS << 12);
-        if(player.vel.vx > 0) {
-            if(player.grnd) player.vel.vz = 0;
-            else player.vel.vx = 0;
+        player->pos.vx = camera->pos.vx + (CENTERX << 12) - (PUSH_RADIUS << 12);
+        if(player->vel.vx > 0) {
+            if(player->grnd) player->vel.vz = 0;
+            else player->vel.vx = 0;
         }
     }
 
     // If speed shoes are finished, we use the player's values
     // as a flag to resume music playback.
     // Player constants are managed within player update
-    if(player.speedshoes_frames == 0) {
+    if(player->speedshoes_frames == 0) {
         if(!level_finished)
             screen_level_play_music(level_round, level_act);
-        player.speedshoes_frames = -1;
+        player->speedshoes_frames = -1;
     }
 }
 
@@ -401,7 +403,7 @@ void
 _screen_level_draw_water(screen_level_data *data)
 {
     if(level_water_y >= 0) {
-        int32_t camera_bottom = camera.pos.vy + (CENTERY << 12);
+        int32_t camera_bottom = camera->pos.vy + (CENTERY << 12);
 
         if(camera_bottom > level_water_y) {
             int32_t water_vh = camera_bottom - level_water_y;
@@ -505,26 +507,26 @@ screen_level_draw(void *d)
     _screen_level_draw_water(data);
 
     // Draw player
-    if(abs((player.pos.vx - camera.pos.vx) >> 12) <= SCREEN_XRES
-       && abs((player.pos.vy - camera.pos.vy) >> 12) <= SCREEN_YRES) {
+    if(abs((player->pos.vx - camera->pos.vx) >> 12) <= SCREEN_XRES
+       && abs((player->pos.vy - camera->pos.vy) >> 12) <= SCREEN_YRES) {
         VECTOR player_canvas_pos = {
-            player.pos.vx - camera.pos.vx + (CENTERX << 12),
-            player.pos.vy - camera.pos.vy + (CENTERY << 12),
+            player->pos.vx - camera->pos.vx + (CENTERX << 12),
+            player->pos.vy - camera->pos.vy + (CENTERY << 12),
             0
         };
-        player_draw(&player, &player_canvas_pos);
+        player_draw(player, &player_canvas_pos);
     }
 
     // Draw free objects
-    object_pool_render(camera.pos.vx, camera.pos.vy);
+    object_pool_render(camera->pos.vx, camera->pos.vy);
 
     // Draw level and level objects
-    render_lvl(camera.pos.vx, camera.pos.vy,
+    render_lvl(camera->pos.vx, camera->pos.vy,
                level_round == 4); // Dawn Canyon: Draw in front
 
     // Draw background and parallax
     if(level_get_num_sprites() < 1312)
-        parallax_draw(&data->parallax, &camera);
+        parallax_draw(&data->parallax, camera);
 
     // If we're in R4, draw a gradient on the background.
     if(level == 8 || level == 9) {
@@ -701,13 +703,13 @@ screen_level_draw(void *d)
         snprintf(buffer, 255, "TIME %03d", (get_elapsed_frames() / 60));
         font_draw_sm(buffer, 248, 36);
 
-        snprintf(buffer, 255, "AIR   %02d", player.remaining_air_frames / 60);
+        snprintf(buffer, 255, "AIR   %02d", player->remaining_air_frames / 60);
         font_draw_sm(buffer, 248, 44);
 
         snprintf(buffer, 255, "TILE%4d", level_get_num_sprites());
         font_draw_sm(buffer, 248, 52);
 
-        snprintf(buffer, 255, "FRA%5d", player.framecount);
+        snprintf(buffer, 255, "FRA%5d", player->framecount);
         font_draw_sm(buffer, 248, 60);
 
         // Player debug
@@ -720,31 +722,31 @@ screen_level_draw(void *d)
                      "ACT %02u\n"
                      "GRN CEI %01u %01u\n"
                      ,
-                     player.vel.vz,
-                     player.vel.vx, player.vel.vy,
-                     player.angle,
-                     (player.gsmode == CDIR_FLOOR)
+                     player->vel.vz,
+                     player->vel.vx, player->vel.vy,
+                     player->angle,
+                     (player->gsmode == CDIR_FLOOR)
                      ? "FL"
-                     : (player.gsmode == CDIR_RWALL)
+                     : (player->gsmode == CDIR_RWALL)
                      ? "RW"
-                     : (player.gsmode == CDIR_LWALL)
+                     : (player->gsmode == CDIR_LWALL)
                      ? "LW"
-                     : (player.gsmode == CDIR_CEILING)
+                     : (player->gsmode == CDIR_CEILING)
                      ? "CE"
                      : "  ",
-                     (player.psmode == CDIR_FLOOR)
+                     (player->psmode == CDIR_FLOOR)
                      ? "FL"
-                     : (player.psmode == CDIR_RWALL)
+                     : (player->psmode == CDIR_RWALL)
                      ? "RW"
-                     : (player.psmode == CDIR_LWALL)
+                     : (player->psmode == CDIR_LWALL)
                      ? "LW"
-                     : (player.psmode == CDIR_CEILING)
+                     : (player->psmode == CDIR_CEILING)
                      ? "CE"
                      : "  ",
-                     (int32_t)(((int32_t)player.angle * (int32_t)(360 << 12)) >> 24), // angle in deg
-                     player.pos.vx, player.pos.vy,
-                     player.action,
-                     player.grnd, player.ceil
+                     (int32_t)(((int32_t)player->angle * (int32_t)(360 << 12)) >> 24), // angle in deg
+                     player->pos.vx, player->pos.vy,
+                     player->action,
+                     player->grnd, player->ceil
                 );
             font_draw_sm(buffer, 8, 12);
         }
@@ -795,9 +797,9 @@ level_load_player(PlayerCharacter character)
         free(timfile);
     }
 
-    load_player(&player, character, chara_file, &tim);
-    player.startpos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
-    player.pos = player.startpos;
+    load_player(player, character, chara_file, &tim);
+    player->startpos = (VECTOR){ 250 << 12, CENTERY << 12, 0 };
+    player->pos = player->startpos;
 }
 
 static void
