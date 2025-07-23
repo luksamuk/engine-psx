@@ -32,6 +32,7 @@ static volatile int32_t cdda_toc_size;
 static volatile CdlLOC  cdda_toc[MAX_TOC_TRACKS];
 static volatile uint8_t cdda_current_track;
 static volatile uint8_t cdda_track_loops;
+static volatile uint8_t cdda_is_stereo = BGM_DEFAULT_IS_STEREO;
 
 // Volume levels
 static volatile uint16_t volume_master = 0;
@@ -57,6 +58,7 @@ sound_init(void)
     SpuInit();
     sound_reset_mem();
     _sound_reset_channels();
+    sound_cdda_set_stereo(cdda_is_stereo);
 }
 
 void
@@ -170,6 +172,32 @@ void
 sound_vag_set_volume(uint16_t volume)
 {
     volume_vag = volume;
+}
+
+void
+sound_cdda_set_stereo(uint8_t stereo)
+{
+    CdlATV vol = { 0, 0, 0, 0 };
+    if(stereo) {
+        vol.val0 = 0x80; // CD to SPU L-to-L
+        vol.val1 = 0x00; // No reversed stereo
+        vol.val2 = 0x80; // CD to SPU R-to-R
+        vol.val3 = 0x00; // No reversed stereo
+        cdda_is_stereo = 1;
+    } else {
+        vol.val0 = 0x40; // CD to SPU L-to-L
+        vol.val1 = 0x40; // CD to SPU L-to-R
+        vol.val2 = 0x40; // CD to SPU R-to-R
+        vol.val3 = 0x40; // CD to SPU R-to-L
+        cdda_is_stereo = 0;
+    }
+    CdMix(&vol);
+}
+
+uint8_t
+sound_cdda_get_stereo()
+{
+    return cdda_is_stereo;
 }
 
 void
