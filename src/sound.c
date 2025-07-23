@@ -36,7 +36,7 @@ static volatile uint8_t cdda_track_loops;
 // Volume levels
 static volatile uint16_t volume_master = 0;
 static volatile uint16_t volume_cdda   = 0;
-static volatile uint16_t volume_vag    = BGM_MAX_VOLUME;
+static volatile uint16_t volume_vag    = VAG_DEFAULT_VOLUME;
 
 void
 _sound_reset_channels(void)
