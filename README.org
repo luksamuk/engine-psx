@@ -94,6 +94,8 @@ gdb
 This will fire  up a GDB debug  session that interacts with  PCSX-Redux. It will
 even load the ELF file with proper debug symbols.
 
+For more information on debugging with GDB on PCSX-Redux, [[https://pcsx-redux.consoledev.net/Debugging/gdb-server/][see this link]].
+
 Have fun.
 
 ** A note on loading .gdbinit
