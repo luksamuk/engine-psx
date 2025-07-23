@@ -5,6 +5,8 @@
 #include <psxcd.h>
 
 #define BGM_MAX_VOLUME      0x3fff
+#define VAG_MAX_VOLUME      0x3fff
+#define VAG_DEFAULT_VOLUME  0x1fff
 #define BGM_DEFAULT_VOLUME  BGM_MAX_VOLUME
 
 // .VAG audio header
