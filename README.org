@@ -64,36 +64,31 @@ PSn00bSDK. Just follow [[https://github.com/Lameguy64/PSn00bSDK/blob/master/doc/
 
 * Debugging
 
-First of all,  generate a disk image  (that will be used as  filesystem) and the
-executable ELF  file. This can  be consolidated individually with  the following
-commands:
+There is a  specific target for Sonic  XA that generates the  current project in
+Debug mode (without optimizations) and with debug symbols:
 
 #+begin_src bash
-make elf
-make iso
+make build-debug
 #+end_src
 
-Note that, if  you're not generating new  assets, you won't need  to rebuild the
-disk  image  (here  named  as  the   =iso=  target,  even  though  it  generates
-BIN+CUE). Just rebuild your ELF file and reload it.
+Run =pcsx-redux=.   Go to File  > Open Disk  Image, select =SONICXA.cue=  on the
+=build= directory, but don't start the emulation  yet; GDB will start it for us.
+This will serve as our application's filesystem.
 
-Now open your  Linux environment's =~/.gdbinit= file and mark  the project's own
-~.gdbinit~ as safe:
+It may  be necessary to  enable the  GDB Server on  =pcsx-redux= as well.  Go to
+Configuration >  Emulation. Mark the option  "Enable GDB Server", and  make sure
+that the GDB Server Port is 3333.
 
-#+begin_example
-add-auto-load-safe-path /path/to/engine-psx/.gdbinit
-#+end_example
+Keep =pcsx-redux= open on that state.
 
-Then, open PCSX-Redux. Go to Configuration  > Emulation. Mark the option "Enable
-GDB Server", and make sure that the GDB Server Port is 3333.
-
-Still on  PCSX-Redux, go to  File > Open Disk  Image and open  ~engine.cue~, but
-don't start running the emulation yet; the program won't be run from the disk.
-
-Now go to the project's root directory and run:
+Now check if you have =gdb-multiarch= installed (or if you're on Arch Linux, the
+package =extra/gdb= already has multiarch support), then run:
 
 #+begin_src bash
 gdb-multiarch
+
+# On Arch Linux:
+gdb
 #+end_src
 
 This will fire  up a GDB debug  session that interacts with  PCSX-Redux. It will
@@ -101,23 +96,17 @@ even load the ELF file with proper debug symbols.
 
 Have fun.
 
-** A note on gdb-multiarch and Arch Linux
+** A note on loading .gdbinit
 
-For some  reason, =gdb-multiarch=  right now  cannot be  installed from  AUR. So
-you'll probably have to generate the package from a PKGBUILD by cloning the repo
-and building it:
+Sometimes it is necessary to "trust"  the =.gdbinit= included on this project so
+it runs under GDB.
 
-#+begin_src bash
-git clone --depth=1 https://aur.archlinux.org/gdb-multiarch.git/
-cd gdb-multiarch
-makepkg -si
-#+end_src
+If you experience problems, open  your Linux environment's =~/.gdbinit= file and
+mark the project's own ~.gdbinit~ as safe:
 
-Notice that you MIGHT Have to tweak  download links and the =pkgver= variable as
-well!  If you  install the  =gdb= package,  take a  look at  the version  of the
-package  =gdb-common= which  is  also  installed with  it.  (If  you have  other
-problems you  can just pass =--skippgpcheck=  to =makepkg=, but be  wary of what
-you're doing)
+#+begin_example
+add-auto-load-safe-path /path/to/engine-psx/.gdbinit
+#+end_example
 
 * Running on real hardware
 
