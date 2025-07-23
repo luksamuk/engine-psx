@@ -5,43 +5,14 @@
 #include "util.h"
 #include "render.h"
 #include "memalloc.h"
+#include "screen.h"
 
 #include "object.h"
 
 #define MAX_TILES 1400
 
-ArenaAllocator _level_arena = { 0 };
-static uint8_t _arena_mem[LEVEL_ARENA_SIZE];
-
 extern int debug_mode;
 extern uint8_t level_fade;
-
-void
-level_init()
-{
-    alloc_arena_init(&_level_arena, &_arena_mem, LEVEL_ARENA_SIZE);
-}
-
-void
-level_reset()
-{
-    alloc_arena_free(&_level_arena);
-}
-
-void
-level_debrief()
-{
-    printf("Arena start address: 0x%08lx\n"
-           "Arena end address:   0x%08lx\n"
-           "Arena bytes size:    %lu\n"
-           "Arena bytes used:    %u\n"
-           "Arena bytes free:    %u\n",
-           _level_arena.start,
-           _level_arena.start + _level_arena.size,
-           _level_arena.size,
-           alloc_arena_bytes_used(&_level_arena),
-           alloc_arena_bytes_free(&_level_arena));
-}
 
 
 void
@@ -62,7 +33,7 @@ _load_collision(TileMap16 *mapping, const char *filename)
 
     for(uint16_t i = 0; i < num_tiles; i++) {
         uint16_t tile_id = get_short_be(bytes, &b);
-        mapping->collision[tile_id] = alloc_arena_malloc(&_level_arena, sizeof(Collision));
+        mapping->collision[tile_id] = screen_alloc(sizeof(Collision));
         Collision *collision = mapping->collision[tile_id];
 
         collision->floor_angle = (int32_t)get_long_be(bytes, &b);
@@ -109,7 +80,7 @@ load_map16(TileMap16 *mapping, const char *filename, const char *collision_filen
     uint32_t frames_per_tile = mapping->frame_side * mapping->frame_side;
     uint32_t total_frames = frames_per_tile * mapping->num_tiles;
 
-    mapping->frames = alloc_arena_malloc(&_level_arena, total_frames * sizeof(uint16_t));
+    mapping->frames = screen_alloc(total_frames * sizeof(uint16_t));
     for(uint32_t i = 0; i < total_frames; i++) {
         mapping->frames[i] = get_short_be(bytes, &b);
     }
@@ -122,7 +93,7 @@ load_map16(TileMap16 *mapping, const char *filename, const char *collision_filen
     }
 
     // Load collision data
-    mapping->collision = alloc_arena_malloc(&_level_arena, (mapping->num_tiles + 1) * sizeof(Collision *));
+    mapping->collision = screen_alloc((mapping->num_tiles + 1) * sizeof(Collision *));
     for(uint16_t i = 0; i < mapping->num_tiles; i++) {
         mapping->collision[i] = NULL;
     }
@@ -153,7 +124,7 @@ load_map128(TileMap128 *mapping, const char *filename)
     uint32_t frames_per_tile = mapping->frame_side * mapping->frame_side;
     uint32_t total_frames = frames_per_tile * mapping->num_tiles;
 
-    mapping->frames = alloc_arena_malloc(&_level_arena, total_frames * sizeof(Frame128));
+    mapping->frames = screen_alloc(total_frames * sizeof(Frame128));
     for(uint32_t i = 0; i < total_frames; i++) {
         mapping->frames[i].index = get_short_be(bytes, &b);
         mapping->frames[i].props = get_byte(bytes, &b);
@@ -184,14 +155,14 @@ load_lvl(LevelData *lvl, const char *filename)
 
     uint16_t max_tiles = 0;
 
-    lvl->layers = alloc_arena_malloc(&_level_arena, lvl->num_layers * sizeof(LevelLayerData));
+    lvl->layers = screen_alloc(lvl->num_layers * sizeof(LevelLayerData));
     for(uint8_t n_layer = 0; n_layer < lvl->num_layers; n_layer++) {
         LevelLayerData *layer = &lvl->layers[n_layer];
         layer->width = get_byte(bytes, &b);
         layer->height = get_byte(bytes, &b);
         uint16_t num_tiles = (uint16_t)layer->width * (uint16_t)layer->height;
         if(num_tiles > max_tiles) max_tiles = num_tiles;
-        layer->tiles = alloc_arena_malloc(&_level_arena, num_tiles * sizeof(uint16_t));
+        layer->tiles = screen_alloc(num_tiles * sizeof(uint16_t));
         for(uint16_t i = 0; i < num_tiles; i++) {
             layer->tiles[i] = get_short_be(bytes, &b);
         }
@@ -211,7 +182,7 @@ load_lvl(LevelData *lvl, const char *filename)
 
     // Initialize object state array within level map
     printf("Allocating object array\n");
-    lvl->objects = alloc_arena_malloc(&_level_arena, max_tiles * sizeof(ChunkObjectData *));
+    lvl->objects = screen_alloc(max_tiles * sizeof(ChunkObjectData *));
     for(uint16_t i = 0; i < max_tiles; i++) {
         lvl->objects[i] = NULL;
     }

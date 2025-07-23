@@ -6,10 +6,10 @@
 #include "memalloc.h"
 #include "camera.h"
 #include "render.h"
+#include "screen.h"
 
 #include "screens/level.h"
 
-extern ArenaAllocator _level_arena;
 extern uint8_t level_fade;
 extern int32_t level_water_y;
 
@@ -43,17 +43,12 @@ load_parallax(Parallax *parallax, const char *filename,
     }
 
     parallax->num_strips = get_byte(bytes, &b);
-    parallax->strips = alloc_arena_malloc(
-        &_level_arena,
+    parallax->strips = screen_alloc(
         sizeof(ParallaxStrip) * parallax->num_strips);
 
     // Prepare polygon lists
-    prl_pols[0] = alloc_arena_malloc(
-        &_level_arena,
-        sizeof(POLY_FT4 **) * parallax->num_strips);
-    prl_pols[1] = alloc_arena_malloc(
-        &_level_arena,
-        sizeof(POLY_FT4 **) * parallax->num_strips);
+    prl_pols[0] = screen_alloc(sizeof(POLY_FT4 **) * parallax->num_strips);
+    prl_pols[1] = screen_alloc(sizeof(POLY_FT4 **) * parallax->num_strips);
     
     for(uint8_t i = 0; i < parallax->num_strips; i++) {
         ParallaxStrip *strip = &parallax->strips[i];
@@ -74,12 +69,8 @@ load_parallax(Parallax *parallax, const char *filename,
         uint32_t polygons_per_strip = (SCREEN_XRES / strip->width) + 3;
         
         // 2. Allocate polygons for this strip
-        prl_pols[0][i] = alloc_arena_malloc(
-            &_level_arena,
-            sizeof(POLY_FT4) * polygons_per_strip);
-        prl_pols[1][i] = alloc_arena_malloc(
-            &_level_arena,
-            sizeof(POLY_FT4) * polygons_per_strip);
+        prl_pols[0][i] = screen_alloc(sizeof(POLY_FT4) * polygons_per_strip);
+        prl_pols[1][i] = screen_alloc(sizeof(POLY_FT4) * polygons_per_strip);
 
         // 3. Preload and prepare polygons for this strip
         // TODO: 6 or 8 Depends on CLUT!!!

@@ -67,7 +67,6 @@ main(void)
     pad_init();
     timer_init();
     fastalloc_init();
-    level_init();
     font_init();
     scene_init();
 

@@ -3,8 +3,7 @@
 #include "object_state.h"
 #include "memalloc.h"
 #include "render.h"
-
-extern ArenaAllocator _level_arena;
+#include "screen.h"
 
 // Pointer to object pool.
 // Notice that we still use our level allocator
@@ -22,9 +21,7 @@ extern void _render_obj(
 void
 object_pool_init()
 {
-    _object_pool = alloc_arena_malloc(
-        &_level_arena,
-        sizeof(PoolObject) * OBJECT_POOL_SIZE);
+    _object_pool = screen_alloc(sizeof(PoolObject) * OBJECT_POOL_SIZE);
 
     // Zero-initialize all objects and set them as free, destroyed objects.
     for(uint32_t i = 0; i < OBJECT_POOL_SIZE; i++) {

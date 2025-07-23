@@ -161,7 +161,6 @@ screen_level_unload(void *d)
     (void)(d);
     level_fade = 0;
     sound_cdda_stop();
-    level_reset();
     sound_reset_mem();
     screen_free();
 }
@@ -1033,7 +1032,7 @@ level_load_level(screen_level_data *data)
     // Pre-allocate and initialize level primitive buffer
     prepare_renderer();
 
-    level_debrief();
+    screen_debrief();
 
     printf("Number of level layers: %d\n", leveldata->num_layers);
 

@@ -11,8 +11,8 @@
 #include "timer.h"
 #include "camera.h"
 #include "boss.h"
+#include "screen.h"
 
-extern ArenaAllocator _level_arena;
 extern uint8_t        paused;
 extern Player         *player;
 extern Camera         *camera;
@@ -60,9 +60,7 @@ _emplace_object(
     // Initialize animation state if this object
     // has a fragment
     if(has_fragment) {
-        state->frag_anim_state = alloc_arena_malloc(
-            &_level_arena,
-            sizeof(ObjectAnimState));
+        state->frag_anim_state = screen_alloc(sizeof(ObjectAnimState));
         *state->frag_anim_state = (ObjectAnimState){ 0 };
     }
 
@@ -124,11 +122,11 @@ load_object_placement(const char *filename, void *lvl_data)
         switch(type) {
         default: break;
         case OBJ_MONITOR:
-            extra = alloc_arena_malloc(&_level_arena, sizeof(MonitorExtra));
+            extra = screen_alloc(sizeof(MonitorExtra));
             ((MonitorExtra *)extra)->kind = get_byte(bytes, &b);
             break;
         case OBJ_BUBBLE_PATCH:
-            extra = alloc_arena_malloc(&_level_arena, sizeof(BubblePatchExtra));
+            extra = screen_alloc(sizeof(BubblePatchExtra));
             ((BubblePatchExtra *)extra)->frequency = get_byte(bytes, &b);
 
             // Start timer at a low timer so we start with idle instead of producing
@@ -146,7 +144,7 @@ load_object_placement(const char *filename, void *lvl_data)
 
         ChunkObjectData *data = lvl->objects[chunk_pos];
         if(!data) {
-            data = alloc_arena_malloc(&_level_arena, sizeof(ChunkObjectData));
+            data = screen_alloc(sizeof(ChunkObjectData));
             lvl->objects[chunk_pos] = data;
             *data = (ChunkObjectData){ 0 };
         }

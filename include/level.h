@@ -9,7 +9,6 @@
 
 #define LEVEL_MAX_X_CHUNKS   255
 #define LEVEL_MAX_Y_CHUNKS    31
-#define LEVEL_ARENA_SIZE  196608 // 192KB
 
 typedef struct {
     uint8_t floor[8];
@@ -65,10 +64,6 @@ typedef struct {
     uint16_t prectx, precty;
     uint16_t clutmode, _unused1;
 } LevelData;
-
-void level_init();
-void level_reset();
-void level_debrief();
 
 void load_map16(TileMap16 *mapping, const char *filename, const char *collision_filename);
 void load_map128(TileMap128 *mapping, const char *filename);

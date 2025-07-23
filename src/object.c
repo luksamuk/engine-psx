@@ -4,8 +4,7 @@
 #include "object.h"
 #include "memalloc.h"
 #include "util.h"
-
-extern ArenaAllocator _level_arena;
+#include "screen.h"
 
 void
 _load_animation(ObjectAnim *animation, uint8_t *bytes, uint32_t *b)
@@ -15,8 +14,7 @@ _load_animation(ObjectAnim *animation, uint8_t *bytes, uint32_t *b)
     animation->loopback   = get_byte(bytes, b);
     animation->duration   = get_byte(bytes, b);
     if(animation->num_frames > 0) {
-        animation->frames = alloc_arena_malloc(
-            &_level_arena,
+        animation->frames = screen_alloc(
             sizeof(ObjectAnimFrame) * animation->num_frames);
 
         for(uint16_t i = 0; i < animation->num_frames; i++) {
@@ -50,9 +48,7 @@ load_object_table(const char *filename, ObjectTable *tbl)
 
     if(tbl->num_entries == 0) goto end;
 
-    tbl->entries = alloc_arena_malloc(
-        &_level_arena,
-        sizeof(ObjectTableEntry) * tbl->num_entries);
+    tbl->entries = screen_alloc(sizeof(ObjectTableEntry) * tbl->num_entries);
 
     for(uint16_t i = 0; i < tbl->num_entries; i++) {
         ObjectTableEntry *entry = &tbl->entries[i];
@@ -68,8 +64,7 @@ load_object_table(const char *filename, ObjectTable *tbl)
         entry->num_animations = get_short_be(bytes, &b);
 
         if(entry->num_animations > 0) {
-            entry->animations = alloc_arena_malloc(
-                &_level_arena,
+            entry->animations = screen_alloc(
                 sizeof(ObjectAnim) * entry->num_animations);
 
             for(uint16_t j = 0; j < entry->num_animations; j++) {
@@ -79,16 +74,13 @@ load_object_table(const char *filename, ObjectTable *tbl)
         }
 
         if(entry->has_fragment) {
-            ObjectFrag *fragment = alloc_arena_malloc(
-                &_level_arena,
-                sizeof(ObjectFrag));
+            ObjectFrag *fragment = screen_alloc(sizeof(ObjectFrag));
             entry->fragment = fragment;
 
             fragment->offsetx = get_short_be(bytes, &b);
             fragment->offsety = get_short_be(bytes, &b);
             fragment->num_animations = get_short_be(bytes, &b);
-            fragment->animations = alloc_arena_malloc(
-                &_level_arena,
+            fragment->animations = screen_alloc(
                 sizeof(ObjectAnim) * fragment->num_animations);
             
             for(uint16_t j = 0; j < fragment->num_animations; j++) {
