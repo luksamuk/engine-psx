@@ -21,7 +21,7 @@ static volatile const struct {
 } slide_table[] = {
     // Put TIM images at 320x0 (no CLUT):
     // $ img2tim -usealpha -org 320 0 -bpp 16 -o IMAGE.TIM IMAGE.png
-    // I recommend images to be 255x240.
+    // I recommend images to be 320x240.
     {
         .image = "\\MISC\\SOON.TIM;1",
         .bgm = BGM_TITLESCREEN,
@@ -143,20 +143,34 @@ screen_slide_update(void *d)
 }
 
 void
+_prepare_slide(POLY_FT4 *poly, screen_slide_data *data, uint8_t tpage)
+{
+    // First tpage: 320x0, WH: 255x240
+    // Second tpage: 576x0, WH? 65x240
+    setPolyFT4(poly);
+    setRGB0(poly, data->fade, data->fade, data->fade);
+    setTPage(poly, 2, 0, (!tpage) ? 320 : 576, 0); // 16-bit, Blend 50% + 50%
+    poly->clut = 0;
+    setXYWH(poly, (!tpage) ? 0 : 255, 0, (!tpage) ? 255 : 65, 240);
+    setUVWH(poly, 0, 0, (!tpage) ? 255 : 64, 240);
+}
+
+void
 screen_slide_draw(void *d)
 {
     screen_slide_data *data = (screen_slide_data *)d;
-    POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+
+    POLY_FT4 *poly;
+
+    // Draw slide in two parts.
+    poly = (POLY_FT4 *)get_next_prim();
     increment_prim(sizeof(POLY_FT4));
-    setPolyFT4(poly);
-    setRGB0(poly, data->fade, data->fade, data->fade);
-    poly->tpage = getTPage(data->mode & 0x3,
-                           0,
-                           data->prectx,
-                           data->precty);
-    poly->clut = 0;
-    setXYWH(poly, 32, 0, 255, 240);
-    setUVWH(poly, 0, 0, 255, 239);
+    _prepare_slide(poly, data, 0);
+    sort_prim(poly, OTZ_LAYER_TOPMOST);
+
+    poly = (POLY_FT4 *)get_next_prim();
+    increment_prim(sizeof(POLY_FT4));
+    _prepare_slide(poly, data, 1);
     sort_prim(poly, OTZ_LAYER_TOPMOST);
 }
 

@@ -83,7 +83,7 @@ typedef struct {
 /*     "WINDMILL ISLE 1", */
 /*     "\n", */
 /*     "SOUND TEST  *??*", */
-/*     "SLIDE TEST  *??*", */
+/*     "SPLASH SCR  *??*", */
 /*     "PLAYER  ????????", */
 /*     "\n", */
 /*     "\n", */
@@ -111,7 +111,7 @@ static const char *menutext[] = {
     "              2",
     "\n",
     "SOUND TEST  *??*",
-    "SLIDE TEST  *??*",
+    "SPLASH SCR  *??*",
     "PLAYER  ????????",
     "\n",
     "\n",
@@ -460,7 +460,7 @@ screen_levelselect_draw(void *d)
             font_draw_sm(buffer, vx, vy);
         } else if(cursel == CHOICE_SLIDE) {
             char buffer[80];
-            snprintf(buffer, 80, "SLIDE TEST  *%02X*",
+            snprintf(buffer, 80, "SPLASH SCR  *%02X*",
                      data->slidetest_selection);
             font_draw_sm(buffer, vx, vy);
         } else if(cursel == CHOICE_CHARACTER) {

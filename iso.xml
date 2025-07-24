@@ -360,7 +360,7 @@
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/LOAD.TIM" />
 	<file name="SOON.TIM"
 	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/misc/SOON2.TIM" />
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/SOON.TIM" />
 	<file name="SEGALOGO.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/SEGALOGO.TIM" />
