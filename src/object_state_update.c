@@ -285,7 +285,6 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
             }
 
-            player_set_action(player, ACTION_NONE);
             screen_level_setmode(LEVEL_MODE_FINISHED);
             _goal_sign_change_score();
         }
@@ -302,33 +301,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         if((state->timer < 0) && (screen_level_getstate() == 2)) {
             screen_level_setstate(3);
         } else if(screen_level_getstate() == 4) {
-            // TODO: THIS NEEDS TO BE REFACTORED AND MOVED TO SOMEWHERE ELSE.
-            uint8_t lvl = screen_level_getlevel();
-            if(lvl == 2 || lvl == 3) {
-                // Finished engine test
-                scene_change(SCREEN_TITLE);
-            } else if(lvl != 5) {
-                // If on test level 2 and our character is Knuckles...
-                // Go to test level 4 (also an act 3)
-                if(lvl == 1) {
-                    if(screen_level_getcharacter() == CHARA_KNUCKLES) {
-                        screen_level_setlevel(3);
-                    } else screen_level_setlevel(2);
-                } else if(lvl == 6) {
-                    // Transition from SWZ1 to AOZ1
-                    // TODO: THIS IS TEMPORARY
-                    screen_level_setlevel(10);
-                } else if(lvl == 10) {
-                    // Transition from AOZ1 to GHZ1
-                    // TODO: THIS IS TEMPORARY
-                    screen_level_setlevel(4);
-                } else screen_level_setlevel(lvl + 1);
-                scene_change(SCREEN_LEVEL);
-            } else {
-                /* screen_slide_set_next(SLIDE_COMINGSOON); */
-                screen_slide_set_next(SLIDE_THANKS);
-                scene_change(SCREEN_SLIDE);
-            }
+            screen_level_transition_to_next();
         }
     }
 }

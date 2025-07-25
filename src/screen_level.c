@@ -1142,3 +1142,36 @@ screen_level_play_music(uint8_t round, uint8_t act)
     default: break;
     }
 }
+
+#include <screens/slide.h>
+
+void
+screen_level_transition_to_next()
+{
+    uint8_t lvl = screen_level_getlevel();
+    if(lvl == 2 || lvl == 3) {
+        // Finished engine test
+        scene_change(SCREEN_TITLE);
+    } else if(lvl != 5) {
+        // If on test level 2 and our character is Knuckles...
+        // Go to test level 4 (also an act 3)
+        if(lvl == 1) {
+            if(screen_level_getcharacter() == CHARA_KNUCKLES) {
+                screen_level_setlevel(3);
+            } else screen_level_setlevel(2);
+        } else if(lvl == 6) {
+            // Transition from SWZ1 to AOZ1
+            // TODO: THIS IS TEMPORARY
+            screen_level_setlevel(10);
+        } else if(lvl == 10) {
+            // Transition from AOZ1 to GHZ1
+            // TODO: THIS IS TEMPORARY
+            screen_level_setlevel(4);
+        } else screen_level_setlevel(lvl + 1);
+        scene_change(SCREEN_LEVEL);
+    } else {
+        /* screen_slide_set_next(SLIDE_COMINGSOON); */
+        screen_slide_set_next(SLIDE_THANKS);
+        scene_change(SCREEN_SLIDE);
+    }
+}
