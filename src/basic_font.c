@@ -418,6 +418,12 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
                 case 'k':
                     font_set_color_knuckles();
                     break;
+                case 'y':
+                    font_set_color_yellow();
+                    break;
+                case 'w':
+                    font_set_color_white();
+                    break;
                 case 'z':
                     font_set_color_super();
                     break;
@@ -510,6 +516,18 @@ void
 font_set_color_super()
 {
     font_set_color(0xbb, 0x8a, 0x0d);
+}
+
+void
+font_set_color_yellow()
+{
+    font_set_color(0xc8, 0xc8, 0);
+}
+
+void
+font_set_color_white()
+{
+    font_set_color(0xc8, 0xc8, 0xc8);
 }
 
 void

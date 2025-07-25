@@ -36,6 +36,8 @@ void font_set_color_sonic();
 void font_set_color_miles();
 void font_set_color_knuckles();
 void font_set_color_super();
+void font_set_color_yellow();
+void font_set_color_white();
 void font_reset_color();
 
 #endif

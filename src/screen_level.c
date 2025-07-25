@@ -69,6 +69,11 @@ typedef struct {
     int16_t tc_zone_tgt_x;
     int16_t tc_act_tgt_x;
 
+    uint32_t time_bonus;
+    uint32_t ring_bonus;
+    uint32_t perfect_bonus;
+    uint32_t total_bonus;
+
     // Water overlay primitives
     TILE     waterquad[2];
     POLY_FT4 wavequad[2][5];
@@ -685,6 +690,44 @@ screen_level_draw(void *d)
         uint8_t act_number = (level == 3) ? 2 : level_act;
         snprintf(buffer, 5, "*%d", act_number + 1);
         font_draw_hg(buffer, CENTERX + textlen - (GLYPH_HG_WHITE_WIDTH >> 1), text_base_y + 20);
+
+        const uint16_t counters_base_y = CENTERY;
+
+        // Score point
+        uint16_t cty = counters_base_y;
+        uint16_t txtx = (CENTERX >> 1) + (CENTERX >> 3);
+        uint16_t ctx = SCREEN_XRES - (CENTERX >> 1);
+
+        ctxt = "\ayTIME BONUS\r";
+        textlen = font_measurew_big(ctxt) >> 1;
+        font_draw_big(ctxt, txtx - textlen, cty);
+        snprintf(buffer, 20, "\aw%d\r", data->time_bonus);
+        textlen = font_measurew_big(buffer);
+        font_draw_big(buffer, ctx - textlen, cty);
+        cty += GLYPH_WHITE_HEIGHT + 2;
+
+        ctxt = "\ayRING BONUS\r";
+        textlen = font_measurew_big(ctxt) >> 1;
+        font_draw_big(ctxt, txtx - textlen, cty);
+        snprintf(buffer, 20, "\aw%d\r", data->ring_bonus);
+        textlen = font_measurew_big(buffer);
+        font_draw_big(buffer, ctx - textlen, cty);
+        cty += GLYPH_WHITE_HEIGHT + 2;
+
+        ctxt = "\ayPERFECT\r";
+        textlen = font_measurew_big(ctxt) >> 1;
+        font_draw_big(ctxt, txtx - textlen, cty);
+        snprintf(buffer, 20, "\aw%d\r", data->perfect_bonus);
+        textlen = font_measurew_big(buffer);
+        font_draw_big(buffer, ctx - textlen, cty);
+        cty += GLYPH_WHITE_HEIGHT + 2;
+
+        ctxt = "\ayTOTAL\r";
+        textlen = font_measurew_big(ctxt) >> 1;
+        font_draw_big(ctxt, txtx - textlen, cty);
+        snprintf(buffer, 20, "\aw%d\r", data->total_bonus);
+        textlen = font_measurew_big(buffer);
+        font_draw_big(buffer, ctx - textlen, cty);
     }
 
     // Demo HUD. Only when playing AutoDemo!
