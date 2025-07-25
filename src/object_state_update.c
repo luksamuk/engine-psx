@@ -269,41 +269,25 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             state->frag_anim_state->animation = 1;
             state->frag_anim_state->frame = 0;
             camera_focus(camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
-            state->timer = 180;
-            level_finished = 1;
-            pause_elapsed_frames();
+            screen_level_transition_start_timer();
             sound_play_vag(sfx_sign, 0);
         }
     } else if(state->frag_anim_state->animation == 1) {
-        state->timer--;
-        if(state->timer < 0) {
-            state->timer = 360; // 6-seconds music
-
+        if(screen_level_getmode() == LEVEL_MODE_FINISHED) {
             switch(screen_level_getcharacter()) {
             default:             state->frag_anim_state->animation = 2; break;
             case CHARA_MILES:    state->frag_anim_state->animation = 3; break;
             case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
             }
-
-            screen_level_setmode(LEVEL_MODE_FINISHED);
-            _goal_sign_change_score();
-        }
-    } else if((state->frag_anim_state->animation > 1)
-              && (player->pos.vx < camera->pos.vx + (CENTERX << 12))) {
-        state->timer = 360; // 6-seconds music
-    } else if(state->frag_anim_state->animation < OBJ_ANIMATION_NO_ANIMATION) {
-        if(state->timer == 360) {
-            // First frame
-            sound_bgm_play(BGM_LEVELCLEAR);
-        }
-        state->timer--;
-
-        if((state->timer < 0) && (screen_level_getstate() == 2)) {
-            screen_level_setstate(3);
-        } else if(screen_level_getstate() == 4) {
-            screen_level_transition_to_next();
         }
     }
+    /* else if(state->frag_anim_state->animation < OBJ_ANIMATION_NO_ANIMATION) { */
+    /*     if((state->timer < 0) && (screen_level_getstate() == 2)) { */
+    /*         screen_level_setstate(3); */
+    /*     } else if(screen_level_getstate() == 4) { */
+    /*         screen_level_transition_to_next(); */
+    /*     } */
+    /* } */
 }
 
 static void

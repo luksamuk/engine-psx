@@ -24,6 +24,7 @@
 
 extern int debug_mode;
 
+
 static uint8_t level = 0;
 static PlayerCharacter level_character = CHARA_SONIC;
 
@@ -58,12 +59,11 @@ typedef struct {
     const char *level_name;
     uint16_t   level_counter;
 
-    // Title card variables
+    // Title card / End count variables
     int16_t tc_ribbon_y;
     int16_t tc_title_x;
     int16_t tc_zone_x;
     int16_t tc_act_x;
-
     int16_t tc_ribbon_tgt_y;
     int16_t tc_title_tgt_x;
     int16_t tc_zone_tgt_x;
@@ -189,6 +189,8 @@ screen_level_update(void *d)
     // 0: Showing title card
     // 1: Fade in
     // 2: Gameplay (differentiate if level is finished with level_finished global)
+    // 5: Goal sign countdown (level_counter determines time)
+    // 6: Counting score
     // 3: Fade out
     // 4: Go to next level (managed by goal sign object)
     if(data->level_transition == 0) { // Show title card
@@ -204,10 +206,33 @@ screen_level_update(void *d)
             // Start level timer
             reset_elapsed_frames();
         }
-    } else if(data->level_transition == 3) { // Fade out
+    }
+    // 2: Gameplay
+    else if(data->level_transition == 3) { // Fade out
         level_fade -= 2;
         if(level_fade == 0) {
             data->level_transition = 4;
+        }
+    }
+    else if(data->level_transition == 4) { // Go to next level
+        screen_level_transition_to_next();
+    } else if(data->level_transition == 5) { // Goal sign countdown. Variable timer
+        data->level_counter--;
+        if(data->level_counter == 0) {
+            // Start score count
+            screen_level_setmode(LEVEL_MODE_FINISHED);
+
+            // TODO: Change this
+            data->level_counter = 360 + 120; // 6 seconds of music
+            data->level_transition = 6;
+            sound_bgm_play(BGM_LEVELCLEAR);
+        }
+    } else if(data->level_transition == 6) { // Counting score
+        // TODO: Change this
+        data->level_counter--;
+        if(data->level_counter == 0) {
+            // Fade out
+            screen_level_setstate(3);
         }
     }
 
@@ -631,6 +656,35 @@ screen_level_draw(void *d)
             setXYWH(polyf, 55, data->tc_ribbon_y, 80, 205);
             sort_prim(polyf, OTZ_LAYER_HUD);
         }
+    }
+
+    // Score count
+    if(data->level_transition == 6) {
+        // TODO: Don't just display this! We gotta have a transition
+        char buffer[20];
+        const char *ctxt = "";
+        switch(screen_level_getcharacter()) {
+        default:             ctxt = "\asSONIC\r";    break;
+        case CHARA_MILES:    ctxt = "\atTAILS\r";    break;
+        case CHARA_KNUCKLES: ctxt = "\akKNUCKLES\r"; break;
+        }
+        snprintf(buffer, 20, "%s GOT", ctxt);
+
+        const uint16_t text_base_y = 50;
+
+        // Measure first part
+        uint16_t textlen = font_measurew_md(buffer) >> 1;
+        font_draw_md(buffer, CENTERX - textlen, text_base_y);
+
+        // Measure second part
+        ctxt = "THROUGH";
+        textlen = font_measurew_md(ctxt) >> 1;
+        font_draw_md(ctxt, CENTERX - textlen, text_base_y + GLYPH_MD_WHITE_HEIGHT);
+
+        // Measure act
+        uint8_t act_number = (level == 3) ? 2 : level_act;
+        snprintf(buffer, 5, "*%d", act_number + 1);
+        font_draw_hg(buffer, CENTERX + textlen - (GLYPH_HG_WHITE_WIDTH >> 1), text_base_y + 20);
     }
 
     // Demo HUD. Only when playing AutoDemo!
@@ -1099,11 +1153,24 @@ screen_level_getstate()
     return data->level_transition;
 }
 
+uint16_t
+screen_level_get_counter()
+{
+    screen_level_data *data = screen_get_data();
+    return data->level_counter;
+}
+
 
 void
 screen_level_setmode(LEVELMODE mode)
 {
     level_mode = mode;
+}
+
+LEVELMODE
+screen_level_getmode()
+{
+    return level_mode;
 }
 
 void
@@ -1174,4 +1241,14 @@ screen_level_transition_to_next()
         screen_slide_set_next(SLIDE_THANKS);
         scene_change(SCREEN_SLIDE);
     }
+}
+
+void
+screen_level_transition_start_timer()
+{
+    screen_level_data *data = screen_get_data();
+    level_finished = 1;
+    pause_elapsed_frames();
+    data->level_counter = 180;
+    data->level_transition = 5;
 }

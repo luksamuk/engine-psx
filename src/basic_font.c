@@ -284,6 +284,13 @@ _font_measurew_generic(const char *text,
             vx += (ws_w << 2) + (gap << 2);
             text++;
             continue;
+        case '\r':
+            text++;
+            continue;
+        case '\a':
+            // Jump two characters
+            text += 2;
+            continue;
         }
 
         uint8_t offset = 0xff;
