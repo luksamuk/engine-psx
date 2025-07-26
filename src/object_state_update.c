@@ -241,25 +241,6 @@ _ring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     }
 }
 
-void
-_goal_sign_change_score()
-{
-    // TODO: A temporary score count. Change this later!
-    level_score_count += level_ring_count * 100;
-
-    uint32_t seconds = get_elapsed_frames() / 60;
-
-    if(seconds <= 29)       level_score_count += 50000; // Under 0:30
-    else if(seconds <= 44)  level_score_count += 10000; // Under 0:45
-    else if(seconds <= 59)  level_score_count += 5000;  // Under 1:00
-    else if(seconds <= 89)  level_score_count += 4000;  // Under 1:30
-    else if(seconds <= 119) level_score_count += 3000;  // Under 2:00
-    else if(seconds <= 179) level_score_count += 2000;  // Under 3:00
-    else if(seconds <= 239) level_score_count += 1000;  // Under 4:00
-    else if(seconds <= 299) level_score_count += 500;   // Under 5:00
-    // Otherwise you get nothing
-}
-
 static void
 _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
@@ -281,13 +262,6 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             }
         }
     }
-    /* else if(state->frag_anim_state->animation < OBJ_ANIMATION_NO_ANIMATION) { */
-    /*     if((state->timer < 0) && (screen_level_getstate() == 2)) { */
-    /*         screen_level_setstate(3); */
-    /*     } else if(screen_level_getstate() == 4) { */
-    /*         screen_level_transition_to_next(); */
-    /*     } */
-    /* } */
 }
 
 static void

@@ -73,6 +73,7 @@ typedef struct {
     uint32_t ring_bonus;
     uint32_t perfect_bonus;
     uint32_t total_bonus;
+    uint8_t is_perfect;
 
     // Water overlay primitives
     TILE     waterquad[2];
@@ -171,6 +172,27 @@ screen_level_unload(void *d)
 }
 
 void
+_calculate_level_bonus(screen_level_data *data)
+{
+    data->ring_bonus = level_ring_count * 100;
+
+    // Time bonus
+    uint32_t seconds = get_elapsed_frames() / 60;
+    if(seconds <= 29)       data->time_bonus = 50000; // Under 0:30
+    else if(seconds <= 44)  data->time_bonus = 10000; // Under 0:45
+    else if(seconds <= 59)  data->time_bonus = 5000;  // Under 1:00
+    else if(seconds <= 89)  data->time_bonus = 4000;  // Under 1:30
+    else if(seconds <= 119) data->time_bonus = 3000;  // Under 2:00
+    else if(seconds <= 179) data->time_bonus = 2000;  // Under 3:00
+    else if(seconds <= 239) data->time_bonus = 1000;  // Under 4:00
+    else if(seconds <= 299) data->time_bonus = 500;   // Under 5:00
+    // Otherwise you get nothing
+
+    // TODO: Perfect bonus
+    data->is_perfect = 0;
+}
+
+void
 screen_level_update(void *d)
 {
     screen_level_data *data = (screen_level_data *)d;
@@ -230,6 +252,7 @@ screen_level_update(void *d)
             // TODO: Change this
             data->level_counter = 360 + 120; // 6 seconds of music
             data->level_transition = 6;
+            _calculate_level_bonus(data);
             sound_bgm_play(BGM_LEVELCLEAR);
         }
     } else if(data->level_transition == 6) { // Counting score
@@ -714,13 +737,15 @@ screen_level_draw(void *d)
         font_draw_big(buffer, ctx - textlen, cty);
         cty += GLYPH_WHITE_HEIGHT + 2;
 
-        ctxt = "\ayPERFECT\r";
-        textlen = font_measurew_big(ctxt) >> 1;
-        font_draw_big(ctxt, txtx - textlen, cty);
-        snprintf(buffer, 20, "\aw%d\r", data->perfect_bonus);
-        textlen = font_measurew_big(buffer);
-        font_draw_big(buffer, ctx - textlen, cty);
-        cty += GLYPH_WHITE_HEIGHT + 2;
+        if(data->is_perfect) {
+            ctxt = "\ayPERFECT BONUS\r";
+            textlen = font_measurew_big(ctxt) >> 1;
+            font_draw_big(ctxt, txtx - textlen, cty);
+            snprintf(buffer, 20, "\aw%d\r", data->perfect_bonus);
+            textlen = font_measurew_big(buffer);
+            font_draw_big(buffer, ctx - textlen, cty);
+        }
+        cty += GLYPH_WHITE_HEIGHT + 4;
 
         ctxt = "\ayTOTAL\r";
         textlen = font_measurew_big(ctxt) >> 1;
