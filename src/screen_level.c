@@ -25,6 +25,7 @@
 extern int debug_mode;
 
 extern SoundEffect sfx_switch;
+extern SoundEffect sfx_kach;
 
 static uint8_t level = 0;
 static PlayerCharacter level_character = CHARA_SONIC;
@@ -259,7 +260,7 @@ screen_level_update(void *d)
         if((data->time_bonus | data->ring_bonus | data->perfect_bonus) == 0) {
             data->level_counter = 120; // Next counter does 2 seconds
             data->level_transition = LEVEL_TRANS_SCORE_OUT;
-            // PLAY SOUND
+            sound_play_vag(sfx_kach, 0);
         } else {
             if(data->level_counter > 0) data->level_counter--;
             else {

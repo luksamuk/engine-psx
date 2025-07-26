@@ -451,6 +451,9 @@
 	<file name="LAND.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/LAND.VAG" />
+	<file name="KACH.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/KACH.VAG" />
       </dir>
 
       <dummy sectors="1024"/>
