@@ -51,7 +51,7 @@ uint8_t     level_has_boss;
 BossState   *boss;
 
 typedef struct {
-    uint8_t    level_transition;
+    LEVEL_TRANSITION level_transition;
     Parallax   parallax;
     uint8_t    parallax_tx_mode;
     int32_t    parallax_px;
@@ -102,7 +102,7 @@ screen_level_load()
     obj_table_common = screen_alloc(sizeof(ObjectTable));
     obj_table_level = screen_alloc(sizeof(ObjectTable));
 
-    data->level_transition = 0;
+    data->level_transition = LEVEL_TRANS_TITLECARD;
     data->level_name = "PLAYGROUND";
     level_act  = 0;
 
@@ -160,7 +160,7 @@ screen_level_load()
     // If it is a demo or we're recording, skip title card
     if(level_mode == LEVEL_MODE_DEMO
        || level_mode == LEVEL_MODE_RECORD) {
-        data->level_transition = 1;
+        data->level_transition = LEVEL_TRANS_FADEIN;
     }
 
     // Recover control if mode is "hold forward"
@@ -229,22 +229,22 @@ screen_level_update(void *d)
     // 6: Counting score
     // 3: Fade out
     // 4: Go to next level (managed by goal sign object)
-    if(data->level_transition == 0) { // Show title card
+    if(data->level_transition == LEVEL_TRANS_TITLECARD) {
         data->level_counter--;
         if(data->level_counter == 0)
-            data->level_transition = 1;
-    } else if(data->level_transition == 1) { // Fade in
+            data->level_transition = LEVEL_TRANS_FADEIN;
+    } else if(data->level_transition == LEVEL_TRANS_FADEIN) {
         level_fade += 2;
         if(level_fade >= 128) {
             level_fade = 128;
-            data->level_transition = 2;
+            data->level_transition = LEVEL_TRANS_GAMEPLAY;
 
             // Start level timer
             reset_elapsed_frames();
         }
     }
     // 2: Gameplay
-    else if(data->level_transition == 3) { // Fade out
+    else if(data->level_transition == LEVEL_TRANS_FADEOUT) {
         // Move bonus text away
         data->bonus_distance_threshold =
             MIN(data->bonus_distance_threshold + LEVEL_BONUS_SPD,
@@ -252,28 +252,27 @@ screen_level_update(void *d)
 
         level_fade -= 2;
         if(level_fade == 0) {
-            data->level_transition = 4;
+            data->level_transition = LEVEL_TRANS_NEXT_LEVEL;
         }
     }
-    else if(data->level_transition == 4) { // Go to next level
+    else if(data->level_transition == LEVEL_TRANS_NEXT_LEVEL) {
         screen_level_transition_to_next();
-    } else if(data->level_transition == 6) { // Counting score
+    } else if(data->level_transition == LEVEL_TRANS_SCORE_IN) {
         // Move score count into screen
         data->bonus_distance_threshold =
             MAX(data->bonus_distance_threshold - LEVEL_BONUS_SPD, 0);
 
-        // TODO: Change this
         data->level_counter--;
         if(data->level_counter == 0) {
-            // Fade out
-            screen_level_setstate(3);
+            // TODO: Go to score count
+            data->level_transition = LEVEL_TRANS_FADEOUT;
         }
     }
 
     // Manage title card depending on level transition
     {
         const uint16_t speed = 16;
-        if(data->level_transition == 0) {
+        if(data->level_transition == LEVEL_TRANS_TITLECARD) {
             data->tc_ribbon_y += speed;
             data->tc_title_x -= speed;
             data->tc_zone_x -= speed;
@@ -287,7 +286,7 @@ screen_level_update(void *d)
                 data->tc_zone_x = data->tc_zone_tgt_x;
             if(data->tc_act_x < data->tc_act_tgt_x)
                 data->tc_act_x = data->tc_act_tgt_x;
-        } else if(data->level_transition == 1) {
+        } else if(data->level_transition == LEVEL_TRANS_FADEIN) {
             data->tc_ribbon_y -= speed;
             data->tc_title_x += speed;
             data->tc_zone_x += speed;
@@ -299,7 +298,7 @@ screen_level_update(void *d)
     if(level_mode != LEVEL_MODE_DEMO) {
         if(pad_pressed(PAD_START)
            && !level_finished
-           && (data->level_transition == 2)) {
+           && (data->level_transition == LEVEL_TRANS_GAMEPLAY)) {
             paused = !paused;
             if(paused) sound_cdda_set_mute(1);
             else sound_cdda_set_mute(0);
@@ -309,11 +308,11 @@ screen_level_update(void *d)
         // trigger its end!
         uint32_t seconds = get_elapsed_frames() / 60;
         if((pad_pressed_any() || (seconds >= 30))
-           && (screen_level_getstate() == 2)) {
-            screen_level_setstate(3);
+           && (data->level_transition == LEVEL_TRANS_GAMEPLAY)) {
+            data->level_transition = LEVEL_TRANS_FADEOUT;
         }
 
-        if(screen_level_getstate() == 4) {
+        if(data->level_transition == LEVEL_TRANS_NEXT_LEVEL) {
             // Go back to title screen
             scene_change(SCREEN_TITLE);
         }
@@ -405,7 +404,7 @@ screen_level_update(void *d)
     object_pool_update(level_round);
 
     // Only update these if past fade in!
-    if(data->level_transition > 0) {
+    if(data->level_transition > LEVEL_TRANS_TITLECARD) {
         player_update(player);
     }
 
@@ -638,7 +637,7 @@ screen_level_draw(void *d)
     }
 
     // Title card
-    if(data->level_transition <= 1) {
+    if(data->level_transition <= LEVEL_TRANS_FADEIN) {
         font_reset_color();
         font_draw_hg(data->level_name, data->tc_title_x, 70);
         font_draw_hg("ZONE", data->tc_zone_x, 70 + GLYPH_HG_WHITE_HEIGHT + 5);
@@ -693,7 +692,7 @@ screen_level_draw(void *d)
     }
 
     // Score count
-    if(data->level_transition == 6 || data->level_transition == 3) {
+    if(data->level_transition == LEVEL_TRANS_SCORE_IN || data->level_transition == LEVEL_TRANS_FADEOUT) {
         int16_t thrsh = data->bonus_distance_threshold;
 
         // TODO: Don't just display this! We gotta have a transition
@@ -1215,14 +1214,7 @@ level_set_clearcolor()
                          LERPC(level_fade, 127));
 }
 
-void
-screen_level_setstate(uint8_t state)
-{
-    screen_level_data *data = screen_get_data();
-    data->level_transition = state;
-}
-
-uint8_t
+LEVEL_TRANSITION
 screen_level_getstate()
 {
     screen_level_data *data = screen_get_data();
@@ -1324,7 +1316,7 @@ screen_level_transition_start_timer()
 {
     screen_level_data *data = screen_get_data();
     data->level_counter = 360 + 120; // 6 seconds of music
-    data->level_transition = 6;
+    data->level_transition = LEVEL_TRANS_SCORE_IN;
     _calculate_level_bonus(data);
     sound_bgm_play(BGM_LEVELCLEAR);
 }

@@ -267,7 +267,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         }
     } else if(state->frag_anim_state->animation >= 2) {
         if((player->pos.vx > camera->pos.vx + (CENTERX << 12))
-           && screen_level_getstate() == 2) {
+           && screen_level_getstate() == LEVEL_TRANS_GAMEPLAY) {
             screen_level_transition_start_timer();
         }
     }

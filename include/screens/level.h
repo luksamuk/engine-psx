@@ -10,6 +10,16 @@ typedef enum {
     LEVEL_MODE_FINISHED,
 } LEVELMODE;
 
+typedef enum {
+    LEVEL_TRANS_TITLECARD = 0,
+    LEVEL_TRANS_FADEIN = 1,
+    LEVEL_TRANS_GAMEPLAY = 2,
+    LEVEL_TRANS_SCORE_IN = 6,
+    
+    LEVEL_TRANS_FADEOUT = 3,
+    LEVEL_TRANS_NEXT_LEVEL = 4,
+} LEVEL_TRANSITION;
+
 void screen_level_load();
 void screen_level_unload(void *);
 void screen_level_update(void *);
@@ -18,8 +28,7 @@ void screen_level_draw(void *);
 void      screen_level_setlevel(uint8_t menuchoice);
 uint8_t   screen_level_getlevel(void);
 
-void      screen_level_setstate(uint8_t state);
-uint8_t   screen_level_getstate();
+LEVEL_TRANSITION screen_level_getstate();
 
 uint16_t  screen_level_get_counter();
 
