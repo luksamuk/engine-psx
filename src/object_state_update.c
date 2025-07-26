@@ -250,16 +250,25 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             state->frag_anim_state->animation = 1;
             state->frag_anim_state->frame = 0;
             camera_focus(camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
-            screen_level_transition_start_timer();
             sound_play_vag(sfx_sign, 0);
+            state->timer = 180;
+            pause_elapsed_frames();
+            level_finished = 1; // Allow going beyond the end
         }
     } else if(state->frag_anim_state->animation == 1) {
-        if(screen_level_getmode() == LEVEL_MODE_FINISHED) {
+        if(state->timer > 0) state->timer--;
+        else {
+            screen_level_setmode(LEVEL_MODE_FINISHED); // Move player to the right
             switch(screen_level_getcharacter()) {
             default:             state->frag_anim_state->animation = 2; break;
             case CHARA_MILES:    state->frag_anim_state->animation = 3; break;
             case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
             }
+        }
+    } else if(state->frag_anim_state->animation >= 2) {
+        if((player->pos.vx > camera->pos.vx + (CENTERX << 12))
+           && screen_level_getstate() == 2) {
+            screen_level_transition_start_timer();
         }
     }
 }

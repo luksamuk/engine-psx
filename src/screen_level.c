@@ -28,6 +28,8 @@ extern int debug_mode;
 static uint8_t level = 0;
 static PlayerCharacter level_character = CHARA_SONIC;
 
+#define LEVEL_BONUS_SPD 12
+
 // Accessible in other source
 Player      *player;
 uint8_t     paused = 0;
@@ -74,6 +76,7 @@ typedef struct {
     uint32_t perfect_bonus;
     uint32_t total_bonus;
     uint8_t is_perfect;
+    int16_t bonus_distance_threshold;
 
     // Water overlay primitives
     TILE     waterquad[2];
@@ -91,10 +94,6 @@ void
 screen_level_load()
 {
     screen_level_data *data = screen_alloc(sizeof(screen_level_data));
-    data->level_transition = 0;
-    data->level_name = "PLAYGROUND";
-    level_act  = 0;
-
     player = screen_alloc(sizeof(Player));
     camera = screen_alloc(sizeof(Camera));
     map16 = screen_alloc(sizeof(TileMap16));
@@ -102,6 +101,10 @@ screen_level_load()
     leveldata = screen_alloc(sizeof(LevelData));
     obj_table_common = screen_alloc(sizeof(ObjectTable));
     obj_table_level = screen_alloc(sizeof(ObjectTable));
+
+    data->level_transition = 0;
+    data->level_name = "PLAYGROUND";
+    level_act  = 0;
 
     camera_init(camera);
 
@@ -119,6 +122,12 @@ screen_level_load()
 
     level_ring_count = 0;
     level_finished = 0;
+
+    data->time_bonus = 0;
+    data->ring_bonus = 0;
+    data->perfect_bonus = 0;
+    data->is_perfect = 0;
+    data->bonus_distance_threshold = SCREEN_XRES + CENTERX;
 
     // Init water quads
     for(int i = 0; i < 2; i++) {
@@ -216,7 +225,7 @@ screen_level_update(void *d)
     // 0: Showing title card
     // 1: Fade in
     // 2: Gameplay (differentiate if level is finished with level_finished global)
-    // 5: Goal sign countdown (level_counter determines time)
+    // 5: 
     // 6: Counting score
     // 3: Fade out
     // 4: Go to next level (managed by goal sign object)
@@ -236,6 +245,11 @@ screen_level_update(void *d)
     }
     // 2: Gameplay
     else if(data->level_transition == 3) { // Fade out
+        // Move bonus text away
+        data->bonus_distance_threshold =
+            MIN(data->bonus_distance_threshold + LEVEL_BONUS_SPD,
+                SCREEN_XRES + CENTERX);
+
         level_fade -= 2;
         if(level_fade == 0) {
             data->level_transition = 4;
@@ -243,19 +257,11 @@ screen_level_update(void *d)
     }
     else if(data->level_transition == 4) { // Go to next level
         screen_level_transition_to_next();
-    } else if(data->level_transition == 5) { // Goal sign countdown. Variable timer
-        data->level_counter--;
-        if(data->level_counter == 0) {
-            // Start score count
-            screen_level_setmode(LEVEL_MODE_FINISHED);
-
-            // TODO: Change this
-            data->level_counter = 360 + 120; // 6 seconds of music
-            data->level_transition = 6;
-            _calculate_level_bonus(data);
-            sound_bgm_play(BGM_LEVELCLEAR);
-        }
     } else if(data->level_transition == 6) { // Counting score
+        // Move score count into screen
+        data->bonus_distance_threshold =
+            MAX(data->bonus_distance_threshold - LEVEL_BONUS_SPD, 0);
+
         // TODO: Change this
         data->level_counter--;
         if(data->level_counter == 0) {
@@ -687,7 +693,9 @@ screen_level_draw(void *d)
     }
 
     // Score count
-    if(data->level_transition == 6) {
+    if(data->level_transition == 6 || data->level_transition == 3) {
+        int16_t thrsh = data->bonus_distance_threshold;
+
         // TODO: Don't just display this! We gotta have a transition
         char buffer[20];
         const char *ctxt = "";
@@ -702,17 +710,17 @@ screen_level_draw(void *d)
 
         // Measure first part
         uint16_t textlen = font_measurew_md(buffer) >> 1;
-        font_draw_md(buffer, CENTERX - textlen, text_base_y);
+        font_draw_md(buffer, CENTERX - textlen - thrsh, text_base_y);
 
         // Measure second part
         ctxt = "THROUGH";
         textlen = font_measurew_md(ctxt) >> 1;
-        font_draw_md(ctxt, CENTERX - textlen, text_base_y + GLYPH_MD_WHITE_HEIGHT);
+        font_draw_md(ctxt, CENTERX - textlen + thrsh, text_base_y + GLYPH_MD_WHITE_HEIGHT);
 
         // Measure act
         uint8_t act_number = (level == 3) ? 2 : level_act;
         snprintf(buffer, 5, "*%d", act_number + 1);
-        font_draw_hg(buffer, CENTERX + textlen - (GLYPH_HG_WHITE_WIDTH >> 1), text_base_y + 20);
+        font_draw_hg(buffer, CENTERX + textlen - (GLYPH_HG_WHITE_WIDTH >> 1) + thrsh, text_base_y + 20);
 
         const uint16_t counters_base_y = CENTERY;
 
@@ -723,36 +731,36 @@ screen_level_draw(void *d)
 
         ctxt = "\ayTIME BONUS\r";
         textlen = font_measurew_big(ctxt) >> 1;
-        font_draw_big(ctxt, txtx - textlen, cty);
+        font_draw_big(ctxt, txtx - textlen - thrsh, cty);
         snprintf(buffer, 20, "\aw%d\r", data->time_bonus);
         textlen = font_measurew_big(buffer);
-        font_draw_big(buffer, ctx - textlen, cty);
+        font_draw_big(buffer, ctx - textlen + thrsh, cty);
         cty += GLYPH_WHITE_HEIGHT + 2;
 
         ctxt = "\ayRING BONUS\r";
         textlen = font_measurew_big(ctxt) >> 1;
-        font_draw_big(ctxt, txtx - textlen, cty);
+        font_draw_big(ctxt, txtx - textlen - thrsh, cty);
         snprintf(buffer, 20, "\aw%d\r", data->ring_bonus);
         textlen = font_measurew_big(buffer);
-        font_draw_big(buffer, ctx - textlen, cty);
+        font_draw_big(buffer, ctx - textlen + thrsh, cty);
         cty += GLYPH_WHITE_HEIGHT + 2;
 
         if(data->is_perfect) {
             ctxt = "\ayPERFECT BONUS\r";
             textlen = font_measurew_big(ctxt) >> 1;
-            font_draw_big(ctxt, txtx - textlen, cty);
+            font_draw_big(ctxt, txtx - textlen - thrsh, cty);
             snprintf(buffer, 20, "\aw%d\r", data->perfect_bonus);
             textlen = font_measurew_big(buffer);
-            font_draw_big(buffer, ctx - textlen, cty);
+            font_draw_big(buffer, ctx - textlen + thrsh, cty);
         }
         cty += GLYPH_WHITE_HEIGHT + 4;
 
         ctxt = "\ayTOTAL\r";
         textlen = font_measurew_big(ctxt) >> 1;
-        font_draw_big(ctxt, txtx - textlen, cty);
+        font_draw_big(ctxt, txtx - textlen - thrsh, cty);
         snprintf(buffer, 20, "\aw%d\r", data->total_bonus);
         textlen = font_measurew_big(buffer);
-        font_draw_big(buffer, ctx - textlen, cty);
+        font_draw_big(buffer, ctx - textlen + thrsh, cty);
     }
 
     // Demo HUD. Only when playing AutoDemo!
@@ -1315,8 +1323,8 @@ void
 screen_level_transition_start_timer()
 {
     screen_level_data *data = screen_get_data();
-    level_finished = 1;
-    pause_elapsed_frames();
-    data->level_counter = 180;
-    data->level_transition = 5;
+    data->level_counter = 360 + 120; // 6 seconds of music
+    data->level_transition = 6;
+    _calculate_level_bonus(data);
+    sound_bgm_play(BGM_LEVELCLEAR);
 }
