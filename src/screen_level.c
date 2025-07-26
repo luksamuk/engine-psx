@@ -24,6 +24,7 @@
 
 extern int debug_mode;
 
+extern SoundEffect sfx_switch;
 
 static uint8_t level = 0;
 static PlayerCharacter level_character = CHARA_SONIC;
@@ -244,7 +245,61 @@ screen_level_update(void *d)
         }
     }
     // 2: Gameplay
-    else if(data->level_transition == LEVEL_TRANS_FADEOUT) {
+    else if(data->level_transition == LEVEL_TRANS_SCORE_IN) {
+        // Move score count into screen
+        data->bonus_distance_threshold =
+            MAX(data->bonus_distance_threshold - LEVEL_BONUS_SPD, 0);
+
+        data->level_counter--;
+        if(data->level_counter == 0) {
+            data->level_transition = LEVEL_TRANS_SCORE_COUNT;
+        }
+    } else if(data->level_transition == LEVEL_TRANS_SCORE_COUNT) {
+        // If all counters are zero, move along
+        if((data->time_bonus | data->ring_bonus | data->perfect_bonus) == 0) {
+            data->level_counter = 120; // Next counter does 2 seconds
+            data->level_transition = LEVEL_TRANS_SCORE_OUT;
+            // PLAY SOUND
+        } else {
+            if(data->level_counter > 0) data->level_counter--;
+            else {
+                uint32_t score_aggregate = 0;
+
+#define INC_AGGREGATE(x)                        \
+                if(x > 100) {                   \
+                    score_aggregate += 100;     \
+                    x -= 100;                   \
+                } else {                        \
+                    score_aggregate += x;       \
+                    x = 0;                      \
+                }
+
+                INC_AGGREGATE(data->time_bonus);
+                INC_AGGREGATE(data->ring_bonus);
+                INC_AGGREGATE(data->perfect_bonus);
+
+                data->total_bonus += score_aggregate;
+                level_score_count += score_aggregate;
+                sound_play_vag(sfx_switch, 0);
+                data->level_counter = 2;
+
+                // Shortcut to count everything instantly
+                if(pad_pressing(PAD_START) || pad_pressing(PAD_CROSS)) {
+                    score_aggregate = 0;
+                    score_aggregate += data->time_bonus;
+                    score_aggregate += data->ring_bonus;
+                    score_aggregate += data->perfect_bonus;
+                    data->time_bonus = data->ring_bonus = data->perfect_bonus = 0;
+                    data->total_bonus += score_aggregate;
+                    level_score_count += score_aggregate;
+                }
+            }
+        }
+    } else if(data->level_transition == LEVEL_TRANS_SCORE_OUT) {
+        // Wait 2 secs then fade out
+        if(data->level_counter > 0) data->level_counter--;
+        else data->level_transition = LEVEL_TRANS_FADEOUT;
+    } else if(data->level_transition == LEVEL_TRANS_FADEOUT) {
         // Move bonus text away
         data->bonus_distance_threshold =
             MIN(data->bonus_distance_threshold + LEVEL_BONUS_SPD,
@@ -257,16 +312,6 @@ screen_level_update(void *d)
     }
     else if(data->level_transition == LEVEL_TRANS_NEXT_LEVEL) {
         screen_level_transition_to_next();
-    } else if(data->level_transition == LEVEL_TRANS_SCORE_IN) {
-        // Move score count into screen
-        data->bonus_distance_threshold =
-            MAX(data->bonus_distance_threshold - LEVEL_BONUS_SPD, 0);
-
-        data->level_counter--;
-        if(data->level_counter == 0) {
-            // TODO: Go to score count
-            data->level_transition = LEVEL_TRANS_FADEOUT;
-        }
     }
 
     // Manage title card depending on level transition
@@ -692,7 +737,7 @@ screen_level_draw(void *d)
     }
 
     // Score count
-    if(data->level_transition == LEVEL_TRANS_SCORE_IN || data->level_transition == LEVEL_TRANS_FADEOUT) {
+    if(data->level_transition >= LEVEL_TRANS_SCORE_IN) {
         int16_t thrsh = data->bonus_distance_threshold;
 
         // TODO: Don't just display this! We gotta have a transition
