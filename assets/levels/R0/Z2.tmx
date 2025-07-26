@@ -93,7 +93,7 @@
    <object id="53" gid="107" x="3184" y="256" width="64" height="64"/>
    <object id="54" gid="107" x="880" y="448" width="64" height="64"/>
    <object id="55" gid="2147483755" x="720" y="448" width="64" height="64"/>
-   <object id="56" gid="108" x="176" y="969" width="64" height="64"/>
+   <object id="56" gid="108" x="176" y="972" width="64" height="64"/>
    <object id="58" gid="102" x="112" y="320" width="64" height="64">
     <properties>
      <property name="Kind" value="INVINCIBILITY"/>
