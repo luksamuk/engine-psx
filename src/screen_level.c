@@ -222,15 +222,7 @@ screen_level_update(void *d)
 
     level_set_clearcolor();
 
-    // Manage fade in and fade out.
-    // States:
-    // 0: Showing title card
-    // 1: Fade in
-    // 2: Gameplay (differentiate if level is finished with level_finished global)
-    // 5: 
-    // 6: Counting score
-    // 3: Fade out
-    // 4: Go to next level (managed by goal sign object)
+    // Manage level transitions/events
     if(data->level_transition == LEVEL_TRANS_TITLECARD) {
         data->level_counter--;
         if(data->level_counter == 0)
@@ -1361,7 +1353,7 @@ void
 screen_level_transition_start_timer()
 {
     screen_level_data *data = screen_get_data();
-    data->level_counter = 360 + 120; // 6 seconds of music
+    data->level_counter = 360; // 6 seconds of music
     data->level_transition = LEVEL_TRANS_SCORE_IN;
     _calculate_level_bonus(data);
     sound_bgm_play(BGM_LEVELCLEAR);
