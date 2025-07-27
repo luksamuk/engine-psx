@@ -36,7 +36,8 @@ extern SoundEffect sfx_sign;
 
 extern int debug_mode;
 
-extern uint8_t  level_ring_count;
+extern uint16_t level_ring_count;
+extern uint16_t level_ring_max;
 extern uint32_t level_score_count;
 extern uint8_t  level_finished;
 extern int32_t  level_water_y;
@@ -178,6 +179,7 @@ _ring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 state->anim_state.frame = 0;
                 state->props ^= OBJ_FLAG_ANIM_LOCK; // Unlock from global timer
                 level_ring_count++;
+                level_ring_max--; // Lower level max ring count
                 sound_play_vag(sfx_ring, 0);
                 return;
             }

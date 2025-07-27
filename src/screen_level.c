@@ -44,7 +44,8 @@ ObjectTable *obj_table_level;
 uint8_t     level_round; // Defined after load
 uint8_t     level_act;   // Defined after load
 uint8_t     level_fade;
-uint8_t     level_ring_count;
+uint16_t    level_ring_count;
+uint16_t    level_ring_max;
 uint32_t    level_score_count;
 uint8_t     level_finished;
 int32_t     level_water_y;
@@ -112,6 +113,7 @@ screen_level_load()
 
     level_load_player(level_character);
 
+    level_ring_max = 0;
     level_load_level(data);
 
     camera_set(camera, player->pos.vx, player->pos.vy);
@@ -199,8 +201,10 @@ _calculate_level_bonus(screen_level_data *data)
     else if(seconds <= 299) data->time_bonus = 500;   // Under 5:00
     // Otherwise you get nothing
 
-    // TODO: Perfect bonus
-    data->is_perfect = 0;
+    // Perfect bonus
+    data->is_perfect = (level_ring_max == 0);
+    if(data->is_perfect)
+        data->perfect_bonus = 50000;
 }
 
 void

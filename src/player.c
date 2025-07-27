@@ -82,7 +82,8 @@ extern SoundEffect sfx_grab;
 extern SoundEffect sfx_land;
 
 extern Camera     camera;
-extern uint8_t    level_ring_count;
+extern uint16_t   level_ring_count;
+extern uint16_t   level_ring_max;
 extern int32_t    level_water_y;
 
 
@@ -1852,6 +1853,7 @@ void
 _player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings)
 {
     _player_set_hurt(player, hazard_x);
+    level_ring_max += num_rings; // If exceeds 32, no way to get a perfect
 
     num_rings = num_rings > 32 ? 32 : num_rings;
 

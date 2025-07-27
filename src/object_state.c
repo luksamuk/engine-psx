@@ -19,6 +19,7 @@ extern Camera         *camera;
 extern uint8_t        level_fade;
 extern uint8_t        level_has_boss;
 extern BossState      *boss;
+extern uint16_t       level_ring_max;
 
 extern ObjectTable *obj_table_common;
 extern ObjectTable *obj_table_level;
@@ -68,6 +69,8 @@ _emplace_object(
     switch(type) {
     default: break;
     case OBJ_RING:
+        // Count rings
+        level_ring_max++;
         state->props |= OBJ_FLAG_ANIM_LOCK;
         break;
     case OBJ_MONITOR:
