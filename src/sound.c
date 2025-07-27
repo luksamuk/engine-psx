@@ -178,18 +178,24 @@ void
 sound_cdda_set_stereo(uint8_t stereo)
 {
     CdlATV vol = { 0, 0, 0, 0 };
-    if(stereo) {
+    if(stereo == 1) {
         vol.val0 = 0x80; // CD to SPU L-to-L
         vol.val1 = 0x00; // No reversed stereo
         vol.val2 = 0x80; // CD to SPU R-to-R
         vol.val3 = 0x00; // No reversed stereo
-        cdda_is_stereo = 1;
+        cdda_is_stereo = BGM_STEREO;
+    } else if(stereo == 2) {
+        vol.val0 = 0x00; // No default stereo
+        vol.val1 = 0x80; // CD to SPU L-to-R
+        vol.val2 = 0x00; // No default stereo
+        vol.val3 = 0x80; // CD to SPU R-to-L
+        cdda_is_stereo = BGM_REVERSE_STEREO;
     } else {
         vol.val0 = 0x40; // CD to SPU L-to-L
         vol.val1 = 0x40; // CD to SPU L-to-R
         vol.val2 = 0x40; // CD to SPU R-to-R
         vol.val3 = 0x40; // CD to SPU R-to-L
-        cdda_is_stereo = 0;
+        cdda_is_stereo = BGM_MONAURAL;
     }
     CdMix(&vol);
 }

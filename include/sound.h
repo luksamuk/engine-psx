@@ -8,7 +8,11 @@
 #define VAG_MAX_VOLUME      0x3fff
 #define VAG_DEFAULT_VOLUME  0x1fff
 #define BGM_DEFAULT_VOLUME  BGM_MAX_VOLUME
-#define BGM_DEFAULT_IS_STEREO 1
+
+#define BGM_MONAURAL       0
+#define BGM_STEREO         1
+#define BGM_REVERSE_STEREO 2
+#define BGM_DEFAULT_IS_STEREO BGM_STEREO
 
 // .VAG audio header
 typedef struct {
@@ -50,6 +54,9 @@ void    sound_master_set_volume(uint16_t volume);
 void    sound_cdda_set_volume(uint16_t volume);
 void    sound_vag_set_volume(uint16_t volume);
 
+// 0: Monaural
+// 1: Stereo
+// 2: Reverse stereo
 void    sound_cdda_set_stereo(uint8_t);
 uint8_t sound_cdda_get_stereo();
 

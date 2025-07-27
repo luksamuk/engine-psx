@@ -159,11 +159,17 @@ screen_options_update(void *d)
 
     switch(data->selection) {
     case 3:
-        if(pad_pressed(PAD_LEFT)
-           || pad_pressed(PAD_RIGHT)
-           || pad_pressed(PAD_CROSS)) {
-            sound_play_vag(sfx_switch, 0);
-            sound_cdda_set_stereo(sound_cdda_get_stereo() ^ 1);
+        {
+            uint8_t changed = 0;
+            int8_t state = sound_cdda_get_stereo();
+            if(pad_pressed(PAD_LEFT)) { state--; changed = 1; }
+            if(pad_pressed(PAD_RIGHT)) { state++; changed = 1; }
+            if(changed) {
+                if(state < 0) state = BGM_REVERSE_STEREO;
+                state %= 3;
+                sound_play_vag(sfx_switch, 0);
+                sound_cdda_set_stereo(state);
+            }
         }
         break;
     case 4:
@@ -251,7 +257,12 @@ screen_options_draw(void *d)
 
     if(data->selection == 3) font_set_color(128, 128, 0);
     font_draw_sm("Music Mode", 15, 120);
-    const char *sndtxt = sound_cdda_get_stereo() ? "Stereo" : "Mono";
+    const char *sndtxt =
+        (sound_cdda_get_stereo() == 1)
+        ? "Stereo"
+        : (sound_cdda_get_stereo() == 2)
+        ? "Reversed Stereo"
+        : "Mono";
     txtw = font_measurew_sm(sndtxt);
     font_draw_sm(sndtxt, SCREEN_XRES - 15 - txtw, 120);
     font_reset_color();
