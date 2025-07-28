@@ -84,6 +84,10 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
 ObjectBehaviour
 enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
 {
+    if(player->death_type > 0) {
+        return OBJECT_DO_NOTHING;
+    }
+
     if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                        hitbox->x, hitbox->y, hitbox->w, hitbox->h))
     {
@@ -130,6 +134,11 @@ hazard_player_interaction(RECT *hitbox, VECTOR *pos)
 ObjectCollision
 solid_object_player_interaction(ObjectState *obj, FRECT *box, uint8_t is_platform)
 {
+    if(player->death_type > 0) {
+        player->pushed_object = player->over_object = NULL;
+        return OBJ_SIDE_NONE;
+    }
+
     if(debug_mode > 1) draw_collision_hitbox(box->x >> 12, box->y >> 12, box->w >> 12, box->h >> 12);
 
     // Player center calculated more or less like in object_update
@@ -219,7 +228,7 @@ solid_object_player_interaction(ObjectState *obj, FRECT *box, uint8_t is_platfor
             // If not moving vertically and standing on the ground,
             // get crushed
             if((player->vel.vy == 0) && (player->grnd)) {
-                // TODO: Get crushed
+                player_do_die(player, PLAYER_DEATH_NORMAL);
                 return OBJ_SIDE_BOTTOM;
             }
             if(player->vel.vy >= 0) return OBJ_SIDE_NONE;

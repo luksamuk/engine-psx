@@ -244,8 +244,10 @@ screen_level_player_respawn()
 {
     screen_level_data *data = screen_get_data();
 
+    // TODO: Deaths on demo mode will cause problems!
+    screen_level_setmode(LEVEL_MODE_NORMAL);
+
     // Show loading screen
-    render_loading_logo();
     render_loading_logo();
 
     // Restore camera
@@ -265,9 +267,10 @@ screen_level_player_respawn()
     player->iframes = 0;
     player->action = ACTION_NONE;
     player->remaining_air_frames = 1800;
+    player->death_type = 0;
 
     // Solve underwater behaviour
-    player->underwater = (player->pos.vy > level_water_y);
+    player->underwater = (level_water_y >= 0) && (player->pos.vy > level_water_y);
     player->cnst =
         getconstants(player->character,
                      player->underwater ? PC_UNDERWATER : PC_DEFAULT);
@@ -531,6 +534,9 @@ screen_level_update(void *d)
         break;
     case LEVEL_MODE_FINISHED:
         player->input.current = player->input.old = 0x0020;
+        break;
+    case LEVEL_MODE_DEATH:
+        player->input.current = player->input.old = 0x0000;
         break;
     default:
         input_get_state(&player->input);

@@ -1,4 +1,5 @@
 #include "collision.h"
+#include "player.h"
 #include <stdlib.h>
 #include <assert.h>
 
@@ -6,12 +7,13 @@
 #include "render.h"
 #include "camera.h"
 extern int debug_mode;
-extern Camera camera;
+extern Camera *camera;
 
 // Level data
 extern TileMap16   *map16;
 extern TileMap128  *map128;
 extern LevelData   *leveldata;
+extern Player      *player;
 
 void
 _move_point_linecast(uint8_t direction, int32_t vx, int32_t vy,
@@ -221,8 +223,8 @@ void
 draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h)
 {
     uint16_t
-        rel_vx = vx - (camera.pos.vx >> 12) + CENTERX,
-        rel_vy = vy - (camera.pos.vy >> 12) + CENTERY;
+        rel_vx = vx - (camera->pos.vx >> 12) + CENTERX,
+        rel_vy = vy - (camera->pos.vy >> 12) + CENTERY;
     POLY_F4 *hitbox = get_next_prim();
     increment_prim(sizeof(POLY_F4));
     setPolyF4(hitbox);
@@ -237,6 +239,10 @@ aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,
                 int32_t b_vx, int32_t b_vy, int32_t bw, int32_t bh)
 {
     if(debug_mode > 1) draw_collision_hitbox(b_vx, b_vy, bw, bh);
+
+    if(player->death_type > 0) {
+        return OBJECT_DO_NOTHING;
+    }
 
     int32_t a_right  = a_vx + aw;
     int32_t a_bottom = a_vy + ah;

@@ -11,6 +11,8 @@
 #include "collision.h"
 #include "basic_font.h"
 #include "player_constants.h"
+#include "screens/level.h"
+#include "timer.h"
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
@@ -81,7 +83,7 @@ extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_grab;
 extern SoundEffect sfx_land;
 
-extern Camera     camera;
+extern Camera     *camera;
 extern uint16_t   level_ring_count;
 extern uint16_t   level_ring_max;
 extern int32_t    level_water_y;
@@ -142,6 +144,7 @@ load_player(Player *player,
     player->remaining_air_frames = 1800; // 30 seconds
     player->speedshoes_frames = -1; // Start inactive
     player->glide_turn_dir = player->sliding = 0;
+    player->death_type = PLAYER_DEATH_NONE;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -316,10 +319,10 @@ _draw_sensor(uint16_t anchorx, uint16_t anchory, LinecastDirection dir,
     };
 
     // Calculate positions relative to camera
-    anchorx -= (camera.pos.vx >> 12) - CENTERX;
-    anchory -= (camera.pos.vy >> 12) - CENTERY;
-    endx -= (camera.pos.vx >> 12) - CENTERX;
-    endy -= (camera.pos.vy >> 12) - CENTERY;
+    anchorx -= (camera->pos.vx >> 12) - CENTERX;
+    anchory -= (camera->pos.vy >> 12) - CENTERY;
+    endx -= (camera->pos.vx >> 12) - CENTERX;
+    endy -= (camera->pos.vy >> 12) - CENTERY;
 
     LINE_F2 *line = get_next_prim();
     increment_prim(sizeof(LINE_F2));
@@ -841,18 +844,24 @@ _player_resolve_collision_modes(Player *player)
 void
 player_update(Player *player)
 {
-    // Angle slope pattern in degrees: 3, 12, 30, 45, 60, 78, 87
-    //_player_resolve_collision_modes(player);
+    if(player->death_type == 0) {
+        // Angle slope pattern in degrees: 3, 12, 30, 45, 60, 78, 87
+        //_player_resolve_collision_modes(player);
 
-    _player_update_collision_lr(player); // Push sensor collision detection
-    _player_update_collision_tb(player); // Ground sensor collision detection
+        _player_update_collision_lr(player); // Push sensor collision detection
+        _player_update_collision_tb(player); // Ground sensor collision detection
 
-    // Tweak object pushing.
-    // If no longer pressing a direction and still pushing an object,
-    // reset push state
-    if(player->pushed_object &&
-       !(input_pressing(&player->input, PAD_LEFT) || input_pressing(&player->input, PAD_RIGHT)))
-        player->pushed_object = NULL;
+        // Tweak object pushing.
+        // If no longer pressing a direction and still pushing an object,
+        // reset push state
+        if(player->pushed_object &&
+           !(input_pressing(&player->input, PAD_LEFT) || input_pressing(&player->input, PAD_RIGHT)))
+            player->pushed_object = NULL;
+    } else {
+        player->push = 0;
+        player->grnd = 0;
+        player->pushed_object = player->over_object = NULL;
+    }
 
     // i-frames
     if(player->iframes > 0) player->iframes--;
@@ -901,7 +910,7 @@ player_update(Player *player)
                 player->vel.vz +=
                     (0x8000 + (floor12(player->spinrev) >> 1)) * player->anim_dir;
                 player_set_action(player, ACTION_ROLLING);
-                camera.lag = (0x10000 - player->spinrev) >> 12;
+                camera->lag = (0x10000 - player->spinrev) >> 12;
                 player->spinrev = 0;
                 sound_play_vag(sfx_relea, 0);
             } else {
@@ -919,7 +928,7 @@ player_update(Player *player)
                 player_set_action(player, ACTION_NONE);
                 if(player->spinrev >= 30) { // Only properly release after 30 frames
                     player->vel.vz = (player->cnst->x_peelout_spd * player->anim_dir);
-                    camera.lag = (0x10000 - player->spinrev) >> 12;
+                    camera->lag = (0x10000 - player->spinrev) >> 12;
                     player->spinrev = 0;
                     sound_play_vag(sfx_relea, 0);
                 }
@@ -1291,7 +1300,9 @@ player_update(Player *player)
     }
 
     // Animation
-    if(player->grnd) {
+    if(player->death_type > 0) {
+        player_set_animation_direct(player, player->death_type == 1 ? ANIM_DEATH : ANIM_DROWN);
+    } else if(player->grnd) {
         if(player->push || player->pushed_object) {
             player_set_animation_direct(player, ANIM_PUSHING);
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
@@ -1560,8 +1571,9 @@ player_update(Player *player)
     // Underwater / leaving water
     if(level_water_y >= 0) {
         // Underwater state update
-        if(((player->pos.vy > level_water_y) && !player->underwater)
-           || ((player->pos.vy < level_water_y) && player->underwater)) {
+        if((player->death_type == 0)
+           && (((player->pos.vy > level_water_y) && !player->underwater)
+               || ((player->pos.vy < level_water_y) && player->underwater))) {
             player->underwater = !player->underwater;
 
             // Change constants accordingly!
@@ -1629,7 +1641,10 @@ player_update(Player *player)
             case (6 * 60):  bubbletype = 6; break; // TODO: Warning bubble "2"
             case (4 * 60):  bubbletype = 7; break; // TODO: Warning bubble "1"
             case (2 * 60):  bubbletype = 8; break; // TODO: Warning bubble "0"
-            case 0: break; // TODO: DROWNED!
+            case 0:
+                if(player->death_type == PLAYER_DEATH_NONE)
+                    player_do_die(player, PLAYER_DEATH_DROWN);
+                break;
             }
 
             // Bubble emission
@@ -1816,14 +1831,44 @@ void _player_set_hurt(Player *player, int32_t hazard_x);
 void _player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings);
 
 void
+player_do_die(Player *player, PlayerDeath kind)
+{
+    if(kind == PLAYER_DEATH_NONE) return;
+    player_set_action(player, (kind == PLAYER_DEATH_NORMAL) ? ACTION_DEATH : ACTION_DROWN);
+    player->vel.vx = 0;
+    player->anim_dir = 1;
+    player->iframes = 0;
+    switch(kind) {
+    case PLAYER_DEATH_NONE: return; // ???????
+    case PLAYER_DEATH_NORMAL:
+        player_set_action(player, ACTION_DEATH);
+        player->vel.vy = -player->cnst->y_dead_force;
+        player->underwater = 0;
+        sound_play_vag(sfx_death, 0);
+        break;
+    case PLAYER_DEATH_DROWN:
+        player_set_action(player, ACTION_DROWN);
+        player->vel.vy = 0;
+        break;
+    }
+    player->death_type = kind;
+    screen_level_setmode(LEVEL_MODE_DEATH);
+    camera_stop_following_player(camera);
+    pause_elapsed_frames();
+}
+
+void
 player_do_damage(Player *player, int32_t hazard_x)
 {
-    // TODO: Missing death routine
-    if((player->shield > 0)
-       || (level_ring_count == 0)) { // TODO: Remove this in favor of a death
+    if(player->shield > 0) {
         player->shield = 0;
         _player_set_hurt(player, hazard_x);
         sound_play_vag(sfx_death, 0);
+        return;
+    }
+
+    if(level_ring_count == 0) {
+        player_do_die(player, PLAYER_DEATH_NORMAL);
         return;
     }
 
@@ -1951,6 +1996,6 @@ player_do_dropdash(Player *player)
             }
         }
         sound_play_vag(sfx_relea, 0);
-        camera.lag = 0x8000 >> 12;
+        camera->lag = 0x8000 >> 12;
     }
 }
