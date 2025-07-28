@@ -708,7 +708,7 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     else if(boss->hit_cooldown > 0)
         state->frag_anim_state->animation = BOSS_ANIM_HIT;
     else state->frag_anim_state->animation =
-             (player->action == ACTION_HURT)
+             ((player->action == ACTION_HURT) || (player->death_type > 0))
              ? BOSS_ANIM_LAUGH
              : ((state->freepos->spdx != 0)
                 ? BOSS_ANIM_MOVE
