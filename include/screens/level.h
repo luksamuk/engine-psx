@@ -39,6 +39,7 @@ LEVELMODE screen_level_getmode();
 void            screen_level_setcharacter(PlayerCharacter character);
 PlayerCharacter screen_level_getcharacter();
 
+void            screen_level_boss_lock(uint8_t state);
 void            screen_level_play_music(uint8_t round, uint8_t act);
 
 void screen_level_transition_start_timer();

@@ -63,6 +63,7 @@ typedef struct {
     int32_t    parallax_cy;
     const char *level_name;
     uint16_t   level_counter;
+    uint8_t    boss_lock;
 
     // Title card / End count variables
     int16_t tc_ribbon_y;
@@ -108,6 +109,7 @@ screen_level_load()
     data->level_transition = LEVEL_TRANS_TITLECARD;
     data->level_name = "PLAYGROUND";
     level_act  = 0;
+    data->boss_lock = 0;
 
     camera_init(camera);
 
@@ -1299,6 +1301,8 @@ screen_level_getcharacter()
 void
 screen_level_play_music(uint8_t round, uint8_t act)
 {
+    screen_level_data *data = screen_get_data();
+    if(data->boss_lock) return;
     switch(round) {
     case 0:
         switch(act) {
@@ -1361,4 +1365,11 @@ screen_level_transition_start_timer()
     data->level_transition = LEVEL_TRANS_SCORE_IN;
     _calculate_level_bonus(data);
     sound_bgm_play(BGM_LEVELCLEAR);
+}
+
+void
+screen_level_boss_lock(uint8_t state)
+{
+    screen_level_data *data = screen_get_data();
+    data->boss_lock = state;
 }

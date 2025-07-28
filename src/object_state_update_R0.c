@@ -250,6 +250,7 @@ _boss_spawner_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos
 
         camera_focus(camera, boss->anchor.vx, boss->anchor.vy - (100 << 12));
 
+        screen_level_boss_lock(1);
         sound_bgm_play(BGM_BOSS);
     }
 }
@@ -438,6 +439,7 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
                 state->freepos->spdy = 0;
                 boss->counter3--;
             } else {
+                screen_level_boss_lock(0);
                 camera_set_left_bound(camera, boss->anchor.vx);
                 camera_follow_player(camera);
                 screen_level_play_music(level_round, level_act);
