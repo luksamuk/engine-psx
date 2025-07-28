@@ -259,12 +259,18 @@ screen_level_player_respawn()
     player->anim_dir = 1;
     player->vel.vx = player->vel.vy = player->vel.vz = 0;
     player->psmode = player->gsmode = CDIR_FLOOR;
-    player->underwater = 0; // TODO: What about underwater respawns?
     player->cnst = getconstants(player->character, PC_DEFAULT);
     player->speedshoes_frames = (player->speedshoes_frames > 0) ? 0 : -1;
     player->shield = 0;
     player->iframes = 0;
     player->action = ACTION_NONE;
+    player->remaining_air_frames = 1800;
+
+    // Solve underwater behaviour
+    player->underwater = (player->pos.vy > level_water_y);
+    player->cnst =
+        getconstants(player->character,
+                     player->underwater ? PC_UNDERWATER : PC_DEFAULT);
 
     // Prepare titlecard
     prepare_titlecard(data);
