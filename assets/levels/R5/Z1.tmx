@@ -93,9 +93,9 @@
      <property name="Kind" value="SPEEDSHOES"/>
     </properties>
    </object>
-   <object id="62" gid="93" x="3008" y="469" width="64" height="64"/>
-   <object id="65" gid="93" x="3032" y="445" width="64" height="64"/>
-   <object id="66" gid="93" x="3056" y="421" width="64" height="64"/>
+   <object id="62" gid="93" x="3180" y="467.667" width="64" height="64"/>
+   <object id="65" gid="93" x="3204" y="443.667" width="64" height="64"/>
+   <object id="66" gid="93" x="3228" y="419.667" width="64" height="64"/>
    <object id="67" gid="87" x="6000" y="1056" width="64" height="64"/>
    <object id="68" gid="87" x="6032" y="1056" width="64" height="64"/>
    <object id="69" gid="87" x="6064" y="1056" width="64" height="64"/>
