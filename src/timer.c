@@ -86,5 +86,5 @@ reset_elapsed_frames()
 uint8_t
 elapsed_frames_paused()
 {
-    return counting_frames;
+    return !counting_frames;
 }
