@@ -76,6 +76,7 @@ void render_lvl(int32_t cam_x, int32_t cam_y, uint8_t front);
 void update_obj_window(int32_t cam_x, int32_t cam_y, uint8_t round);
 
 // Object-related. These are defined in object_state.c
-void load_object_placement(const char *filename, void *lvl_data);
+void load_object_placement(const char *filename, void *lvl_data, uint8_t has_started);
+void unload_object_placements(void *lvl_data);
 
 #endif

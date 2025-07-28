@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "object.h"
 #include "object_state.h"
@@ -98,7 +99,7 @@ _emplace_object(
 }
 
 void
-load_object_placement(const char *filename, void *lvl_data)
+load_object_placement(const char *filename, void *lvl_data, uint8_t has_started)
 {
     LevelData *lvl = (LevelData *)lvl_data;
     uint8_t *bytes;
@@ -168,25 +169,78 @@ load_object_placement(const char *filename, void *lvl_data)
                 created_objects += 3;
                 break;
             case OBJ_DUMMY_STARTPOS:
-                // Initialize player at position
-                player->startpos = (VECTOR){ .vx = vx << 12, .vy = (vy - 8) << 12, .vz = 0 };
-                player->pos = player->respawnpos = player->startpos;
+                // Initialize player at position. But only if not reloading
+                // objects after a respawn
+                if(!has_started) {
+                    player->startpos = (VECTOR){ .vx = vx << 12, .vy = (vy - 8) << 12, .vz = 0 };
+                    player->pos = player->respawnpos = player->startpos;
+                }
                 break;
             default: break;
             }
         } else {
-            ObjectTableEntry *entry = (type >= MIN_LEVEL_OBJ_GID)
-                ? &obj_table_level->entries[type - MIN_LEVEL_OBJ_GID]
-                : &obj_table_common->entries[type];
-            
-            _emplace_object(data, cx, cy, is_level_specific, entry->has_fragment, type, flipmask, vx, vy, extra);
-            created_objects++;
+            // Exception: If the level has started, this is a soft reset
+            // situation. We'd be in trouble if we were recreating any
+            // checkpoints, since they are never reset not recreated --
+            // generally they're just moved to the beginning of the object array
+            if(!(has_started && type == OBJ_CHECKPOINT)) {
+                ObjectTableEntry *entry = (type >= MIN_LEVEL_OBJ_GID)
+                    ? &obj_table_level->entries[type - MIN_LEVEL_OBJ_GID]
+                    : &obj_table_common->entries[type];
+
+                _emplace_object(data, cx, cy,
+                                is_level_specific, entry->has_fragment,
+                                type, flipmask, vx, vy, extra);
+                created_objects++;
+            }
         }
     }
 
     printf("Loaded %d objects.\n", created_objects);
 
     free(bytes);
+}
+
+void
+unload_object_placements(void *lvl_data)
+{
+    LevelData *lvl = (LevelData *)lvl_data;
+
+    // Levels are 255 x 31, so we have this amount of objects
+    // to unload
+    for(uint32_t i = 0; i < LEVEL_MAX_X_CHUNKS * LEVEL_MAX_Y_CHUNKS; i++) {
+        ChunkObjectData *cnk = lvl->objects[i];
+        if(cnk != NULL) {
+            for(uint8_t j = 0; j < cnk->num_objects; j++) {
+                // We never destroy checkpoints.
+                // That's because object unloading is supposed to be used
+                // on respawns
+                ObjectState *obj = &cnk->objects[j];
+                if(obj->id != OBJ_CHECKPOINT)
+                    cnk->objects[j].props |= OBJ_FLAG_DESTROYED;
+            }
+            if(cnk->num_objects == 0) continue;
+
+            uint8_t orig_num_objs = cnk->num_objects;
+            cnk->num_objects = 0;
+            // Move checkpoints to beginning of vector.
+            for(uint8_t j = 0; j < orig_num_objs; j++) {
+                ObjectState *obj = &cnk->objects[j];
+                if(obj->id == OBJ_CHECKPOINT) {
+                    // hey look, bubblesort!
+                    if(cnk->num_objects != j) {
+                        memcpy(&cnk->objects[cnk->num_objects], obj, sizeof(ObjectState));
+                        obj->props |= OBJ_FLAG_DESTROYED;
+                        // Just turn it into a ring, it will be overwritten
+                        // anyway, right?
+                        cnk->objects[j].id = OBJ_RING;
+                        cnk->objects[j].props |= OBJ_FLAG_DESTROYED;
+                    }
+                    cnk->num_objects++;
+                }
+            }
+        }
+    }
 }
 
 void

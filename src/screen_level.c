@@ -240,6 +240,66 @@ prepare_titlecard(screen_level_data *data)
 }
 
 void
+screen_level_player_respawn()
+{
+    screen_level_data *data = screen_get_data();
+
+    // Restore camera
+    camera_init(camera);
+    camera_follow_player(camera);
+
+    // Restore player
+    player->pos = player->respawnpos;
+    camera->pos = camera->realpos = player->respawnpos;
+    player->grnd = 0;
+    player->anim_dir = 1;
+    player->vel.vx = player->vel.vy = player->vel.vz = 0;
+    player->psmode = player->gsmode = CDIR_FLOOR;
+    player->underwater = 0; // TODO: What about underwater respawns?
+    player->cnst = getconstants(player->character, PC_DEFAULT);
+    player->speedshoes_frames = (player->speedshoes_frames > 0) ? 0 : -1;
+    player->shield = 0;
+
+    // Prepare titlecard
+    prepare_titlecard(data);
+
+    // Destroy ALL free objects (take special care in case of bosses with extra objects)
+    object_pool_init();
+
+    // Zero out the ring count
+    level_ring_count = 0;
+
+    // Restore any boss state
+    bzero(boss, sizeof(BossState));
+
+    // UNLOAD ALL STATIC OBJECTS (except checkpoints)
+    if(data->has_started)
+        unload_object_placements(leveldata);
+
+    // Stop music
+    sound_cdda_stop();
+
+    // Show loading screen
+    render_loading_logo();
+
+    // RELOAD ALL OBJECTS (ignores checkpoints)
+    // WARNING --
+    // KNOWN MEMORY LEAK: Since Monitors have an EXTRA struct, every reload
+    // of a level recreates this "EXTRA" struct, which is currently one byte,
+    // so I'm going to ignore this because the cost is so low and the game
+    // will reset the entire arena when skipping levels. Don't judge me.
+    char basepath[255];
+    char filename[255];
+    snprintf(basepath, 255, "\\LEVELS\\R%1u", level_round);
+    snprintf(filename, 255, "%s\\Z%1u.OMP;1", basepath, level_act + 1);
+    load_object_placement(filename, leveldata, data->has_started);
+
+    // Restart music
+    data->boss_lock = 0;
+    screen_level_play_music(level_round, level_act);
+}
+
+void
 screen_level_update(void *d)
 {
     screen_level_data *data = (screen_level_data *)d;
@@ -443,18 +503,7 @@ screen_level_update(void *d)
 
         // Respawn
         if(pad_pressed(PAD_SELECT) && !level_finished) {
-            player->pos = player->respawnpos;
-            camera->pos = camera->realpos = player->respawnpos;
-            player->grnd = 0;
-            player->anim_dir = 1;
-            player->vel.vx = player->vel.vy = player->vel.vz = 0;
-            player->psmode = player->gsmode = CDIR_FLOOR;
-            player->underwater = 0;
-            player->cnst = getconstants(player->character, PC_DEFAULT);
-            player->speedshoes_frames = (player->speedshoes_frames > 0) ? 0 : -1;
-
-            // Restore titlecard
-            prepare_titlecard(data);
+            screen_level_player_respawn();
         }
 
         if(pad_pressed(PAD_CIRCLE)) {
@@ -861,7 +910,8 @@ screen_level_draw(void *d)
         font_draw_big("TIME",  10, 24);
 
         // Flash red every 8 frames
-        if(level_ring_count == 0
+        if(!elapsed_frames_paused()
+           && (level_ring_count == 0)
            && ((get_elapsed_frames() >> 3) % 2 == 1)) {
             font_set_color(
                 LERPC(level_fade, 0xc8),
@@ -1233,7 +1283,7 @@ level_load_level(screen_level_data *data)
     // Load object positioning on level.
     // Always do this AFTER loading object definitions!
     snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, level_act + 1);
-    load_object_placement(filename0, leveldata);
+    load_object_placement(filename0, leveldata, 0);
 
 
     /* === OBJECT POOL / FREE OBJECTS === */

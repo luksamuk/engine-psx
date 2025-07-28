@@ -82,3 +82,9 @@ reset_elapsed_frames()
     frame_count = 0;
     counting_frames = 1;
 }
+
+uint8_t
+elapsed_frames_paused()
+{
+    return counting_frames;
+}
