@@ -416,6 +416,19 @@ screen_level_update(void *d)
     }
     else if(data->level_transition == LEVEL_TRANS_NEXT_LEVEL) {
         screen_level_transition_to_next();
+    } else if(data->level_transition == LEVEL_TRANS_DEATH_WAIT) {
+        // Countdown timer when player is out of the screen
+        if(player->pos.vy <= camera->pos.vy + (CENTERY << 12)) {
+            // Prepare to wait for 2 seconds
+            data->level_counter = 120;
+        }
+        else if(data->level_counter > 0) data->level_counter--;
+        else data->level_transition = LEVEL_TRANS_DEATH_FADEOUT;
+    } else if(data->level_transition == LEVEL_TRANS_DEATH_FADEOUT) {
+        level_fade -= 2;
+        if(level_fade == 0) {
+            screen_level_player_respawn();
+        }
     }
 
     // Manage title card depending on level transition
@@ -1450,6 +1463,13 @@ screen_level_transition_start_timer()
     data->level_transition = LEVEL_TRANS_SCORE_IN;
     _calculate_level_bonus(data);
     sound_bgm_play(BGM_LEVELCLEAR);
+}
+
+void
+screen_level_transition_death()
+{
+    screen_level_data *data = screen_get_data();
+    data->level_transition = LEVEL_TRANS_DEATH_WAIT;
 }
 
 void

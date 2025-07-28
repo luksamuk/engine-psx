@@ -1835,7 +1835,7 @@ player_do_die(Player *player, PlayerDeath kind)
 {
     if(kind == PLAYER_DEATH_NONE) return;
     player_set_action(player, (kind == PLAYER_DEATH_NORMAL) ? ACTION_DEATH : ACTION_DROWN);
-    player->vel.vx = 0;
+    player->vel.vx = player->vel.vz = 0;
     player->anim_dir = 1;
     player->iframes = 0;
     switch(kind) {
@@ -1844,6 +1844,7 @@ player_do_die(Player *player, PlayerDeath kind)
         player_set_action(player, ACTION_DEATH);
         player->vel.vy = -player->cnst->y_dead_force;
         player->underwater = 0;
+        player->cnst = getconstants(player->character, PC_DEFAULT);
         sound_play_vag(sfx_death, 0);
         break;
     case PLAYER_DEATH_DROWN:
@@ -1855,6 +1856,7 @@ player_do_die(Player *player, PlayerDeath kind)
     screen_level_setmode(LEVEL_MODE_DEATH);
     camera_stop_following_player(camera);
     pause_elapsed_frames();
+    screen_level_transition_death();
 }
 
 void

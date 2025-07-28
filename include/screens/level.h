@@ -20,6 +20,8 @@ typedef enum {
     LEVEL_TRANS_SCORE_OUT = 5,
     LEVEL_TRANS_FADEOUT = 6,
     LEVEL_TRANS_NEXT_LEVEL = 7,
+    LEVEL_TRANS_DEATH_WAIT = 8,
+    LEVEL_TRANS_DEATH_FADEOUT = 9,
 } LEVEL_TRANSITION;
 
 void screen_level_load();
@@ -47,5 +49,6 @@ void            screen_level_give_rings(uint16_t amount);
 
 void screen_level_transition_start_timer();
 void screen_level_transition_to_next();
+void screen_level_transition_death();
 
 #endif
