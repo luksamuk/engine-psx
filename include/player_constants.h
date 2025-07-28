@@ -24,6 +24,7 @@ typedef struct {
         y_gravity,
         y_hurt_gravity,
         y_min_jump,
+        x_jump_away, // Knuckles only
         y_jump_strength,
         x_min_roll_spd,
         x_min_uncurl_spd,

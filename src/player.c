@@ -1231,8 +1231,8 @@ player_update(Player *player)
                 if(input_pressed(&player->input, PAD_CROSS)) {
                     player_set_action(player, ACTION_JUMPING);
                     player->anim_dir *= -1;
-                    player->vel.vx = (4 << 12) * player->anim_dir;
-                    player->vel.vy = -(4 << 12);
+                    player->vel.vx = player->cnst->x_jump_away * player->anim_dir;
+                    player->vel.vy = -player->cnst->y_min_jump;
                     player->holding_jump = 1;
                 }
             }
