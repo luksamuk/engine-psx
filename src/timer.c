@@ -71,6 +71,12 @@ pause_elapsed_frames()
 }
 
 void
+resume_elapsed_frames()
+{
+    counting_frames = 1;
+}
+
+void
 reset_elapsed_frames()
 {
     frame_count = 0;

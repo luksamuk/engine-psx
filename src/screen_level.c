@@ -68,6 +68,7 @@ typedef struct {
     uint8_t    ring_1up_mask;
 
     // Title card / End count variables
+    uint8_t has_started;
     int16_t tc_ribbon_y;
     int16_t tc_title_x;
     int16_t tc_zone_x;
@@ -113,6 +114,7 @@ screen_level_load()
     level_act  = 0;
     data->boss_lock = 0;
     data->ring_1up_mask = 0;
+    data->has_started = 0;
 
     camera_init(camera);
 
@@ -213,6 +215,31 @@ _calculate_level_bonus(screen_level_data *data)
 }
 
 void
+prepare_titlecard(screen_level_data *data)
+{
+    pause_elapsed_frames();
+
+    // Pre-calculate title card target X and Y positions
+    uint16_t wt = font_measurew_hg(data->level_name);
+    uint16_t wz = font_measurew_hg("ZONE");
+    uint16_t vx = CENTERX - (wt >> 1) + 20;
+
+    data->tc_ribbon_tgt_y = 0;
+    data->tc_title_tgt_x = vx;
+    data->tc_zone_tgt_x = vx + wt - wz;
+    data->tc_act_tgt_x = vx + wt - 40;
+
+    data->tc_ribbon_y = -200;
+    data->tc_title_x = SCREEN_XRES + wt;
+    data->tc_zone_x  = SCREEN_XRES + wt;
+    data->tc_act_x   = SCREEN_XRES + wt;
+
+    data->level_counter = 120;
+    level_fade = 0;
+    data->level_transition = LEVEL_TRANS_TITLECARD;
+}
+
+void
 screen_level_update(void *d)
 {
     screen_level_data *data = (screen_level_data *)d;
@@ -243,7 +270,10 @@ screen_level_update(void *d)
             data->level_transition = LEVEL_TRANS_GAMEPLAY;
 
             // Start level timer
-            reset_elapsed_frames();
+            if(!data->has_started) {
+                data->has_started = 1;
+                reset_elapsed_frames();
+            } else resume_elapsed_frames();
         }
     }
     // 2: Gameplay
@@ -422,6 +452,9 @@ screen_level_update(void *d)
             player->underwater = 0;
             player->cnst = getconstants(player->character, PC_DEFAULT);
             player->speedshoes_frames = (player->speedshoes_frames > 0) ? 0 : -1;
+
+            // Restore titlecard
+            prepare_titlecard(data);
         }
 
         if(pad_pressed(PAD_CIRCLE)) {
@@ -1218,24 +1251,8 @@ level_load_level(screen_level_data *data)
     // Start playback after we don't need the CD anymore.
     screen_level_play_music(level_round, level_act);
 
-    // Pre-calculate title card target X and Y positions
-    {
-        uint16_t wt = font_measurew_hg(data->level_name);
-        uint16_t wz = font_measurew_hg("ZONE");
-        uint16_t vx = CENTERX - (wt >> 1) + 20;
-
-        data->tc_ribbon_tgt_y = 0;
-        data->tc_title_tgt_x = vx;
-        data->tc_zone_tgt_x = vx + wt - wz;
-        data->tc_act_tgt_x = vx + wt - 40;
-
-        data->tc_ribbon_y = -200;
-        data->tc_title_x = SCREEN_XRES + wt;
-        data->tc_zone_x  = SCREEN_XRES + wt;
-        data->tc_act_x   = SCREEN_XRES + wt;
-    }
+    prepare_titlecard(data);
 }
-
 
 static void
 level_set_clearcolor()
