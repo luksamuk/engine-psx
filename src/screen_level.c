@@ -26,6 +26,7 @@ extern int debug_mode;
 
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_kach;
+extern SoundEffect sfx_event;
 
 static uint8_t level = 0;
 static PlayerCharacter level_character = CHARA_SONIC;
@@ -64,6 +65,7 @@ typedef struct {
     const char *level_name;
     uint16_t   level_counter;
     uint8_t    boss_lock;
+    uint8_t    ring_1up_mask;
 
     // Title card / End count variables
     int16_t tc_ribbon_y;
@@ -110,6 +112,7 @@ screen_level_load()
     data->level_name = "PLAYGROUND";
     level_act  = 0;
     data->boss_lock = 0;
+    data->ring_1up_mask = 0;
 
     camera_init(camera);
 
@@ -498,6 +501,9 @@ screen_level_update(void *d)
             screen_level_play_music(level_round, level_act);
         player->speedshoes_frames = -1;
     }
+
+    // Give 1-up's at every cent
+    screen_level_give_1up(level_ring_count / 100);
 }
 
 void
@@ -1372,4 +1378,22 @@ screen_level_boss_lock(uint8_t state)
 {
     screen_level_data *data = screen_get_data();
     data->boss_lock = state;
+}
+
+void
+screen_level_give_1up(int8_t ring_cent)
+{
+    if(ring_cent < 0) goto give_1up;
+    if(ring_cent == 0) return;
+    ring_cent--;
+
+    screen_level_data *data = screen_get_data();
+    uint8_t mask = 1 << ring_cent;
+    if((~data->ring_1up_mask) & mask) {
+        data->ring_1up_mask |= mask;
+        goto give_1up;
+    }
+    return;
+ give_1up:
+    sound_play_vag(sfx_event, 0);
 }

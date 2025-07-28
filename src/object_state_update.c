@@ -29,7 +29,6 @@ extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
-extern SoundEffect sfx_event;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_sign;
@@ -633,7 +632,7 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         case MONITOR_KIND_1UP:
         case 7: // !-up (Miles)
         case 8: // 1-up (Knuckles)
-            sound_play_vag(sfx_event, 0);
+            screen_level_give_1up(-1);
             break;
         case MONITOR_KIND_RING:
             sound_play_vag(sfx_ring, 0);
