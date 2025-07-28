@@ -82,6 +82,7 @@ extern SoundEffect sfx_count;
 extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_grab;
 extern SoundEffect sfx_land;
+extern SoundEffect sfx_drown;
 
 extern Camera     *camera;
 extern uint16_t   level_ring_count;
@@ -1850,6 +1851,7 @@ player_do_die(Player *player, PlayerDeath kind)
     case PLAYER_DEATH_DROWN:
         player_set_action(player, ACTION_DROWN);
         player->vel.vy = 0;
+        sound_play_vag(sfx_drown, 0);
         break;
     }
     player->death_type = kind;

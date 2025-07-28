@@ -419,8 +419,8 @@ screen_level_update(void *d)
     } else if(data->level_transition == LEVEL_TRANS_DEATH_WAIT) {
         // Countdown timer when player is out of the screen
         if(player->pos.vy <= camera->pos.vy + (CENTERY << 12)) {
-            // Prepare to wait for 2 seconds
-            data->level_counter = 120;
+            // Prepare to wait for 1 second
+            data->level_counter = 60;
         }
         else if(data->level_counter > 0) data->level_counter--;
         else data->level_transition = LEVEL_TRANS_DEATH_FADEOUT;

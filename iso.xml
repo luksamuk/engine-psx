@@ -454,6 +454,9 @@
 	<file name="KACH.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/KACH.VAG" />
+	<file name="DROWN.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/DROWN.VAG" />
       </dir>
 
       <dummy sectors="1024"/>

@@ -23,6 +23,7 @@ SoundEffect sfx_bomb   = { 0 };
 SoundEffect sfx_grab   = { 0 };
 SoundEffect sfx_land   = { 0 };
 SoundEffect sfx_kach   = { 0 };
+SoundEffect sfx_drown  = { 0 };
 
 void
 sound_sfx_init()
@@ -50,4 +51,5 @@ sound_sfx_init()
     if(sfx_grab.addr == 0)   sfx_grab    = sound_load_vag("\\SFX\\GRAB.VAG;1");
     if(sfx_land.addr == 0)   sfx_land    = sound_load_vag("\\SFX\\LAND.VAG;1");
     if(sfx_kach.addr == 0)   sfx_kach    = sound_load_vag("\\SFX\\KACH.VAG;1");
+    if(sfx_drown.addr == 0)  sfx_drown   = sound_load_vag("\\SFX\\DROWN.VAG;1");
 }
