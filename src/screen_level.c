@@ -244,6 +244,10 @@ screen_level_player_respawn()
 {
     screen_level_data *data = screen_get_data();
 
+    // Show loading screen
+    render_loading_logo();
+    render_loading_logo();
+
     // Restore camera
     camera_init(camera);
     camera_follow_player(camera);
@@ -259,6 +263,8 @@ screen_level_player_respawn()
     player->cnst = getconstants(player->character, PC_DEFAULT);
     player->speedshoes_frames = (player->speedshoes_frames > 0) ? 0 : -1;
     player->shield = 0;
+    player->iframes = 0;
+    player->action = ACTION_NONE;
 
     // Prepare titlecard
     prepare_titlecard(data);
@@ -278,9 +284,6 @@ screen_level_player_respawn()
 
     // Stop music
     sound_cdda_stop();
-
-    // Show loading screen
-    render_loading_logo();
 
     // RELOAD ALL OBJECTS (ignores checkpoints)
     // WARNING --
