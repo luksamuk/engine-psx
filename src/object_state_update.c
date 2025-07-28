@@ -177,7 +177,7 @@ _ring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 state->anim_state.animation = 1;
                 state->anim_state.frame = 0;
                 state->props ^= OBJ_FLAG_ANIM_LOCK; // Unlock from global timer
-                level_ring_count++;
+                screen_level_give_rings(1);
                 level_ring_max--; // Lower level max ring count
                 sound_play_vag(sfx_ring, 0);
                 return;
@@ -636,7 +636,7 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             break;
         case MONITOR_KIND_RING:
             sound_play_vag(sfx_ring, 0);
-            level_ring_count += 10;
+            screen_level_give_rings(10);
             break;
         case MONITOR_KIND_SHIELD:
             if(player->shield != 1) {

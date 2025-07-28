@@ -583,9 +583,6 @@ screen_level_update(void *d)
             screen_level_play_music(level_round, level_act);
         player->speedshoes_frames = -1;
     }
-
-    // Give 1-up's at every cent
-    screen_level_give_1up(level_ring_count / 100);
 }
 
 void
@@ -1463,4 +1460,13 @@ screen_level_give_1up(int8_t ring_cent)
     return;
  give_1up:
     sound_play_vag(sfx_event, 0);
+}
+
+void
+screen_level_give_rings(uint16_t amount)
+{
+    level_ring_count += amount;
+
+    // Give 1-up's at every cent
+    screen_level_give_1up(level_ring_count / 100);
 }
