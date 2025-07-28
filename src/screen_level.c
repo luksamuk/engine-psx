@@ -282,7 +282,7 @@ screen_level_player_respawn()
     level_ring_count = 0;
 
     // Restore any boss state
-    bzero(boss, sizeof(BossState));
+    if(level_has_boss) bzero(boss, sizeof(BossState));
 
     // UNLOAD ALL STATIC OBJECTS (except checkpoints)
     if(data->has_started)
