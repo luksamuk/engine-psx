@@ -28,7 +28,7 @@
 static int8_t current_scene = -1;
 static uint8_t *scene_data[SCREEN_BUFFER_LEN] = { 0 };
 static ArenaAllocator screen_arena;
-static uint8_t loading_logo[9050] = { 0 };// Image has 9034B, should be enough
+static uint8_t loading_logo[9050] = { 0 };// Image has 9034 bytes, should be enough
 
 void
 scene_init()

@@ -96,6 +96,7 @@ typedef struct {
 static void level_load_player(PlayerCharacter character);
 static void level_load_level(screen_level_data *);
 static void level_set_clearcolor();
+static void prepare_titlecard(screen_level_data *data);
 
 void
 screen_level_load()
@@ -110,7 +111,7 @@ screen_level_load()
     obj_table_level = screen_alloc(sizeof(ObjectTable));
 
     data->level_transition = LEVEL_TRANS_TITLECARD;
-    data->level_name = "PLAYGROUND";
+    data->level_name = "";
     level_act  = 0;
     data->boss_lock = 0;
     data->ring_1up_mask = 0;
@@ -191,7 +192,7 @@ screen_level_unload(void *d)
     screen_free();
 }
 
-void
+static void
 _calculate_level_bonus(screen_level_data *data)
 {
     data->ring_bonus = level_ring_count * 100;
@@ -214,11 +215,9 @@ _calculate_level_bonus(screen_level_data *data)
         data->perfect_bonus = 50000;
 }
 
-void
+static void
 prepare_titlecard(screen_level_data *data)
 {
-    pause_elapsed_frames();
-
     // Pre-calculate title card target X and Y positions
     uint16_t wt = font_measurew_hg(data->level_name);
     uint16_t wz = font_measurew_hg("ZONE");
@@ -712,7 +711,7 @@ void
 screen_level_draw(void *d)
 {
     screen_level_data *data = (screen_level_data *)d;
-    char buffer[255] = { 0 };
+    char buffer[120] = { 0 };
 
     // As a rule of thumb, things are drawn in specific otz's.
     // When things are drawn on the same otz, anything drawn first
@@ -954,16 +953,16 @@ screen_level_draw(void *d)
             LERPC(level_fade, 0xc8),
             LERPC(level_fade, 0xc8));
 
-        snprintf(buffer, 255, "%8d", level_score_count);
+        snprintf(buffer, 120, "%8d", level_score_count);
         font_draw_big(buffer, 60, 10);
 
         {
             uint32_t seconds = get_elapsed_frames() / 60;
-            snprintf(buffer, 255, "%2d:%02d", seconds / 60, seconds % 60);
+            snprintf(buffer, 120, "%2d:%02d", seconds / 60, seconds % 60);
             font_draw_big(buffer, 54, 24);
         }
 
-        snprintf(buffer, 255, "%3d", level_ring_count);
+        snprintf(buffer, 120, "%3d", level_ring_count);
         font_draw_big(buffer, 60, 38);
 
         font_reset_color();
@@ -973,29 +972,29 @@ screen_level_draw(void *d)
         font_set_color(0xc8, 0xc8, 0xc8);
 
         // Video debug
-        snprintf(buffer, 255,
+        snprintf(buffer, 120,
                  "%4s %3d",
                  GetVideoMode() == MODE_PAL ? "PAL" : "NTSC", get_frame_rate());
         font_draw_sm(buffer, 248, 12);
 
         // Free object debug
-        snprintf(buffer, 255, "SPR  %3d", object_pool_get_count());
+        snprintf(buffer, 120, "SPR  %3d", object_pool_get_count());
         font_draw_sm(buffer, 248, 20);
 
         // Rings, time and air for convenience
-        snprintf(buffer, 255, "RING %03d", level_ring_count);
+        snprintf(buffer, 120, "RING %03d", level_ring_count);
         font_draw_sm(buffer, 248, 28);
 
-        snprintf(buffer, 255, "TIME %03d", (get_elapsed_frames() / 60));
+        snprintf(buffer, 120, "TIME %03d", (get_elapsed_frames() / 60));
         font_draw_sm(buffer, 248, 36);
 
-        snprintf(buffer, 255, "AIR   %02d", player->remaining_air_frames / 60);
+        snprintf(buffer, 120, "AIR   %02d", player->remaining_air_frames / 60);
         font_draw_sm(buffer, 248, 44);
 
-        snprintf(buffer, 255, "TILE%4d", level_get_num_sprites());
+        snprintf(buffer, 120, "TILE%4d", level_get_num_sprites());
         font_draw_sm(buffer, 248, 52);
 
-        snprintf(buffer, 255, "FRA%5d", player->framecount);
+        snprintf(buffer, 120, "FRA%5d", player->framecount);
         font_draw_sm(buffer, 248, 60);
 
         // Player debug

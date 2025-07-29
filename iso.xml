@@ -379,9 +379,9 @@
 	<file name="STICONS.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/misc/STICONS.TIM" />
-	<file name="CHARSEL.TIM"
+	<file name="CHARAS.TIM"
 	      type="data"
-	      source="${PROJECT_SOURCE_DIR}/assets/misc/CHARSEL.TIM" />
+	      source="${PROJECT_SOURCE_DIR}/assets/misc/CHARAS.TIM" />
       </dir>
 
       <dir name="SFX">
