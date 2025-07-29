@@ -1949,6 +1949,8 @@ player_set_action(Player *player, PlayerAction action)
         player->iframes = PLAYER_HURT_IFRAMES;
     } else if(player->action == ACTION_GLIDE) {
         player->sliding = 0;
+    } else if(player->action == ACTION_JUMPING) {
+        player->ctrllock = 0;
     }
 
     if(action == ACTION_CLIMB) {
