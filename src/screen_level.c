@@ -416,6 +416,7 @@ screen_level_update(void *d)
     }
     else if(data->level_transition == LEVEL_TRANS_NEXT_LEVEL) {
         screen_level_transition_to_next();
+        return;
     } else if(data->level_transition == LEVEL_TRANS_DEATH_WAIT) {
         // Countdown timer when player is out of the screen
         if(player->pos.vy <= camera->pos.vy + (CENTERY << 12)) {
@@ -423,7 +424,13 @@ screen_level_update(void *d)
             data->level_counter = 60;
         }
         else if(data->level_counter > 0) data->level_counter--;
-        else data->level_transition = LEVEL_TRANS_DEATH_FADEOUT;
+        else {
+            // If you died during a demo, transition to "next level"
+            // instead (which will actually redirect to the title screen)
+            if(level_mode == LEVEL_MODE_DEMO)
+                data->level_transition = LEVEL_TRANS_FADEOUT;
+            else data->level_transition = LEVEL_TRANS_DEATH_FADEOUT;
+        }
     } else if(data->level_transition == LEVEL_TRANS_DEATH_FADEOUT) {
         level_fade -= 2;
         if(level_fade == 0) {
@@ -474,9 +481,16 @@ screen_level_update(void *d)
             data->level_transition = LEVEL_TRANS_FADEOUT;
         }
 
+        // Uncomment to test deaths on demo mode.
+        /* if(player->death_type == 0 && seconds == 10) { */
+        /*     level_ring_count = 0; */
+        /*     player_do_damage(player, player->pos.vx); */
+        /* } */
+
         if(data->level_transition == LEVEL_TRANS_NEXT_LEVEL) {
             // Go back to title screen
             scene_change(SCREEN_TITLE);
+            return;
         }
     }
     
@@ -510,6 +524,7 @@ screen_level_update(void *d)
 
             if(pad_pressed(PAD_SELECT)) {
                 scene_change(SCREEN_LEVELSELECT);
+                return;
             }
         }
         
@@ -536,24 +551,28 @@ screen_level_update(void *d)
         }
     }
 
-    // Record level demo. Uncomment to print.
-    switch(level_mode) {
-    case LEVEL_MODE_DEMO:
-        demo_update_playback(level, &player->input);
-        break;
-    case LEVEL_MODE_RECORD:
-        demo_record();
-        input_get_state(&player->input);
-        break;
-    case LEVEL_MODE_FINISHED:
-        player->input.current = player->input.old = 0x0020;
-        break;
-    case LEVEL_MODE_DEATH:
+    // Input management according to level mode.
+    if(player->death_type > 0) {
+        // If dead, force no input, no X speed and face right
         player->input.current = player->input.old = 0x0000;
-        break;
-    default:
-        input_get_state(&player->input);
-        break;
+        player->vel.vx = 0;
+        player->anim_dir = 1;
+    } else {
+        switch(level_mode) {
+        case LEVEL_MODE_DEMO:
+            demo_update_playback(level, &player->input);
+            break;
+        case LEVEL_MODE_RECORD:
+            demo_record();
+            input_get_state(&player->input);
+            break;
+        case LEVEL_MODE_FINISHED:
+            player->input.current = player->input.old = 0x0020;
+            break;
+        default:
+            input_get_state(&player->input);
+            break;
+        }
     }
 
     camera_update(camera, player);
@@ -1433,6 +1452,8 @@ screen_level_play_music(uint8_t round, uint8_t act)
 void
 screen_level_transition_to_next()
 {
+    // WARNING: WHEN CALLING THIS, RETURN IMMEDIATELY SO YOU DON'T
+    // OVERWRITE THE NEXT SCREEN WITH JUNK.
     uint8_t lvl = screen_level_getlevel();
     if(lvl == 2 || lvl == 3) {
         // Finished engine test

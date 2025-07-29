@@ -1855,7 +1855,6 @@ player_do_die(Player *player, PlayerDeath kind)
         break;
     }
     player->death_type = kind;
-    screen_level_setmode(LEVEL_MODE_DEATH);
     camera_stop_following_player(camera);
     pause_elapsed_frames();
     screen_level_transition_death();
