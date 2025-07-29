@@ -7,7 +7,7 @@
             "enabled": true,
             "name": "Cook assets",
             "saveBeforeExecute": true,
-            "shortcut": "Ctrl+Shift+C",
+            "shortcut": null,
             "showOutput": true,
             "workingDirectory": "/home/alchemist/git/engine-psx"
         },
@@ -17,18 +17,18 @@
             "enabled": true,
             "name": "Repack",
             "saveBeforeExecute": true,
-            "shortcut": "Ctrl+Shift+R",
+            "shortcut": null,
             "showOutput": true,
             "workingDirectory": "/home/alchemist/git/engine-psx"
         },
         {
-            "arguments": "packrun",
+            "arguments": "run",
             "command": "make",
             "enabled": true,
-            "name": "Repack & Run",
+            "name": "Run",
             "saveBeforeExecute": true,
-            "shortcut": "Ctrl+Shift+F",
-            "showOutput": true,
+            "shortcut": null,
+            "showOutput": false,
             "workingDirectory": "/home/alchemist/git/engine-psx"
         }
     ],
