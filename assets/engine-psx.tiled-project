@@ -1,6 +1,36 @@
 {
     "automappingRulesFile": "",
     "commands": [
+        {
+            "arguments": "cook",
+            "command": "/usr/bin/make",
+            "enabled": true,
+            "name": "Cook assets",
+            "saveBeforeExecute": true,
+            "shortcut": "Ctrl+Shift+C",
+            "showOutput": true,
+            "workingDirectory": "/home/alchemist/git/engine-psx"
+        },
+        {
+            "arguments": "repack",
+            "command": "make",
+            "enabled": true,
+            "name": "Repack",
+            "saveBeforeExecute": true,
+            "shortcut": "Ctrl+Shift+R",
+            "showOutput": true,
+            "workingDirectory": "/home/alchemist/git/engine-psx"
+        },
+        {
+            "arguments": "packrun",
+            "command": "make",
+            "enabled": true,
+            "name": "Repack & Run",
+            "saveBeforeExecute": true,
+            "shortcut": "Ctrl+Shift+F",
+            "showOutput": true,
+            "workingDirectory": "/home/alchemist/git/engine-psx"
+        }
     ],
     "compatibilityVersion": 1100,
     "extensionsPath": "extensions",
