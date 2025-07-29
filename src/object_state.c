@@ -70,8 +70,6 @@ _emplace_object(
     switch(type) {
     default: break;
     case OBJ_RING:
-        // Count rings
-        level_ring_max++;
         state->props |= OBJ_FLAG_ANIM_LOCK;
         break;
     case OBJ_MONITOR:
@@ -233,6 +231,24 @@ unload_object_placements(void *lvl_data)
             }
         }
     }
+}
+
+uint16_t
+count_emplaced_rings(void *lvl_data)
+{
+    uint16_t result = 0;
+    LevelData *lvl = (LevelData *)lvl_data;
+    for(uint32_t i = 0; i < LEVEL_MAX_X_CHUNKS * LEVEL_MAX_Y_CHUNKS; i++) {
+        ChunkObjectData *cnk = lvl->objects[i];
+        if(cnk != NULL) {
+            for(uint8_t j = 0; j < cnk->num_objects; j++) {
+                ObjectState *obj = &cnk->objects[j];
+                if(obj->id == OBJ_RING && !(obj->props & OBJ_FLAG_DESTROYED))
+                    result++;
+            }
+        }
+    }
+    return result;
 }
 
 void

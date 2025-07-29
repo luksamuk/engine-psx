@@ -111,6 +111,7 @@ void object_render(ObjectState *state, ObjectTableEntry *typedata,
 // its position and speed by using the 'freepos' field.
 void object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8_t round);
 
+uint16_t count_emplaced_rings(void *lvl_data);
 
 /* ============================== */
 /* OBJECTS OWNED BY OBJECT POOL   */

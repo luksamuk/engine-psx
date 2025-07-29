@@ -304,6 +304,7 @@ screen_level_player_respawn()
     snprintf(basepath, 255, "\\LEVELS\\R%1u", level_round);
     snprintf(filename, 255, "%s\\Z%1u.OMP;1", basepath, level_act + 1);
     load_object_placement(filename, leveldata, data->has_started);
+    level_ring_max = count_emplaced_rings(leveldata);
 
     // Restart music
     data->boss_lock = 0;
@@ -997,6 +998,9 @@ screen_level_draw(void *d)
         snprintf(buffer, 120, "FRA%5d", player->framecount);
         font_draw_sm(buffer, 248, 60);
 
+        snprintf(buffer, 120, "PFT %4d", level_ring_max);
+        font_draw_sm(buffer, 248, 68);
+
         // Player debug
         if(debug_mode > 1) {
             snprintf(buffer, 255,
@@ -1308,6 +1312,9 @@ level_load_level(screen_level_data *data)
     // Always do this AFTER loading object definitions!
     snprintf(filename0, 255, "%s\\Z%1u.OMP;1", basepath, level_act + 1);
     load_object_placement(filename0, leveldata, 0);
+
+    // Load number of rings on level
+    level_ring_max = count_emplaced_rings(leveldata);
 
 
     /* === OBJECT POOL / FREE OBJECTS === */
