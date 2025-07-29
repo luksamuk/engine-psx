@@ -270,6 +270,7 @@ screen_levelselect_update(void *d)
     if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {
         if(data->menu_choice == CHOICE_TITLE) {
             scene_change(SCREEN_TITLE);
+            return;
         } else if(data->menu_choice == CHOICE_MODELTEST) {
             scene_change(SCREEN_MODELTEST);
         } else if(data->menu_choice == CHOICE_SLIDE) {
@@ -277,9 +278,11 @@ screen_levelselect_update(void *d)
                 screen_slide_set_next(data->slidetest_selection - 1);
                 slide_screen_override = SCREEN_LEVELSELECT;
                 scene_change(SCREEN_SLIDE);
+                return;
             }
         } else if(data->menu_choice == CHOICE_CREDITS) {
             scene_change(SCREEN_CREDITS);
+            return;
         } else if(data->menu_choice == CHOICE_SOUNDTEST) {
             if(data->soundtest_selection > 0) {
                 sound_bgm_play(data->soundtest_selection - 1);
@@ -287,10 +290,12 @@ screen_levelselect_update(void *d)
             }
         } else if(data->menu_choice == CHOICE_OPTIONS) {
             scene_change(SCREEN_OPTIONS);
+            return;
         } else if(data->menu_choice == CHOICE_SPRITETEST) {
             screen_level_setcharacter(data->character_selection);
             screen_sprite_test_setcharacter(data->character_selection);
             scene_change(SCREEN_SPRITETEST);
+            return;
         } else if(data->menu_choice == CHOICE_CHARACTER) {
             // Do nothing
         } else {
@@ -324,6 +329,7 @@ screen_levelselect_update(void *d)
                 screen_level_setmode(LEVEL_MODE_RECORD);
             }
             scene_change(SCREEN_LEVEL);
+            return;
         }
     }
 }
