@@ -211,33 +211,25 @@ unload_object_placements(void *lvl_data)
     for(uint32_t i = 0; i < LEVEL_MAX_X_CHUNKS * LEVEL_MAX_Y_CHUNKS; i++) {
         ChunkObjectData *cnk = lvl->objects[i];
         if(cnk != NULL) {
-            for(uint8_t j = 0; j < cnk->num_objects; j++) {
-                // We never destroy checkpoints.
-                // That's because object unloading is supposed to be used
-                // on respawns
-                ObjectState *obj = &cnk->objects[j];
-                if(obj->id != OBJ_CHECKPOINT)
-                    cnk->objects[j].props |= OBJ_FLAG_DESTROYED;
-            }
             if(cnk->num_objects == 0) continue;
 
             uint8_t orig_num_objs = cnk->num_objects;
             cnk->num_objects = 0;
-            // Move checkpoints to beginning of vector.
             for(uint8_t j = 0; j < orig_num_objs; j++) {
                 ObjectState *obj = &cnk->objects[j];
+                // We never destroy checkpoints.
+                // That's because object unloading is supposed to be used
+                // on respawns.
+                // Instead, move checkpoints to beginning of vector.
                 if(obj->id == OBJ_CHECKPOINT) {
-                    // hey look, bubblesort!
+                    // Hey, look, IT'S BUBBLESORT!!!!
                     if(cnk->num_objects != j) {
                         memcpy(&cnk->objects[cnk->num_objects], obj, sizeof(ObjectState));
                         obj->props |= OBJ_FLAG_DESTROYED;
-                        // Just turn it into a ring, it will be overwritten
-                        // anyway, right?
-                        cnk->objects[j].id = OBJ_RING;
                         cnk->objects[j].props |= OBJ_FLAG_DESTROYED;
                     }
                     cnk->num_objects++;
-                }
+                } else cnk->objects[j].props |= OBJ_FLAG_DESTROYED;
             }
         }
     }
