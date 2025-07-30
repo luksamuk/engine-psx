@@ -79,6 +79,7 @@ typedef struct OBJECT_STATE {
     uint8_t props; // IMPORTANT: DO NOT MOVE THIS FIELD.
     uint8_t flipmask;
     uint16_t id;
+    uint16_t unique_id;
     int16_t rx, ry; // Positions relative to chunk top-left corner
     int16_t timer;
     int16_t timer2;

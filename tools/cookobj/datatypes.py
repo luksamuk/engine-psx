@@ -255,6 +255,7 @@ ObjectProperties = MonitorProperties | BubblePatchProperties | None
 class ObjectPlacement:
     is_level_specific: bool = False
     otype: int = 0
+    unique_id: int = 0
     x: int = 0
     y: int = 0
     flipx: bool = False
@@ -273,6 +274,7 @@ class ObjectPlacement:
 
         f.write(c_ubyte(int(self.is_level_specific)))
         f.write(c_byte(self.otype))
+        f.write(c_ushort(self.unique_id))
         f.write(c_ubyte(flipmask))
         f.write(c_int(self.x + 32))  # Center X position
         f.write(c_int(self.y))  # Already at extreme bottom Y position
@@ -285,6 +287,7 @@ class ObjectPlacement:
 # - Array of object placements:
 #   - is_level_specific (u8)
 #   - Type / ID (s8)
+#   - unique_id (u16) (actual object id on Tiled map)
 #   - Flip Mask (u8)
 #   - vx (s32)
 #   - vy (s32)

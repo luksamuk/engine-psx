@@ -116,6 +116,7 @@ load_object_placement(const char *filename, void *lvl_data, uint8_t has_started)
     for(uint16_t i = 0; i < num_objects; i++) {
         uint8_t is_level_specific = get_byte(bytes, &b);
         int8_t type = get_byte(bytes, &b);
+        uint16_t unique_id = get_short_be(bytes, &b); // TODO: Should be used to identify objects
         uint8_t flipmask = get_byte(bytes, &b);
         int32_t vx = get_long_be(bytes, &b);
         int32_t vy = get_long_be(bytes, &b);

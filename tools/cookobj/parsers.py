@@ -131,6 +131,7 @@ def parse_object_group(
         p.is_level_specific = is_level_specific
         gid = int(obj.get("gid"))
         p.otype = current_ts.get_otype_from_gid(gid)
+        p.unique_id = int(obj.get("id"))
         p.x = int(float(obj.get("x")))
         p.y = int(float(obj.get("y")))
         p.flipx = bool(gid & (1 << 31))
