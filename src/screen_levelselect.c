@@ -305,6 +305,7 @@ screen_levelselect_update(void *d)
             // (Important for SAGE 2025 demo)
 #ifndef ALLOW_DEBUG
             if((data->menu_choice == 7) // SWZ2
+               || (data->menu_choice == 8) // DCZ1
                || (data->menu_choice == 9) // DCZ2
                || (data->menu_choice == 11) // AOZ2
             ) {
@@ -322,12 +323,16 @@ screen_levelselect_update(void *d)
             screen_level_setlevel(data->menu_choice);
             screen_level_setmode(LEVEL_MODE_NORMAL);
             screen_level_setcharacter(data->character_selection);
+
+#ifdef ALLOW_DEBUG
             // Start auto-demo
             if(pad_pressing(PAD_TRIANGLE)) {
                 screen_level_setmode(LEVEL_MODE_DEMO);
             } else if(pad_pressing(PAD_CIRCLE)) {
                 screen_level_setmode(LEVEL_MODE_RECORD);
             }
+#endif
+
             scene_change(SCREEN_LEVEL);
             return;
         }

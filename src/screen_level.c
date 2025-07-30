@@ -170,8 +170,7 @@ screen_level_load()
     srand(get_global_frames());
 
     // If it is a demo or we're recording, skip title card
-    if(level_mode == LEVEL_MODE_DEMO
-       || level_mode == LEVEL_MODE_RECORD) {
+    if(level_mode == LEVEL_MODE_DEMO || level_mode == LEVEL_MODE_RECORD) {
         data->level_transition = LEVEL_TRANS_FADEIN;
     }
 
