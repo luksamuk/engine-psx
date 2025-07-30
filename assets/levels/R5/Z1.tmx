@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="232">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" nextlayerid="5" nextobjectid="233">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="85" source="../COMMON/objects_common.tsx"/>
  <tileset firstgid="109" source="objects.tsx"/>
@@ -197,7 +197,11 @@
      <property name="parent" type="object" value="179"/>
     </properties>
    </object>
-   <object id="179" gid="94" x="9504" y="768" width="64" height="64"/>
+   <object id="179" gid="94" x="9504" y="768" width="64" height="64">
+    <properties>
+     <property name="parent" type="object" value="232"/>
+    </properties>
+   </object>
    <object id="180" gid="94" x="9632" y="768" width="64" height="64">
     <properties>
      <property name="parent" type="object" value="178"/>
@@ -225,6 +229,7 @@
    <object id="196" gid="85" x="7215" y="968" width="64" height="64"/>
    <object id="230" gid="93" x="4192" y="436" width="64" height="64"/>
    <object id="231" gid="105" x="2456" y="640" width="64" height="64"/>
+   <object id="232" gid="105" x="9984" y="704" width="64" height="64"/>
   </objectgroup>
   <objectgroup id="4" name="LEVEL">
    <object id="198" gid="2147483757" x="2717" y="1082" width="64" height="64"/>

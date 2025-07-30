@@ -32,6 +32,7 @@ extern SoundEffect sfx_shield;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_sign;
+extern SoundEffect sfx_destroy;
 
 extern int debug_mode;
 
@@ -706,10 +707,65 @@ _switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     if(collision_side == OBJ_SIDE_TOP) {
         state->anim_state.animation = 1;
         if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
-            // Switch was just pressed; play "beep"
-            sound_play_vag(sfx_switch, 0);
+            uint8_t sound = 0;
             printf("Parent ID: %d // Parent: %p type: %d\n",
                    state->parent_id, state->parent, state->parent ? state->parent->id : -1);
+
+            if((state->parent != NULL) && !(state->parent->props & OBJ_FLAG_DESTROYED)) {
+                if((state->child != NULL) && (state->child->id == OBJ_SWITCH)) {
+                    // Logics 1 and 3 are treated here
+                    if(!(state->child->props & OBJ_FLAG_SWITCH_PUZZLE)) {
+                        // Remove flag from all children
+                        ObjectState *itr = state->child;
+                        while((itr != NULL) && (itr->id == OBJ_SWITCH)) {
+                            itr->props &= ~OBJ_FLAG_SWITCH_PUZZLE;
+                            itr = itr->child;
+                        }
+                        // Remove flag from all parents
+                        itr = state->parent;
+                        while((itr != NULL) && (itr->id == OBJ_SWITCH)) {
+                            itr->props &= ~OBJ_FLAG_SWITCH_PUZZLE;
+                            itr = itr->parent;
+                        }
+                    } else {
+                        if(state->parent->id == OBJ_DOOR) {
+                            // If I'm the last link, kill the door that is my parent
+                            state->parent->props |= OBJ_FLAG_DESTROYED;
+                            sound = 1;
+                        } else {
+                            // Otherwise set my puzzle flag
+                            state->props |= OBJ_FLAG_SWITCH_PUZZLE;
+                            printf("Puzzle flag\n");
+                        }
+                    }
+                } else if(state->parent->id == OBJ_DOOR) {
+                    if(state->child == NULL) {
+                        // Logic 0: Parent is a door + I have no children (door opener)
+                        // Kill the door, do a destruction sound
+                        state->parent->props |= OBJ_FLAG_DESTROYED;
+                        sound = 1;
+                        printf("Kill parent\n");
+                    } /* else if(state->child->id == OBJ_SWITCH) {} */
+                    // Logic 1: Parent is a door + I have a button child (puzzle last chain)
+                    // If my child doesn't have an active puzzle flag active,
+                    // go ahead and deactivate the entire chain of flags (up and down).
+                    // Otherwise kill parent and unlink everything.
+                    // SEE LOGIC IMPLEMENTED ABOVE
+                } else if(state->parent->id == OBJ_SWITCH) {
+                    if(state->child == NULL) {
+                        // Logic 2: Parent is a button + I have no children (puzzle start)
+                        // Set my puzzle flag.
+                        state->props |= OBJ_FLAG_SWITCH_PUZZLE;
+                    } /* else if(state->child->id == OBJ_SWITCH) {} */
+                    // Logic 3: Parent is a button + I have a button child (puzzle chain)
+                    // Do the same as logic 1 -- SEE LOGIC IMPLEMENTED ABOVE
+                }
+            }
+
+            switch(sound) {
+            default: sound_play_vag(sfx_switch, 0);  break; // Beep
+            case 1:  sound_play_vag(sfx_destroy, 0); break; // Destruction
+            }
         }
         state->props |= OBJ_FLAG_SWITCH_PRESSED;
     } else {

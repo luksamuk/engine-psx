@@ -32,6 +32,7 @@ typedef enum {
 
     // Switch-only flags
     OBJ_FLAG_SWITCH_PRESSED = 0x10,
+    OBJ_FLAG_SWITCH_PUZZLE  = 0x20, // Puzzle flag
 } ObjectGeneralFlag;
 
 typedef struct {
