@@ -956,10 +956,10 @@ _end_capsule_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
     (void)(entry);
     FRECT solidity = {
-        .x = pos->vx - 32,
-        .y = pos->vy - 60,
-        .w = 64,
-        .h = 60,
+        .x = pos->vx - 30,
+        .y = pos->vy - 54,
+        .w = 60,
+        .h = 54,
     };
 
     // Convert to 20.12 fixed
@@ -979,9 +979,9 @@ _end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *
 {
     (void)(entry);
     FRECT solidity = {
-        .x = (pos->vx - 15) << 12,
+        .x = (pos->vx - 12) << 12,
         .y = (pos->vy - 8) << 12,
-        .w = 30 << 12,
+        .w = 24 << 12,
         .h = 8 << 12,
     };
 
