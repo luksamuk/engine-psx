@@ -992,8 +992,58 @@ _end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *
     if(collision_side == OBJ_SIDE_TOP) {
         if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
             state->anim_state.animation = 1;
-            sound_play_vag(sfx_switch, 0);
+            uint8_t sound = 0;
             state->props |= OBJ_FLAG_SWITCH_PRESSED;
+
+            if(state->parent != NULL) {
+                if(!(state->parent->props & OBJ_FLAG_CAPSULE_OPEN)) {
+                    state->parent->props |= OBJ_FLAG_CAPSULE_OPEN;
+                    state->parent->anim_state.animation = 1;
+                    sound = 1;
+
+                    /* Create objects */
+                    int32_t vx = pos->vx << 12;
+                    int32_t vy = (pos->vy + 64) << 12;
+                    int32_t parts_vy = (pos->vy + 40) << 12;
+
+                    // Explosion
+                    PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+                    explosion->freepos.vx = (pos->vx << 12);
+                    explosion->freepos.vy = ((pos->vy + 12 + 16) << 12);
+                    explosion->state.anim_state.animation = 0; // Small explosion
+
+                    // Animals
+                    for(int i = 0; i < 6; i++) {
+                        int16_t timer = 30 + (i * 15);
+                        int32_t x;
+                        PoolObject *animal;
+
+                        // Animal at left
+                        x = (pos->vx - 10 - (i * 3)) << 12;
+                        animal = object_pool_create(OBJ_ANIMAL);
+                        animal->state.subtype = rand() % 4;
+                        animal->freepos.vx = x;
+                        animal->freepos.vy = parts_vy;
+                        animal->state.flipmask |= MASK_FLIP_FLIPX;
+                        animal->freepos.spdy = -0x04800;
+                        animal->state.timer = timer;
+
+                        x = (pos->vx + 10 + (i * 3)) << 12;
+                        animal = object_pool_create(OBJ_ANIMAL);
+                        animal->state.subtype = rand() % 4;
+                        animal->freepos.vx = x;
+                        animal->freepos.vy = parts_vy;
+                        animal->state.flipmask = 0;
+                        animal->freepos.spdy = -0x04800;
+                        animal->state.timer = timer;
+                    }
+                }
+            }
+
+            switch(sound) {
+            default: sound_play_vag(sfx_switch, 0); break;
+            case 1: sound_play_vag(sfx_pop, 0);     break;
+            }
         }
     } else {
         state->anim_state.animation = 0;
@@ -1005,10 +1055,6 @@ static void
 _door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
     (void)(entry);
-    // TODO.
-    // Idea: If not-free: keep being static.
-    // If free: move down.
-
     FRECT solidity = {
         .x = (pos->vx - 5) << 12,
         .y = (pos->vy - 64) << 12,
@@ -1032,24 +1078,25 @@ _animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     // Timer countdown to begin movement
     if(state->timer > 0) {
         state->timer--;
-        return;
-    }
-
-    if(object_should_despawn(state)) {
-        state->props |= OBJ_FLAG_DESTROYED;
-        return;
-    }
-
-    state->freepos->spdy += ANIMAL_GRAVITY;
-
-    // When hitting the ground, ensure that the animal moves horizontally
-    // as well
-    if(state->freepos->spdy > 0) {
-        CollisionEvent grn = linecast(pos->vx, pos->vy - 8, CDIR_FLOOR, 8, CDIR_FLOOR);
-        if(grn.collided) {
-            state->freepos->spdx = ANIMAL_XSPD * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
-            state->freepos->spdy = -ANIMAL_JMP_SPD;
+    } else {
+        if(object_should_despawn(state)) {
+            state->props |= OBJ_FLAG_DESTROYED;
+            return;
         }
+
+        state->freepos->spdy += ANIMAL_GRAVITY;
+
+        // When hitting the ground, ensure that the animal moves horizontally
+        // as well
+        if(state->freepos->spdy > 0) {
+            CollisionEvent grn = linecast(pos->vx, pos->vy - 8, CDIR_FLOOR, 8, CDIR_FLOOR);
+            if(grn.collided) {
+                state->freepos->spdx = ANIMAL_XSPD * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+                state->freepos->spdy = -ANIMAL_JMP_SPD;
+            }
+        }
+        state->freepos->vx += state->freepos->spdx;
+        state->freepos->vy += state->freepos->spdy;
     }
 
     // Animation control
@@ -1061,8 +1108,5 @@ _animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     }
     // Leverage subtype for multiple animals
     animation += (state->subtype * 3);
-
     state->anim_state.animation = animation;
-    state->freepos->vx += state->freepos->spdx;
-    state->freepos->vy += state->freepos->spdy;
 }
