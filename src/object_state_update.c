@@ -62,6 +62,7 @@ static void _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _end_capsule_button_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _door_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Level-specific update functions
@@ -138,6 +139,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     case OBJ_BUBBLE_PATCH:           _bubble_patch_update(state, typedata, pos);       break;
     case OBJ_BUBBLE:                 _bubble_update(state, typedata, pos);             break;
     case OBJ_END_CAPSULE:            _end_capsule_update(state, typedata, pos);        break;
+    case OBJ_END_CAPSULE_BUTTON:     _end_capsule_button_update(state, typedata, pos); break;
     case OBJ_DOOR:                   _door_update(state, typedata, pos);               break;
     }
     return;
@@ -971,6 +973,32 @@ _end_capsule_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     solid_object_player_interaction(state, &solidity, 0);
 }
 
+static
+void
+_end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    (void)(entry);
+    FRECT solidity = {
+        .x = (pos->vx - 15) << 12,
+        .y = (pos->vy - 8) << 12,
+        .w = 30 << 12,
+        .h = 8 << 12,
+    };
+
+    ObjectCollision collision_side =
+        solid_object_player_interaction(state, &solidity, 0);
+
+    if(collision_side == OBJ_SIDE_TOP) {
+        if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
+            state->anim_state.animation = 1;
+            sound_play_vag(sfx_switch, 0);
+            state->props |= OBJ_FLAG_SWITCH_PRESSED;
+        }
+    } else {
+        state->anim_state.animation = 0;
+        state->props &= ~OBJ_FLAG_SWITCH_PRESSED;
+    }
+}
 
 static void
 _door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)

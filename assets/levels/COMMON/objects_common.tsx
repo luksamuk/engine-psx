@@ -62,6 +62,10 @@
  </tile>
  <tile id="17" type="bubble"/>
  <tile id="18" type="end_capsule"/>
- <tile id="19" type="end_capsule_button"/>
+ <tile id="19" type="end_capsule_button">
+  <properties>
+   <property name="parent" type="object" value="0"/>
+  </properties>
+ </tile>
  <tile id="20" type="door"/>
 </tileset>
