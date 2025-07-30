@@ -29,7 +29,9 @@ void
 _emplace_object(
     ChunkObjectData *data, int32_t tx, int32_t ty,
     uint8_t is_level_specific, uint8_t has_fragment,
-    int8_t type, uint8_t flipmask, int32_t vx, int32_t vy, void *extra)
+    int8_t type, uint8_t flipmask, int32_t vx, int32_t vy,
+    uint16_t unique_id, uint16_t parent_id,
+    void *extra)
 {
     if(data->num_objects + 1 >= MAX_OBJECTS_PER_CHUNK) {
         printf("WARNING: Not emplacing extra object. ID: %d, specific? %d\n",
@@ -40,6 +42,8 @@ _emplace_object(
     assert(data->num_objects < MAX_OBJECTS_PER_CHUNK);
 
     state->id = type + (is_level_specific ? MIN_LEVEL_OBJ_GID : 0);
+    state->unique_id = unique_id; // TODO: Connect to children if possible
+    state->parent_id = parent_id; // TODO: Connect to parent if possible
     state->flipmask = flipmask;
 
     state->rx = vx - (tx << 7);
@@ -116,7 +120,8 @@ load_object_placement(const char *filename, void *lvl_data, uint8_t has_started)
     for(uint16_t i = 0; i < num_objects; i++) {
         uint8_t is_level_specific = get_byte(bytes, &b);
         int8_t type = get_byte(bytes, &b);
-        uint16_t unique_id = get_short_be(bytes, &b); // TODO: Should be used to identify objects
+        uint16_t unique_id = get_short_be(bytes, &b); // Should be used to identify objects
+        uint16_t parent_id = get_short_be(bytes, &b); // Identifies a parent if existing
         uint8_t flipmask = get_byte(bytes, &b);
         int32_t vx = get_long_be(bytes, &b);
         int32_t vy = get_long_be(bytes, &b);
@@ -156,15 +161,15 @@ load_object_placement(const char *filename, void *lvl_data, uint8_t has_started)
             // This is a dummy object, so create others in its place.
             switch(type) {
             case OBJ_DUMMY_RINGS_3V:
-                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy - 24, NULL);
-                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy, NULL);
-                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy + 24, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy - 24, 0, 0, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy, 0, 0, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy + 24, 0, 0, NULL);
                 created_objects += 3;
                 break;
             case OBJ_DUMMY_RINGS_3H:
-                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx - 24, vy, NULL);
-                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy, NULL);
-                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx + 24, vy, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx - 24, vy, 0, 0, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx, vy, 0, 0, NULL);
+                _emplace_object(data, cx, cy, 0, 0, OBJ_RING, 0, vx + 24, vy, 0, 0, NULL);
                 created_objects += 3;
                 break;
             case OBJ_DUMMY_STARTPOS:
@@ -189,7 +194,8 @@ load_object_placement(const char *filename, void *lvl_data, uint8_t has_started)
 
                 _emplace_object(data, cx, cy,
                                 is_level_specific, entry->has_fragment,
-                                type, flipmask, vx, vy, extra);
+                                type, flipmask, vx, vy, unique_id, parent_id,
+                                extra);
                 created_objects++;
             }
         }

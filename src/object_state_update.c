@@ -708,6 +708,7 @@ _switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
             // Switch was just pressed; play "beep"
             sound_play_vag(sfx_switch, 0);
+            printf("Parent ID: %d\n", state->parent_id);
         }
         state->props |= OBJ_FLAG_SWITCH_PRESSED;
     } else {

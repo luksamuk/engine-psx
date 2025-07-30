@@ -51,6 +51,7 @@ struct ObjectPlacement {
     u8 is_level_specific;
     ObjectType type;
     be u16 unique_id;
+    be u16 parent_id;
     FlipMask flipmask;
     be s32 vx;
     be s32 vy;

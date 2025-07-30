@@ -60,7 +60,11 @@
     </properties>
    </object>
    <object id="11" gid="90" x="3680" y="848" width="64" height="64" rotation="90"/>
-   <object id="12" gid="94" x="4192" y="448" width="64" height="64"/>
+   <object id="12" gid="94" x="4192" y="448" width="64" height="64">
+    <properties>
+     <property name="parent" type="object" value="231"/>
+    </properties>
+   </object>
    <object id="13" gid="89" x="4048" y="896" width="64" height="64"/>
    <object id="14" gid="90" x="2992" y="848" width="64" height="64"/>
    <object id="15" gid="2147483739" x="3536" y="544" width="64" height="64"/>
@@ -188,9 +192,17 @@
    <object id="175" gid="87" x="9584" y="1248" width="64" height="64"/>
    <object id="176" gid="87" x="9616" y="1248" width="64" height="64"/>
    <object id="177" gid="89" x="9808" y="1152" width="64" height="64"/>
-   <object id="178" gid="94" x="9376" y="768" width="64" height="64"/>
+   <object id="178" gid="94" x="9376" y="768" width="64" height="64">
+    <properties>
+     <property name="parent" type="object" value="179"/>
+    </properties>
+   </object>
    <object id="179" gid="94" x="9504" y="768" width="64" height="64"/>
-   <object id="180" gid="94" x="9632" y="768" width="64" height="64"/>
+   <object id="180" gid="94" x="9632" y="768" width="64" height="64">
+    <properties>
+     <property name="parent" type="object" value="178"/>
+    </properties>
+   </object>
    <object id="183" gid="96" x="10528" y="704" width="64" height="64"/>
    <object id="184" gid="86" x="10450" y="320" width="64" height="64">
     <properties>

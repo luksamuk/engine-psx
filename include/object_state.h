@@ -90,6 +90,8 @@ typedef struct OBJECT_STATE {
     ObjectAnimState *frag_anim_state; // Only exists if fragment also exists
     ObjectFreePos *freepos; // Only exists if object lives in object pool
 
+    // Map reference to parent entity (only static entities allowed)
+    uint16_t parent_id;
     // Pointer to parent entity (NULL unless manually set!)
     ObjectState *parent;
     // Pointer to next object (NULL unless manually set!)

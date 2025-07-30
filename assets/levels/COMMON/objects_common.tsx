@@ -42,6 +42,9 @@
  </tile>
  <tile id="8" type="ring_3h"/>
  <tile id="9" type="switch">
+  <properties>
+   <property name="parent" type="object" value="0"/>
+  </properties>
   <objectgroup draworder="index" id="2">
    <object id="1" x="16" y="48" width="32" height="16"/>
   </objectgroup>
