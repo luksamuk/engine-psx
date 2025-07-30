@@ -32,6 +32,7 @@ typedef enum {
     OBJ_END_CAPSULE            = 0x0f,
     OBJ_END_CAPSULE_BUTTON     = 0x10,
     OBJ_DOOR                   = 0x11,
+    OBJ_ANIMAL                 = 0x12,
 } ObjectType;
 
 #define MASK_FLIP_FLIPX  0x1 // Flip on X axis

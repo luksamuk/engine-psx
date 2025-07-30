@@ -44,6 +44,7 @@ class ObjectId(Enum):
     END_CAPSULE = 0x0F
     END_CAPSULE_BUTTON = 0x10
     DOOR = 0x11
+    ANIMAL = 0x12
 
     @staticmethod
     def get(name):
@@ -66,6 +67,7 @@ class ObjectId(Enum):
             "end_capsule": ObjectId.END_CAPSULE,
             "end_capsule_button": ObjectId.END_CAPSULE_BUTTON,
             "door": ObjectId.DOOR,
+            "animal": ObjectId.ANIMAL,
         }
         result = switch.get(name.lower())
         assert result is not None, f"Unknown common object {name}"

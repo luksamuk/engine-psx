@@ -64,6 +64,7 @@ static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _end_capsule_button_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _door_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _animal_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Level-specific update functions
 extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
@@ -141,6 +142,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     case OBJ_END_CAPSULE:            _end_capsule_update(state, typedata, pos);        break;
     case OBJ_END_CAPSULE_BUTTON:     _end_capsule_button_update(state, typedata, pos); break;
     case OBJ_DOOR:                   _door_update(state, typedata, pos);               break;
+    case OBJ_ANIMAL:                 _animal_update(state, typedata, pos);             break;
     }
     return;
 
@@ -973,8 +975,7 @@ _end_capsule_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     solid_object_player_interaction(state, &solidity, 0);
 }
 
-static
-void
+static void
 _end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
     (void)(entry);
@@ -1015,4 +1016,10 @@ _door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         .h = 64 << 12,
     };
     solid_object_player_interaction(state, &solidity, 0);
+}
+
+static void
+_animal_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+{
+    
 }

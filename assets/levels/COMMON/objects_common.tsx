@@ -68,4 +68,9 @@
   </properties>
  </tile>
  <tile id="20" type="door"/>
+ <tile id="21" type="animal">
+  <properties>
+   <property name="subtype" type="int" value="0"/>
+  </properties>
+ </tile>
 </tileset>

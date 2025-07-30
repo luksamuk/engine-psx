@@ -715,6 +715,35 @@ loopback = 0
 frames = [[224, 256, 16, 64]]
 
 # ============
+
+[animal]
+
+# ------------
+
+[[animal.animations]]
+id = 0
+name = "flicky_stop"
+duration = 0
+loopback = 0
+frames = [[160, 312, 16, 24]]
+
+[[animal.animations]]
+id = 1
+name = "flicky_up"
+duration = 0
+loopback = 0
+frames = [[176, 312, 16, 16]]
+
+[[animal.animations]]
+id = 2
+name = "flicky_down"
+duration = 0
+loopback = 0
+frames = [[192, 312, 16, 16]]
+
+# ------------
+
+# ============
 # Dummy objects
 # ============
 
