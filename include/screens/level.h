@@ -8,6 +8,7 @@ typedef enum {
     LEVEL_MODE_RECORD,
     LEVEL_MODE_DEMO,
     LEVEL_MODE_FINISHED,
+    LEVEL_MODE_FINISHED2,
 } LEVELMODE;
 
 typedef enum {

@@ -1006,10 +1006,15 @@ _end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *
                     int32_t vy = (pos->vy + 64) << 12;
                     int32_t parts_vy = (pos->vy + 40) << 12;
 
+                    camera_focus(camera, vx, vy - (CENTERY << 11));
+                    pause_elapsed_frames();
+                    state->timer = 181;
+                    level_finished = 2; // Finish but don't go beyond end
+
                     // Explosion
                     PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
-                    explosion->freepos.vx = (pos->vx << 12);
-                    explosion->freepos.vy = ((pos->vy + 12 + 16) << 12);
+                    explosion->freepos.vx = vx;
+                    explosion->freepos.vy = vy + ((12 + 16) << 12);
                     explosion->state.anim_state.animation = 0; // Small explosion
 
                     // Animals
@@ -1048,6 +1053,14 @@ _end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *
     } else {
         state->anim_state.animation = 0;
         state->props &= ~OBJ_FLAG_SWITCH_PRESSED;
+    }
+
+    if((state->parent != NULL) && (state->parent->props & OBJ_FLAG_CAPSULE_OPEN)) {
+        if(state->timer > 0) state->timer--;
+        if(state->timer == 1) {
+            screen_level_setmode(LEVEL_MODE_FINISHED2);
+            screen_level_transition_start_timer();
+        }
     }
 }
 
