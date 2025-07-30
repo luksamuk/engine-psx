@@ -1018,8 +1018,51 @@ _door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     solid_object_player_interaction(state, &solidity, 0);
 }
 
+#define ANIMAL_GRAVITY 0x00380
+#define ANIMAL_XSPD    0x04000
+#define ANIMAL_JMP_SPD 0x06000
+
 static void
-_animal_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+_animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
-    
+    (void)(entry);
+    // Should only exist as a free object
+    if(state->freepos == NULL) state->props |= OBJ_FLAG_DESTROYED;
+
+    // Timer countdown to begin movement
+    if(state->timer > 0) {
+        state->timer--;
+        return;
+    }
+
+    if(object_should_despawn(state)) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
+
+    state->freepos->spdy += ANIMAL_GRAVITY;
+
+    // When hitting the ground, ensure that the animal moves horizontally
+    // as well
+    if(state->freepos->spdy > 0) {
+        CollisionEvent grn = linecast(pos->vx, pos->vy - 8, CDIR_FLOOR, 8, CDIR_FLOOR);
+        if(grn.collided) {
+            state->freepos->spdx = ANIMAL_XSPD * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+            state->freepos->spdy = -ANIMAL_JMP_SPD;
+        }
+    }
+
+    // Animation control
+    uint8_t animation;
+    if(state->freepos->spdx == 0) {
+        animation = 0;
+    } else {
+        animation = (state->freepos->spdy < 0) ? 1 : 2;
+    }
+    // Leverage subtype for multiple animals
+    animation += (state->subtype * 3);
+
+    state->anim_state.animation = animation;
+    state->freepos->vx += state->freepos->spdx;
+    state->freepos->vy += state->freepos->spdy;
 }

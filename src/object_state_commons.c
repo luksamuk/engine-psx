@@ -106,6 +106,14 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
             explosion->freepos.vy = (pos->vy << 12);
             explosion->state.anim_state.animation = 0; // Small explosion
 
+            // Animal
+            PoolObject *animal = object_pool_create(OBJ_ANIMAL);
+            animal->state.subtype = rand() % 4;
+            animal->freepos.vx = (pos->vx << 12);
+            animal->freepos.vy = (pos->vy << 12);
+            animal->state.flipmask |= MASK_FLIP_FLIPX;
+            animal->freepos.spdy = -0x05000;
+
             if(!player->grnd && player->vel.vy > 0) {
                 player->vel.vy *= -1;
             }

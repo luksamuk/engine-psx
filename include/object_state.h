@@ -84,7 +84,7 @@ typedef struct OBJECT_STATE {
     int16_t rx, ry; // Positions relative to chunk top-left corner
     int16_t timer;
     int16_t timer2;
-    int16_t _padding0; // Unused for now
+    uint16_t subtype;
     void    *extra;
 
     ObjectAnimState anim_state;

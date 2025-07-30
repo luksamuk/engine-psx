@@ -741,6 +741,75 @@ duration = 0
 loopback = 0
 frames = [[192, 312, 16, 16]]
 
+# ==
+
+[[animal.animations]]
+id = 3
+name = "cucky_stop"
+duration = 0
+loopback = 0
+frames = [[160, 336, 16, 24]]
+
+[[animal.animations]]
+id = 4
+name = "cucky_up"
+duration = 0
+loopback = 0
+frames = [[176, 336, 16, 16]]
+
+[[animal.animations]]
+id = 5
+name = "cucky_down"
+duration = 0
+loopback = 0
+frames = [[192, 336, 16, 16]]
+
+# ==
+
+[[animal.animations]]
+id = 6
+name = "pocky_stop"
+duration = 0
+loopback = 0
+frames = [[160, 360, 16, 24]]
+
+[[animal.animations]]
+id = 7
+name = "pocky_up"
+duration = 0
+loopback = 0
+frames = [[176, 360, 16, 24]]
+
+[[animal.animations]]
+id = 8
+name = "pocky_down"
+duration = 0
+loopback = 0
+frames = [[192, 360, 16, 24]]
+
+# ==
+
+[[animal.animations]]
+id = 9
+name = "ricky_stop"
+duration = 0
+loopback = 0
+frames = [[160, 384, 16, 24]]
+
+[[animal.animations]]
+id = 10
+name = "ricky_up"
+duration = 0
+loopback = 0
+frames = [[176, 384, 24, 16]]
+
+[[animal.animations]]
+id = 11
+name = "ricky_down"
+duration = 0
+loopback = 0
+frames = [[200, 384, 24, 16]]
+
 # ------------
 
 # ============
