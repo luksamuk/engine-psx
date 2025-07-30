@@ -61,6 +61,7 @@ static void _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _door_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Level-specific update functions
 extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
@@ -136,6 +137,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     case OBJ_BUBBLE_PATCH:           _bubble_patch_update(state, typedata, pos);       break;
     case OBJ_BUBBLE:                 _bubble_update(state, typedata, pos);             break;
     case OBJ_END_CAPSULE:            _end_capsule_update(state, typedata, pos);        break;
+    case OBJ_DOOR:                   _door_update(state, typedata, pos);               break;
     }
     return;
 
@@ -911,5 +913,23 @@ _end_capsule_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         .h = solidity.h << 12,
     };
 
+    solid_object_player_interaction(state, &solidity, 0);
+}
+
+
+static void
+_door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    (void)(entry);
+    // TODO.
+    // Idea: If not-free: keep being static.
+    // If free: move down.
+
+    FRECT solidity = {
+        .x = (pos->vx - 8) << 12,
+        .y = (pos->vy - 64) << 12,
+        .w = 16 << 12,
+        .h = 64 << 12,
+    };
     solid_object_player_interaction(state, &solidity, 0);
 }
