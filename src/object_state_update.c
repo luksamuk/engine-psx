@@ -708,9 +708,8 @@ _switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         state->anim_state.animation = 1;
         if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
             uint8_t sound = 0;
-            printf("Parent ID: %d // Parent: %p type: %d\n",
-                   state->parent_id, state->parent, state->parent ? state->parent->id : -1);
-
+            /* printf("Parent ID: %d // Parent: %p type: %d\n", */
+            /*        state->parent_id, state->parent, state->parent ? state->parent->id : -1); */
             if((state->parent != NULL) && !(state->parent->props & OBJ_FLAG_DESTROYED)) {
                 if((state->child != NULL) && (state->child->id == OBJ_SWITCH)) {
                     // Logics 1 and 3 are treated here
@@ -735,7 +734,6 @@ _switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                         } else {
                             // Otherwise set my puzzle flag
                             state->props |= OBJ_FLAG_SWITCH_PUZZLE;
-                            printf("Puzzle flag\n");
                         }
                     }
                 } else if(state->parent->id == OBJ_DOOR) {
@@ -744,7 +742,6 @@ _switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                         // Kill the door, do a destruction sound
                         state->parent->props |= OBJ_FLAG_DESTROYED;
                         sound = 1;
-                        printf("Kill parent\n");
                     } /* else if(state->child->id == OBJ_SWITCH) {} */
                     // Logic 1: Parent is a door + I have a button child (puzzle last chain)
                     // If my child doesn't have an active puzzle flag active,
