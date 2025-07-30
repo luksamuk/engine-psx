@@ -457,6 +457,9 @@
 	<file name="DROWN.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/DROWN.VAG" />
+	<file name="DESTROY.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/DESTROY.VAG" />
       </dir>
 
       <dummy sectors="1024"/>
