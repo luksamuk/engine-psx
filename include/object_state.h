@@ -92,8 +92,10 @@ typedef struct OBJECT_STATE {
 
     // Map reference to parent entity (only static entities allowed)
     uint16_t parent_id;
-    // Pointer to parent entity (NULL unless manually set!)
+    /* NOTE: Sometimes the following pointers are used on free objects */
+    // Pointer to parent/child entity (NULL unless manually set!)
     ObjectState *parent;
+    ObjectState *child;
     // Pointer to next object (NULL unless manually set!)
     ObjectState *next;
 } ObjectState;

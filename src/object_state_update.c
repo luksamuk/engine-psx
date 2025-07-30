@@ -708,7 +708,8 @@ _switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
             // Switch was just pressed; play "beep"
             sound_play_vag(sfx_switch, 0);
-            printf("Parent ID: %d\n", state->parent_id);
+            printf("Parent ID: %d // Parent: %p type: %d\n",
+                   state->parent_id, state->parent, state->parent ? state->parent->id : -1);
         }
         state->props |= OBJ_FLAG_SWITCH_PRESSED;
     } else {
@@ -927,9 +928,9 @@ _door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     // If free: move down.
 
     FRECT solidity = {
-        .x = (pos->vx - 8) << 12,
+        .x = (pos->vx - 5) << 12,
         .y = (pos->vy - 64) << 12,
-        .w = 16 << 12,
+        .w = 12 << 12,
         .h = 64 << 12,
     };
     solid_object_player_interaction(state, &solidity, 0);

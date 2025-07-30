@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <strings.h>
 
 #include "object.h"
 #include "object_state.h"
@@ -24,6 +25,106 @@ extern uint16_t       level_ring_max;
 
 extern ObjectTable *obj_table_common;
 extern ObjectTable *obj_table_level;
+
+
+
+// Takes up to 12KB of object state table
+// (8KB emplaceds, 4KB awaiting references, 4B num_awaiting)
+#define MAX_LEVEL_OBJECTS 2000
+
+typedef struct {
+    ObjectState **emplaceds;
+    uint16_t    *awaiting_parent; // References awaiting a parent
+    uint32_t    num_awaiting;
+} ObjectPlacementIndex;
+
+static ObjectPlacementIndex *placement_idx = NULL;
+
+// ---- Functions to manipulate this data structure ---
+// Initialize placement index
+void
+init_placement_index(ObjectPlacementIndex *idx)
+{
+    idx->emplaceds = (ObjectState **)malloc(sizeof(ObjectState *) * MAX_LEVEL_OBJECTS);
+    idx->awaiting_parent = (uint16_t *)malloc(sizeof(uint16_t) * MAX_LEVEL_OBJECTS);
+    bzero(idx->emplaceds, sizeof(ObjectState *) * MAX_LEVEL_OBJECTS);
+    bzero(idx->awaiting_parent, sizeof(uint16_t) * MAX_LEVEL_OBJECTS);
+    idx->num_awaiting = 0;
+}
+
+// Destroy placement index
+void
+destroy_placement_index(ObjectPlacementIndex *idx)
+{
+    free(idx->emplaceds);
+    free(idx->awaiting_parent);
+    idx->num_awaiting = 0;
+}
+
+void
+placement_index_add_emplaced(ObjectPlacementIndex *idx, ObjectState *st)
+{
+    if(st->unique_id == 0) return; // Ignore certain objects
+    idx->emplaceds[st->unique_id] = st;
+}
+
+void
+placement_index_add_awaiting(ObjectPlacementIndex *idx, ObjectState *st)
+{
+    idx->awaiting_parent[idx->num_awaiting++] = st->unique_id;
+}
+
+void
+placement_index_remove_awaiting_at(ObjectPlacementIndex *idx, uint32_t n)
+{
+    if(n >= idx->num_awaiting) return;
+    for(uint32_t i = n; i < idx->num_awaiting; i++) {
+        idx->awaiting_parent[i] = idx->awaiting_parent[i+1];
+    }
+    idx->num_awaiting--;
+}
+
+// ---- entry points for placement index ----
+
+void
+placement_index_add_parent(ObjectPlacementIndex *idx, ObjectState *parent)
+{
+    if(parent->unique_id == 0) return;
+    idx->emplaceds[parent->unique_id] = parent;
+}
+
+void
+placement_index_find_child(ObjectPlacementIndex *idx, ObjectState *parent)
+{
+    // I am a parent that has been emplaced, and I'm looking for my only child!
+    // Worst case scenario: I don't find any child
+    for(uint32_t i = 0; i < idx->num_awaiting; i++) {
+        ObjectState *orphan = idx->emplaceds[idx->awaiting_parent[i]];
+        if(orphan->parent_id == parent->unique_id) {
+            orphan->parent = parent;
+            parent->child = orphan;
+            placement_index_remove_awaiting_at(idx, i);
+            return;
+        }
+    }
+}
+
+void
+placement_index_try_find_parent(ObjectPlacementIndex *idx, ObjectState *orphan)
+{
+    // I have just been created, and I know my parent's ID.
+    // If it exists, attribute it.
+    // If it doesn't, send me to the orphanage.
+    ObjectState *parent = idx->emplaceds[orphan->parent_id];
+    if(parent != NULL) {
+        orphan->parent = parent;
+        parent->child = orphan;
+        return;
+    }
+    placement_index_add_awaiting(idx, orphan);
+}
+
+// --------
 
 void
 _emplace_object(
@@ -98,6 +199,14 @@ _emplace_object(
         camera_set_right_bound(camera, (vx << 12) + ((CENTERX >> 1) << 12));
         break;
     };
+
+    // Try and find parent and child
+    state->parent = state->child = state->next = NULL;
+    placement_index_add_parent(placement_idx, state);
+    if(state->parent_id != 0) {
+        placement_index_try_find_parent(placement_idx, state);
+    }
+    placement_index_find_child(placement_idx, state);
 }
 
 void
@@ -107,6 +216,7 @@ load_object_placement(const char *filename, void *lvl_data, uint8_t has_started)
     uint8_t *bytes;
     uint32_t b, length;
 
+    // Slurp object placement file
     bytes = file_read(filename, &length);
     if(bytes == NULL) {
         printf("Error reading OTD file %s from the CD.\n", filename);
@@ -114,6 +224,10 @@ load_object_placement(const char *filename, void *lvl_data, uint8_t has_started)
     }
 
     b = 0;
+
+    // Prepare object reference list and sentinels
+    placement_idx = (ObjectPlacementIndex *)malloc(sizeof(ObjectPlacementIndex));
+    init_placement_index(placement_idx);
 
     uint16_t created_objects = 0;
     uint16_t num_objects = get_short_be(bytes, &b);
@@ -203,6 +317,12 @@ load_object_placement(const char *filename, void *lvl_data, uint8_t has_started)
 
     printf("Loaded %d objects.\n", created_objects);
 
+    // Destroy object placement index
+    destroy_placement_index(placement_idx);
+    free(placement_idx);
+    placement_idx = NULL;
+
+    // Free slurped file
     free(bytes);
 }
 
@@ -229,6 +349,12 @@ unload_object_placements(void *lvl_data)
                 if(obj->id == OBJ_CHECKPOINT) {
                     // Hey, look, IT'S BUBBLESORT!!!!
                     if(cnk->num_objects != j) {
+                        // Notice that ANY REFERENCE ON PARENT/CHILD OBJECTS
+                        // WILL BE LOST ON THIS PROCESS. SO >>DO NOT<< USE
+                        // OBJECT REFERENCES WITHIN CHECKPOINTS, PERIOD.
+                        obj->parent_id = 0;
+                        obj->parent = obj->child = obj->next = NULL;
+
                         memcpy(&cnk->objects[cnk->num_objects], obj, sizeof(ObjectState));
                         obj->props |= OBJ_FLAG_DESTROYED;
                         cnk->objects[j].props |= OBJ_FLAG_DESTROYED;
