@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="6" nextobjectid="216">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="6" nextobjectid="218">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="101" source="../COMMON/objects_common.tsx"/>
  <tileset firstgid="125" source="objects.tsx"/>
@@ -170,12 +170,14 @@
     </properties>
    </object>
    <object id="156" gid="103" x="4848" y="1728" width="64" height="64"/>
-   <object id="157" gid="105" x="1528" y="832" width="64" height="64"/>
-   <object id="158" gid="105" x="1568" y="832" width="64" height="64"/>
-   <object id="159" gid="105" x="1608" y="832" width="64" height="64"/>
-   <object id="160" gid="1073741929" x="1528" y="640" width="64" height="64"/>
-   <object id="161" gid="1073741929" x="1568" y="640" width="64" height="64"/>
-   <object id="162" gid="1073741929" x="1608" y="640" width="64" height="64"/>
+   <object id="157" gid="105" x="1520" y="832" width="64" height="64"/>
+   <object id="158" gid="105" x="1552" y="832" width="64" height="64"/>
+   <object id="159" gid="105" x="1584" y="832" width="64" height="64"/>
+   <object id="216" gid="105" x="1616" y="832" width="64" height="64"/>
+   <object id="160" gid="1073741929" x="1520" y="640" width="64" height="64"/>
+   <object id="161" gid="1073741929" x="1552" y="640" width="64" height="64"/>
+   <object id="162" gid="1073741929" x="1584" y="640" width="64" height="64"/>
+   <object id="217" gid="1073741929" x="1616" y="640" width="64" height="64"/>
    <object id="163" gid="111" x="1567" y="717" width="64" height="64"/>
    <object id="164" gid="111" x="1546" y="731" width="64" height="64"/>
    <object id="165" gid="111" x="1589" y="731" width="64" height="64"/>
