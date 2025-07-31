@@ -120,6 +120,8 @@ version.
   soon since object states now have a  proper subtype slot, but this memory leak
   will be insignificant on most scenarios,  and should only cause problems after
   an unrealistic number of respawns.
+- Tails's tail  has no  hitbox: When flying,  Tails's tail cannot  be used  as a
+  form of attack, so flying underneath bosses and enemies will hurt Tails.
 
 * v0.1 (2025-04-24)
 
