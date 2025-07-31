@@ -89,6 +89,7 @@ typedef struct {
     uint8_t   anim_timer;
     uint8_t   tail_anim_frame;
     uint8_t   tail_anim_timer;
+    uint8_t   tail_anim_frame_duration;
     uint8_t   frame_duration;
     uint8_t   loopback_frame;
     int8_t    anim_dir;

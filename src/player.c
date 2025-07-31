@@ -251,7 +251,13 @@ _player_set_tail_animation(Player *player, uint32_t anim_sum)
     if(tail_anim != player->tail_cur_anim) {
         player->tail_cur_anim = tail_anim;
         player->tail_anim_frame = tail_anim->start;
-        player->tail_anim_timer = 7;
+        switch(tail_anim->hname) {
+        default: player->tail_anim_frame_duration = 7; break;
+        case ANIM_TAILFLY:
+            player->tail_anim_frame_duration = 2;
+            break;
+        }
+        player->tail_anim_timer = player->tail_anim_frame_duration;
     }
 }
 
@@ -1547,11 +1553,12 @@ player_update(Player *player)
         } else player->anim_timer--;
     }
 
+    // Tail animation update
     if((player->character == CHARA_MILES) && player->tail_cur_anim) {
         if(player->tail_cur_anim->start >= player->tail_cur_anim->end)
             player->tail_anim_frame = player->tail_cur_anim->start;
         else if(player->tail_anim_timer == 0) {
-            player->tail_anim_timer = 7; // Tail animation frame duration
+            player->tail_anim_timer = player->tail_anim_frame_duration;
             player->tail_anim_frame++;
             if(player->tail_anim_frame > player->tail_cur_anim->end) {
                 player->tail_anim_frame = player->tail_cur_anim->start; // No loopback
