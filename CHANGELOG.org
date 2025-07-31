@@ -104,6 +104,22 @@ version.
 - [R3] Changes to level layout to prevent Knuckles from gliding infinitely
 - Many changes to level layouts in general
 
+** Known bugs
+
+- Collision issues: random speed resets may occur on some wavy ramps, especially
+  on  the  Test Level.  This  is  because of  how  collision  is resolved  along
+  linecasts, and will be solved at collision refactoring.
+- Lack of  360° collision:  The full  360 degree  collision modes  are currently
+  deactivated on  code because they  still need  work. Levels presented  in this
+  demo do not have big loops, so it is not really a concern for gameplay on main
+  levels.
+- Small memory leak when respawning level:  For each item monitor respawned when
+  the  player dies,  a memory  leak of  a  single byte  or two  may occur  since
+  monitors use "extra properties" to determine their subtype. This will be fixed
+  soon since object states now have a  proper subtype slot, but this memory leak
+  will be insignificant on most scenarios,  and should only cause problems after
+  an unrealistic number of respawns.
+
 * v0.1 (2025-04-24)
 
 This is the  first version to use semantic versioning.  This makes very profound
