@@ -104,6 +104,7 @@ version.
 - [R3] Changes to level layout to prevent Knuckles from gliding infinitely
 - Many changes to level layouts in general
 - Add pause menu when debug mode is inactive
+- Fix Tails's tail slightly dislocated when walking on slopes
 
 ** Known bugs
 
@@ -122,6 +123,9 @@ version.
   an unrealistic number of respawns.
 - Tails's tail  has no  hitbox: When flying,  Tails's tail cannot  be used  as a
   form of attack, so flying underneath bosses and enemies will hurt Tails.
+- Characters  may   appear  slightly  above   ground  on  certain   objects  and
+  platforms. This behaviour relates to how character rendering works and will be
+  fixed once the new 360° collision feature is refactored.
 
 * v0.1 (2025-04-24)
 
