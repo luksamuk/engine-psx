@@ -203,6 +203,7 @@ screen_title_update(void *d)
                         // Go to Engine Test
                         screen_level_setlevel(0);
                         screen_level_setmode(LEVEL_MODE_NORMAL);
+                        screen_level_setcharacter(CHARA_SONIC);
                         data->next_scene = SCREEN_CHARSELECT;
                         level_score_count = 0;
                         break;
@@ -211,6 +212,7 @@ screen_title_update(void *d)
                         // Use Surely Wood Zone 1 as first level
                         screen_level_setlevel(6);
                         screen_level_setmode(LEVEL_MODE_NORMAL);
+                        screen_level_setcharacter(CHARA_SONIC);
                         data->next_scene = SCREEN_CHARSELECT;
                         level_score_count = 0;
                         break;
