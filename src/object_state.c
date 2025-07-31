@@ -196,6 +196,7 @@ _emplace_object(
         }
         break;
     case OBJ_GOAL_SIGN:
+    case OBJ_END_CAPSULE:
         camera_set_right_bound(camera, (vx << 12) + ((CENTERX >> 1) << 12));
         break;
     };

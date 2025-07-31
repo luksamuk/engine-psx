@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="7" nextobjectid="261">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="7" nextobjectid="263">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="101" source="../COMMON/objects_common.tsx"/>
- <tileset firstgid="121" source="objects.tsx"/>
+ <tileset firstgid="125" source="objects.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,19,19,2,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,12,12,12,12,12,12,12,12,12,12,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -40,7 +40,6 @@
  </layer>
  <group id="3" name="OBJECTS">
   <objectgroup id="4" name="COMMON">
-   <object id="58" gid="112" x="10528" y="2048" width="64" height="64"/>
    <object id="59" gid="102" x="113.063" y="672" width="64" height="64">
     <properties>
      <property name="Kind" value="SPEEDSHOES"/>
@@ -215,21 +214,23 @@
    <object id="258" gid="1073741927" x="6128" y="384" width="64" height="64"/>
    <object id="259" gid="1073741927" x="6800" y="512" width="64" height="64"/>
    <object id="260" gid="1073741927" x="6768" y="512" width="64" height="64"/>
+   <object id="261" gid="119" x="10528" y="2048" width="64" height="64"/>
+   <object id="262" gid="120" x="10528" y="1984" width="64" height="64"/>
   </objectgroup>
   <objectgroup id="6" name="LEVEL">
-   <object id="236" gid="121" x="1024" y="704" width="64" height="64"/>
-   <object id="237" gid="121" x="2613" y="576" width="64" height="64"/>
-   <object id="238" gid="121" x="4131" y="832.5" width="64" height="64"/>
-   <object id="239" gid="121" x="3408" y="672" width="64" height="64"/>
-   <object id="240" gid="121" x="3712" y="1280" width="64" height="64"/>
-   <object id="241" gid="121" x="4480" y="1408" width="64" height="64"/>
-   <object id="242" gid="121" x="4352" y="1408" width="64" height="64"/>
-   <object id="243" gid="121" x="5504" y="1984" width="64" height="64"/>
-   <object id="244" gid="121" x="6767" y="1024" width="64" height="64"/>
-   <object id="245" gid="121" x="6528" y="2048" width="64" height="64"/>
-   <object id="246" gid="121" x="6784" y="2048" width="64" height="64"/>
-   <object id="247" gid="121" x="7100" y="1728" width="64" height="64"/>
-   <object id="248" gid="123" x="9762" y="2048" width="64" height="64"/>
+   <object id="236" gid="125" x="1024" y="704" width="64" height="64"/>
+   <object id="237" gid="125" x="2613" y="576" width="64" height="64"/>
+   <object id="238" gid="125" x="4131" y="832.5" width="64" height="64"/>
+   <object id="239" gid="125" x="3408" y="672" width="64" height="64"/>
+   <object id="240" gid="125" x="3712" y="1280" width="64" height="64"/>
+   <object id="241" gid="125" x="4480" y="1408" width="64" height="64"/>
+   <object id="242" gid="125" x="4352" y="1408" width="64" height="64"/>
+   <object id="243" gid="125" x="5504" y="1984" width="64" height="64"/>
+   <object id="244" gid="125" x="6767" y="1024" width="64" height="64"/>
+   <object id="245" gid="125" x="6528" y="2048" width="64" height="64"/>
+   <object id="246" gid="125" x="6784" y="2048" width="64" height="64"/>
+   <object id="247" gid="125" x="7100" y="1728" width="64" height="64"/>
+   <object id="248" gid="127" x="9762" y="2048" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

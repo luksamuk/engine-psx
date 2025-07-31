@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="7" nextobjectid="269">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="255" height="31" tilewidth="128" tileheight="128" infinite="0" backgroundcolor="#3f007f" nextlayerid="7" nextobjectid="271">
  <tileset firstgid="1" source="128x128.tsx"/>
  <tileset firstgid="101" source="../COMMON/objects_common.tsx"/>
- <tileset firstgid="121" source="objects.tsx"/>
+ <tileset firstgid="125" source="objects.tsx"/>
  <layer id="1" name="LAYER0" width="255" height="31">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,0,0,0,0,0,0,0,0,0,12,12,12,12,12,0,0,0,0,0,12,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -40,7 +40,6 @@
  </layer>
  <group id="3" name="OBJECTS">
   <objectgroup id="4" name="COMMON">
-   <object id="208" gid="112" x="17691" y="3072" width="64" height="64"/>
    <object id="209" gid="102" x="-16" y="320" width="64" height="64">
     <properties>
      <property name="Kind" value="SPEEDSHOES"/>
@@ -120,14 +119,20 @@
    <object id="265" gid="104" x="16384" y="3072" width="64" height="64"/>
    <object id="266" gid="109" x="16512" y="3072" width="64" height="64"/>
    <object id="268" gid="104" x="4224" y="3520" width="64" height="64"/>
+   <object id="269" gid="119" x="17691" y="3072" width="64" height="64"/>
+   <object id="270" gid="120" x="17691" y="3008" width="64" height="64">
+    <properties>
+     <property name="parent" type="object" value="269"/>
+    </properties>
+   </object>
   </objectgroup>
   <objectgroup id="6" name="LEVEL">
-   <object id="258" gid="121" x="1792" y="480" width="64" height="64"/>
-   <object id="259" gid="121" x="2944" y="3328" width="64" height="64"/>
-   <object id="260" gid="121" x="5248" y="3584" width="64" height="64"/>
-   <object id="263" gid="121" x="6721" y="3328" width="64" height="64"/>
-   <object id="264" gid="123" x="16930" y="3072" width="64" height="64"/>
-   <object id="267" gid="121" x="4530" y="3328" width="64" height="64"/>
+   <object id="258" gid="125" x="1792" y="480" width="64" height="64"/>
+   <object id="259" gid="125" x="2944" y="3328" width="64" height="64"/>
+   <object id="260" gid="125" x="5248" y="3584" width="64" height="64"/>
+   <object id="263" gid="125" x="6721" y="3328" width="64" height="64"/>
+   <object id="264" gid="127" x="16930" y="3072" width="64" height="64"/>
+   <object id="267" gid="125" x="4530" y="3328" width="64" height="64"/>
   </objectgroup>
  </group>
 </map>

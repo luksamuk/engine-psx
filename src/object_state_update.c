@@ -1014,7 +1014,7 @@ _end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *
                     // Explosion
                     PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
                     explosion->freepos.vx = vx;
-                    explosion->freepos.vy = vy + ((12 + 16) << 12);
+                    explosion->freepos.vy = (pos->vy + (12 + 16)) << 12;
                     explosion->state.anim_state.animation = 0; // Small explosion
 
                     // Animals
