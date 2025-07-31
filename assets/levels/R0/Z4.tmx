@@ -215,7 +215,11 @@
    <object id="259" gid="1073741927" x="6800" y="512" width="64" height="64"/>
    <object id="260" gid="1073741927" x="6768" y="512" width="64" height="64"/>
    <object id="261" gid="119" x="10528" y="2048" width="64" height="64"/>
-   <object id="262" gid="120" x="10528" y="1984" width="64" height="64"/>
+   <object id="262" gid="120" x="10528" y="1984" width="64" height="64">
+    <properties>
+     <property name="parent" type="object" value="261"/>
+    </properties>
+   </object>
   </objectgroup>
   <objectgroup id="6" name="LEVEL">
    <object id="236" gid="125" x="1024" y="704" width="64" height="64"/>
