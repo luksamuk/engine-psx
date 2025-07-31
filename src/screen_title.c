@@ -14,7 +14,7 @@
 
 #include "screens/level.h"
 
-#define AUTODEMO_WAIT_FRAMES 1500
+#define AUTODEMO_WAIT_FRAMES 1620
 
 #ifdef ALLOW_DEBUG
 extern int      debug_mode;
