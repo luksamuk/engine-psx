@@ -30,7 +30,6 @@ else()
 endif()
 
 # Allows debug mode. Debug can be activated through the options menu at will,
-
 add_definitions("-DALLOW_DEBUG")
 
 set(CMAKE_C_FLAGS "-Wall")

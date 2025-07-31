@@ -103,6 +103,7 @@ version.
 - Add animals when destroying badniks and opening end capsules
 - [R3] Changes to level layout to prevent Knuckles from gliding infinitely
 - Many changes to level layouts in general
+- Add pause menu when debug mode is inactive
 
 ** Known bugs
 
