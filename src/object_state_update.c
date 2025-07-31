@@ -999,6 +999,8 @@ _end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *
                 if(!(state->parent->props & OBJ_FLAG_CAPSULE_OPEN)) {
                     state->parent->props |= OBJ_FLAG_CAPSULE_OPEN;
                     state->parent->anim_state.animation = 1;
+                    state->parent->frag_anim_state->animation = 1;
+                    state->parent->frag_anim_state->frame = 0;
                     sound = 1;
 
                     /* Create objects */
