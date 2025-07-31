@@ -1765,7 +1765,7 @@ player_draw(Player *player, VECTOR *pos)
                         (int16_t)(pos->vx >> 12),
                         (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : (is_gliding ? 8 : 0)),
                         facing_left ? 6 : 2,
-                        9,
+                        8,
                         facing_left,
                         ((is_zero_angle || is_lowered_animation) ? 0 : anim_angle));
         /* chara_draw_gte(&player->chara, */
@@ -1822,7 +1822,7 @@ player_draw(Player *player, VECTOR *pos)
                         (int16_t)(pos->vx >> 12) - (is_rolling ? tail_distance_x : 0),
                         (int16_t)(pos->vy >> 12) - (is_rolling ? tail_distance_y : 0),
                         is_rolling ? 0 : (facing_left ? 6 : 2),
-                        9,
+                        8,
                         facing_left,
                         tail_angle);
         
