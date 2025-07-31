@@ -424,6 +424,8 @@ _spring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t
                 if(!player->grnd) player->vel.vx = is_red ? 0x10000 : 0xa000;
                 player->ctrllock = 16;
                 player->anim_dir = 1;
+                player->push = 0;
+                player->pushed_object = NULL;
                 if(player->action != ACTION_ROLLING)
                     player_set_action(player, ACTION_NONE);
                 break;
@@ -432,6 +434,8 @@ _spring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t
                 if(!player->grnd) player->vel.vx = is_red ? -0x10000 : -0xa000;
                 player->ctrllock = 16;
                 player->anim_dir = -1;
+                player->push = 0;
+                player->pushed_object = NULL;
                 if(player->action != ACTION_ROLLING)
                     player_set_action(player, ACTION_NONE);
                 break;
