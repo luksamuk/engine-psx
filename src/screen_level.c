@@ -36,6 +36,7 @@ static PlayerCharacter level_character = CHARA_SONIC;
 // Accessible in other source
 Player      *player;
 uint8_t     paused = 0;
+uint8_t     paused_selection = 0;
 TileMap16   *map16;
 TileMap128  *map128;
 LevelData   *leveldata;
@@ -468,7 +469,10 @@ screen_level_update(void *d)
            && !level_finished
            && (data->level_transition == LEVEL_TRANS_GAMEPLAY)) {
             paused = !paused;
-            if(paused) sound_cdda_set_mute(1);
+            if(paused) {
+                paused_selection = 0;
+                sound_cdda_set_mute(1);
+            }
             else sound_cdda_set_mute(0);
         }
     } else {
@@ -524,6 +528,37 @@ screen_level_update(void *d)
             if(pad_pressed(PAD_SELECT)) {
                 scene_change(SCREEN_LEVELSELECT);
                 return;
+            }
+        } else {
+            if(pad_pressed(PAD_DOWN)) {
+                if(paused_selection < 2) {
+                    sound_play_vag(sfx_switch, 0);
+                    paused_selection++;
+                }
+            }
+            else if(pad_pressed(PAD_UP)) {
+                if(paused_selection > 0) {
+                    sound_play_vag(sfx_switch, 0);
+                    paused_selection--;
+                }
+            }
+            else if(
+                // Let code above handle un-pausing with start,
+                // since we may want to unpause during debug mode
+                (pad_pressed(PAD_START) && (paused_selection > 0))
+                || pad_pressed(PAD_CROSS)) {
+                paused = 0;
+                switch(paused_selection) {
+                default: // Case 0 -- Continue
+                    sound_cdda_set_mute(0);
+                    break;
+                case 1: // Restart
+                    screen_level_player_respawn();
+                    return;
+                case 2: // Quit
+                    scene_change(SCREEN_TITLE);
+                    return;
+                }
             }
         }
         
@@ -804,14 +839,28 @@ screen_level_draw(void *d)
     }
 
     // Pause text
-    if(paused) {
-        const char *line1 = "Paused";
-        int16_t x = CENTERX - (strlen(line1) * 4);
-        font_set_color(
-            LERPC(level_fade, 0xc8),
-            LERPC(level_fade, 0xc8),
-            LERPC(level_fade, 0xc8));
-        font_draw_big(line1, x, CENTERY - 12);
+    if(paused && !debug_mode) {
+        const char *line1 = "\awPaused\r";
+        int16_t x = CENTERX - (font_measurew_big(line1) >> 1);
+        font_draw_big(line1, x, CENTERY - 28);
+
+        if(paused_selection == 0) font_set_color_yellow();
+        else                      font_reset_color();
+        line1 = "Continue\r";
+        x = CENTERX - (font_measurew_sm(line1) >> 1);
+        font_draw_sm(line1, x, CENTERY - 4);
+
+        if(paused_selection == 1) font_set_color_yellow();
+        else                      font_reset_color();
+        line1 = "Restart\r";
+        x = CENTERX - (font_measurew_sm(line1) >> 1);
+        font_draw_sm(line1, x, CENTERY + 4);
+
+        if(paused_selection == 2) font_set_color_yellow();
+        else font_reset_color();
+        line1 = "Quit\r";
+        x = CENTERX - (font_measurew_sm(line1) >> 1);
+        font_draw_sm(line1, x, CENTERY + 12);
     }
 
     // Title card
