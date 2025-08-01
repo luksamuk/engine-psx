@@ -89,22 +89,22 @@ static const char *creditstxt[] = {
     "By u_ul6ysm8501",
     "\r",
     
-    "Playgrond Zone 1",
+    "Test Level Zone 1",
     "Rusty Ruin Act 1",
     "By Richard Jacques",
     "\r",
 
-    "Playground Zone 2",
+    "Test Level Zone 2",
     "Rusty Ruin Act 2",
     "By Richard Jacques",
     "\r",
 
-    "Playground Zone 3",
+    "Test Level Zone 3",
     "Let Mom Sleep",
     "By Hideki Naganuma",
     "\r",
 
-    "Playground Zone 4",
+    "Test Level Zone 4",
     "Let Mom Sleep: No Sleep Remix",
     "By Hideki Naganuma",
     "Remixed by Richard Jacques",
