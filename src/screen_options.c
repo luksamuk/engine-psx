@@ -126,13 +126,23 @@ screen_options_update(void *d)
         }
     }
 
-    if(pad_pressed(PAD_UP)) data->selection--;
-    if(pad_pressed(PAD_DOWN)) data->selection++;
+    if(pad_pressed(PAD_UP)) {
+        data->selection--;
+#ifndef ALLOW_DEBUG
+        if(data->selection == 4) data->selection = 3;
+#endif
+    }
+    else if(pad_pressed(PAD_DOWN)) {
+        data->selection++;
+#ifndef ALLOW_DEBUG
+        if(data->selection == 4) data->selection = 5;
+#endif
+    }
     data->selection =
         (data->selection < 0)
         ? 0
         : (data->selection > 5)
-        ? 4
+        ? 5
         : data->selection;
 
     if(!(get_global_frames() % 4)) {
@@ -172,6 +182,7 @@ screen_options_update(void *d)
             }
         }
         break;
+#ifdef ALLOW_DEBUG
     case 4:
         if(pad_pressed(PAD_LEFT)) {
             debug_mode--;
@@ -187,6 +198,7 @@ screen_options_update(void *d)
             ? 0
             : debug_mode;
         break;
+#endif
     default: break;
     }
 
@@ -267,6 +279,7 @@ screen_options_draw(void *d)
     font_draw_sm(sndtxt, SCREEN_XRES - 15 - txtw, 120);
     font_reset_color();
 
+#ifdef ALLOW_DEBUG
     if(data->selection == 4) font_set_color(128, 128, 0);
     font_draw_sm("Debug Mode", 15, 140);
 
@@ -279,6 +292,7 @@ screen_options_draw(void *d)
     txtw = font_measurew_sm(dbgtxt);
     font_draw_sm(dbgtxt, SCREEN_XRES - 15 - txtw, 140);
     font_reset_color();
+#endif
 
     if(data->selection == 5) font_set_color(128, 128, 0);
     font_draw_sm("Back", 270, 200);

@@ -106,6 +106,7 @@ version.
 - Add pause menu when debug mode is inactive
 - Fix Tails's tail slightly dislocated when walking on slopes
 - Change wrong level names on credits
+- Remove debug mode option from Options Menu when playing a Release build
 
 ** Known bugs
 
