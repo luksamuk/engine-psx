@@ -44,7 +44,7 @@ PlayerCharacter screen_level_getcharacter();
 
 void            screen_level_boss_lock(uint8_t state);
 void            screen_level_play_music(uint8_t round, uint8_t act);
-void            screen_level_give_1up(int8_t ring_cent);
+uint8_t         screen_level_give_1up(int8_t ring_cent);
 void            screen_level_give_rings(uint16_t amount);
 
 void screen_level_transition_start_timer();

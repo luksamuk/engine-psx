@@ -24,6 +24,7 @@
 
 extern int debug_mode;
 
+extern SoundEffect sfx_ring;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_kach;
 extern SoundEffect sfx_event;
@@ -1557,11 +1558,11 @@ screen_level_boss_lock(uint8_t state)
     data->boss_lock = state;
 }
 
-void
+uint8_t
 screen_level_give_1up(int8_t ring_cent)
 {
     if(ring_cent < 0) goto give_1up;
-    if(ring_cent == 0) return;
+    if(ring_cent == 0) return 0;
     ring_cent--;
 
     screen_level_data *data = screen_get_data();
@@ -1570,9 +1571,11 @@ screen_level_give_1up(int8_t ring_cent)
         data->ring_1up_mask |= mask;
         goto give_1up;
     }
-    return;
+    return 0;
  give_1up:
+    // TODO
     sound_play_vag(sfx_event, 0);
+    return 1;
 }
 
 void
@@ -1581,5 +1584,8 @@ screen_level_give_rings(uint16_t amount)
     level_ring_count += amount;
 
     // Give 1-up's at every cent
-    screen_level_give_1up(level_ring_count / 100);
+    if(!screen_level_give_1up(level_ring_count / 100)) {
+        sound_play_vag(sfx_ring, 0);
+    }
+    
 }
