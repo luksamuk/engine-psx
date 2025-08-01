@@ -105,6 +105,7 @@ version.
 - Many changes to level layouts in general
 - Add pause menu when debug mode is inactive
 - Fix Tails's tail slightly dislocated when walking on slopes
+- Change wrong level names on credits
 
 ** Known bugs
 
