@@ -33,6 +33,7 @@ static uint8_t level = 0;
 static PlayerCharacter level_character = CHARA_SONIC;
 
 #define LEVEL_BONUS_SPD 12
+#define ANIM_IDLE_TIMER_MAX 180 // Also defined in player.c
 
 // Accessible in other source
 Player      *player;
@@ -265,6 +266,8 @@ screen_level_player_respawn()
     player->speedshoes_frames = (player->speedshoes_frames > 0) ? 0 : -1;
     player->shield = 0;
     player->iframes = 0;
+    player->anim_frame = player->tail_anim_frame = 0;
+    player->idle_timer = ANIM_IDLE_TIMER_MAX;
     player->action = ACTION_NONE;
     player->remaining_air_frames = 1800;
     player->death_type = 0;
