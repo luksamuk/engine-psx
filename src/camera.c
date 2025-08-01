@@ -170,6 +170,12 @@ camera_follow_player(Camera *c)
 }
 
 void
+camera_stop_following_player(Camera *c)
+{
+    c->follow_player = 0;
+}
+
+void
 camera_focus(Camera *c, int32_t vx, int32_t vy)
 {
     c->focus.vx = vx;

@@ -11,6 +11,8 @@
 #include "collision.h"
 #include "basic_font.h"
 #include "player_constants.h"
+#include "screens/level.h"
+#include "timer.h"
 
 #define TMP_ANIM_SPD          7
 #define ANIM_IDLE_TIMER_MAX 180
@@ -80,13 +82,11 @@ extern SoundEffect sfx_count;
 extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_grab;
 extern SoundEffect sfx_land;
+extern SoundEffect sfx_drown;
 
-// TODO: Maybe shouldn't be extern?
-extern TileMap16  map16;
-extern TileMap128 map128;
-extern LevelData  leveldata;
-extern Camera     camera;
-extern uint8_t    level_ring_count;
+extern Camera     *camera;
+extern uint16_t   level_ring_count;
+extern uint16_t   level_ring_max;
 extern int32_t    level_water_y;
 
 
@@ -145,6 +145,7 @@ load_player(Player *player,
     player->remaining_air_frames = 1800; // 30 seconds
     player->speedshoes_frames = -1; // Start inactive
     player->glide_turn_dir = player->sliding = 0;
+    player->death_type = PLAYER_DEATH_NONE;
 
     player_set_animation_direct(player, ANIM_STOPPED);
     player->anim_frame = player->anim_timer = 0;
@@ -152,6 +153,7 @@ load_player(Player *player,
     player->idle_timer = ANIM_IDLE_TIMER_MAX;
     player->grnd = player->ceil = player->push = 0;
     player->over_object = NULL;
+    player->pushed_object = NULL;
 
     player->ev_grnd1 = (CollisionEvent){ 0 };
     player->ev_grnd2 = (CollisionEvent){ 0 };
@@ -249,7 +251,13 @@ _player_set_tail_animation(Player *player, uint32_t anim_sum)
     if(tail_anim != player->tail_cur_anim) {
         player->tail_cur_anim = tail_anim;
         player->tail_anim_frame = tail_anim->start;
-        player->tail_anim_timer = 7;
+        switch(tail_anim->hname) {
+        default: player->tail_anim_frame_duration = 7; break;
+        case ANIM_TAILFLY:
+            player->tail_anim_frame_duration = 2;
+            break;
+        }
+        player->tail_anim_timer = player->tail_anim_frame_duration;
     }
 }
 
@@ -318,10 +326,10 @@ _draw_sensor(uint16_t anchorx, uint16_t anchory, LinecastDirection dir,
     };
 
     // Calculate positions relative to camera
-    anchorx -= (camera.pos.vx >> 12) - CENTERX;
-    anchory -= (camera.pos.vy >> 12) - CENTERY;
-    endx -= (camera.pos.vx >> 12) - CENTERX;
-    endy -= (camera.pos.vy >> 12) - CENTERY;
+    anchorx -= (camera->pos.vx >> 12) - CENTERX;
+    anchory -= (camera->pos.vy >> 12) - CENTERY;
+    endx -= (camera->pos.vx >> 12) - CENTERX;
+    endy -= (camera->pos.vy >> 12) - CENTERY;
 
     LINE_F2 *line = get_next_prim();
     increment_prim(sizeof(LINE_F2));
@@ -695,51 +703,15 @@ _player_update_collision_tb(Player *player)
                 player_set_action(player, ACTION_NONE);
                 player->airdirlock = 0;
             }
-            else if(player->action == ACTION_DROPDASH) {
-                // Perform drop dash
-                player->framecount   = 0;
-                player->holding_jump = 0;
-                player_set_action(player, ACTION_ROLLING);
-                // We're going to need the previous vel.vx as usual,
-                // but we're going to manipulate gsp AFTER it has been calculated,
-                // so this code MUST come after landing speed calculation
-                uint8_t moving_backwards =
-                    (player->vel.vx > 0 && player->anim_dir == -1)
-                    || (player->vel.vx < 0 && player->anim_dir == 1);
-                if(!moving_backwards) {
-                    // gsp = (gsp / 4) + (drpspd * dir)
-                    player->vel.vz = (player->vel.vz >> 2)
-                        + (player->cnst->x_drpspd * player->anim_dir);
-                    if(player->vel.vz > 0)
-                        player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
-                            ? player->cnst->x_drpmax
-                            : player->vel.vz;
-                    else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
-                             ? -player->cnst->x_drpmax : player->vel.vz;
-                } else {
-                    if(player->angle == 0)
-                        player->vel.vz = player->cnst->x_drpspd * player->anim_dir;
-                    else {
-                        player->vel.vz = (player->vel.vz >> 1)
-                            + (player->cnst->x_drpspd * player->anim_dir);
-                        if(player->vel.vz > 0)
-                            player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
-                                ? player->cnst->x_drpmax
-                                : player->vel.vz;
-                        else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
-                                 ? -player->cnst->x_drpmax
-                                 : player->vel.vz;
-                    }
-                }
-                sound_play_vag(sfx_relea, 0);
-                camera.lag = 0x8000 >> 12;
-            } else if(player->action == ACTION_DROP) {
+            else if(player->action == ACTION_DROP) {
                 player_set_action(player, ACTION_DROPRECOVER);
                 player->framecount = 12;
                 player->vel.vz = 0;
                 player->airdirlock = 0;
                 sound_play_vag(sfx_land, 0);
             }
+
+            player_do_dropdash(player);
         } else {
             // If NOT touching the ground.
             if(player->sliding) {
@@ -879,11 +851,24 @@ _player_resolve_collision_modes(Player *player)
 void
 player_update(Player *player)
 {
-    // Angle slope pattern in degrees: 3, 12, 30, 45, 60, 78, 87
-    //_player_resolve_collision_modes(player);
+    if(player->death_type == 0) {
+        // Angle slope pattern in degrees: 3, 12, 30, 45, 60, 78, 87
+        //_player_resolve_collision_modes(player);
 
-    _player_update_collision_lr(player); // Push sensor collision detection
-    _player_update_collision_tb(player); // Ground sensor collision detection
+        _player_update_collision_lr(player); // Push sensor collision detection
+        _player_update_collision_tb(player); // Ground sensor collision detection
+
+        // Tweak object pushing.
+        // If no longer pressing a direction and still pushing an object,
+        // reset push state
+        if(player->pushed_object &&
+           !(input_pressing(&player->input, PAD_LEFT) || input_pressing(&player->input, PAD_RIGHT)))
+            player->pushed_object = NULL;
+    } else {
+        player->push = 0;
+        player->grnd = 0;
+        player->pushed_object = player->over_object = NULL;
+    }
 
     // i-frames
     if(player->iframes > 0) player->iframes--;
@@ -932,7 +917,7 @@ player_update(Player *player)
                 player->vel.vz +=
                     (0x8000 + (floor12(player->spinrev) >> 1)) * player->anim_dir;
                 player_set_action(player, ACTION_ROLLING);
-                camera.lag = (0x10000 - player->spinrev) >> 12;
+                camera->lag = (0x10000 - player->spinrev) >> 12;
                 player->spinrev = 0;
                 sound_play_vag(sfx_relea, 0);
             } else {
@@ -950,7 +935,7 @@ player_update(Player *player)
                 player_set_action(player, ACTION_NONE);
                 if(player->spinrev >= 30) { // Only properly release after 30 frames
                     player->vel.vz = (player->cnst->x_peelout_spd * player->anim_dir);
-                    camera.lag = (0x10000 - player->spinrev) >> 12;
+                    camera->lag = (0x10000 - player->spinrev) >> 12;
                     player->spinrev = 0;
                     sound_play_vag(sfx_relea, 0);
                 }
@@ -1034,7 +1019,7 @@ player_update(Player *player)
                     player_set_action(player, ACTION_ROLLING);
                     player_set_animation_direct(player, ANIM_ROLLING);
                     sound_play_vag(sfx_roll, 0);
-                } else if((player->col_ledge || (player->over_object != NULL))
+                } else if(player->col_ledge
                           && player->vel.vz == 0
                           && input_pressed(&player->input, PAD_CROSS)) { // Spindash
                     player_set_action(player, ACTION_SPINDASH);
@@ -1044,7 +1029,7 @@ player_update(Player *player)
                 }
             } else if((player->character == CHARA_SONIC)
                 && input_pressing(&player->input, PAD_UP)) {
-                if((player->col_ledge || (player->over_object != NULL))
+                if(player->col_ledge
                    && player->vel.vz == 0
                    && input_pressed(&player->input, PAD_CROSS)) { // Peel-out
                     player_set_action(player, ACTION_PEELOUT);
@@ -1252,8 +1237,8 @@ player_update(Player *player)
                 if(input_pressed(&player->input, PAD_CROSS)) {
                     player_set_action(player, ACTION_JUMPING);
                     player->anim_dir *= -1;
-                    player->vel.vx = (4 << 12) * player->anim_dir;
-                    player->vel.vy = -(4 << 12);
+                    player->vel.vx = player->cnst->x_jump_away * player->anim_dir;
+                    player->vel.vy = -player->cnst->y_min_jump;
                     player->holding_jump = 1;
                 }
             }
@@ -1322,8 +1307,10 @@ player_update(Player *player)
     }
 
     // Animation
-    if(player->grnd) {
-        if(player->push) {
+    if(player->death_type > 0) {
+        player_set_animation_direct(player, player->death_type == 1 ? ANIM_DEATH : ANIM_DROWN);
+    } else if(player->grnd) {
+        if(player->push || player->pushed_object) {
             player_set_animation_direct(player, ANIM_PUSHING);
             player->idle_timer = ANIM_IDLE_TIMER_MAX;
         } else if(player->action == ACTION_GLIDERECOVER) {
@@ -1347,14 +1334,12 @@ player_update(Player *player)
                 // If grounded, then this means we climbed up the ledge and
                 // are just waiting for things to finish
                 player_set_animation_direct(player, ANIM_CLIMBEND);
-            } else if((player->col_ledge || (player->over_object != NULL))
-                      && input_pressing(&player->input, PAD_UP)) {
+            } else if(player->col_ledge && input_pressing(&player->input, PAD_UP)) {
                 // Look up (except when balancing)
                 player_set_animation_direct(player, ANIM_LOOKUP);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
                 player_set_action(player, ACTION_LOOKUP);
-            } else if((player->col_ledge || (player->over_object != NULL))
-                      && input_pressing(&player->input, PAD_DOWN)) {
+            } else if(player->col_ledge && input_pressing(&player->input, PAD_DOWN)) {
                 // Crouch down (except when balancing)
                 player_set_animation_direct(player, ANIM_CROUCHDOWN);
                 player->idle_timer = ANIM_IDLE_TIMER_MAX;
@@ -1568,11 +1553,12 @@ player_update(Player *player)
         } else player->anim_timer--;
     }
 
+    // Tail animation update
     if((player->character == CHARA_MILES) && player->tail_cur_anim) {
         if(player->tail_cur_anim->start >= player->tail_cur_anim->end)
             player->tail_anim_frame = player->tail_cur_anim->start;
         else if(player->tail_anim_timer == 0) {
-            player->tail_anim_timer = 7; // Tail animation frame duration
+            player->tail_anim_timer = player->tail_anim_frame_duration;
             player->tail_anim_frame++;
             if(player->tail_anim_frame > player->tail_cur_anim->end) {
                 player->tail_anim_frame = player->tail_cur_anim->start; // No loopback
@@ -1593,8 +1579,9 @@ player_update(Player *player)
     // Underwater / leaving water
     if(level_water_y >= 0) {
         // Underwater state update
-        if(((player->pos.vy > level_water_y) && !player->underwater)
-           || ((player->pos.vy < level_water_y) && player->underwater)) {
+        if((player->death_type == 0)
+           && (((player->pos.vy > level_water_y) && !player->underwater)
+               || ((player->pos.vy < level_water_y) && player->underwater))) {
             player->underwater = !player->underwater;
 
             // Change constants accordingly!
@@ -1662,7 +1649,10 @@ player_update(Player *player)
             case (6 * 60):  bubbletype = 6; break; // TODO: Warning bubble "2"
             case (4 * 60):  bubbletype = 7; break; // TODO: Warning bubble "1"
             case (2 * 60):  bubbletype = 8; break; // TODO: Warning bubble "0"
-            case 0: break; // TODO: DROWNED!
+            case 0:
+                if(player->death_type == PLAYER_DEATH_NONE)
+                    player_do_die(player, PLAYER_DEATH_DROWN);
+                break;
             }
 
             // Bubble emission
@@ -1774,7 +1764,8 @@ player_draw(Player *player, VECTOR *pos)
         chara_draw_blit(&player->render_area,
                         (int16_t)(pos->vx >> 12),
                         (int16_t)(pos->vy >> 12) + (is_rolling ? 4 : (is_gliding ? 8 : 0)),
-                        facing_left ? 6 : 2, 9,
+                        facing_left ? 6 : 2,
+                        8,
                         facing_left,
                         ((is_zero_angle || is_lowered_animation) ? 0 : anim_angle));
         /* chara_draw_gte(&player->chara, */
@@ -1828,9 +1819,10 @@ player_draw(Player *player, VECTOR *pos)
         chara_draw_prepare(&player->render_sub_area, SUB_OT_LENGTH - 3);
         chara_draw_offscreen(&player->chara, player->tail_anim_frame, facing_left, SUB_OT_LENGTH - 4);
         chara_draw_blit(&player->render_sub_area,
-                        (int16_t)(pos->vx >> 12) - tail_distance_x,
-                        (int16_t)(pos->vy >> 12) - tail_distance_y,
-                        0, 9,
+                        (int16_t)(pos->vx >> 12) - (is_rolling ? tail_distance_x : 0),
+                        (int16_t)(pos->vy >> 12) - (is_rolling ? tail_distance_y : 0),
+                        is_rolling ? 0 : (facing_left ? 6 : 2),
+                        8,
                         facing_left,
                         tail_angle);
         
@@ -1849,14 +1841,46 @@ void _player_set_hurt(Player *player, int32_t hazard_x);
 void _player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings);
 
 void
+player_do_die(Player *player, PlayerDeath kind)
+{
+    if(kind == PLAYER_DEATH_NONE) return;
+    player_set_action(player, (kind == PLAYER_DEATH_NORMAL) ? ACTION_DEATH : ACTION_DROWN);
+    player->vel.vx = player->vel.vz = 0;
+    player->anim_dir = 1;
+    player->iframes = 0;
+    switch(kind) {
+    case PLAYER_DEATH_NONE: return; // ???????
+    case PLAYER_DEATH_NORMAL:
+        player_set_action(player, ACTION_DEATH);
+        player->vel.vy = -player->cnst->y_dead_force;
+        player->underwater = 0;
+        player->cnst = getconstants(player->character, PC_DEFAULT);
+        sound_play_vag(sfx_death, 0);
+        break;
+    case PLAYER_DEATH_DROWN:
+        player_set_action(player, ACTION_DROWN);
+        player->vel.vy = 0;
+        sound_play_vag(sfx_drown, 0);
+        break;
+    }
+    player->death_type = kind;
+    camera_stop_following_player(camera);
+    pause_elapsed_frames();
+    screen_level_transition_death();
+}
+
+void
 player_do_damage(Player *player, int32_t hazard_x)
 {
-    // TODO: Missing death routine
-    if((player->shield > 0)
-       || (level_ring_count == 0)) { // TODO: Remove this in favor of a death
+    if(player->shield > 0) {
         player->shield = 0;
         _player_set_hurt(player, hazard_x);
         sound_play_vag(sfx_death, 0);
+        return;
+    }
+
+    if(level_ring_count == 0) {
+        player_do_die(player, PLAYER_DEATH_NORMAL);
         return;
     }
 
@@ -1886,6 +1910,7 @@ void
 _player_set_ring_loss(Player *player, int32_t hazard_x, uint8_t num_rings)
 {
     _player_set_hurt(player, hazard_x);
+    level_ring_max += num_rings; // If exceeds 32, no way to get a perfect
 
     num_rings = num_rings > 32 ? 32 : num_rings;
 
@@ -1932,6 +1957,8 @@ player_set_action(Player *player, PlayerAction action)
         player->iframes = PLAYER_HURT_IFRAMES;
     } else if(player->action == ACTION_GLIDE) {
         player->sliding = 0;
+    } else if(player->action == ACTION_JUMPING) {
+        player->ctrllock = 0;
     }
 
     if(action == ACTION_CLIMB) {
@@ -1941,4 +1968,48 @@ player_set_action(Player *player, PlayerAction action)
     }
 
     player->action = action;
+}
+
+void
+player_do_dropdash(Player *player)
+{
+    if(player->action == ACTION_DROPDASH) {
+        // Perform drop dash
+        player->framecount   = 0;
+        player->holding_jump = 0;
+        player_set_action(player, ACTION_ROLLING);
+        // We're going to need the previous vel.vx as usual,
+        // but we're going to manipulate gsp AFTER it has been calculated,
+        // so this code MUST come after landing speed calculation
+        uint8_t moving_backwards =
+            (player->vel.vx > 0 && player->anim_dir == -1)
+            || (player->vel.vx < 0 && player->anim_dir == 1);
+        if(!moving_backwards) {
+            // gsp = (gsp / 4) + (drpspd * dir)
+            player->vel.vz = (player->vel.vz >> 2)
+                + (player->cnst->x_drpspd * player->anim_dir);
+            if(player->vel.vz > 0)
+                player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
+                    ? player->cnst->x_drpmax
+                    : player->vel.vz;
+            else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
+                     ? -player->cnst->x_drpmax : player->vel.vz;
+        } else {
+            if(player->angle == 0)
+                player->vel.vz = player->cnst->x_drpspd * player->anim_dir;
+            else {
+                player->vel.vz = (player->vel.vz >> 1)
+                    + (player->cnst->x_drpspd * player->anim_dir);
+                if(player->vel.vz > 0)
+                    player->vel.vz = (player->vel.vz > player->cnst->x_drpmax)
+                        ? player->cnst->x_drpmax
+                        : player->vel.vz;
+                else player->vel.vz = (player->vel.vz < player->cnst->x_drpmax)
+                         ? -player->cnst->x_drpmax
+                         : player->vel.vz;
+            }
+        }
+        sound_play_vag(sfx_relea, 0);
+        camera->lag = 0x8000 >> 12;
+    }
 }

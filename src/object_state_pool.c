@@ -3,16 +3,15 @@
 #include "object_state.h"
 #include "memalloc.h"
 #include "render.h"
-
-extern ArenaAllocator _level_arena;
+#include "screen.h"
 
 // Pointer to object pool.
 // Notice that we still use our level allocator
 static PoolObject *_object_pool;
 static uint32_t   _pool_count = 0;
 
-extern ObjectTable obj_table_common;
-extern ObjectTable obj_table_level;
+extern ObjectTable *obj_table_common;
+extern ObjectTable *obj_table_level;
 
 // Defined in level.c
 extern void _render_obj(
@@ -22,9 +21,7 @@ extern void _render_obj(
 void
 object_pool_init()
 {
-    _object_pool = alloc_arena_malloc(
-        &_level_arena,
-        sizeof(PoolObject) * OBJECT_POOL_SIZE);
+    _object_pool = screen_alloc(sizeof(PoolObject) * OBJECT_POOL_SIZE);
 
     // Zero-initialize all objects and set them as free, destroyed objects.
     for(uint32_t i = 0; i < OBJECT_POOL_SIZE; i++) {
@@ -46,8 +43,8 @@ object_pool_update(uint8_t round)
             VECTOR pos = { obj->freepos.vx >> 12, obj->freepos.vy >> 12, 0 };
             object_update((ObjectState *)&obj->state,
                           (obj->state.id >= MIN_LEVEL_OBJ_GID)
-                          ? &obj_table_level.entries[obj->state.id - MIN_LEVEL_OBJ_GID]
-                          : &obj_table_common.entries[obj->state.id],
+                          ? &obj_table_level->entries[obj->state.id - MIN_LEVEL_OBJ_GID]
+                          : &obj_table_common->entries[obj->state.id],
                           &pos,
                           round);
             _pool_count += !(obj->props & OBJ_FLAG_DESTROYED);
@@ -73,8 +70,8 @@ object_pool_render(int32_t camera_x, int32_t camera_y)
 
         object_render(&obj->state,
                       (obj->state.id >= MIN_LEVEL_OBJ_GID)
-                      ? &obj_table_level.entries[obj->state.id - MIN_LEVEL_OBJ_GID]
-                      : &obj_table_common.entries[obj->state.id],
+                      ? &obj_table_level->entries[obj->state.id - MIN_LEVEL_OBJ_GID]
+                      : &obj_table_common->entries[obj->state.id],
                       px, py);
     }
 }

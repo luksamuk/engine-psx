@@ -20,11 +20,8 @@
 #define ANIM_GASP             0x02d9012c
 
 // Extern elements
-extern Player player;
-extern Camera camera;
-extern TileMap16  map16;
-extern TileMap128 map128;
-extern LevelData  leveldata;
+extern Player *player;
+extern Camera *camera;
 extern SoundEffect sfx_ring;
 extern SoundEffect sfx_pop;
 extern SoundEffect sfx_sprn;
@@ -32,14 +29,15 @@ extern SoundEffect sfx_chek;
 extern SoundEffect sfx_death;
 extern SoundEffect sfx_ringl;
 extern SoundEffect sfx_shield;
-extern SoundEffect sfx_event;
 extern SoundEffect sfx_switch;
 extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_sign;
+extern SoundEffect sfx_destroy;
 
 extern int debug_mode;
 
-extern uint8_t  level_ring_count;
+extern uint16_t level_ring_count;
+extern uint16_t level_ring_max;
 extern uint32_t level_score_count;
 extern uint8_t  level_finished;
 extern int32_t  level_water_y;
@@ -64,6 +62,9 @@ static void _switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _end_capsule_button_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _door_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _animal_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Level-specific update functions
 extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
@@ -80,23 +81,22 @@ int32_t player_width = 16;
 int32_t player_height = HEIGHT_RADIUS_NORMAL << 1;
 
 int player_hitbox_shown;
-
-/* void */
-/* _draw_player_hitbox() */
-/* { */
-/*     if(player_hitbox_shown) return; */
-/*     player_hitbox_shown = 1; */
-/*     uint16_t */
-/*         rel_vx = player_vx - (camera.pos.vx >> 12) + CENTERX, */
-/*         rel_vy = player_vy - (camera.pos.vy >> 12) + CENTERY; */
-/*     POLY_F4 *hitbox = get_next_prim(); */
-/*     increment_prim(sizeof(POLY_F4)); */
-/*     setPolyF4(hitbox); */
-/*     setSemiTrans(hitbox, 1); */
-/*     setXYWH(hitbox, rel_vx, rel_vy, 16, player_height); */
-/*     setRGB0(hitbox, 0xfb, 0x94, 0xdc); */
-/*     sort_prim(hitbox, OTZ_LAYER_OBJECTS); */
-/* } */
+void
+_draw_player_hitbox()
+{
+    if(player_hitbox_shown) return;
+    player_hitbox_shown = 1;
+    uint16_t
+        rel_vx = player_vx - (camera->pos.vx >> 12) + CENTERX,
+        rel_vy = player_vy - (camera->pos.vy >> 12) + CENTERY;
+    POLY_F4 *hitbox = get_next_prim();
+    increment_prim(sizeof(POLY_F4));
+    setPolyF4(hitbox);
+    setSemiTrans(hitbox, 1);
+    setXYWH(hitbox, rel_vx, rel_vy, 16, player_height);
+    setRGB0(hitbox, 0xfb, 0x94, 0xdc);
+    sort_prim(hitbox, OTZ_LAYER_OBJECTS);
+}
 
 void
 object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8_t round)
@@ -105,20 +105,20 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
 
     // Calculate top left corner of player AABB.
     // Note that player data is in fixed-point format!
-    player_vx = (player.pos.vx >> 12) - 8;
-    player_attacking = (player.action == ACTION_JUMPING ||
-                        player.action == ACTION_ROLLING ||
-                        player.action == ACTION_SPINDASH ||
-                        player.action == ACTION_DROPDASH ||
-                        player.action == ACTION_GLIDE);
+    player_vx = (player->pos.vx >> 12) - 8;
+    player_attacking = (player->action == ACTION_JUMPING ||
+                        player->action == ACTION_ROLLING ||
+                        player->action == ACTION_SPINDASH ||
+                        player->action == ACTION_DROPDASH ||
+                        player->action == ACTION_GLIDE);
     player_height = (player_attacking
                      ? HEIGHT_RADIUS_ROLLING
                      : HEIGHT_RADIUS_NORMAL) << 1;
-    player_vy = (player.pos.vy >> 12) - (player_height >> 1) - 1;
+    player_vy = (player->pos.vy >> 12) - (player_height >> 1) - 1;
 
-    /* if(debug_mode > 1) { */
-    /*     _draw_player_hitbox(); */
-    /* } */
+    if(debug_mode > 1) {
+        _draw_player_hitbox();
+    }
 
     if(typedata->is_level_specific) goto level_specific_update;
 
@@ -140,6 +140,9 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     case OBJ_BUBBLE_PATCH:           _bubble_patch_update(state, typedata, pos);       break;
     case OBJ_BUBBLE:                 _bubble_update(state, typedata, pos);             break;
     case OBJ_END_CAPSULE:            _end_capsule_update(state, typedata, pos);        break;
+    case OBJ_END_CAPSULE_BUTTON:     _end_capsule_button_update(state, typedata, pos); break;
+    case OBJ_DOOR:                   _door_update(state, typedata, pos);               break;
+    case OBJ_ANIMAL:                 _animal_update(state, typedata, pos);             break;
     }
     return;
 
@@ -164,15 +167,16 @@ level_specific_update:
 
 
 static void
-_ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_ring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     if(state->anim_state.animation == 0) {
         // Calculate actual top left corner of ring AABB
         pos->vx -= 8;    pos->vy -= (8 + 32);
 
         // Hey -- if this is a moving ring (ring loss behaviour), only
         // allow the player to collect it if its action is not ACTION_HURT
-        if(!((state->props & OBJ_FLAG_RING_MOVING) && (player.action == ACTION_HURT))) {
+        if(!((state->props & OBJ_FLAG_RING_MOVING) && (player->action == ACTION_HURT))) {
             // Ring collision
             if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                                pos->vx, pos->vy, 16, 16))
@@ -180,7 +184,8 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
                 state->anim_state.animation = 1;
                 state->anim_state.frame = 0;
                 state->props ^= OBJ_FLAG_ANIM_LOCK; // Unlock from global timer
-                level_ring_count++;
+                screen_level_give_rings(1);
+                level_ring_max--; // Lower level max ring count
                 sound_play_vag(sfx_ring, 0);
                 return;
             }
@@ -193,10 +198,10 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             // If the ring is way too far from camera, just destroy it
             // By "too far", I mean two screens apart.
             // Also, moving rings only live for 256 frames
-            if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))
-               || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 13))
-               || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 13))
-               || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 13))
+            if((state->freepos->vx < camera->pos.vx - (SCREEN_XRES << 13))
+               || (state->freepos->vx > camera->pos.vx + (SCREEN_XRES << 13))
+               || (state->freepos->vy < camera->pos.vy - (SCREEN_YRES << 13))
+               || (state->freepos->vy > camera->pos.vy + (SCREEN_YRES << 13))
                || (state->timer >= 256)) {
                 state->props |= OBJ_FLAG_DESTROYED;
                 return;
@@ -244,92 +249,34 @@ _ring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     }
 }
 
-void
-_goal_sign_change_score()
-{
-    // TODO: A temporary score count. Change this later!
-    level_score_count += level_ring_count * 100;
-
-    uint32_t seconds = get_elapsed_frames() / 60;
-
-    if(seconds <= 29)       level_score_count += 50000; // Under 0:30
-    else if(seconds <= 44)  level_score_count += 10000; // Under 0:45
-    else if(seconds <= 59)  level_score_count += 5000;  // Under 1:00
-    else if(seconds <= 89)  level_score_count += 4000;  // Under 1:30
-    else if(seconds <= 119) level_score_count += 3000;  // Under 2:00
-    else if(seconds <= 179) level_score_count += 2000;  // Under 3:00
-    else if(seconds <= 239) level_score_count += 1000;  // Under 4:00
-    else if(seconds <= 299) level_score_count += 500;   // Under 5:00
-    // Otherwise you get nothing
-}
-
 static void
-_goal_sign_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     if(state->frag_anim_state->animation == 0) {
-        if(pos->vx <= (player.pos.vx >> 12)) {
+        if(pos->vx <= (player->pos.vx >> 12)) {
             state->frag_anim_state->animation = 1;
             state->frag_anim_state->frame = 0;
-            camera_focus(&camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
-            state->timer = 180;
-            level_finished = 1;
-            pause_elapsed_frames();
+            camera_focus(camera, ((pos->vx + 80) << 12), (pos->vy - (CENTERY >> 1)) << 12);
             sound_play_vag(sfx_sign, 0);
+            state->timer = 180;
+            pause_elapsed_frames();
+            level_finished = 1; // Allow going beyond the end
         }
     } else if(state->frag_anim_state->animation == 1) {
-        state->timer--;
-        if(state->timer < 0) {
-            state->timer = 360; // 6-seconds music
-
+        if(state->timer > 0) state->timer--;
+        else {
+            screen_level_setmode(LEVEL_MODE_FINISHED); // Move player to the right
             switch(screen_level_getcharacter()) {
             default:             state->frag_anim_state->animation = 2; break;
             case CHARA_MILES:    state->frag_anim_state->animation = 3; break;
             case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
             }
-
-            player_set_action(&player, ACTION_NONE);
-            screen_level_setmode(LEVEL_MODE_FINISHED);
-            _goal_sign_change_score();
         }
-    } else if((state->frag_anim_state->animation > 1)
-              && (player.pos.vx < camera.pos.vx + (CENTERX << 12))) {
-        state->timer = 360; // 6-seconds music
-    } else if(state->frag_anim_state->animation < OBJ_ANIMATION_NO_ANIMATION) {
-        if(state->timer == 360) {
-            // First frame
-            sound_bgm_play(BGM_LEVELCLEAR);
-        }
-        state->timer--;
-
-        if((state->timer < 0) && (screen_level_getstate() == 2)) {
-            screen_level_setstate(3);
-        } else if(screen_level_getstate() == 4) {
-            // TODO: THIS NEEDS TO BE REFACTORED AND MOVED TO SOMEWHERE ELSE.
-            uint8_t lvl = screen_level_getlevel();
-            if(lvl == 2 || lvl == 3) {
-                // Finished engine test
-                scene_change(SCREEN_TITLE);
-            } else if(lvl != 4) {
-                // If on test level 2 and our character is Knuckles...
-                // Go to test level 4 (also an act 3)
-                if(lvl == 1) {
-                    if(screen_level_getcharacter() == CHARA_KNUCKLES) {
-                        screen_level_setlevel(3);
-                    } else screen_level_setlevel(2);
-                } else if(lvl == 6) {
-                    // Transition from SWZ1 to AOZ1
-                    // TODO: THIS IS TEMPORARY
-                    screen_level_setlevel(10);
-                } else if(lvl == 10) {
-                    // Transition from AOZ1 to GHZ1
-                    // TODO: THIS IS TEMPORARY
-                    screen_level_setlevel(4);
-                } else screen_level_setlevel(lvl + 1);
-                scene_change(SCREEN_LEVEL);
-            } else {
-                screen_slide_set_next(SLIDE_COMINGSOON);
-                scene_change(SCREEN_SLIDE);
-            }
+    } else if(state->frag_anim_state->animation >= 2) {
+        if((player->pos.vx > camera->pos.vx + (CENTERX << 12))
+           && screen_level_getstate() == LEVEL_TRANS_GAMEPLAY) {
+            screen_level_transition_start_timer();
         }
     }
 }
@@ -340,10 +287,10 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     if(state->anim_state.animation == 0) {
         // Calculate solidity
         int32_t solidity_vx = pos->vx - 16;
-        int32_t solidity_vy = pos->vy - 32; // Monitor is a 32x32 solid box
+        int32_t solidity_vy = pos->vy - 34; // Monitor is a 32x34 solid box
 
         int32_t hitbox_vx = pos->vx - 15;
-        int32_t hitbox_vy = pos->vy - 32; // Monitor hitbox is a 28x32 solid box
+        int32_t hitbox_vy = pos->vy - 34; // Monitor hitbox is a 28x34 solid box
         
         // Perform collision detection
         if(aabb_intersects(player_vx, player_vy, player_width, player_height,
@@ -365,7 +312,7 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
                 uint16_t animation = ((MonitorExtra *)state->extra)->kind;
                 if(animation == MONITOR_KIND_1UP) {
-                    switch(player.character) {
+                    switch(player->character) {
                     default:
                     case CHARA_SONIC:    animation = 5; break;
                     case CHARA_MILES:    animation = 7; break;
@@ -380,27 +327,27 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                 explosion->freepos.vy = (pos->vy << 12);
                 explosion->state.anim_state.animation = 0; // Small explosion
 
-                if(!player.grnd && player.vel.vy > 0) {
-                    player.vel.vy *= -1;
+                if(!player->grnd && player->vel.vy > 0) {
+                    player->vel.vy *= -1;
                 }
             } else {
                 // Landing on top
                 if(((player_vy + player_height) < solidity_vy + 16) &&
                    ((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32)))
                 {
-                    player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
-                    player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
-                    player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy + 4;
+                    player->ev_grnd1.collided = player->ev_grnd2.collided = 1;
+                    player->ev_grnd1.angle = player->ev_grnd2.angle = 0;
+                    player->ev_grnd1.coord = player->ev_grnd2.coord = solidity_vy + 4;
                 } else if((player_vy + 8) > solidity_vy) {
                     // Check for intersection on left/right
                     if((player_vx + 8) < pos->vx) {
-                        player.ev_right.collided = 1;
-                        player.ev_right.coord = (solidity_vx + 2);
-                        player.ev_right.angle = 0;
+                        player->ev_right.collided = 1;
+                        player->ev_right.coord = (solidity_vx + 2);
+                        player->ev_right.angle = 0;
                     } else {
-                        player.ev_left.collided = 1;
-                        player.ev_left.coord = solidity_vx + 16;
-                        player.ev_right.angle = 0;
+                        player->ev_left.collided = 1;
+                        player->ev_left.coord = solidity_vx + 16;
+                        player->ev_right.angle = 0;
                     }
                 }
             }
@@ -409,75 +356,90 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 }
 
 static void
-_spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
+_spring_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t is_red)
 {
+    (void)(entry);
     if(state->anim_state.animation == 0) {
-        int32_t solidity_vx = pos->vx - 15;
-        int32_t solidity_vy = pos->vy - 16; // Spring is 32x16 solid
-        int32_t solidity_w  = 31;
-        int32_t solidity_h  = 16;
-        
+        // Spring is 32x13 solid
+        FRECT solidity = {
+            .x = pos->vx - 16,
+            .y = pos->vy - 13,
+            .w = 32,
+            .h = 13,
+        };
+        ObjectCollision bump_side = OBJ_SIDE_TOP;
+
+        // Handle possible rotations
         if(state->flipmask & MASK_FLIP_ROTCW) {
-            solidity_vx = pos->vx - 32;
-            solidity_vy = pos->vy + 16;
-            solidity_w  = 16;
-            solidity_h  = 32;
+            solidity.x = pos->vx - 32;
+            solidity.y = pos->vy + 16;
+            solidity.w  = 13;
+            solidity.h  = 30;
+            bump_side = OBJ_SIDE_RIGHT;
         } else if(state->flipmask & MASK_FLIP_ROTCT) {
-            solidity_vx = pos->vx - 48;
-            solidity_vy = pos->vy - 48;
-            solidity_w  = 16;
-            solidity_h  = 32;
+            solidity.x = pos->vx - 48;
+            solidity.y = pos->vy - 48;
+            solidity.w  = 13;
+            solidity.h  = 30;
+            bump_side = OBJ_SIDE_LEFT;
         } else if(state->flipmask & MASK_FLIP_FLIPY) {
-            solidity_vy -= 48;
+            solidity.y -= 48;
+            bump_side = OBJ_SIDE_BOTTOM;
         }
 
-        ObjectCollision collision_side =
-            hitbox_collision(player_vx, player_vy, player_width, player_height,
-                             solidity_vx, solidity_vy, solidity_w, solidity_h);
+        // Convert to 20.12 fixed
+        solidity = (FRECT){
+            .x = solidity.x << 12,
+            .y = solidity.y << 12,
+            .w = solidity.w << 12,
+            .h = solidity.h << 12,
+        };
 
-        // Simple spring collision.
-        // In this case, springs are not solid, and the player's spring action
-        // relate to where the spring is pointing at.
+        ObjectCollision collision_side =
+            solid_object_player_interaction(state, &solidity, 0);
+
+        // The player's spring action relate to where the spring is pointing at.
         if(collision_side == OBJ_SIDE_NONE)
             return;
-        else if(state->flipmask & MASK_FLIP_ROTCT) { // Left-pointing spring
-            //player.pos.vx = (solidity_vx - player_width) << 12;
-            player.ev_right.collided = 0; // Detach player from right wall if needed
-            player.vel.vz = is_red ? -0x10000 : -0xa000;
-            if(!player.grnd) player.vel.vx = is_red ? -0x10000 : -0xa000;
-            player.ctrllock = 16;
-            player.anim_dir = -1;
-            state->anim_state.animation = 1;
-            sound_play_vag(sfx_sprn, 0);
-            if(player.action != ACTION_ROLLING)
-                player_set_action(&player, ACTION_NONE);
-        } else if(state->flipmask & MASK_FLIP_ROTCW) { // Right-pointing spring
-            //player.pos.vx = (solidity_vx + solidity_w + player_width + 8) << 12;
-            player.ev_left.collided = 0; // Detach player from left wall if needed
-            player.vel.vz = is_red ? 0x10000 : 0xa000;
-            if(!player.grnd) player.vel.vx = is_red ? 0x10000 : 0xa000;
-            player.ctrllock = 16;
-            player.anim_dir = 1;
-            state->anim_state.animation = 1;
-            sound_play_vag(sfx_sprn, 0);
-            if(player.action != ACTION_ROLLING)
-                player_set_action(&player, ACTION_NONE);
-        } else if(state->flipmask == 0) { // Top-pointing spring
-            player.pos.vy = (solidity_vy - (player_height >> 1)) << 12;
-            player.grnd = 0;
-            player.vel.vy = is_red ? -0x10000 : -0xa000;
-            player.angle = 0;
-            player.ctrllock = 0;
-            player_set_action(&player, ACTION_SPRING);
-            state->anim_state.animation = 1;
-            sound_play_vag(sfx_sprn, 0);
-        } else if(state->flipmask & MASK_FLIP_FLIPY) { // Bottom-pointing spring
-            player.pos.vy = (solidity_vy + solidity_h + (player_height >> 1)) << 12;
-            player.grnd = 0;
-            player.vel.vy = is_red ? 0x10000 : 0xa000;
-            player.angle = 0;
-            player.ctrllock = 0;
-            player_set_action(&player, ACTION_SPRING);
+        else if(collision_side == bump_side) {
+            switch(bump_side) {
+            default: break; // ?????
+            case OBJ_SIDE_TOP:
+                player->grnd = 0;
+                player->vel.vy = is_red ? -0x10000 : -0xa000;
+                player->angle = 0;
+                player->ctrllock = 0;
+                player->over_object = NULL;
+                player_set_action(player, ACTION_SPRING);
+                break;
+            case OBJ_SIDE_BOTTOM:
+                player->grnd = 0;
+                player->vel.vy = is_red ? 0x10000 : 0xa000;
+                player->angle = 0;
+                player->ctrllock = 0;
+                player_set_action(player, ACTION_SPRING);
+                break;
+            case OBJ_SIDE_RIGHT:
+                player->vel.vz = is_red ? 0x10000 : 0xa000;
+                if(!player->grnd) player->vel.vx = is_red ? 0x10000 : 0xa000;
+                player->ctrllock = 16;
+                player->anim_dir = 1;
+                player->push = 0;
+                player->pushed_object = NULL;
+                if(player->action != ACTION_ROLLING)
+                    player_set_action(player, ACTION_NONE);
+                break;
+            case OBJ_SIDE_LEFT:
+                player->vel.vz = is_red ? -0x10000 : -0xa000;
+                if(!player->grnd) player->vel.vx = is_red ? -0x10000 : -0xa000;
+                player->ctrllock = 16;
+                player->anim_dir = -1;
+                player->push = 0;
+                player->pushed_object = NULL;
+                if(player->action != ACTION_ROLLING)
+                    player_set_action(player, ACTION_NONE);
+                break;
+            };
             state->anim_state.animation = 1;
             sound_play_vag(sfx_sprn, 0);
         }
@@ -489,8 +451,9 @@ _spring_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_r
 
 
 static void
-_checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_checkpoint_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     if(!(state->props & OBJ_FLAG_CHECKPOINT_ACTIVE)) {
         int32_t hitbox_vx = pos->vx - 8;
         int32_t hitbox_vy = pos->vy - 48;
@@ -501,7 +464,7 @@ _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
             state->props |= OBJ_FLAG_CHECKPOINT_ACTIVE;
             state->frag_anim_state->animation = 1;
             state->frag_anim_state->frame = 0;
-            player.respawnpos = (VECTOR){
+            player->respawnpos = (VECTOR){
                 .vx = pos->vx << 12,
                 .vy = (pos->vy - 8) << 12,
                 .vz = 0
@@ -515,15 +478,25 @@ _checkpoint_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 #define SPRND_ST_Y 0x00007120 // 7.0703125
 
 static void
-_spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uint8_t is_red)
+_spring_diagonal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos, uint8_t is_red)
 {
+    (void)(entry);
     // For diagonal springs, interaction should occur if and only if the player
     // is colliding with its top.
     if(state->anim_state.animation == 0) {
-        int32_t solidity_vx = pos->vx - 16;
-        int32_t solidity_vy = pos->vy - 32; // Spring is 32x32 solid
-        int32_t solidity_w  = 32;
-        int32_t solidity_h  = 32;
+        /* int32_t solidity_vx = pos->vx - 16; */
+        /* int32_t solidity_vy = pos->vy - 32; // Spring is 32x32 solid */
+        /* int32_t solidity_w  = 32; */
+        /* int32_t solidity_h  = 32; */
+
+        // Spring is 32x32 solid
+        FRECT solidity = {
+            .x = pos->vx - 16,
+            .y = pos->vy - 32,
+            .w = 32,
+            .h = 32,
+        };
+        ObjectCollision bump_side = OBJ_SIDE_TOP;
 
         // Spring hitbox is actually calculated relative to player's X position
         // within it.
@@ -536,43 +509,51 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
         int32_t shrink = 0;
         int32_t delta = 0;
         if(state->flipmask & MASK_FLIP_FLIPX) {
-            delta = solidity_w - (player_vx - solidity_vx);
+            delta = solidity.w - (player_vx - solidity.x);
         } else {
-            delta = player_vx - solidity_vx + 16;
+            delta = player_vx - solidity.x + 16;
         }
 
         if(delta > 10 && delta < 33) {
             shrink = delta - 10;
         } else shrink = 22;
 
-        solidity_h -= shrink;
+        solidity.h -= shrink;
         
         if(state->flipmask & MASK_FLIP_FLIPY) {
-            solidity_vy -= 32;
-        } else solidity_vy += shrink;
+            solidity.y -= 32;
+            bump_side = OBJ_SIDE_BOTTOM;
+        } else solidity.y += shrink;
+
+        // Convert to 20.12 fixed
+        solidity = (FRECT){
+            .x = solidity.x << 12,
+            .y = solidity.y << 12,
+            .w = solidity.w << 12,
+            .h = solidity.h << 12,
+        };
 
         ObjectCollision collision_side =
-            hitbox_collision(player_vx, player_vy, player_width, player_height,
-                             solidity_vx, solidity_vy, solidity_w, solidity_h);
+            solid_object_player_interaction(state, &solidity, 0);
 
         if(collision_side == OBJ_SIDE_NONE) return;
-        
-        player.grnd = 0;
-        player.pos.vx = pos->vx << 12;
-        player.pos.vy = (pos->vy - 16) << 12;
-        player.vel.vx = is_red ? SPRND_ST_R : SPRND_ST_Y;
-        player.vel.vy = is_red ? SPRND_ST_R : SPRND_ST_Y;
-        if(!(state->flipmask & MASK_FLIP_FLIPY)) player.vel.vy *= -1;
-        if(state->flipmask & MASK_FLIP_FLIPX) {
-            player.vel.vx *= -1;
-            player.anim_dir = -1; // Flip on X: point player left
-        } else player.anim_dir = 1; // No flip on X: point player right
-        player.angle = 0;
-        player.airdirlock = 1;
-        player_set_action(&player, ACTION_SPRING);
-        state->anim_state.animation = 1;
-        sound_play_vag(sfx_sprn, 0);
-        
+        else if(collision_side == bump_side) {
+            player->grnd = 0;
+            player->vel.vx = is_red ? SPRND_ST_R : SPRND_ST_Y;
+            player->vel.vy = is_red ? SPRND_ST_R : SPRND_ST_Y;
+            if(!(state->flipmask & MASK_FLIP_FLIPY)) player->vel.vy *= -1;
+            if(state->flipmask & MASK_FLIP_FLIPX) {
+                player->vel.vx *= -1;
+                player->anim_dir = -1; // Flip on X: point player left
+            } else player->anim_dir = 1; // No flip on X: point player right
+            player->airdirlock = 1;
+            player_set_action(player, ACTION_SPRING);
+            state->anim_state.animation = 1;
+            sound_play_vag(sfx_sprn, 0);
+            if(bump_side == OBJ_SIDE_TOP) {
+                player->over_object = NULL;
+            }
+        }
     } else if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION) {
         state->anim_state.animation = 0;
         state->anim_state.frame = 0;
@@ -582,55 +563,61 @@ _spring_diagonal_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos, uin
 
 
 static void
-_spikes_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_spikes_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
-    // TODO: For now, only spikes pointing upwards check for collision
-    if(state->flipmask != 0) return;
+    (void)(entry);
+    // Spikes are generally a 32x32 solid box,
+    // but when they're facing up (no transform), they're
+    // somewhat thinner so we don't have to deal with player
+    // ceiling collision and we can also put them on top of thin
+    // platforms.
+    FRECT solidity = {
+        .x = pos->vx - 14,
+        .y = pos->vy - 32,
+        .w = 27,
+        .h = 32,
+    };
+    ObjectCollision hurt_side = OBJ_SIDE_TOP;
 
-    // Collision logic is very similar to monitors
-    // Calculate solidity
-    int32_t solidity_vx = pos->vx - 16;
-    int32_t solidity_vy = pos->vy - 32; // Spikes are a 32x32 solid box
-        
-    // Perform collision detection
-    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                       solidity_vx, solidity_vy, 32, 32))
-    {
-       
-        // Landing on top
-        if(((player_vy + player_height) < solidity_vy + 16) &&
-           ((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32)))
-        {
-            if(player.action != ACTION_HURT && player.iframes == 0) {
-                player_do_damage(&player, (solidity_vx + 16) << 12);
-                return;
-            }
+    // Handle possible rotations
+    if(state->flipmask & MASK_FLIP_ROTCW) {
+        solidity.x = pos->vx - 32;
+        solidity.y = pos->vy + 16;
+        hurt_side = OBJ_SIDE_RIGHT;
+    } else if(state->flipmask & MASK_FLIP_ROTCT) {
+        solidity.x = pos->vx - 64;
+        solidity.y = pos->vy - 48;
+        hurt_side = OBJ_SIDE_LEFT;
+    } else if(state->flipmask & MASK_FLIP_FLIPY) {
+        solidity.y -= 32;
+        hurt_side = OBJ_SIDE_BOTTOM;
+    }
 
-            player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
-            player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
-            player.ev_grnd1.coord = player.ev_grnd2.coord =
-                solidity_vy + (player_attacking
-                               ? (HEIGHT_RADIUS_NORMAL - HEIGHT_RADIUS_ROLLING)
-                               : 0);
-        } else if((player_vy + 8) > solidity_vy) {
-            // Check for intersection on left/right
-            if((player_vx + 8) < pos->vx) {
-                player.ev_right.collided = 1;
-                player.ev_right.coord = (solidity_vx + 2);
-                player.ev_right.angle = 0;
-            } else {
-                player.ev_left.collided = 1;
-                player.ev_left.coord = solidity_vx + 16;
-                player.ev_right.angle = 0;
-            }
+    // Convert to 20.12 fixed
+    solidity = (FRECT){
+        .x = solidity.x << 12,
+        .y = solidity.y << 12,
+        .w = solidity.w << 12,
+        .h = solidity.h << 12,
+    };
+
+    ObjectCollision side = solid_object_player_interaction(state, &solidity, 0);
+    if(side == hurt_side) {
+        if(player->action != ACTION_HURT && player->iframes == 0) {
+            player_do_damage(player, (solidity.x + 16) << 12);
+            if(side == OBJ_SIDE_TOP)
+                player->over_object = NULL;
+            return;
         }
     }
 }
 
 
 static void
-_explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+_explosion_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
+    (void)(pos);;
     // Explosions are simple particles: their animation is finished?
     // If so, destroy.
     if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION)
@@ -639,8 +626,10 @@ _explosion_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 
 
 static void
-_monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+_monitor_image_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
+    (void)(pos);
     state->timer++;
     PoolObject *newobj;
 
@@ -654,25 +643,25 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
         case MONITOR_KIND_1UP:
         case 7: // !-up (Miles)
         case 8: // 1-up (Knuckles)
-            sound_play_vag(sfx_event, 0);
+            screen_level_give_1up(-1);
             break;
         case MONITOR_KIND_RING:
             sound_play_vag(sfx_ring, 0);
-            level_ring_count += 10;
+            screen_level_give_rings(10);
             break;
         case MONITOR_KIND_SHIELD:
-            if(player.shield != 1) {
-                player.shield = 1;
+            if(player->shield != 1) {
+                player->shield = 1;
                 newobj = object_pool_create(OBJ_SHIELD);
-                newobj->freepos.vx = player.pos.vx;
-                newobj->freepos.vy = player.pos.vy + (20 << 12);
+                newobj->freepos.vx = player->pos.vx;
+                newobj->freepos.vy = player->pos.vy + (20 << 12);
             }
             sound_play_vag(sfx_shield, 0);
             break;
         case MONITOR_KIND_SPEEDSHOES:
             // Start speed shoes count
-            player.speedshoes_frames = 1200; // 20 seconds
-            player.cnst = getconstants(player.character, PC_SPEEDSHOES);
+            player->speedshoes_frames = 1200; // 20 seconds
+            player->cnst = getconstants(player->character, PC_SPEEDSHOES);
             sound_bgm_play(BGM_SPEEDSHOES);
             break;
         default: break;
@@ -684,79 +673,117 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
 
 
 static void
-_shield_update(ObjectState *state, ObjectTableEntry *, VECTOR *)
+_shield_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
+    (void)(pos);
     // Just stay with the player and disappear if player gets hurt
-    if(player.shield != 1)  {
+    if(player->shield != 1)  {
         state->props |= OBJ_FLAG_DESTROYED;
         return;
     }
 
-    state->freepos->vx = player.pos.vx;
-    state->freepos->vy = player.pos.vy + (16 << 12);
+    state->freepos->vx = player->pos.vx;
+    state->freepos->vy = player->pos.vy + (16 << 12);
 
-    if(player_get_current_animation_hash(&player) == ANIM_ROLLING) {
+    if(player_get_current_animation_hash(player) == ANIM_ROLLING) {
         state->freepos->vy += 4 << 12;
     }
 
     // Compensate position since it is drawn before player update
-    state->freepos->vx += player.vel.vx;
-    state->freepos->vy += player.vel.vy;
+    state->freepos->vx += player->vel.vx;
+    state->freepos->vy += player->vel.vy;
 }
 
 
 static void
-_switch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_switch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
-    // Switches are always solid at same size and change animation
-    // while being upon.
-    int32_t solidity_vx = pos->vx - 16;
-    int32_t solidity_vy = pos->vy - 8;
+    (void)(entry);
+    // Switches have a single solidity box, but they change animation
+    // depending on whether the player is on top
+    FRECT solidity = {
+        .x = (pos->vx - 15) << 12,
+        .y = (pos->vy - 8) << 12,
+        .w = 30 << 12,
+        .h = 8 << 12,
+    };
 
-    // Set as not pressed by default
-    state->anim_state.animation = 0;
+    ObjectCollision collision_side =
+        solid_object_player_interaction(state, &solidity, 0);
 
-    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                           solidity_vx, solidity_vy, 32, 8))
-    {
-        // Check for intersection on left/right
-        if((player_vy + 36) > solidity_vy
-            && !((player_vx >= solidity_vx - 8) && ((player_vx + 8) <= solidity_vx + 32))) {
+    if(collision_side == OBJ_SIDE_TOP) {
+        state->anim_state.animation = 1;
+        if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
+            uint8_t sound = 0;
+            /* printf("Parent ID: %d // Parent: %p type: %d\n", */
+            /*        state->parent_id, state->parent, state->parent ? state->parent->id : -1); */
+            if((state->parent != NULL) && !(state->parent->props & OBJ_FLAG_DESTROYED)) {
+                if((state->child != NULL) && (state->child->id == OBJ_SWITCH)) {
+                    // Logics 1 and 3 are treated here
+                    if(!(state->child->props & OBJ_FLAG_SWITCH_PUZZLE)) {
+                        // Remove flag from all children
+                        ObjectState *itr = state->child;
+                        while((itr != NULL) && (itr->id == OBJ_SWITCH)) {
+                            itr->props &= ~OBJ_FLAG_SWITCH_PUZZLE;
+                            itr = itr->child;
+                        }
+                        // Remove flag from all parents
+                        itr = state->parent;
+                        while((itr != NULL) && (itr->id == OBJ_SWITCH)) {
+                            itr->props &= ~OBJ_FLAG_SWITCH_PUZZLE;
+                            itr = itr->parent;
+                        }
+                    } else {
+                        if(state->parent->id == OBJ_DOOR) {
+                            // If I'm the last link, kill the door that is my parent
+                            state->parent->props |= OBJ_FLAG_DESTROYED;
+                            sound = 1;
+                        } else {
+                            // Otherwise set my puzzle flag
+                            state->props |= OBJ_FLAG_SWITCH_PUZZLE;
+                        }
+                    }
+                } else if(state->parent->id == OBJ_DOOR) {
+                    if(state->child == NULL) {
+                        // Logic 0: Parent is a door + I have no children (door opener)
+                        // Kill the door, do a destruction sound
+                        state->parent->props |= OBJ_FLAG_DESTROYED;
+                        sound = 1;
+                    } /* else if(state->child->id == OBJ_SWITCH) {} */
+                    // Logic 1: Parent is a door + I have a button child (puzzle last chain)
+                    // If my child doesn't have an active puzzle flag active,
+                    // go ahead and deactivate the entire chain of flags (up and down).
+                    // Otherwise kill parent and unlink everything.
+                    // SEE LOGIC IMPLEMENTED ABOVE
+                } else if(state->parent->id == OBJ_SWITCH) {
+                    if(state->child == NULL) {
+                        // Logic 2: Parent is a button + I have no children (puzzle start)
+                        // Set my puzzle flag.
+                        state->props |= OBJ_FLAG_SWITCH_PUZZLE;
+                    } /* else if(state->child->id == OBJ_SWITCH) {} */
+                    // Logic 3: Parent is a button + I have a button child (puzzle chain)
+                    // Do the same as logic 1 -- SEE LOGIC IMPLEMENTED ABOVE
+                }
+            }
 
-            if((player_vx + 8) < pos->vx) {
-                player.ev_right.collided = 1;
-                player.ev_right.coord = (solidity_vx + 2);
-                player.ev_right.angle = 0;
-            } else {
-                player.ev_left.collided = 1;
-                player.ev_left.coord = solidity_vx + 16;
-                player.ev_right.angle = 0;
+            switch(sound) {
+            default: sound_play_vag(sfx_switch, 0);  break; // Beep
+            case 1:  sound_play_vag(sfx_destroy, 0); break; // Destruction
             }
         }
-        // Landing on top; pressing
-        else if(((player_vy + player_height) < solidity_vy + 16))
-        {
-            player.ev_grnd1.collided = player.ev_grnd2.collided = 1;
-            player.ev_grnd1.angle = player.ev_grnd2.angle = 0;
-            player.ev_grnd1.coord = player.ev_grnd2.coord = solidity_vy;
-            state->anim_state.animation = 1;
-            if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
-                // Switch was just pressed; play "beep"
-                sound_play_vag(sfx_switch, 0);
-            }
-
-            state->props |= OBJ_FLAG_SWITCH_PRESSED;
-        }
+        state->props |= OBJ_FLAG_SWITCH_PRESSED;
     } else {
-        // If button is pressed... un-press it
+        state->anim_state.animation = 0;
         state->props &= ~OBJ_FLAG_SWITCH_PRESSED;
     }
 }
 
 
 static void
-_bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_bubble_patch_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     // Fixed bubble patch sets
     static const uint8_t bubble_size_sets[4][6] = {
         {0, 0, 0, 0, 1, 0},
@@ -820,8 +847,9 @@ _bubble_patch_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 }
 
 static void
-_bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_bubble_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
+    (void)(entry);
     // NOTE: this object can only exist as a free object. Do not insist.
     if(state->freepos == NULL) {
         state->props |= OBJ_FLAG_DESTROYED;
@@ -829,10 +857,10 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     }
 
     // FIRST OFF: If way too far from camera, destroy it
-    if((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 13))
-       || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 13))
-       || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 13))
-       || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 13))
+    if((state->freepos->vx < camera->pos.vx - (SCREEN_XRES << 13))
+       || (state->freepos->vx > camera->pos.vx + (SCREEN_XRES << 13))
+       || (state->freepos->vy < camera->pos.vy - (SCREEN_YRES << 13))
+       || (state->freepos->vy > camera->pos.vy + (SCREEN_YRES << 13))
        || (state->timer >= 256)) {
         state->props |= OBJ_FLAG_DESTROYED;
         return;
@@ -853,8 +881,8 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         // relative to screen center, because it will hang around at the same
         // X and Y position on screen.
         if(state->anim_state.animation >= 3) {
-            state->freepos->rx = state->freepos->vx - camera.pos.vx;
-            state->freepos->ry = state->freepos->vy - camera.pos.vy;
+            state->freepos->rx = state->freepos->vx - camera->pos.vx;
+            state->freepos->ry = state->freepos->vy - camera->pos.vy;
         }
     }
 
@@ -891,8 +919,8 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
     // Again: if this is a stick-around bubble (number bubble), our free position
     // should be relative to camera center
     if(state->anim_state.animation >= 3) {
-        state->freepos->vx = state->freepos->rx + camera.pos.vx;
-        state->freepos->vy = state->freepos->ry + camera.pos.vy;
+        state->freepos->vx = state->freepos->rx + camera->pos.vx;
+        state->freepos->vy = state->freepos->ry + camera->pos.vy;
     }
 
     // When a normal bubble's top interact with water surface, destroy it.
@@ -916,13 +944,13 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
         if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                            pos->vx - 16, pos->vy - 16, 32, 16)) {
             state->props |= OBJ_FLAG_DESTROYED;
-            player.remaining_air_frames = 1800;
+            player->remaining_air_frames = 1800;
             // TODO: Cancel any drowning music.
-            player_set_action(&player, ACTION_GASP);
-            player_set_animation_direct(&player, ANIM_GASP);
-            player.ctrllock = player.grnd ? 15 : 10;
-            player.grnd = 0;
-            player.vel.vx = player.vel.vy = player.vel.vz = 0;
+            player_set_action(player, ACTION_GASP);
+            player_set_animation_direct(player, ANIM_GASP);
+            player->ctrllock = player->grnd ? 15 : 10;
+            player->grnd = 0;
+            player->vel.vx = player->vel.vy = player->vel.vz = 0;
             sound_play_vag(sfx_bubble, 0);
             return;
         }
@@ -930,14 +958,174 @@ _bubble_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
 }
 
 static void
-_end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *pos)
+_end_capsule_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
-    RECT solidity = {
-        .x = pos->vx - 32,
-        .y = pos->vy - 60,
-        .w = 64,
-        .h = 60,
+    (void)(entry);
+    FRECT solidity = {
+        .x = pos->vx - 30,
+        .y = pos->vy - 54,
+        .w = 60,
+        .h = 54,
     };
 
-    solid_object_player_interaction(state, &solidity);
+    // Convert to 20.12 fixed
+    solidity = (FRECT){
+        .x = solidity.x << 12,
+        .y = solidity.y << 12,
+        .w = solidity.w << 12,
+        .h = solidity.h << 12,
+    };
+
+    solid_object_player_interaction(state, &solidity, 0);
+}
+
+static void
+_end_capsule_button_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    (void)(entry);
+    FRECT solidity = {
+        .x = (pos->vx - 12) << 12,
+        .y = (pos->vy - 8) << 12,
+        .w = 24 << 12,
+        .h = 8 << 12,
+    };
+
+    ObjectCollision collision_side =
+        solid_object_player_interaction(state, &solidity, 0);
+
+    if(collision_side == OBJ_SIDE_TOP) {
+        if(!(state->props & OBJ_FLAG_SWITCH_PRESSED)) {
+            state->anim_state.animation = 1;
+            uint8_t sound = 0;
+            state->props |= OBJ_FLAG_SWITCH_PRESSED;
+
+            if(state->parent != NULL) {
+                if(!(state->parent->props & OBJ_FLAG_CAPSULE_OPEN)) {
+                    state->parent->props |= OBJ_FLAG_CAPSULE_OPEN;
+                    state->parent->anim_state.animation = 1;
+                    state->parent->frag_anim_state->animation = 1;
+                    state->parent->frag_anim_state->frame = 0;
+                    sound = 1;
+
+                    /* Create objects */
+                    int32_t vx = pos->vx << 12;
+                    int32_t vy = (pos->vy + 64) << 12;
+                    int32_t parts_vy = (pos->vy + 40) << 12;
+
+                    camera_focus(camera, vx, vy - (CENTERY << 11));
+                    pause_elapsed_frames();
+                    state->timer = 181;
+                    level_finished = 2; // Finish but don't go beyond end
+
+                    // Explosion
+                    PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+                    explosion->freepos.vx = vx;
+                    explosion->freepos.vy = (pos->vy + (12 + 16)) << 12;
+                    explosion->state.anim_state.animation = 0; // Small explosion
+
+                    // Animals
+                    for(int i = 0; i < 6; i++) {
+                        int16_t timer = 30 + (i * 15);
+                        int32_t x;
+                        PoolObject *animal;
+
+                        // Animal at left
+                        x = (pos->vx - 10 - (i * 3)) << 12;
+                        animal = object_pool_create(OBJ_ANIMAL);
+                        animal->state.subtype = rand() % 4;
+                        animal->freepos.vx = x;
+                        animal->freepos.vy = parts_vy;
+                        animal->state.flipmask |= MASK_FLIP_FLIPX;
+                        animal->freepos.spdy = -0x04800;
+                        animal->state.timer = timer;
+
+                        x = (pos->vx + 10 + (i * 3)) << 12;
+                        animal = object_pool_create(OBJ_ANIMAL);
+                        animal->state.subtype = rand() % 4;
+                        animal->freepos.vx = x;
+                        animal->freepos.vy = parts_vy;
+                        animal->state.flipmask = 0;
+                        animal->freepos.spdy = -0x04800;
+                        animal->state.timer = timer;
+                    }
+                }
+            }
+
+            switch(sound) {
+            default: sound_play_vag(sfx_switch, 0); break;
+            case 1: sound_play_vag(sfx_pop, 0);     break;
+            }
+        }
+    } else {
+        state->anim_state.animation = 0;
+        state->props &= ~OBJ_FLAG_SWITCH_PRESSED;
+    }
+
+    if((state->parent != NULL) && (state->parent->props & OBJ_FLAG_CAPSULE_OPEN)) {
+        if(state->timer > 0) state->timer--;
+        if(state->timer == 1) {
+            screen_level_setmode(LEVEL_MODE_FINISHED2);
+            screen_level_transition_start_timer();
+        }
+    }
+}
+
+static void
+_door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    (void)(entry);
+    FRECT solidity = {
+        .x = (pos->vx - 5) << 12,
+        .y = (pos->vy - 64) << 12,
+        .w = 12 << 12,
+        .h = 64 << 12,
+    };
+    solid_object_player_interaction(state, &solidity, 0);
+}
+
+#define ANIMAL_GRAVITY 0x00380
+#define ANIMAL_XSPD    0x04000
+#define ANIMAL_JMP_SPD 0x06000
+
+static void
+_animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    (void)(entry);
+    // Should only exist as a free object
+    if(state->freepos == NULL) state->props |= OBJ_FLAG_DESTROYED;
+
+    // Timer countdown to begin movement
+    if(state->timer > 0) {
+        state->timer--;
+    } else {
+        if(object_should_despawn(state)) {
+            state->props |= OBJ_FLAG_DESTROYED;
+            return;
+        }
+
+        state->freepos->spdy += ANIMAL_GRAVITY;
+
+        // When hitting the ground, ensure that the animal moves horizontally
+        // as well
+        if(state->freepos->spdy > 0) {
+            CollisionEvent grn = linecast(pos->vx, pos->vy - 8, CDIR_FLOOR, 8, CDIR_FLOOR);
+            if(grn.collided) {
+                state->freepos->spdx = ANIMAL_XSPD * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+                state->freepos->spdy = -ANIMAL_JMP_SPD;
+            }
+        }
+        state->freepos->vx += state->freepos->spdx;
+        state->freepos->vy += state->freepos->spdy;
+    }
+
+    // Animation control
+    uint8_t animation;
+    if(state->freepos->spdx == 0) {
+        animation = 0;
+    } else {
+        animation = (state->freepos->spdy < 0) ? 1 : 2;
+    }
+    // Leverage subtype for multiple animals
+    animation += (state->subtype * 3);
+    state->anim_state.animation = animation;
 }

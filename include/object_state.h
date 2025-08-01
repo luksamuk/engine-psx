@@ -6,6 +6,7 @@
 #include <psxgte.h>
 
 #include "object.h"
+#include "util.h"
 
 /* ======================== */
 /*  OBJECT STATE STRUCTURE */
@@ -31,6 +32,10 @@ typedef enum {
 
     // Switch-only flags
     OBJ_FLAG_SWITCH_PRESSED = 0x10,
+    OBJ_FLAG_SWITCH_PUZZLE  = 0x20, // Puzzle flag
+
+    // End capsule-only flags
+    OBJ_FLAG_CAPSULE_OPEN = 0x10,
 } ObjectGeneralFlag;
 
 typedef struct {
@@ -78,18 +83,25 @@ typedef struct OBJECT_STATE {
     uint8_t props; // IMPORTANT: DO NOT MOVE THIS FIELD.
     uint8_t flipmask;
     uint16_t id;
+    uint16_t unique_id;
     int16_t rx, ry; // Positions relative to chunk top-left corner
     int16_t timer;
     int16_t timer2;
-    int16_t _padding0; // Unused for now
+    uint16_t subtype;
     void    *extra;
 
     ObjectAnimState anim_state;
     ObjectAnimState *frag_anim_state; // Only exists if fragment also exists
     ObjectFreePos *freepos; // Only exists if object lives in object pool
 
-    // Pointer to parent entity (NULL unless manually set!)
+    // Map reference to parent entity (only static entities allowed)
+    uint16_t parent_id;
+    /* NOTE: Sometimes the following pointers are used on free objects */
+    // Pointer to parent/child entity (NULL unless manually set!)
     ObjectState *parent;
+    ObjectState *child;
+    // Pointer to next object (NULL unless manually set!)
+    ObjectState *next;
 } ObjectState;
 
 typedef struct {
@@ -108,6 +120,7 @@ void object_render(ObjectState *state, ObjectTableEntry *typedata,
 // its position and speed by using the 'freepos' field.
 void object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8_t round);
 
+uint16_t count_emplaced_rings(void *lvl_data);
 
 /* ============================== */
 /* OBJECTS OWNED BY OBJECT POOL   */
@@ -152,10 +165,18 @@ typedef enum {
     OBJECT_DESPAWN,
 } ObjectBehaviour;
 
+typedef enum {
+    OBJ_SIDE_NONE   = 0,
+    OBJ_SIDE_LEFT   = 1,
+    OBJ_SIDE_RIGHT  = 2,
+    OBJ_SIDE_TOP    = 3,
+    OBJ_SIDE_BOTTOM = 4,
+} ObjectCollision;
+
 ObjectBehaviour enemy_spawner_update(ObjectState *state, VECTOR *pos);
 ObjectBehaviour enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos);
 uint8_t         object_should_despawn(ObjectState *state);
 void            hazard_player_interaction(RECT *hitbox, VECTOR *pos);
-void            solid_object_player_interaction(ObjectState *obj, RECT *solidity);
+ObjectCollision solid_object_player_interaction(ObjectState *obj, FRECT *solidity, uint8_t is_platform);
 
 #endif

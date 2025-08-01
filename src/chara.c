@@ -114,7 +114,7 @@ chara_draw_prepare(RECT *render_area, int otz)
     pfill = (FILL *)get_next_prim();
     setFill(pfill);
     setXY0(pfill, render_area->x, render_area->y);
-    setWH(pfill, render_area->w, render_area->h);
+    setWH(pfill, render_area->w + 1, render_area->h + 1);
     setRGB0(pfill, 0, 0, 0);
     sort_sub_prim(pfill, otz);
     increment_prim(sizeof(FILL));
@@ -233,8 +233,8 @@ chara_draw_blit(RECT *render_area,
     setTPage(poly, 2, 0, render_area->x, render_area->y);
     // Not CLUT! We use 16-bit depth.
 
-    uint8_t umax = render_area->w - 1;
-    uint8_t vmax = render_area->h - 1;
+    uint8_t umax = render_area->w;
+    uint8_t vmax = render_area->h;
     uint8_t vmin = render_area->y;
     poly->clut = 0;
     if(flipx) {

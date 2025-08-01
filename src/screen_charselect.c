@@ -14,7 +14,8 @@
 #define BG_FPS    4
 #define BG_FRAMES 4
 
-#define CHARSEL_PADDING (SCREEN_XRES >> 2)
+#define YRADIUS 21
+#define XRADIUS 42
 
 extern SoundEffect sfx_switch;
 
@@ -26,20 +27,45 @@ typedef struct {
     uint8_t  bg_frame;
     uint8_t  bg_state;
     uint16_t bg_timer;
-    uint8_t  charsel_mode;
+
+    int32_t char_angles[3];
+    VECTOR pos[3];
+    int32_t alpha;
+    int32_t alpha_target;
+    int32_t alpha_speed;
 } screen_charselect_data;
 
 // TIM 15bpp -- TPAGE: 384x0
-// Sonic: 0x0+22+40
-// Tails: 22x0+40+40
-// Knuckles: 62x0+40+40
+// Each frame is 112x127
+// Sonic:      0x0
+// Tails:    112x0
+// Knuckles:   0x128
+#define CHAR_WIDTH  112
+#define CHAR_HEIGHT 127
+#define CHAR_CHANGE_SPEED 40
 
+static void
+_calculate_positions(screen_charselect_data *data)
+{
+    for(int i = 0; i < 3; i++) {
+        int32_t angle = (data->alpha % ONE) + data->char_angles[i];
+        if(angle < 0) angle += ONE;
+        data->pos[i].vx = (CENTERX << 12) + (XRADIUS * -rsin(angle));
+        data->pos[i].vy = (CENTERY << 12) + (YRADIUS * rcos(angle));
+    }
+}
 
 void
 screen_charselect_load()
 {
     screen_charselect_data *data = screen_alloc(sizeof(screen_charselect_data));
     data->character = screen_level_getcharacter();
+    data->alpha_speed = 0;
+    data->char_angles[0] = 0x0000;
+    data->char_angles[1] = 0x0555;
+    data->char_angles[2] = 0x0aaa;
+    data->alpha_target = data->alpha = data->char_angles[data->character];
+    _calculate_positions(data);
 
     uint32_t length;
     TIM_IMAGE tim;
@@ -50,9 +76,8 @@ screen_charselect_load()
     data->bg_prect_y = tim.prect->y;
     free(img);
 
-    img = file_read("\\MISC\\CHARSEL.TIM;1", &length);
+    img = file_read("\\MISC\\CHARAS.TIM;1", &length);
     load_texture(img, &tim);
-    data->charsel_mode = tim.mode;
     free(img);
 
     data->bg_frame = 0;
@@ -63,8 +88,9 @@ screen_charselect_load()
 }
 
 void
-screen_charselect_unload(void *)
+screen_charselect_unload(void *d)
 {
+    (void)(d);
     sound_cdda_stop();
     screen_free();
 }
@@ -102,21 +128,44 @@ screen_charselect_update(void *d)
         }
     }
 
-    if(pad_pressed(PAD_RIGHT) && (data->character < CHARA_MAX)) {
-        data->character++;
-        sound_play_vag(sfx_switch, 0);
-    }
-    if(pad_pressed(PAD_LEFT) && (data->character > 0)) {
-        data->character--;
-        sound_play_vag(sfx_switch, 0);
-    }
+    if(data->alpha_speed == 0) {
+        if(pad_pressed(PAD_CROSS) || pad_pressed(PAD_START)) {
+            screen_level_setcharacter(data->character);
+            // NOTE: screen_level_setlevel should have
+            // been called from previous screen
+            screen_level_setmode(LEVEL_MODE_NORMAL);
+            scene_change(SCREEN_LEVEL);
+        } else {
+            uint8_t changed = 0;
+            if(pad_pressing(PAD_RIGHT)) {
+                data->alpha_speed = CHAR_CHANGE_SPEED;
+                data->character++;
+                changed = 1;
+            }
+            if(pad_pressing(PAD_LEFT)) {
+                data->alpha_speed = -CHAR_CHANGE_SPEED;
+                data->character--;
+                changed = 1;
+            }
+            if(changed) {
+                data->character = (data->character < 0) ? 2 : (data->character % 3);
+                data->alpha_target = data->char_angles[data->character];
+                sound_play_vag(sfx_switch, 0);
+            }
+        }
+    } else {
+        data->alpha += data->alpha_speed;
+        if(data->alpha < 0) data->alpha += ONE;
+        if(data->alpha >= ONE) data->alpha -= ONE;
 
-    if(pad_pressed(PAD_CROSS) || pad_pressed(PAD_START)) {
-        screen_level_setcharacter(data->character);
-        // NOTE: screen_level_setlevel should have
-        // been called from previous screen
-        screen_level_setmode(LEVEL_MODE_NORMAL);
-        scene_change(SCREEN_LEVEL);
+        int32_t target_min = data->alpha_target - abs(data->alpha_speed);
+        int32_t target_max = data->alpha_target + abs(data->alpha_speed);
+
+        if((data->alpha >= target_min) && (data->alpha <= target_max)) {
+            data->alpha_speed = 0;
+            data->alpha = data->alpha_target;
+        }
+        _calculate_positions(data);
     }
 }
 
@@ -124,11 +173,50 @@ const char *
 _get_char_name(int8_t character)
 {
     switch(character) {
-    case CHARA_SONIC: return "SONIC";
-    case CHARA_MILES: return "TAILS";
-    case CHARA_KNUCKLES: return "KNUCKLES";
+    case CHARA_SONIC: return "\asSONIC\r";
+    case CHARA_MILES: return "\atTAILS\r";
+    case CHARA_KNUCKLES: return "\akKNUCKLES\r";
     }
-    return "UNKNOWN";
+    return "WECHNIA";
+}
+
+const char *
+_get_char_subtitle(int8_t character)
+{
+    switch(character) {
+    case CHARA_SONIC: return "\awThe Hedgehog\r";
+    case CHARA_MILES: return "\awMiles Prower\r";
+    case CHARA_KNUCKLES: return "\awThe Echidna\r";
+    }
+    return "\awUNKNOWN\r";
+}
+
+static void
+_draw_character(uint8_t c, VECTOR *v)
+{
+    uint8_t intensity = ((v->vy >> 12) < CENTERY + (YRADIUS >> 1)) ? 64 : 128;
+    POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
+    increment_prim(sizeof(POLY_FT4));
+    setPolyFT4(poly);
+    setRGB0(poly, intensity, intensity, intensity);
+    setTPage(poly, 2, 0, 384, 0);
+    poly->clut = 0;
+    setXYWH(poly,
+            (v->vx >> 12) - (CHAR_WIDTH >> 1),
+            (v->vy >> 12) - (CHAR_HEIGHT >> 1),
+            CHAR_WIDTH,
+            CHAR_HEIGHT);
+    switch(c) {
+    default: setUVWH(poly,   0,   0, CHAR_WIDTH, CHAR_HEIGHT); break;
+    case 2:  setUVWH(poly, 112,   0, CHAR_WIDTH, CHAR_HEIGHT); break;
+    case 1:  setUVWH(poly,   0, 128, CHAR_WIDTH, CHAR_HEIGHT); break;
+    }
+    sort_prim(poly,
+              ((v->vy >> 12) < CENTERY - (YRADIUS >> 1))
+              ? OTZ_LAYER_LEVEL_FG_BACK
+              : ((v->vy >> 12) < CENTERY)
+              ? OTZ_LAYER_UNDER_PLAYER
+              : OTZ_LAYER_PLAYER);
 }
 
 void
@@ -136,35 +224,25 @@ screen_charselect_draw(void *d)
 {
     screen_charselect_data *data = (screen_charselect_data *)d;
 
-    static const char *title = "CHARACTER SELECT";
+    static const char *title = "\awCHARACTER SELECT\r";
 
     font_set_color(128, 128, 128);
     uint16_t text_hsize = font_measurew_big(title) >> 1;
     uint16_t text_xpos = CENTERX - text_hsize;
     font_draw_big(title, text_xpos, SCREEN_YRES >> 3);
 
-    // Draw characters
-    for(uint16_t i = 0; i < 3; i++) {
-        int16_t xpos = (CHARSEL_PADDING + (i * CHARSEL_PADDING));
-        int16_t ypos = (SCREEN_YRES >> 1);
-        uint8_t is_current_char = (data->character == i);
-        uint8_t dim = is_current_char ? 128 : 64;
-        POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
-        increment_prim(sizeof(POLY_FT4));
-        setPolyFT4(poly);
-        setRGB0(poly, dim, dim, dim);
-        setTPage(poly, data->charsel_mode & 0x3, 0, 384, 0);
-        poly->clut = 0;
-        setXYWH(poly, xpos - 20, ypos - 20, 40, 40);
-        setUVWH(poly, 40 * i, 0, 40, 40);
-        sort_prim(poly, OTZ_LAYER_PLAYER);
-
-        if(is_current_char) {
-            const char *charname = _get_char_name(data->character);
-            text_hsize = font_measurew_sm(charname) >> 1;
-            font_draw_sm(charname, xpos - text_hsize, ypos + 30);
-        }
+    // Draw character
+    for(int i = 0; i < 3; i++) {
+        _draw_character(i, &data->pos[i]);
     }
+
+    const char *name = _get_char_name(data->character);
+    const char *subtitle = _get_char_subtitle(data->character);
+    text_hsize = font_measurew_md(name) >> 1;
+    font_draw_md(name, CENTERX - text_hsize, (SCREEN_YRES - (CENTERY >> 1)));
+    text_hsize = font_measurew_sm(subtitle) >> 1;
+    font_draw_sm(subtitle, CENTERX - text_hsize, (SCREEN_YRES - (CENTERY >> 1)) + GLYPH_MD_WHITE_HEIGHT);
+    
 
     // Draw background
     for(uint16_t y = 0; y < SCREEN_YRES; y += 32) {

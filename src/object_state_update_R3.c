@@ -32,8 +32,8 @@ static void _buzzbomber_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 static void _projectile_update(ObjectState *, ObjectTableEntry *, VECTOR *);
 
 // Extern variables
-extern Player player;
-extern Camera camera;
+extern Player *player;
+extern Camera *camera;
 extern int32_t player_vx, player_vy; // Top left corner of player hitbox
 extern uint8_t player_attacking;
 extern int32_t player_width;
@@ -255,7 +255,7 @@ _buzzbomber_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
             shoot_max_x = state->freepos->vx + BUZZBOMBER_SHOOT_RADIUS;
         }
 
-        if(player.pos.vx >= shoot_min_x && player.pos.vx <= shoot_max_x) {
+        if(player->pos.vx >= shoot_min_x && player->pos.vx <= shoot_max_x) {
             state->timer = BUZZBOMBER_AIMING_FRAMES;
         }
     }

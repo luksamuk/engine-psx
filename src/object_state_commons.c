@@ -8,8 +8,8 @@
 #define OBJ_MIN_SPAWN_DIST_X (CENTERX + (CENTERX >> 1))
 #define OBJ_MIN_SPAWN_DIST_Y (CENTERY + (CENTERY >> 1))
 
-extern Player player;
-extern Camera camera;
+extern Player *player;
+extern Camera *camera;
 extern int32_t player_vx, player_vy; // Top left corner of player hitbox
 extern uint8_t player_attacking;
 extern int32_t player_width;
@@ -23,12 +23,12 @@ extern SoundEffect sfx_pop;
 uint8_t
 object_should_despawn(ObjectState *state)
 {
-    // Despawn if too far from camera.
+    // Despawn if too far from camera->
     return
-        ((state->freepos->vx < camera.pos.vx - (SCREEN_XRES << 12))
-         || (state->freepos->vx > camera.pos.vx + (SCREEN_XRES << 12))
-         || (state->freepos->vy < camera.pos.vy - (SCREEN_YRES << 12))
-         || (state->freepos->vy > camera.pos.vy + (SCREEN_YRES << 12)));
+        ((state->freepos->vx < camera->pos.vx - (SCREEN_XRES << 12))
+         || (state->freepos->vx > camera->pos.vx + (SCREEN_XRES << 12))
+         || (state->freepos->vy < camera->pos.vy - (SCREEN_YRES << 12))
+         || (state->freepos->vy > camera->pos.vy + (SCREEN_YRES << 12)));
 }
 
 ObjectBehaviour
@@ -53,16 +53,16 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
         // but still far away from  play area itself!
         if((state->parent == NULL) && (
                // Within outside boundary, and...
-               (pos->vx > (camera.pos.vx >> 12) - SCREEN_XRES)
-               && (pos->vx < (camera.pos.vx >> 12) + SCREEN_XRES)
-               && (pos->vy > (camera.pos.vy >> 12) - SCREEN_YRES)
-               && (pos->vy < (camera.pos.vy >> 12) + SCREEN_YRES)
+               (pos->vx > (camera->pos.vx >> 12) - SCREEN_XRES)
+               && (pos->vx < (camera->pos.vx >> 12) + SCREEN_XRES)
+               && (pos->vy > (camera->pos.vy >> 12) - SCREEN_YRES)
+               && (pos->vy < (camera->pos.vy >> 12) + SCREEN_YRES)
             ) && (
                 // Outside center screen
-                (pos->vx < (camera.pos.vx >> 12) - OBJ_MIN_SPAWN_DIST_X)
-                || (pos->vx > (camera.pos.vx >> 12) + OBJ_MIN_SPAWN_DIST_X)
-                || (pos->vy < (camera.pos.vy >> 12) - OBJ_MIN_SPAWN_DIST_Y)
-                || (pos->vy > (camera.pos.vy >> 12) + OBJ_MIN_SPAWN_DIST_Y)
+                (pos->vx < (camera->pos.vx >> 12) - OBJ_MIN_SPAWN_DIST_X)
+                || (pos->vx > (camera->pos.vx >> 12) + OBJ_MIN_SPAWN_DIST_X)
+                || (pos->vy < (camera->pos.vy >> 12) - OBJ_MIN_SPAWN_DIST_Y)
+                || (pos->vy > (camera->pos.vy >> 12) + OBJ_MIN_SPAWN_DIST_Y)
                 )
             )
         {
@@ -71,7 +71,7 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
         return OBJECT_SPAWNER_ABORT_BEHAVIOUR;
     }
 
-    // Despawn if too far from camera.
+    // Despawn if too far from camera->
     if(object_should_despawn(state)) {
         return OBJECT_DESPAWN;
     }
@@ -84,6 +84,10 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
 ObjectBehaviour
 enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
 {
+    if(player->death_type > 0) {
+        return OBJECT_DO_NOTHING;
+    }
+
     if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                        hitbox->x, hitbox->y, hitbox->w, hitbox->h))
     {
@@ -102,13 +106,21 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
             explosion->freepos.vy = (pos->vy << 12);
             explosion->state.anim_state.animation = 0; // Small explosion
 
-            if(!player.grnd && player.vel.vy > 0) {
-                player.vel.vy *= -1;
+            // Animal
+            PoolObject *animal = object_pool_create(OBJ_ANIMAL);
+            animal->state.subtype = rand() % 4;
+            animal->freepos.vx = (pos->vx << 12);
+            animal->freepos.vy = (pos->vy << 12);
+            animal->state.flipmask |= MASK_FLIP_FLIPX;
+            animal->freepos.spdy = -0x05000;
+
+            if(!player->grnd && player->vel.vy > 0) {
+                player->vel.vy *= -1;
             }
             return OBJECT_DESPAWN;
         } else {
-            if(player.action != ACTION_HURT && player.iframes == 0) {
-                player_do_damage(&player, pos->vx << 12);
+            if(player->action != ACTION_HURT && player->iframes == 0) {
+                player_do_damage(player, pos->vx << 12);
             }
         }
     }
@@ -121,67 +133,76 @@ hazard_player_interaction(RECT *hitbox, VECTOR *pos)
     if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                        hitbox->x, hitbox->y, hitbox->w, hitbox->h))
     {
-        if(player.action != ACTION_HURT && player.iframes == 0) {
-            player_do_damage(&player, pos->vx << 12);
+        if(player->action != ACTION_HURT && player->iframes == 0) {
+            player_do_damage(player, pos->vx << 12);
         }
     }
 }
 
-void
-solid_object_player_interaction(ObjectState *obj, RECT *solidity)
+ObjectCollision
+solid_object_player_interaction(ObjectState *obj, FRECT *box, uint8_t is_platform)
 {
-    if(debug_mode > 1) draw_collision_hitbox(solidity->x, solidity->y, solidity->w, solidity->h);
+    if(player->death_type > 0) {
+        player->pushed_object = player->over_object = NULL;
+        return OBJ_SIDE_NONE;
+    }
 
+    if(debug_mode > 1) draw_collision_hitbox(box->x >> 12, box->y >> 12, box->w >> 12, box->h >> 12);
+
+    // Player center calculated more or less like in object_update
     VECTOR player_center = {
-        .vx = player_vx + (player_width >> 1),
-        .vy = player_vy + (player_height >> 1),
+        .vx = player->pos.vx,
+        .vy = player->pos.vy,
     };
 
     VECTOR object_center = {
-        .vx = solidity->x + (solidity->w >> 1),
-        .vy = solidity->y + (solidity->h >> 1),
+        .vx = box->x + (box->w >> 1),
+        .vy = box->y + (box->h >> 1),
     };
 
-    int32_t combined_x_radius = (solidity->w >> 1) + PUSH_RADIUS + 1;
-    int32_t combined_y_radius = (solidity->h >> 1) + (player_height >> 1);
+    int32_t combined_x_radius = (box->w >> 1) + ((PUSH_RADIUS + 1) << 12);
+    int32_t combined_y_radius = (box->h >> 1) + (player_height << 11);
     int32_t combined_x_diameter = (combined_x_radius << 1);
     int32_t combined_y_diameter = (combined_y_radius << 1);
 
 
     // If we're standing over the current object, do something about this
-    if(player.over_object == obj) {
+    if(player->over_object == obj) {
         int32_t x_left_distance = (player_center.vx - object_center.vx) + combined_x_radius;
         if((x_left_distance < 0) || (x_left_distance >= combined_x_diameter)) {
-            player.over_object = NULL;
-            player.grnd = 0;
+            player->over_object = NULL;
+            player->grnd = 0;
+            return OBJ_SIDE_NONE;
         } else {
             // Balance on ledges
             int32_t left_difference = (player_center.vx - object_center.vx) + combined_x_radius;
             if(player_center.vx > object_center.vx) {
                 left_difference = left_difference - combined_x_diameter;
             }
-            player.col_ledge = (abs(left_difference) >= 12);
-            if(!player.col_ledge) {
+            player->col_ledge = (abs(left_difference) >= (12 << 12));
+            if(!player->col_ledge) {
                 if(left_difference < 0)
-                    player.ev_grnd1.collided = 1;
-                else player.ev_grnd2.collided = 1;
+                    player->ev_grnd1.collided = 1;
+                else player->ev_grnd2.collided = 1;
             }
         }
-        return;
+        return OBJ_SIDE_TOP;
     }
 
 
     // Horizontal overlap
     int32_t left_difference = (player_center.vx - object_center.vx) + combined_x_radius;
     // Cancel if player is too far to the left or the right to be touching object
-    if((left_difference < 0) || (left_difference > combined_x_diameter))
-       return;
+    if((left_difference < 0) || (left_difference > combined_x_diameter)) {
+        if(player->pushed_object == obj) player->pushed_object = NULL;
+        return OBJ_SIDE_NONE;
+    }
 
     // Vertical overlap
-    int32_t top_difference = (player_center.vy - object_center.vy) + 4 + combined_y_radius;
+    int32_t top_difference = (player_center.vy - object_center.vy) + (4 << 12) + combined_y_radius;
     // Cancel if player is too far to the top or bottom to be touching object
     if((top_difference < 0) || (top_difference > combined_y_diameter))
-        return;
+        return OBJ_SIDE_NONE;
 
     
     // Find direction of collision.
@@ -201,36 +222,37 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
     int32_t y_distance;
     if(player_center.vy > object_center.vy) {
         // Player is on the bottom; flipped, will be a negative number, minus extra 4px
-        y_distance = top_difference - 4 - combined_y_diameter;
+        y_distance = top_difference - (4 << 12) - combined_y_diameter;
     } else {
         // Player is on top
         y_distance = top_difference;
     }
 
-    if((abs(x_distance) > abs(y_distance)) || (abs(y_distance) <= 4)) {
+    if((abs(x_distance) > abs(y_distance)) || (abs(y_distance) <= (8 << 12)) || is_platform) {
         // Collide vertically.
 
         // Pop downwards
-        if(y_distance < 0) {
+        if(!is_platform && (y_distance < 0)) {
             // If not moving vertically and standing on the ground,
             // get crushed
-            if((player.vel.vy == 0) && (player.grnd)) {
-                // TODO: Get crushed
-                return;
+            if((player->vel.vy == 0) && (player->grnd)) {
+                player_do_die(player, PLAYER_DEATH_NORMAL);
+                return OBJ_SIDE_BOTTOM;
             }
-            if(player.vel.vy >= 0) return;
-            player.pos.vy -= (y_distance << 12);
-            player.vel.vy = 0;
+            if(player->vel.vy >= 0) return OBJ_SIDE_NONE;
+            player->pos.vy -= y_distance;
+            player->vel.vy = 0;
+            return OBJ_SIDE_BOTTOM;
         } else {
             // Popped upwards: Land on object
             // y_distance must not be larger or equal to 16
-            if(y_distance >= 16) return;
-            y_distance -= 4; // Subtract 4px added earlier
+            if(y_distance >= (16 << 12)) return OBJ_SIDE_NONE;
+            y_distance -= (4 << 12); // Subtract 4px added earlier
 
             // Forget the combined_x_radius; use the actual width radius of
             // the object, not combined with anything at all
-            combined_x_radius = solidity->w >> 1;
-            combined_x_diameter = solidity->w;
+            combined_x_radius = box->w >> 1;
+            combined_x_diameter = box->w;
 
             // Get a distance from the player's X position to the object's
             // right edge
@@ -239,29 +261,35 @@ solid_object_player_interaction(ObjectState *obj, RECT *solidity)
             // If the player is too far to the right; or...
             // If the player is too far to the left...
             if((x_comparison < 0) || (x_comparison >= combined_x_diameter))
-                return;
+                return OBJ_SIDE_NONE;
 
             // If player is moving upwards, cancel too
-            if(player.vel.vy < 0) return;
+            if(player->vel.vy < 0) return OBJ_SIDE_NONE;
 
             // Land over object
-            player.pos.vy -= (y_distance + 1) << 12;
-            player.grnd = 1;
-            player.vel.vy = 0;
-            player.angle = 0;
-            player.over_object = obj;
-            player.vel.vz = player.vel.vx;
+            if(!is_platform)
+                player->pos.vy -= y_distance + ONE;
+            else
+                player->pos.vy = object_center.vy - (box->h >> 1) - (player_height << 11);
+            player->grnd = 1;
+            player->vel.vy = 0;
+            player->angle = 0;
+            player->over_object = obj;
+            player->vel.vz = player->vel.vx;
+            player_do_dropdash(player);
+            return OBJ_SIDE_TOP;
         }
     } else {
         // Collide horizontally
         // Do not affect speed if x_distance is zero.
         if((x_distance != 0)
-           && (((x_distance > 0) && (player.vel.vx > 0))
-               || ((x_distance < 0) && (player.vel.vx < 0))))
+           && (((x_distance > 0) && (player->vel.vx > 0))
+               || ((x_distance < 0) && (player->vel.vx < 0))))
         {
-            player.vel.vx = player.vel.vz = 0;
-            if(player.grnd) player.push = 1;
+            player->vel.vx = player->vel.vz = 0;
+            if(player->grnd) player->pushed_object = obj;
         }
-        player.pos.vx -= (x_distance << 12);
+        player->pos.vx -= x_distance;
+        return (x_distance < 0) ? OBJ_SIDE_RIGHT : OBJ_SIDE_LEFT;
     }
 }

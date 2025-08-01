@@ -55,6 +55,8 @@
 
 int debug_mode = 0;
 
+#include "screens/level.h"
+
 int
 main(void)
 {
@@ -65,7 +67,6 @@ main(void)
     pad_init();
     timer_init();
     fastalloc_init();
-    level_init();
     font_init();
     scene_init();
 
@@ -76,7 +77,9 @@ main(void)
 
     // Set first scene
     scene_change(SCREEN_DISCLAIMER);
-    /* scene_change(SCREEN_OPTIONS); */
+
+    /* screen_level_setlevel(5); */
+    /* scene_change(SCREEN_LEVEL); */
 
     while(1) {
         // Update systems

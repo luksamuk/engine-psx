@@ -9,7 +9,6 @@
 
 #define LEVEL_MAX_X_CHUNKS   255
 #define LEVEL_MAX_Y_CHUNKS    31
-#define LEVEL_ARENA_SIZE  196608 // 192KB
 
 typedef struct {
     uint8_t floor[8];
@@ -66,10 +65,6 @@ typedef struct {
     uint16_t clutmode, _unused1;
 } LevelData;
 
-void level_init();
-void level_reset();
-void level_debrief();
-
 void load_map16(TileMap16 *mapping, const char *filename, const char *collision_filename);
 void load_map128(TileMap128 *mapping, const char *filename);
 void load_lvl(LevelData *lvl, const char *filename);
@@ -81,6 +76,7 @@ void render_lvl(int32_t cam_x, int32_t cam_y, uint8_t front);
 void update_obj_window(int32_t cam_x, int32_t cam_y, uint8_t round);
 
 // Object-related. These are defined in object_state.c
-void load_object_placement(const char *filename, void *lvl_data);
+void load_object_placement(const char *filename, void *lvl_data, uint8_t has_started);
+void unload_object_placements(void *lvl_data);
 
 #endif

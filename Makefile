@@ -50,7 +50,7 @@ run-duckstation: ${CUESHEET}
 
 # Run debugger
 debug:
-	gdb-multiarch
+	gdb
 
 # =======================================
 #  Targets for executable building
@@ -78,8 +78,12 @@ ${CHD}: ${CUESHEET}
 
 # Create build directory and generate CMake config from preset
 configure:
-#	cmake --preset default .
 	cmake --preset release .
+
+# Force a debug build
+build-debug: cook
+	cmake --preset default .
+	cd build && make sonic && make iso
 
 # Clean build directory
 clean:

@@ -26,6 +26,7 @@ void camera_set_right_bound(Camera *, int32_t vx);
 void camera_set_left_bound(Camera *, int32_t vx);
 
 void camera_follow_player(Camera *);
+void camera_stop_following_player(Camera *);
 void camera_focus(Camera *, int32_t vx, int32_t vy);
 
 #endif

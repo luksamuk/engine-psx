@@ -64,68 +64,59 @@ PSn00bSDK. Just follow [[https://github.com/Lameguy64/PSn00bSDK/blob/master/doc/
 
 * Debugging
 
-First of all,  generate a disk image  (that will be used as  filesystem) and the
-executable ELF  file. This can  be consolidated individually with  the following
-commands:
+There is a  specific target for Sonic  XA that generates the  current project in
+Debug mode (without optimizations) and with debug symbols:
 
 #+begin_src bash
-make elf
-make iso
+make build-debug
 #+end_src
 
-Note that, if  you're not generating new  assets, you won't need  to rebuild the
-disk  image  (here  named  as  the   =iso=  target,  even  though  it  generates
-BIN+CUE). Just rebuild your ELF file and reload it.
+Run =pcsx-redux=.   Go to File  > Open Disk  Image, select =SONICXA.cue=  on the
+=build= directory, but don't start the emulation  yet; GDB will start it for us.
+This will serve as our application's filesystem.
 
-Now open your  Linux environment's =~/.gdbinit= file and mark  the project's own
-~.gdbinit~ as safe:
+It may  be necessary to  enable the  GDB Server on  =pcsx-redux= as well.  Go to
+Configuration >  Emulation. Mark the option  "Enable GDB Server", and  make sure
+that the GDB Server Port is 3333.
 
-#+begin_example
-add-auto-load-safe-path /path/to/engine-psx/.gdbinit
-#+end_example
+Keep =pcsx-redux= open on that state.
 
-Then, open PCSX-Redux. Go to Configuration  > Emulation. Mark the option "Enable
-GDB Server", and make sure that the GDB Server Port is 3333.
-
-Still on  PCSX-Redux, go to  File > Open Disk  Image and open  ~engine.cue~, but
-don't start running the emulation yet; the program won't be run from the disk.
-
-Now go to the project's root directory and run:
+Now check if you have =gdb-multiarch= installed (or if you're on Arch Linux, the
+package =extra/gdb= already has multiarch support), then run:
 
 #+begin_src bash
 gdb-multiarch
+
+# On Arch Linux:
+gdb
 #+end_src
 
 This will fire  up a GDB debug  session that interacts with  PCSX-Redux. It will
 even load the ELF file with proper debug symbols.
 
+For more information on debugging with GDB on PCSX-Redux, [[https://pcsx-redux.consoledev.net/Debugging/gdb-server/][see this link]].
+
 Have fun.
 
-** A note on gdb-multiarch and Arch Linux
+** A note on loading .gdbinit
 
-For some  reason, =gdb-multiarch=  right now  cannot be  installed from  AUR. So
-you'll probably have to generate the package from a PKGBUILD by cloning the repo
-and building it:
+Sometimes it is necessary to "trust"  the =.gdbinit= included on this project so
+it runs under GDB.
 
-#+begin_src bash
-git clone --depth=1 https://aur.archlinux.org/gdb-multiarch.git/
-cd gdb-multiarch
-makepkg -si
-#+end_src
+If you experience problems, open  your Linux environment's =~/.gdbinit= file and
+mark the project's own ~.gdbinit~ as safe:
 
-Notice that you MIGHT Have to tweak  download links and the =pkgver= variable as
-well!  If you  install the  =gdb= package,  take a  look at  the version  of the
-package  =gdb-common= which  is  also  installed with  it.  (If  you have  other
-problems you  can just pass =--skippgpcheck=  to =makepkg=, but be  wary of what
-you're doing)
+#+begin_example
+add-auto-load-safe-path /path/to/engine-psx/.gdbinit
+#+end_example
 
 * Running on real hardware
 
 #+html: <center>
-[[file:./screenshots/sonicxa-realhardware-xmas-24.gif]]
+[[file:./screenshots/sonicxa-realhardware-20250723.gif]]
 #+html: </center>
 
-/Amazing Ocean Zone autodemo running on a PlayStation SCPH-5501, dated [2024-12-25]./
+/Green Hill Zone boss running on a PlayStation SCPH-5501 and a Philips CRT TV, dated [2025-07-23]./
 
 In theory,  to burn the  disc, you  would need a  Sony license file  which comes
 bundled with the Psy-Q SDK (which *I  AM NOT* using). I *WILL NOT* provide these
@@ -149,7 +140,7 @@ Use a command  such as this to burn  your image into the disk  by using =cdrdao=
 
 #+begin_src bash
 cd build/
-cdrdao write --speed 1 --driver generic-mmc-raw --swap -n --eject "engine.cue"
+cdrdao write --speed 1 --driver generic-mmc-raw --swap -n --eject "SONICXA.cue"
 #+end_src
 
 If you're on  Windows or you need  more information on other  methods, check out
@@ -167,25 +158,26 @@ tochd -d . -- ./build/engine.cue
 
 * Gallery
 
-| Screenshot                                            | Description                                                                                             |
-|-------------------------------------------------------+---------------------------------------------------------------------------------------------------------|
-| [[file:./screenshots/sonicxa-v0.1.gif]]                   | Version 0.1 [2025-04-24]. First tag featuring Sonic, Tails, Knuckles, and a bunch of other stuff.       |
-| [[file:./screenshots/sonicxa-realhardware-xmas-24.gif]]   | Beta engine [2024-12-25]. Christmas build. Showcasing Amazing Ocean running on AutoDemo.                |
-| [[file:./screenshots/sonicxa-122224-aoz.gif]]             | Beta engine [2024-12-22]. Amazing Ocean Zone. Much more mature with many objects and water implemented. |
-| [[file:./screenshots/sonicxa-110424-swz.gif]]             | Beta engine [2024-11-04]. Like below. Showcasing Surely Wood Zone, springs, background, etc.            |
-| [[file:./screenshots/sonicxa-110424-ghz.gif]]             | Beta engine [2024-11-04]. Many changes, notably a HUD, improved collision, spikes and damage.           |
-| [[file:./screenshots/sonicxa-100424-gh.gif]]              | Beta engine [2024-10-04]. Same as below, showcasing Green Hill Zone.                                    |
-| [[file:./screenshots/sonicxa-100424.gif]]                 | Beta engine [2024-10-04]. Includes object rendering, and monitors and rings can be interacted.          |
-| [[file:./screenshots/sonicxa-092224-gh.gif]]              | Beta engine [2024-09-22]. Same as below, but showcasing an initial Green Hill Zone.                     |
-| [[file:./screenshots/sonicxa-092224.gif]]                 | Beta engine [2024-09-22]. Modifications of test level, collision layout and much more.                  |
-| [[file:./screenshots/engine-psx-081924-realhardware.gif]] | Alpha engine [2024-08-19]. Same as below, on a physical SCPH-5501.                                      |
-| [[file:./screenshots/engine-psx-081924.gif]]              | Alpha engine [2024-08-19]. New tilesets, animation with variable speed, extended camera.                |
-| [[file:./screenshots/engine-psx-081624-realhardware.gif]] | Alpha engine [2024-08-16]. Same as below, on a physical SCPH-5501.                                      |
-| [[file:./screenshots/engine-psx-081624.gif]]              | Alpha engine [2024-08-16]. First working implementation of slope collision.                             |
-| [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine [2024-08-05]. Same as screenshot below, but on a physical PlayStation (SCPH-5501).         |
-| [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine [2024-08-05]. First implementation of collision, camera and level data.                    |
-| [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine [2024-07-22]. Running on DuckStation.                                                      |
-| [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine [2024-07-21]. Running on a physical PlayStation (SCPH-5501).                               |
+| Screenshot                                            | Description                                                                                                                    |
+|-------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------|
+| [[file:./screenshots/sonicxa-realhardware-20250723.gif]]  | Development build [2025-07-23]. Showcasing Green Hill Zone's boss and Knuckles. Running on a physical PlayStation (SCPH-5501). |
+| [[file:./screenshots/sonicxa-v0.1.gif]]                   | Version 0.1 [2025-04-24]. First tag featuring Sonic, Tails, Knuckles, and a bunch of other stuff.                              |
+| [[file:./screenshots/sonicxa-realhardware-xmas-24.gif]]   | Beta engine [2024-12-25]. Christmas build. Showcasing Amazing Ocean running on AutoDemo.                                       |
+| [[file:./screenshots/sonicxa-122224-aoz.gif]]             | Beta engine [2024-12-22]. Amazing Ocean Zone. Much more mature with many objects and water implemented.                        |
+| [[file:./screenshots/sonicxa-110424-swz.gif]]             | Beta engine [2024-11-04]. Like below. Showcasing Surely Wood Zone, springs, background, etc.                                   |
+| [[file:./screenshots/sonicxa-110424-ghz.gif]]             | Beta engine [2024-11-04]. Many changes, notably a HUD, improved collision, spikes and damage.                                  |
+| [[file:./screenshots/sonicxa-100424-gh.gif]]              | Beta engine [2024-10-04]. Same as below, showcasing Green Hill Zone.                                                           |
+| [[file:./screenshots/sonicxa-100424.gif]]                 | Beta engine [2024-10-04]. Includes object rendering, and monitors and rings can be interacted.                                 |
+| [[file:./screenshots/sonicxa-092224-gh.gif]]              | Beta engine [2024-09-22]. Same as below, but showcasing an initial Green Hill Zone.                                            |
+| [[file:./screenshots/sonicxa-092224.gif]]                 | Beta engine [2024-09-22]. Modifications of test level, collision layout and much more.                                         |
+| [[file:./screenshots/engine-psx-081924-realhardware.gif]] | Alpha engine [2024-08-19]. Same as below, on a physical SCPH-5501.                                                             |
+| [[file:./screenshots/engine-psx-081924.gif]]              | Alpha engine [2024-08-19]. New tilesets, animation with variable speed, extended camera.                                       |
+| [[file:./screenshots/engine-psx-081624-realhardware.gif]] | Alpha engine [2024-08-16]. Same as below, on a physical SCPH-5501.                                                             |
+| [[file:./screenshots/engine-psx-081624.gif]]              | Alpha engine [2024-08-16]. First working implementation of slope collision.                                                    |
+| [[file:./screenshots/engine-psx-080524-realhardware.gif]] | Alpha engine [2024-08-05]. Same as screenshot below, but on a physical PlayStation (SCPH-5501).                                |
+| [[file:./screenshots/engine-psx-080524.gif]]              | Alpha engine [2024-08-05]. First implementation of collision, camera and level data.                                           |
+| [[file:./screenshots/engine-psx-072224.gif]]              | Alpha engine [2024-07-22]. Running on DuckStation.                                                                             |
+| [[file:./screenshots/engine-psx-realhardware-072124.gif]] | Alpha engine [2024-07-21]. Running on a physical PlayStation (SCPH-5501).                                                      |
 
 * License
 

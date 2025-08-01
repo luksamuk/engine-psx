@@ -40,7 +40,7 @@
  <group id="2" name="OBJECTS">
   <objectgroup id="3" name="COMMON">
    <object id="1" gid="237" x="72" y="288" width="64" height="64"/>
-   <object id="3" gid="229" x="970" y="576" width="64" height="64"/>
+   <object id="3" gid="229" x="984" y="576" width="64" height="64"/>
    <object id="4" gid="229" x="2322" y="400" width="64" height="64" rotation="-90"/>
    <object id="5" gid="226" x="-16" y="832" width="64" height="64">
     <properties>

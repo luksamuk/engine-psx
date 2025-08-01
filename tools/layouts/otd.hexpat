@@ -12,6 +12,13 @@ enum CommonId: s8 {
     GOAL_SIGN = 8,
     SWITCH = 9,
     EXPLOSION = 10,
+    MONITOR_IMAGE = 11,
+    SHIELD = 12,
+    BUBBLE_PATCH = 13,
+    BUBBLE = 14,
+    END_CAPSULE = 15,
+    END_CAPSULE_BUTTON = 16,
+    DOOR = 17,
 };
 
 bitfield FlipMask {

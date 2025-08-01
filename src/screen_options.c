@@ -21,6 +21,7 @@
 #define SLIDER_STEP 0x1e9
 
 extern SoundEffect sfx_switch;
+
 extern int         debug_mode;
 
 typedef struct {
@@ -130,8 +131,8 @@ screen_options_update(void *d)
     data->selection =
         (data->selection < 0)
         ? 0
-        : (data->selection > 4)
-        ? 3
+        : (data->selection > 5)
+        ? 4
         : data->selection;
 
     if(!(get_global_frames() % 4)) {
@@ -158,6 +159,20 @@ screen_options_update(void *d)
 
     switch(data->selection) {
     case 3:
+        {
+            uint8_t changed = 0;
+            int8_t state = sound_cdda_get_stereo();
+            if(pad_pressed(PAD_LEFT)) { state--; changed = 1; }
+            if(pad_pressed(PAD_RIGHT)) { state++; changed = 1; }
+            if(changed) {
+                if(state < 0) state = BGM_REVERSE_STEREO;
+                state %= 3;
+                sound_play_vag(sfx_switch, 0);
+                sound_cdda_set_stereo(state);
+            }
+        }
+        break;
+    case 4:
         if(pad_pressed(PAD_LEFT)) {
             debug_mode--;
             sound_play_vag(sfx_switch, 0);
@@ -170,12 +185,12 @@ screen_options_update(void *d)
             ? 2
             : (debug_mode > 2)
             ? 0
-                : debug_mode;
+            : debug_mode;
         break;
     default: break;
     }
 
-    if(pad_pressed(PAD_CROSS) && (data->selection == 4)) {
+    if(pad_pressed(PAD_CROSS) && (data->selection == 5)) {
         scene_change(SCREEN_TITLE);
     }
 }
@@ -229,6 +244,7 @@ screen_options_draw(void *d)
     screen_options_data *data = (screen_options_data *)d;
 
     static const char *title = "OPTIONS";
+    uint16_t txtw;
 
     font_set_color(128, 128, 128);
     uint16_t text_hsize = font_measurew_big(title) >> 1;
@@ -240,7 +256,19 @@ screen_options_draw(void *d)
     _draw_control(100, "Sound Effects", data->sfx_volume, data->selection == 2);
 
     if(data->selection == 3) font_set_color(128, 128, 0);
-    font_draw_sm("Debug Mode", 15, 120);
+    font_draw_sm("Music Mode", 15, 120);
+    const char *sndtxt =
+        (sound_cdda_get_stereo() == 1)
+        ? "Stereo"
+        : (sound_cdda_get_stereo() == 2)
+        ? "Reversed Stereo"
+        : "Mono";
+    txtw = font_measurew_sm(sndtxt);
+    font_draw_sm(sndtxt, SCREEN_XRES - 15 - txtw, 120);
+    font_reset_color();
+
+    if(data->selection == 4) font_set_color(128, 128, 0);
+    font_draw_sm("Debug Mode", 15, 140);
 
     const char *dbgtxt =
         (debug_mode == 0)
@@ -248,12 +276,11 @@ screen_options_draw(void *d)
         : (debug_mode == 1)
         ? "Basic Debug"
         : "Collision Debug";
-    uint16_t txtw = font_measurew_sm(dbgtxt);
-    font_draw_sm(dbgtxt, SCREEN_XRES - 15 - txtw, 120);
-
+    txtw = font_measurew_sm(dbgtxt);
+    font_draw_sm(dbgtxt, SCREEN_XRES - 15 - txtw, 140);
     font_reset_color();
 
-    if(data->selection == 4) font_set_color(128, 128, 0);
+    if(data->selection == 5) font_set_color(128, 128, 0);
     font_draw_sm("Back", 270, 200);
     font_reset_color();
 

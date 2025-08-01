@@ -20,3 +20,198 @@ frames = [
 loopback = 0
 
 # ============
+
+[buzzbomber]
+
+[[buzzbomber.animations]]
+name = "Idle"
+id = 0
+duration = 0
+loopback = 0
+frames = [[40, 0, 49, 29]]
+
+[[buzzbomber.animations]]
+name = "Firing"
+id = 1
+duration = 0
+loopback = 0
+frames = [[40, 32, 49, 29]]
+
+[buzzbomber.fragment]
+offset = [3, -23]
+
+[[buzzbomber.fragment.animations]]
+name = "Wings"
+id = 0
+duration = 2
+loopback = 0
+frames = [
+       [51, 61, 38, 8],
+       [51, 69, 38, 8],
+]
+
+# ============
+
+[projectile]
+
+[[projectile.animations]]
+name = "buzzbomber_charge"
+id = 0
+duration = 6
+loopback = 3
+frames = [
+       [89,  0, 16, 16],
+       [89,  0, 16, 16],
+       [89, 16, 16, 16],
+       [89, 16, 16, 16],
+]
+
+[[projectile.animations]]
+name = "buzzbomber_fire"
+id = 1
+duration = 12
+loopback = 0
+frames = [
+       [89, 32, 16, 16],
+       [89, 48, 16, 16],
+]
+
+
+# ============
+
+[chopper]
+
+[[chopper.animations]]
+name = "Idle"
+id = 0
+duration = 6
+loopback = 0
+frames = [
+       [106,  0, 32, 32],
+       [106, 32, 32, 32],
+]
+
+# ============
+
+[boss_spawner]
+# Spawner object has no animations
+# When triggered, destroys itself and spawns a free object
+
+# ============
+
+[boss]
+
+[[boss.animations]]
+name = "eggmobile"
+id = 0
+duration = 30
+loopback = 0
+frames = [
+       [ 0, 256, 64, 48],
+       [64, 256, 64, 48],
+]
+
+
+[boss.fragment]
+offset = [3, -48]
+
+[[boss.fragment.animations]]
+name = "Stopped"
+id = 0
+duration = 0
+loopback = 0
+frames = [[128, 256, 64, 21]]
+
+[[boss.fragment.animations]]
+name = "Moving"
+id = 1
+duration = 6
+loopback = 0
+frames = [
+       [128, 256, 64, 21],
+       [128, 277, 64, 21],
+]
+
+[[boss.fragment.animations]]
+name = "Laugh"
+id = 2
+duration = 6
+loopback = 0
+frames = [
+       [128, 298, 64, 21],
+       [128, 319, 64, 21],
+]
+
+[[boss.fragment.animations]]
+name = "Hit"
+id = 3
+duration = 0
+loopback = 0
+frames = [[128, 340, 64, 21]]
+
+[[boss.fragment.animations]]
+name = "Recovering"
+id = 4
+duration = 0
+loopback = 0
+frames = [[128, 361, 64, 21]]
+
+[[boss.fragment.animations]]
+name = "Dead"
+id = 5
+duration = 0
+loopback = 0
+frames = [[128, 382, 64, 21]]
+
+[[boss.fragment.animations]]
+name = "Dropping"
+id = 6
+duration = 0
+loopback = 0
+frames = [[128, 403, 64, 21]]
+
+# ============
+
+[boss_extras]
+
+[[boss_extras.animations]]
+name = "WreckingBall"
+id = 0
+duration = 6
+loopback = 0
+frames = [
+       [0, 320, 48, 48],
+       [0, 416, 48, 48],
+       [0, 368, 48, 48],
+       [0, 416, 48, 48],
+]
+
+[[boss_extras.animations]]
+name = "BallRing"
+id = 1
+duration = 1
+loopback = 0
+frames = [[0, 304, 16, 16]]
+
+# ============
+
+[rock]
+
+[[rock.animations]]
+name = "Idle"
+id = 0
+duration = 0
+loopback = 0
+frames = [[138, 0, 48, 32]]
+
+# ============
+
+[platform]
+
+[[platform.animations]]
+name = "Idle"
+id = 0
+duration = 0
+loopback = 0
+frames = [[138, 32, 64, 32]]
+

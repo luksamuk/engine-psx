@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <strings.h>
 
 #include "render.h"
 #include "memalloc.h"
@@ -20,15 +21,14 @@
 #include "screens/charselect.h"
 #include "screens/options.h"
 
-// Start with 64k until we make the actual level scene
-// an object as well
 //#define SCREEN_BUFFER_LEN 65536
-#define SCREEN_BUFFER_LEN 122880
+//#define SCREEN_BUFFER_LEN 122880
+#define SCREEN_BUFFER_LEN 319488
 
 static int8_t current_scene = -1;
 static uint8_t *scene_data[SCREEN_BUFFER_LEN] = { 0 };
 static ArenaAllocator screen_arena;
-static uint8_t loading_logo[9050] = { 0 };// Image has 9034B, should be enough
+static uint8_t loading_logo[9050] = { 0 };// Image has 9034 bytes, should be enough
 
 void
 scene_init()
@@ -147,7 +147,9 @@ scene_draw()
 void *
 screen_alloc(uint32_t size)
 {
-    return alloc_arena_malloc(&screen_arena, size);
+    void *ptr = alloc_arena_malloc(&screen_arena, size);
+    bzero(ptr, size);
+    return ptr;
 }
 
 void
@@ -157,6 +159,21 @@ screen_free()
            alloc_arena_bytes_used(&screen_arena),
            alloc_arena_bytes_free(&screen_arena));
     alloc_arena_free(&screen_arena);
+}
+
+void
+screen_debrief()
+{
+    printf("Arena start address: 0x%08lx\n"
+           "Arena end address:   0x%08lx\n"
+           "Arena bytes size:    %lu\n"
+           "Arena bytes used:    %u\n"
+           "Arena bytes free:    %u\n",
+           screen_arena.start,
+           screen_arena.start + screen_arena.size,
+           screen_arena.size,
+           alloc_arena_bytes_used(&screen_arena),
+           alloc_arena_bytes_free(&screen_arena));
 }
 
 void *

@@ -58,6 +58,7 @@ static const char *creditstxt[] = {
     "1001",
     "GameMaster12",
     "SupaChao",
+    "Gato",
     "\r",
 
     "Original Fonts",
@@ -68,10 +69,14 @@ static const char *creditstxt[] = {
 
     "Objects Ripping",
     "Paraemon",
+    "Triangly",
+    "Dolphman",
+    "MFF",
     "\r",
 
     "Original Sprites and Tiles",
     "Sonic Team",
+    "Devy",
     "\r",
 
 
@@ -115,21 +120,21 @@ static const char *creditstxt[] = {
     "By pkVortex",
     "\r",
 
-    "Dawn Canyon Zone",
-    "Chaos Island Act 2",
-    "From Sonic x Shadow Generations",
-    "By Sonic Team",
-    "\r",
+    /* "Dawn Canyon Zone", */
+    /* "Chaos Island Act 2", */
+    /* "From Sonic x Shadow Generations", */
+    /* "By Sonic Team", */
+    /* "\r", */
 
     "Amazing Ocean Zone",
     "Aquarium Park -Dragon Dance Mashup-",
     "By DarkHyperSonic7",
     "\r",
 
-    "Eggmanland Zone",
-    "Eggmanland: 16 Bit Remix",
-    "By DRocca",
-    "\r",
+    /* "Eggmanland Zone", */
+    /* "Eggmanland: 16 Bit Remix", */
+    /* "By DRocca", */
+    /* "\r", */
 
     "Level Select Theme",
     "Sonic 3D Blast Main Title:",
@@ -143,10 +148,10 @@ static const char *creditstxt[] = {
     "By Richard Jacques",
     "\r",
 
-    "Windmill Isle",
-    "Windmill Isle Day: Silent Dreams Remix",
-    "By Silent Dreams",
-    "\r",
+    /* "Windmill Isle", */
+    /* "Windmill Isle Day: Silent Dreams Remix", */
+    /* "By Silent Dreams", */
+    /* "\r", */
 
     "Boss Music",
     "Sonic 3D Blast Boss Music",
@@ -181,7 +186,7 @@ static const char *creditstxt[] = {
 typedef struct {
     uint8_t entry;
     uint8_t fade;
-    int8_t  countdown;
+    int16_t countdown;
     uint8_t state;
 } screen_credits_data;
 
@@ -200,8 +205,9 @@ screen_credits_load()
 }
 
 void
-screen_credits_unload(void *)
+screen_credits_unload(void *data)
 {
+    (void)(data);
     sound_cdda_stop();
     screen_free();
 }

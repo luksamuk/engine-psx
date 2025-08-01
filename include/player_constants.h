@@ -24,6 +24,7 @@ typedef struct {
         y_gravity,
         y_hurt_gravity,
         y_min_jump,
+        x_jump_away, // Knuckles only
         y_jump_strength,
         x_min_roll_spd,
         x_min_uncurl_spd,
@@ -39,7 +40,8 @@ typedef struct {
         x_drpmax,
         y_hurt_force,
         x_hurt_force,
-        x_peelout_spd;
+        x_peelout_spd,
+        y_dead_force;
 } PlayerConstants;
 
 // SEE PLAYER_CONSTANTS.C FOR CONSTANTS DEFINITIONS!!!!

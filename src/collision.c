@@ -1,4 +1,5 @@
 #include "collision.h"
+#include "player.h"
 #include <stdlib.h>
 #include <assert.h>
 
@@ -6,12 +7,13 @@
 #include "render.h"
 #include "camera.h"
 extern int debug_mode;
-extern Camera camera;
+extern Camera *camera;
 
 // Level data
-extern TileMap16   map16;
-extern TileMap128  map128;
-extern LevelData   leveldata;
+extern TileMap16   *map16;
+extern TileMap128  *map128;
+extern LevelData   *leveldata;
+extern Player      *player;
 
 void
 _move_point_linecast(uint8_t direction, int32_t vx, int32_t vy,
@@ -64,7 +66,7 @@ _get_height_and_angle_from_mask(
     uint16_t piece, LinecastDirection direction, uint8_t hpos,
     uint8_t *out_h, int32_t *out_angle)
 {
-    Collision *collision = map16.collision[piece];
+    Collision *collision = map16->collision[piece];
 
     if(collision == NULL) {
     abort_retrieve:
@@ -141,7 +143,7 @@ linecast(int32_t vx, int32_t vy, LinecastDirection direction,
          uint8_t magnitude, LinecastDirection floor_direction)
 {
     // No level data? No collision.
-    if(leveldata.num_layers < 1) return (CollisionEvent){ 0 };
+    if(leveldata->num_layers < 1) return (CollisionEvent){ 0 };
 
     const uint8_t layer = 0;
     assert(direction < 4);
@@ -170,19 +172,19 @@ linecast(int32_t vx, int32_t vy, LinecastDirection direction,
 
         // Get chunk id
         int32_t chunk_pos;
-        if((cx < 0) || (cx >= leveldata.layers[layer].width)) chunk_pos = -1;
-        else if((cy < 0) || (cy >= leveldata.layers[layer].height)) chunk_pos = -1;
-        else chunk_pos = (cy * leveldata.layers[layer].width) + cx;
+        if((cx < 0) || (cx >= leveldata->layers[layer].width)) chunk_pos = -1;
+        else if((cy < 0) || (cy >= leveldata->layers[layer].height)) chunk_pos = -1;
+        else chunk_pos = (cy * leveldata->layers[layer].width) + cx;
 
-        int16_t chunk = leveldata.layers[layer].tiles[chunk_pos];
+        int16_t chunk = leveldata->layers[layer].tiles[chunk_pos];
         
         if(chunk >= 0) {
             // Piece coordinates within chunk
             int32_t px = (lx & 0x7f) >> 4;
             int32_t py = (ly & 0x7f) >> 4;
             uint16_t piece_pos = ((py << 3) + px) + (chunk << 6);
-            uint16_t piece = map128.frames[piece_pos].index;
-            uint8_t piece_props = map128.frames[piece_pos].props;
+            uint16_t piece = map128->frames[piece_pos].index;
+            uint8_t piece_props = map128->frames[piece_pos].props;
 
             if((piece > 0) &&
                (piece_props != MAP128_PROP_NONE) &&
@@ -221,8 +223,8 @@ void
 draw_collision_hitbox(int32_t vx, int32_t vy, int32_t w, int32_t h)
 {
     uint16_t
-        rel_vx = vx - (camera.pos.vx >> 12) + CENTERX,
-        rel_vy = vy - (camera.pos.vy >> 12) + CENTERY;
+        rel_vx = vx - (camera->pos.vx >> 12) + CENTERX,
+        rel_vy = vy - (camera->pos.vy >> 12) + CENTERY;
     POLY_F4 *hitbox = get_next_prim();
     increment_prim(sizeof(POLY_F4));
     setPolyF4(hitbox);
@@ -238,6 +240,10 @@ aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,
 {
     if(debug_mode > 1) draw_collision_hitbox(b_vx, b_vy, bw, bh);
 
+    if(player->death_type > 0) {
+        return OBJECT_DO_NOTHING;
+    }
+
     int32_t a_right  = a_vx + aw;
     int32_t a_bottom = a_vy + ah;
     int32_t b_right  = b_vx + bw;
@@ -247,49 +253,3 @@ aabb_intersects(int32_t a_vx, int32_t a_vy, int32_t aw, int32_t ah,
              (a_bottom < b_vy) || (a_vy > b_bottom));
 }
 
-ObjectCollision
-hitbox_collision(int32_t p_vx, int32_t p_vy, int32_t pw, int32_t ph,
-                 int32_t o_vx, int32_t o_vy, int32_t ow, int32_t oh)
-{
-    int32_t player_x = p_vx + (pw >> 1);
-    int32_t player_y = p_vy + (ph >> 1);
-    
-    int32_t obj_x = o_vx + (ow >> 1);
-    int32_t obj_y = o_vy + (oh >> 1);
-
-    if(debug_mode > 1) draw_collision_hitbox(o_vx, o_vy, ow, oh);
-
-    // Check for overlap
-    int32_t combined_x_radius = (ow >> 1) + (pw >> 1) + 1;
-    int32_t combined_y_radius = (oh >> 1) + (ph >> 1);
-
-    int32_t combined_x_diameter = ow + pw + 1;
-    int32_t combined_y_diameter = oh + ph;
-
-    int32_t left_difference = player_x - obj_x + combined_x_radius;
-    if((left_difference < 0) || (left_difference > combined_x_diameter))
-        return OBJ_SIDE_NONE;
-
-    int32_t top_difference = (player_y - obj_y) + 4 + combined_y_radius;
-    if((top_difference < 0) || (top_difference > combined_y_diameter))
-        return OBJ_SIDE_NONE;
-
-    uint8_t is_right = player_x > obj_x;
-    uint8_t is_bottom = player_y > obj_y;
-
-    int32_t x_distance = left_difference - (is_right ? ow : 0) + 1;
-    int32_t y_distance = top_difference - (is_bottom ? (4 + oh) : 0);
-
-    ObjectCollision col;
-    y_distance -= (oh >> 1);
-    x_distance -= (ow >> 1);
-    if(abs(x_distance) > abs(y_distance)) {
-        col = (y_distance > 0) ? OBJ_SIDE_TOP : OBJ_SIDE_BOTTOM;
-    }
-    else {
-        col = (x_distance < 0) ? OBJ_SIDE_LEFT : OBJ_SIDE_RIGHT;
-        if(abs(y_distance) <= 4) col = OBJ_SIDE_NONE;
-    }
-
-    return col;
-}

@@ -29,6 +29,9 @@ else()
   add_definitions("-DGIT_VERSION=\"DEV BUILD ${GIT_SHORTHASH}\"")
 endif()
 
+# Allows debug mode. Debug can be activated through the options menu at will,
+add_definitions("-DALLOW_DEBUG")
+
 set(CMAKE_C_FLAGS "-Wall")
 
 psn00bsdk_add_executable(sonic

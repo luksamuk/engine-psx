@@ -26,6 +26,7 @@ void scene_draw();
 
 void *screen_alloc(uint32_t size);
 void screen_free();
+void screen_debrief();
 void *screen_get_data();
 
 void render_loading_logo();

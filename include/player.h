@@ -43,6 +43,8 @@ typedef enum {
     ACTION_SPRING,
     ACTION_HURT,
     ACTION_GASP,
+    ACTION_DEATH,
+    ACTION_DROWN,
     // Miles actions
     ACTION_FLY,
     // Knuckles actions
@@ -63,6 +65,12 @@ typedef enum {
     PC_SPEEDSHOES,
 } PlayerConstantType;
 
+typedef enum {
+    PLAYER_DEATH_NONE,
+    PLAYER_DEATH_NORMAL,
+    PLAYER_DEATH_DROWN,
+} PlayerDeath;
+
 // declared in player_constants.c
 PlayerConstants *getconstants(PlayerCharacter, PlayerConstantType);
 
@@ -81,6 +89,7 @@ typedef struct {
     uint8_t   anim_timer;
     uint8_t   tail_anim_frame;
     uint8_t   tail_anim_timer;
+    uint8_t   tail_anim_frame_duration;
     uint8_t   frame_duration;
     uint8_t   loopback_frame;
     int8_t    anim_dir;
@@ -100,6 +109,8 @@ typedef struct {
     uint8_t   underwater;
     int8_t    glide_turn_dir;
     uint8_t   sliding;
+    PlayerDeath death_type;
+    ObjectState *pushed_object;
     ObjectState *over_object;
 
     // Collision modes
@@ -141,10 +152,12 @@ uint32_t  player_get_current_animation_hash(Player *player);
 CharaAnim *player_get_animation(Player *player, uint32_t sum);
 CharaAnim *player_get_animation_by_name(Player *player, const char *name);
 void      player_set_action(Player *player, PlayerAction action);
+void      player_do_dropdash(Player *player);
 
 void player_update(Player *player);
 void player_draw(Player *player, VECTOR *screen_pos);
 
+void player_do_die(Player *player, PlayerDeath kind);
 void player_do_damage(Player *player, int32_t hazard_x);
 
 #endif

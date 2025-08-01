@@ -27,7 +27,7 @@ version.
 - Add ceiling collision to dropped rings
 - Change goal sign art style to match characters
 - Add boss loading routine
-- [R0] Add boss
+- [R0] Add boss (Egg Bomber)
 - Add routines to generate alternate palette for boss (when it is hit)
 - Fix animation fragment positioning when it is flipped
 - Make changes to camera so we have limits for boss arena
@@ -52,6 +52,80 @@ version.
 - Change "Engine Test" option to "Play Test Levels" on title screen
 - Fix autodemos to showcase Sonic, Tails and Knuckles
 - Change levels sequence for the next demo
+- Add new collision method for solid objects
+- Fix player not slipping down slopes unless rolling
+- Fix springs  collisions so  it is  solid on  sides that  do not  interact with
+  player
+- Fix collision for switches
+- Change art style of some objects
+- Add SAGE 2025 logo
+- Add flag to disable debug behaviour on release target
+- Change level select so planned levels are not spoiled nor accessible
+- Change art for most slides
+- [R2] Add buzzbomber (Green Hill)
+- [R2] Add boss (Egg Wrecker)
+- [R2] Add a static rock and floating platforms
+- Add a new, medium-sized font (used on level score count title)
+- Add text-coloring escape sequences with some predefined default colors
+- [R2] Make GHZ2 a 100-ring, 1-Up level finished with a boss
+- Add level and character icons to level select
+- [DEBUG] Add documentation on properly using GDB to work with PCSX-Redux
+- Fix sprites looking distorted (especially on DuckStation and real hardware)
+- Reduce SFX default volume to 50%
+- Move most memory allocation to screen arena allocator, acquiring more control
+- Add selectable CD music modes: Stereo, Reversed Stereo, Mono
+- Convert all slides style to proper 320x240 resolution
+- Add a new, more stylized "Created By" slide
+- Rebuild level transitions framework
+- Add score count at end of levels (skippable by pressing start or cross)
+- Add a Perfect Bonus that appears  when player collects all loose rings without
+  losing them
+- Add a boss lock so music won't switch during boss
+- Add a proper respawn routine
+- Add object management during respawn. Checkpoints will be treated differently
+- Add player death/drown actions
+- Bosses will persistently mock you when you die during a boss fight
+- Fix a bug where  a Knuckles climbing underwater would jump  away from the wall
+  in a speed greater than it should
+- Change loading logo
+- Add a routine to count emplaced  static, loose rings (relates to Perfect Bonus
+  implementation)
+- Restore control when jumping after slipping down slopes
+- Fix deaths on demo mode to prevent possible memory leaks
+- Re-record demos
+- Add a door object
+- Add unique IDs (Tiled map IDs)  for all static objects (except objects created
+  by dummy objects)
+- Add parent/child hierarchy to objects, along with special scripting and values
+  to allow determining parenthood of objects within Tiled maps
+- [R5] Add doors and finish switch puzzles
+- Add end capsules to finish level, with proper transitions, etc
+- Add animals when destroying badniks and opening end capsules
+- [R3] Changes to level layout to prevent Knuckles from gliding infinitely
+- Many changes to level layouts in general
+- Add pause menu when debug mode is inactive
+- Fix Tails's tail slightly dislocated when walking on slopes
+
+** Known bugs
+
+- Collision issues: random speed resets may occur on some wavy ramps, especially
+  on  the  Test Level.  This  is  because of  how  collision  is resolved  along
+  linecasts, and will be solved at collision refactoring.
+- Lack of  360° collision:  The full  360 degree  collision modes  are currently
+  deactivated on  code because they  still need  work. Levels presented  in this
+  demo do not have big loops, so it is not really a concern for gameplay on main
+  levels.
+- Small memory leak when respawning level:  For each item monitor respawned when
+  the  player dies,  a memory  leak of  a  single byte  or two  may occur  since
+  monitors use "extra properties" to determine their subtype. This will be fixed
+  soon since object states now have a  proper subtype slot, but this memory leak
+  will be insignificant on most scenarios,  and should only cause problems after
+  an unrealistic number of respawns.
+- Tails's tail  has no  hitbox: When flying,  Tails's tail cannot  be used  as a
+  form of attack, so flying underneath bosses and enemies will hurt Tails.
+- Characters  may   appear  slightly  above   ground  on  certain   objects  and
+  platforms. This behaviour relates to how character rendering works and will be
+  fixed once the new 360° collision feature is refactored.
 
 * v0.1 (2025-04-24)
 

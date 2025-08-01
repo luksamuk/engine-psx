@@ -131,6 +131,7 @@ def parse_object_group(
         p.is_level_specific = is_level_specific
         gid = int(obj.get("gid"))
         p.otype = current_ts.get_otype_from_gid(gid)
+        p.unique_id = int(obj.get("id"))
         p.x = int(float(obj.get("x")))
         p.y = int(float(obj.get("y")))
         p.flipx = bool(gid & (1 << 31))
@@ -141,16 +142,22 @@ def parse_object_group(
         if p.otype == ObjectId.MONITOR.value:
             m = MonitorProperties()
             if props:
-                prop = props.find("property")
+                prop = props.find("property", attrs={"name": "Kind"})
                 m.kind = MonitorKind.get(prop.get("value")).value
             p.properties = m
         elif p.otype == ObjectId.BUBBLE_PATCH.value:
             bp = BubblePatchProperties()
             if props:
-                prop = props.find("property")
+                prop = props.find("property", attrs={"name": "frequency"})
                 # Get first available value
                 bp.frequency = int(prop.get("value"))
             p.properties = bp
+        # Fetch other properties
+        if props:
+            # "Parent" object, if exists
+            parent = props.find("property", attrs={"name": "parent"})
+            if parent:
+                p.parent_id = int(parent.get("value"))
         # print(
         #     f"Object type {current_ts.object_types[p.otype + current_ts.firstgid].name if p.otype >= 0 else 'DUMMY'}"
         # )

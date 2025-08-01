@@ -5,7 +5,14 @@
 #include <psxcd.h>
 
 #define BGM_MAX_VOLUME      0x3fff
+#define VAG_MAX_VOLUME      0x3fff
+#define VAG_DEFAULT_VOLUME  0x1fff
 #define BGM_DEFAULT_VOLUME  BGM_MAX_VOLUME
+
+#define BGM_MONAURAL       0
+#define BGM_STEREO         1
+#define BGM_REVERSE_STEREO 2
+#define BGM_DEFAULT_IS_STEREO BGM_STEREO
 
 // .VAG audio header
 typedef struct {
@@ -47,11 +54,38 @@ void    sound_master_set_volume(uint16_t volume);
 void    sound_cdda_set_volume(uint16_t volume);
 void    sound_vag_set_volume(uint16_t volume);
 
+// 0: Monaural
+// 1: Stereo
+// 2: Reverse stereo
+void    sound_cdda_set_stereo(uint8_t);
+uint8_t sound_cdda_get_stereo();
+
 uint16_t sound_master_get_volume();
 uint16_t sound_cdda_get_volume();
 uint16_t sound_vag_get_volume();
 
 /* BGM audio table */
+/* typedef enum { */
+/*     BGM_TITLESCREEN  = 0, */
+/*     BGM_SPEEDSHOES   = 1, */
+/*     BGM_LEVELSELECT  = 2, */
+/*     BGM_PLAYGROUND1  = 3, */
+/*     BGM_PLAYGROUND2  = 4, */
+/*     BGM_PLAYGROUND3  = 5, */
+/*     BGM_PLAYGROUND4  = 6, */
+/*     BGM_GREENHILL    = 7, */
+/*     BGM_SURELYWOOD   = 8, */
+/*     BGM_DAWNCANYON   = 9, */
+/*     BGM_EGGMANLAND   = 10, */
+/*     BGM_AMAZINGOCEAN = 11, */
+/*     BGM_WINDMILLISLE = 12, */
+/*     BGM_LEVELCLEAR   = 13, */
+/*     BGM_CREDITS      = 14, */
+/*     BGM_BOSS         = 15, */
+
+/*     BGM_NUM_SONGS    = BGM_BOSS + 1, */
+/* } BGMOption; */
+
 typedef enum {
     BGM_TITLESCREEN  = 0,
     BGM_SPEEDSHOES   = 1,
@@ -62,13 +96,10 @@ typedef enum {
     BGM_PLAYGROUND4  = 6,
     BGM_GREENHILL    = 7,
     BGM_SURELYWOOD   = 8,
-    BGM_DAWNCANYON   = 9,
-    BGM_EGGMANLAND   = 10,
-    BGM_AMAZINGOCEAN = 11,
-    BGM_WINDMILLISLE = 12,
-    BGM_LEVELCLEAR   = 13,
-    BGM_CREDITS      = 14,
-    BGM_BOSS         = 15,
+    BGM_AMAZINGOCEAN = 9,
+    BGM_LEVELCLEAR   = 10,
+    BGM_CREDITS      = 11,
+    BGM_BOSS         = 12,
 
     BGM_NUM_SONGS    = BGM_BOSS + 1,
 } BGMOption;
