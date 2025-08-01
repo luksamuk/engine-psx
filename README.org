@@ -160,6 +160,7 @@ tochd -d . -- ./build/engine.cue
 
 | Screenshot                                            | Description                                                                                                                    |
 |-------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------|
+| [[file:./screenshots/sonicxa-realhardware-20250801.gif]]  | SAGE 2025 Demo (Release Candidate 2) [2025-08-01]. Recorded from a real PlayStation (SCPH-5501) using a capture device.        |
 | [[file:./screenshots/sonicxa-realhardware-20250723.gif]]  | Development build [2025-07-23]. Showcasing Green Hill Zone's boss and Knuckles. Running on a physical PlayStation (SCPH-5501). |
 | [[file:./screenshots/sonicxa-v0.1.gif]]                   | Version 0.1 [2025-04-24]. First tag featuring Sonic, Tails, Knuckles, and a bunch of other stuff.                              |
 | [[file:./screenshots/sonicxa-realhardware-xmas-24.gif]]   | Beta engine [2024-12-25]. Christmas build. Showcasing Amazing Ocean running on AutoDemo.                                       |
