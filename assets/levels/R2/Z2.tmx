@@ -118,7 +118,7 @@
      <property name="parent" type="object" value="75"/>
     </properties>
    </object>
-   <object id="79" gid="157" x="1382" y="3297" width="64" height="64"/>
+   <object id="79" gid="157" x="1381" y="3297" width="64" height="64"/>
   </objectgroup>
   <objectgroup id="4" name="LEVEL">
    <object id="5" gid="181" x="2078" y="3908" width="64" height="64"/>
