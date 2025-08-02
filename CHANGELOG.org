@@ -107,6 +107,7 @@ version.
 - Fix Tails's tail slightly dislocated when walking on slopes
 - Change wrong level names on credits
 - Remove debug mode option from Options Menu when playing a Release build
+- Slightly change background of R5
 
 ** Known bugs
 
