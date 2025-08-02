@@ -89,7 +89,8 @@ typedef struct {
     int16_t bonus_distance_threshold;
 
     // Water overlay primitives
-    TILE     waterquad[2];
+    //TILE     waterquad[2]; // Flat-shaded option
+    POLY_G4  waterquad[2]; // Gouraud-shaded option
     POLY_FT4 wavequad[2][5];
     uint8_t  waterbuffer;
     uint8_t  water_last_fade[2];
@@ -146,12 +147,23 @@ screen_level_load()
 
     // Init water quads
     for(int i = 0; i < 2; i++) {
-        TILE *poly = &data->waterquad[i];
-        setTile(poly);
+        // Flat-shaded option
+        /* TILE *poly = &data->waterquad[i]; */
+        /* setTile(poly); */
+        /* setSemiTrans(poly, 1); */
+        /* setRGB0(poly, 0, 0, 0); */
+        /* setXY0(poly, 0, 0); */
+        /* setWH(poly, SCREEN_XRES, 0); */
+
+        // Gouraud-shaded option
+        POLY_G4 *poly = &data->waterquad[i];
+        setPolyG4(poly);
         setSemiTrans(poly, 1);
         setRGB0(poly, 0, 0, 0);
-        setXY0(poly, 0, 0);
-        setWH(poly, SCREEN_XRES, 0);
+        setRGB1(poly, 0, 0, 0);
+        setRGB2(poly, 0, 0, 0);
+        setRGB3(poly, 0, 0, 0);
+        setXYWH(poly, 0, 0, SCREEN_XRES, 0);
 
         for(int j = 0; j < 5; j++) {
             POLY_FT4 *tx = &data->wavequad[i][j];
@@ -711,24 +723,45 @@ _screen_level_draw_water(screen_level_data *data)
                 /*         LERPC(level_fade, 0), */
                 /*         LERPC(level_fade, 0x18)); */
                 /* sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT); */
-
-                /* FLAT SHADE, STATIC BUFFERS */
-                TILE *poly = &data->waterquad[data->waterbuffer];
-                poly->y0 = water_y;
-                poly->h = water_h;
-
+                POLY_G4 *poly = &data->waterquad[data->waterbuffer];
+                setXYWH(poly, 0, water_y, SCREEN_XRES, water_h);
                 if(data->water_last_fade[data->waterbuffer] != level_fade) {
-                    data->water_last_fade[data->waterbuffer] = level_fade;
                     setRGB0(poly,
                             LERPC(level_fade, 0),
                             LERPC(level_fade, 0),
                             LERPC(level_fade, 0xb8));
-                    setRGB0(&data->waterquad[data->waterbuffer ^ 1],
+                    setRGB1(poly,
                             LERPC(level_fade, 0),
                             LERPC(level_fade, 0),
                             LERPC(level_fade, 0xb8));
+                    setRGB2(poly,
+                            LERPC(level_fade, 0),
+                            LERPC(level_fade, 0),
+                            LERPC(level_fade, 0x18));
+                    setRGB3(poly,
+                            LERPC(level_fade, 0),
+                            LERPC(level_fade, 0),
+                            LERPC(level_fade, 0x18));
                 }
                 sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT);
+
+                /* FLAT SHADE, STATIC BUFFERS */
+                /* TILE *poly = &data->waterquad[data->waterbuffer]; */
+                /* poly->y0 = water_y; */
+                /* poly->h = water_h; */
+
+                /* if(data->water_last_fade[data->waterbuffer] != level_fade) { */
+                /*     data->water_last_fade[data->waterbuffer] = level_fade; */
+                /*     setRGB0(poly, */
+                /*             LERPC(level_fade, 0), */
+                /*             LERPC(level_fade, 0), */
+                /*             LERPC(level_fade, 0xb8)); */
+                /*     setRGB0(&data->waterquad[data->waterbuffer ^ 1], */
+                /*             LERPC(level_fade, 0), */
+                /*             LERPC(level_fade, 0), */
+                /*             LERPC(level_fade, 0xb8)); */
+                /* } */
+                /* sort_prim(poly, OTZ_LAYER_LEVEL_FG_FRONT); */
             }
 
             // Draw water waves
