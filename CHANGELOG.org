@@ -108,6 +108,7 @@ version.
 - Change wrong level names on credits
 - Remove debug mode option from Options Menu when playing a Release build
 - Slightly change background of R5
+- Fix an issue with ledges and ceiling sensors
 
 ** Known bugs
 

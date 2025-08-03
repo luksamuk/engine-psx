@@ -534,6 +534,8 @@ _player_update_collision_tb(Player *player)
         grn_mag = ceil_mag = HEIGHT_RADIUS_ROLLING;
     }
 
+    ceil_mag = ceil_mag >> 1; // Halve ceiling sensor magnitude
+
     uint16_t anchorx_left = anchorx,
         anchorx_right = anchorx,
         anchory_left = anchory,
@@ -569,6 +571,32 @@ _player_update_collision_tb(Player *player)
         break;
     };
 
+    // Recalculate ceiling sensor anchors
+    uint16_t anchorx_top_left = anchorx,
+        anchorx_top_right = anchorx,
+        anchory_top_left = anchory,
+        anchory_top_right = anchory;
+
+    switch(player->gsmode) {
+    case CDIR_RWALL:
+        anchorx_top_left += ceil_mag;
+        anchorx_top_right += ceil_mag;
+        break;
+    case CDIR_LWALL:
+        anchorx_top_left -= ceil_mag;
+        anchorx_top_right -= ceil_mag;
+        break;
+    case CDIR_CEILING:
+        anchory_top_left += ceil_mag;
+        anchory_top_right += ceil_mag;
+        break;
+    case CDIR_FLOOR:
+    default:
+        anchory_top_left -= ceil_mag;
+        anchory_top_right -= ceil_mag;
+        break;
+    };
+
     // Ground sensors
     if(!player->ev_grnd1.collided) {
         player->ev_grnd1 = linecast(anchorx_left, anchory_left,
@@ -592,11 +620,11 @@ _player_update_collision_tb(Player *player)
     if(!player->grnd) {
         // Ceiling sensors
         if(!player->ev_ceil1.collided) {
-            player->ev_ceil1 = linecast(anchorx_left, anchory_left,
+            player->ev_ceil1 = linecast(anchorx_top_left, anchory_top_left,
                                         ceildir, ceil_mag, player->gsmode);
         }
         if(!player->ev_ceil2.collided) {
-            player->ev_ceil2 = linecast(anchorx_right, anchory_right,
+            player->ev_ceil2 = linecast(anchorx_top_right, anchory_top_right,
                                         ceildir, ceil_mag, player->gsmode);
         }
     }
@@ -612,10 +640,10 @@ _player_update_collision_tb(Player *player)
                      0x38, 0xff, 0xa2);
 
         // Ceiling sensors
-        _draw_sensor(anchorx_left, anchory_left,
+        _draw_sensor(anchorx_top_left, anchory_top_left,
                      ceildir, ceil_mag,
                      0x00, 0xae, 0xef);
-        _draw_sensor(anchorx_right, anchory_right,
+        _draw_sensor(anchorx_top_right, anchory_top_right,
                      ceildir, ceil_mag,
                      0xff, 0xf2, 0x38);
 
