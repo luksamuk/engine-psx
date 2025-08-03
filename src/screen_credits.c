@@ -165,6 +165,12 @@ static const char *creditstxt[] = {
     "SEGA Inc.",
     "\r",
 
+    "Beta Testers",
+    "Leonardo Reis",
+    "Playstation The Collectors Club",
+    "TonEusd",
+    "\r",
+
     "Special Thanks",
     "Pikuma.com",
     "PSXDEV Network",
