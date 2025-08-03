@@ -167,6 +167,7 @@ static const char *creditstxt[] = {
 
     "Beta Testers",
     "Leonardo Reis",
+    "Marcel Oliveira",
     "Playstation The Collectors Club",
     "TonEusd",
     "\r",
