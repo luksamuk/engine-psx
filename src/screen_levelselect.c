@@ -82,9 +82,9 @@ typedef struct {
 /*     "              3", */
 /*     "WINDMILL ISLE 1", */
 /*     "\n", */
-/*     "SOUND TEST  *??*", */
-/*     "SPLASH SCR  *??*", */
-/*     "PLAYER  ????????", */
+/*     "BGM TEST *xx:xx*", */
+/*     "SPLASH      *xx*", */
+/*     "PLAYER  xxxxxxxx", */
 /*     "\n", */
 /*     "\n", */
 /*     "\n", */
@@ -110,9 +110,9 @@ static const char *menutext[] = {
     "AMAZING OCEAN 1",
     "              2",
     "\n",
-    "SOUND TEST  *??*",
-    "SPLASH SCR  *??*",
-    "PLAYER  ????????",
+    "BGM TEST *xx:xx*",
+    "SPLASH      *xx*",
+    "PLAYER  xxxxxxxx",
     "\n",
     "\n",
     "\n",
@@ -466,12 +466,13 @@ screen_levelselect_draw(void *d)
 
         if(cursel == CHOICE_SOUNDTEST) {
             char buffer[80];
-            snprintf(buffer, 80, "SOUND TEST  *%02X*",
-                     data->soundtest_selection);
+            snprintf(buffer, 80, "BGM TEST  *%02X:%02X*",
+                     data->soundtest_selection,
+                     MAX(0, sound_cdda_get_num_tracks() - 1));
             font_draw_sm(buffer, vx, vy);
         } else if(cursel == CHOICE_SLIDE) {
             char buffer[80];
-            snprintf(buffer, 80, "SPLASH SCR  *%02X*",
+            snprintf(buffer, 80, "SPLASH      *%02X*",
                      data->slidetest_selection);
             font_draw_sm(buffer, vx, vy);
         } else if(cursel == CHOICE_CHARACTER) {
