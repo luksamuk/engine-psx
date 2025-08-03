@@ -4,7 +4,7 @@ This  changelog file  describes  the  differences between  each  Sonic XA  build
 available  in  this directory.  Changes  are  always  relative to  the  previous
 version.
 
-* Latest
+* SAGE 2025 Build: v0.5 (2025-08-03)
 
 - Remove embedded debug font to make room for offscreen rendering
 - Add missing credits for AOZ music
