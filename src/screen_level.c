@@ -34,6 +34,7 @@ static PlayerCharacter level_character = CHARA_SONIC;
 
 #define LEVEL_BONUS_SPD 12
 #define ANIM_IDLE_TIMER_MAX 180 // Also defined in player.c
+#define ANIM_STOPPED 0x08cd0220 // Also defined in player.c
 
 // Accessible in other source
 Player      *player;
@@ -285,6 +286,8 @@ screen_level_player_respawn()
     player->death_type = 0;
     player->over_object = NULL;
     player->pushed_object = NULL;
+    player->push = 0;
+    player_set_animation_direct(player, ANIM_STOPPED);
 
     // Solve underwater behaviour
     player->underwater = (level_water_y >= 0) && (player->pos.vy > level_water_y);

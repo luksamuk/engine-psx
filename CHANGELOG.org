@@ -10,6 +10,8 @@ version.
   standing over an object
 - Fix a  bug where old  object placements were  not being entirely  cleared upon
   respawn
+- Fix a bug where the player would  "slide" with an idle animation after holding
+  right, on very specific manual respawns
 
 * SAGE 2025 Build: v0.5 (2025-08-03)
 
