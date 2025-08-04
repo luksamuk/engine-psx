@@ -8,6 +8,8 @@ version.
 
 - Fix a  bug where  the player  would remain  on air  if restarting  level while
   standing over an object
+- Fix a  bug where old  object placements were  not being entirely  cleared upon
+  respawn
 
 * SAGE 2025 Build: v0.5 (2025-08-03)
 

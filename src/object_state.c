@@ -363,6 +363,10 @@ unload_object_placements(void *lvl_data)
                     cnk->num_objects++;
                 } else cnk->objects[j].props |= OBJ_FLAG_DESTROYED;
             }
+            // Clean other object placements
+            uint8_t num_empty_objs = orig_num_objs - cnk->num_objects;
+            ObjectState *empty_start = &cnk->objects[cnk->num_objects];
+            bzero(empty_start, num_empty_objs * sizeof(ObjectState));
         }
     }
 }
