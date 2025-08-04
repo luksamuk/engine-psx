@@ -35,7 +35,7 @@
   Level boss:     704x256;   CLUT: 0x486 (8-bit only, loaded over level objects)
                              CLUT: 0x487 (8-bit only, alt palette when hit)
 
-  System fonts:   960x0      (CLUT on same TPAGE; reserved!)
+  Character offscreen renderer: 960x0, 16-bit (do not upload textures here)
   Basic fonts:    960x256;   CLUT: 0x490 (4-bit always)
  */
 
