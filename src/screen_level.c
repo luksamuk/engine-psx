@@ -283,6 +283,8 @@ screen_level_player_respawn()
     player->action = ACTION_NONE;
     player->remaining_air_frames = 1800;
     player->death_type = 0;
+    player->over_object = NULL;
+    player->pushed_object = NULL;
 
     // Solve underwater behaviour
     player->underwater = (level_water_y >= 0) && (player->pos.vy > level_water_y);
