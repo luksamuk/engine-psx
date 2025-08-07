@@ -214,13 +214,8 @@ sound_cdda_set_mute(uint8_t state)
 }
 
 void
-sound_cdda_init()
+_cdda_load_toc()
 {
-    CdAutoPauseCallback(_cdda_loop_callback);
-
-    sound_master_set_volume(BGM_DEFAULT_VOLUME);
-    sound_cdda_set_volume(BGM_DEFAULT_VOLUME);
-
     while((cdda_toc_size = CdGetToc((CdlLOC *)cdda_toc)) == 0) {
         printf("Warning: CD TOC not found, retrying. Please insert a CD-DA disc..\n");
     }
@@ -235,8 +230,24 @@ sound_cdda_init()
 }
 
 void
+sound_cdda_init()
+{
+    CdAutoPauseCallback(_cdda_loop_callback);
+
+    sound_master_set_volume(BGM_DEFAULT_VOLUME);
+    sound_cdda_set_volume(BGM_DEFAULT_VOLUME);
+
+    _cdda_load_toc();
+}
+
+void
 sound_cdda_play_track(uint8_t track, uint8_t loops)
 {
+    if(cdda_toc_size <= 1) {
+        // Perharps TOC wasn't properly loaded?
+        _cdda_load_toc();
+    }
+
     if(track > cdda_toc_size) {
         printf("Error: Cannot set audio track %02d\n", track);
         return;
