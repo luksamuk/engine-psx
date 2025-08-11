@@ -945,8 +945,8 @@ screen_level_draw(void *d)
                 setRGB3(polyg, 0xd0, 0x00, 0x40);
                 break;
             case CHARA_AMY:
-                setRGB2(polyg, 0xb4, 0x24, 0x48);
-                setRGB3(polyg, 0xb8, 0x24, 0x48);
+                setRGB2(polyg, 0xfc, 0x6c, 0x90);
+                setRGB3(polyg, 0xfc, 0x6c, 0x90);
                 break;
             default:
                 setRGB2(polyg, 0x00, 0x24, 0xd8);
