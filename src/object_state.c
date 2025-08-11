@@ -190,6 +190,7 @@ _emplace_object(
                 case CHARA_SONIC:    animation = 5; break;
                 case CHARA_MILES:    animation = 7; break;
                 case CHARA_KNUCKLES: animation = 8; break;
+                case CHARA_AMY:      animation = 9; break;
                 }
             }
             state->frag_anim_state->animation = animation;

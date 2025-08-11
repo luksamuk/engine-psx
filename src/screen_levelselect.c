@@ -482,6 +482,7 @@ screen_levelselect_draw(void *d)
             case CHARA_SONIC:    charaname = "SONIC";    break;
             case CHARA_MILES:    charaname = "MILES";    break;
             case CHARA_KNUCKLES: charaname = "KNUCKLES"; break;
+            case CHARA_AMY:      charaname = "AMY";      break;
             default:          charaname = "UNKNOWN"; break;
             }
             snprintf(buffer, 80, "PLAYER  %8s",

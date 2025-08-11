@@ -35,6 +35,12 @@
 	<file name="KNUX.CHARA"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/KNUX.CHARA" />
+	<file name="AMY.TIM"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/AMY.TIM" />
+	<file name="AMY.CHARA"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sprites/CHARA/AMY.CHARA" />
 	<file name="BASEFONT.TIM"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sprites/BASEFONT.TIM" />

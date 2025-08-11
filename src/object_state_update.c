@@ -269,6 +269,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             default:             state->frag_anim_state->animation = 2; break;
             case CHARA_MILES:    state->frag_anim_state->animation = 3; break;
             case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
+            case CHARA_AMY:      state->frag_anim_state->animation = 5; break;
             }
         }
     } else if(state->frag_anim_state->animation >= 2) {
@@ -315,6 +316,7 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                     case CHARA_SONIC:    animation = 5; break;
                     case CHARA_MILES:    animation = 7; break;
                     case CHARA_KNUCKLES: animation = 8; break;
+                    case CHARA_AMY:      animation = 9; break;
                     }
                 }
                 image->state.anim_state.animation = animation;
@@ -639,8 +641,9 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             sound_play_vag(sfx_death, 0);
             break;
         case MONITOR_KIND_1UP:
-        case 7: // !-up (Miles)
+        case 7: // 1-up (Miles)
         case 8: // 1-up (Knuckles)
+        case 9: // 1-up (Amy)
             screen_level_give_1up(-1); // (Plays sound effect)
             break;
         case MONITOR_KIND_RING:

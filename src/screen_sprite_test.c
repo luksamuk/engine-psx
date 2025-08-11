@@ -44,6 +44,10 @@ screen_sprite_test_load()
         chara_file = "\\SPRITES\\KNUX.CHARA;1";
         tim_file = "\\SPRITES\\KNUX.TIM;1";
         break;
+    case CHARA_AMY:
+        chara_file = "\\SPRITES\\AMY.CHARA;1";
+        tim_file = "\\SPRITES\\AMY.TIM;1";
+        break;
     case CHARA_SONIC:
     default: break;
     }

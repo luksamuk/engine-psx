@@ -944,6 +944,10 @@ screen_level_draw(void *d)
                 setRGB2(polyg, 0xd0, 0x00, 0x40);
                 setRGB3(polyg, 0xd0, 0x00, 0x40);
                 break;
+            case CHARA_AMY:
+                setRGB2(polyg, 0xb4, 0x24, 0x48);
+                setRGB3(polyg, 0xb8, 0x24, 0x48);
+                break;
             default:
                 setRGB2(polyg, 0x00, 0x24, 0xd8);
                 setRGB3(polyg, 0x00, 0x24, 0xd8);
@@ -972,6 +976,7 @@ screen_level_draw(void *d)
         default:             ctxt = "\asSONIC\r";    break;
         case CHARA_MILES:    ctxt = "\atTAILS\r";    break;
         case CHARA_KNUCKLES: ctxt = "\akKNUCKLES\r"; break;
+        case CHARA_AMY:      ctxt = "\aaAMY\r"; break;
         }
         snprintf(buffer, 20, "%s GOT", ctxt);
 
@@ -1186,6 +1191,10 @@ level_load_player(PlayerCharacter character)
     case CHARA_KNUCKLES:
         chara_file = "\\SPRITES\\KNUX.CHARA;1";
         tim_file = "\\SPRITES\\KNUX.TIM;1";
+        break;
+    case CHARA_AMY:
+        chara_file = "\\SPRITES\\AMY.CHARA;1";
+        tim_file = "\\SPRITES\\AMY.TIM;1";
         break;
     case CHARA_SONIC:
     default: break;

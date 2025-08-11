@@ -60,6 +60,11 @@
 #define ANIM_GLIDELAND        0x0cab0285 // KNUCKLES ONLY
 #define ANIM_GLIDERISE        0x0ce60299 // KNUCKLES ONLY
 
+#define ANIM_HAMMERSTART      0x13430349 // AMY ONLY
+#define ANIM_HAMMERHIT        0x0ce102a0 // AMY ONLY
+#define ANIM_HAMMEREND        0x0cd20292 // AMY ONLY
+#define ANIM_HAMMERSPIN       0x0ffa02f5 // AMY ONLY
+
 extern int debug_mode;
 
 // Reference to sound effects
