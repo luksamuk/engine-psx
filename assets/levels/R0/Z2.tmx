@@ -147,10 +147,10 @@
    </object>
    <object id="98" gid="109" x="32" y="1423" width="64" height="64" rotation="90"/>
    <object id="99" gid="109" x="896" y="1744" width="64" height="64" rotation="-90"/>
-   <object id="100" gid="111" x="240" y="2080" width="64" height="64"/>
+   <object id="100" gid="111" x="240" y="2072" width="64" height="64"/>
    <object id="101" gid="2147483759" x="2320" y="960" width="64" height="64"/>
    <object id="102" gid="109" x="32" y="1936" width="64" height="64" rotation="90"/>
-   <object id="104" gid="111" x="752" y="2112" width="64" height="64"/>
+   <object id="104" gid="111" x="752" y="2104" width="64" height="64"/>
    <object id="105" gid="109" x="368" y="2304" width="64" height="64"/>
    <object id="106" gid="109" x="1296" y="1936" width="64" height="64"/>
    <object id="107" gid="109" x="1392" y="1792" width="64" height="64"/>
