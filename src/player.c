@@ -1413,7 +1413,10 @@ player_update(Player *player)
                  player_set_animation_direct(player, ANIM_ROLLING);
             } else if(abs(player->vel.vz) >= (10 << 12)) {
                 player_set_animation_direct(player, ANIM_PEELOUT);
-            } else if(abs(player->vel.vz) >= (6 << 12) - 0xff) {
+            } else if( /* Amy has a top speed of 5.5 instead of 6 */
+                      ((player->character == CHARA_AMY)
+                       && abs(player->vel.vz) >= (0x5800 - 0xff))
+                      || (abs(player->vel.vz) >= ((6 << 12) - 0xff))) {
                 player_set_animation_direct(player, ANIM_RUNNING);
             } else if((player->character == CHARA_SONIC) &&
                 (player->underwater && abs(player->vel.vz) >= (4 << 12))) {
