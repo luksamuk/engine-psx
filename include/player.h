@@ -55,6 +55,8 @@ typedef enum {
     ACTION_DROPRECOVER,
     ACTION_CLIMB,
     ACTION_CLAMBER,
+    // Amy actions
+    ACTION_PIKOSPIN,
 } PlayerAction;
 
 // Alias to make things look less weird

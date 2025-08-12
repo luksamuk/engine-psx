@@ -123,6 +123,9 @@ extern int32_t    level_water_y;
 #define LANDING_ANGLE_SLOPE_LEFT  0x0e0b // 316
 #define LANDING_ANGLE_SLOPE_RIGHT 0x0200 // 45
 
+/* Forward declarations */
+void player_do_pikospin(Player *);
+
 void
 load_player(Player *player,
             PlayerCharacter character,
@@ -728,7 +731,8 @@ _player_update_collision_tb(Player *player)
             if(player->action == ACTION_JUMPING
                || player->action == ACTION_ROLLING
                || player->action == ACTION_SPRING
-               || player->action == ACTION_HURT) {
+               || player->action == ACTION_HURT
+               || player->action == ACTION_PIKOSPIN) {
                 if(player->action == ACTION_HURT) {
                     player->iframes = PLAYER_HURT_IFRAMES;
                     player->ctrllock = 0;
@@ -1208,6 +1212,10 @@ player_update(Player *player)
                         // 0.5 for left)
                         player->spinrev = (player->anim_dir > 0) ? 0 : (ONE >> 1);
                         player->glide_turn_dir = 0;
+                    case CHARA_AMY:
+                        player_do_pikospin(player);
+                        sound_play_vag(sfx_jump, 0);
+                        break;
                     default: break;
                     }
                 }
@@ -1471,6 +1479,9 @@ player_update(Player *player)
         } else if(player->action == ACTION_CLAMBER) {
             // We're clambering, but still on air!
             player_set_animation_direct(player, ANIM_CLIMBRISE);
+        } else if(player->action == ACTION_PIKOSPIN) {
+            player_set_animation_direct(player, ANIM_HAMMERSPIN);
+            player_set_frame_duration(player, 0);
         } else {
             // NO ACTION
             // Only handle cases where we have certain animations that would
@@ -1993,7 +2004,8 @@ player_set_action(Player *player, PlayerAction action)
         player->iframes = PLAYER_HURT_IFRAMES;
     } else if(player->action == ACTION_GLIDE) {
         player->sliding = 0;
-    } else if(player->action == ACTION_JUMPING) {
+    } else if(player->action == ACTION_JUMPING
+              || player->action == ACTION_PIKOSPIN) {
         player->ctrllock = 0;
     }
 
@@ -2048,4 +2060,24 @@ player_do_dropdash(Player *player)
         sound_play_vag(sfx_relea, 0);
         camera->lag = 0x8000 >> 12;
     }
+}
+
+void
+player_do_pikospin(Player *player)
+{
+    if(player->character != CHARA_AMY) return;
+    int32_t piko_strength = player->cnst->y_min_jump;
+    if(player->grnd) {
+        // TODO: Change vel.vz to helper accumulator shared with glide action
+        piko_strength = (abs(player->vel.vz) << 12) / player->cnst->x_top_spd;
+        piko_strength += player->cnst->y_jump_strength;
+        player->vel.vx -= (piko_strength * rsin(player->angle)) >> 12;
+        player->vel.vy -= (piko_strength * rcos(player->angle)) >> 12;
+    } else {
+        player->vel.vy = -((piko_strength * rcos(player->angle)) >> 12);
+    }
+    player->grnd = 0;
+    player_set_action(player, ACTION_PIKOSPIN);
+    player->holding_jump = 0;
+    player->over_object = NULL;
 }
