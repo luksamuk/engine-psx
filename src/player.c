@@ -994,6 +994,31 @@ player_update(Player *player)
                 player->framecount--;
                 player->vel.vx = player->vel.vz = 0;
             } else player_set_action(player, ACTION_NONE);
+        } else if(player->action == ACTION_PIKOPIKO) {
+            // Full duration is 15 frames. Stop at framecount 0
+            // All three animations have a 2 frame duration
+            // Frames 15-11 // >= 11:     Start
+            // Frames 11-5  // >= 5:      Hitting (active hitbox)
+            // Frames  5-1  // otherwise: End
+            if(player->framecount == 0) {
+                player_set_action(player, ACTION_NONE);
+            } else player->framecount--;
+
+            if(player->framecount == 7) {
+                // Perform a Piko Spin if enough speed and pressing the button
+                if(input_pressing(&player->input, PAD_SQUARE)
+                   // Amy's speed at beginning of action was at least 5
+                   && player->spinrev >= 0x5000) {
+                    player_do_pikospin(player);
+                    return;
+                }
+            }
+
+            // Perform deceleration just like skidding
+            if(player->vel.vz > player->cnst->x_decel)
+                player->vel.vz -= player->cnst->x_decel;
+            else if(player->vel.vz < -player->cnst->x_decel)
+                player->vel.vz += player->cnst->x_decel;
         } else {
             // Default physics
             player_set_action(player, ACTION_NONE);
@@ -1088,7 +1113,10 @@ player_update(Player *player)
         player->vel.vy = (player->vel.vz * -rsin(player->angle)) >> 12;
     } else {
         // Air X movement
-        if(player->action == ACTION_GLIDE) {
+        if(player->action == ACTION_PIKOPIKO) {
+            player_set_action(player, ACTION_NONE);
+            player_set_animation_direct(player, ANIM_WALKING);
+        } else if(player->action == ACTION_GLIDE) {
             // spinrev is an acceleration "angle" for turning while gliding.
             if(player->glide_turn_dir == -1) { // Turning right to left
                 // Disable turn, fix angle
@@ -1345,6 +1373,14 @@ player_update(Player *player)
             player->holding_jump = 1;
             player->over_object = NULL;
         }
+        // Piko Piko Hammer
+        else if((player->character == CHARA_AMY)
+                && input_pressed(&player->input, PAD_SQUARE)
+                && (player->action != ACTION_SPINDASH)
+                && (player->action != ACTION_PIKOPIKO)
+                && (player->action != ACTION_PEELOUT)) {
+            player_set_action(player, ACTION_PIKOPIKO);
+        }
     }
 
     // Animation
@@ -1358,6 +1394,13 @@ player_update(Player *player)
             player_set_animation_direct(player, ANIM_GLIDERISE);
         } else if(player->action == ACTION_DROPRECOVER) {
             player_set_animation_direct(player, ANIM_CROUCHDOWN);
+        } else if(player->action == ACTION_PIKOPIKO) {
+            if(player->framecount >= 11)
+                player_set_animation_direct(player, ANIM_HAMMERSTART);
+            else if(player->framecount >= 5)
+                player_set_animation_direct(player, ANIM_HAMMERHIT);
+            else player_set_animation_direct(player, ANIM_HAMMEREND);
+            player_set_frame_duration(player, 3);
         } else if(player->vel.vz == 0) {
             if(player->action == ACTION_SPINDASH) {
                 player_set_animation_direct(player, ANIM_SPINDASH);
@@ -1572,6 +1615,16 @@ player_update(Player *player)
             case ANIM_CLIMBEND:
                 if(anim_hash == ANIM_CLIMBRISE)
                     player->loopback_frame = 1;
+                player_set_frame_duration(player, 6);
+                break;
+
+            case ANIM_HAMMEREND:
+            case ANIM_HAMMERSTART:
+                player->loopback_frame = 1;
+                player_set_frame_duration(player, 6);
+                break;
+            case ANIM_HAMMERHIT:
+                player->loopback_frame = 2;
                 player_set_frame_duration(player, 6);
                 break;
 
@@ -2004,15 +2057,19 @@ player_set_action(Player *player, PlayerAction action)
         player->iframes = PLAYER_HURT_IFRAMES;
     } else if(player->action == ACTION_GLIDE) {
         player->sliding = 0;
-    } else if(player->action == ACTION_JUMPING
-              || player->action == ACTION_PIKOSPIN) {
+    } else if((player->action == ACTION_JUMPING) || (player->action == ACTION_PIKOSPIN)) {
         player->ctrllock = 0;
+    } else if((player->action == ACTION_PIKOPIKO) && (action != player->action)) {
+        player->framecount = 0;
     }
 
     if(action == ACTION_CLIMB) {
         // "Fake" collision to start as detecting a wall
         // so Knuckles doesn't drop instantly
         player->ev_climbdrop.collided = player->ev_clamber.collided = 1;
+    } else if(action == ACTION_PIKOPIKO) {
+        player->spinrev = abs(player->vel.vz); // Save velocity on spinrev
+        player->framecount = 15;
     }
 
     player->action = action;
@@ -2069,10 +2126,11 @@ player_do_pikospin(Player *player)
     int32_t piko_strength = player->cnst->y_min_jump;
     if(player->grnd) {
         // TODO: Change vel.vz to helper accumulator shared with glide action
-        piko_strength = (abs(player->vel.vz) << 12) / player->cnst->x_top_spd;
-        piko_strength += player->cnst->y_jump_strength;
-        player->vel.vx -= (piko_strength * rsin(player->angle)) >> 12;
-        player->vel.vy -= (piko_strength * rcos(player->angle)) >> 12;
+        piko_strength = player->cnst->y_jump_strength;
+        // GSP is saved on spinrev at this point (see player_set_action)
+        piko_strength += (player->spinrev << 12) / player->cnst->x_top_spd;
+        player->vel.vx -= ((piko_strength * rsin(player->angle)) >> 12);
+        player->vel.vy = -((piko_strength * rcos(player->angle)) >> 12);
     } else {
         player->vel.vy = -((piko_strength * rcos(player->angle)) >> 12);
     }

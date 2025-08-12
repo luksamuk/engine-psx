@@ -56,6 +56,7 @@ typedef enum {
     ACTION_CLIMB,
     ACTION_CLAMBER,
     // Amy actions
+    ACTION_PIKOPIKO,
     ACTION_PIKOSPIN,
 } PlayerAction;
 
