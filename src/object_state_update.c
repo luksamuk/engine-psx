@@ -113,6 +113,13 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     player_height = (player_attacking
                      ? HEIGHT_RADIUS_ROLLING
                      : HEIGHT_RADIUS_NORMAL) << 1;
+
+    // Make a smaller hitbox if playing as Amy Rose
+    if(player->character == CHARA_AMY && !player_attacking) {
+        player_height = player_attacking ?
+            (player_height - 8) : (player_height - 12);
+    }
+
     player_vy = (player->pos.vy >> 12) - (player_height >> 1) - 1;
 
     if(debug_mode > 1) {
