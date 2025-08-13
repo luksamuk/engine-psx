@@ -1395,6 +1395,7 @@ player_update(Player *player)
         } else if(player->action == ACTION_DROPRECOVER) {
             player_set_animation_direct(player, ANIM_CROUCHDOWN);
         } else if(player->action == ACTION_PIKOPIKO) {
+            player->idle_timer = ANIM_IDLE_TIMER_MAX;
             if(player->framecount >= 11)
                 player_set_animation_direct(player, ANIM_HAMMERSTART);
             else if(player->framecount >= 5)
