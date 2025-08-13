@@ -14,7 +14,7 @@
 #define BG_FPS    4
 #define BG_FRAMES 4
 
-#define YRADIUS 21
+#define YRADIUS 26
 #define XRADIUS 42
 
 extern SoundEffect sfx_switch;
