@@ -610,8 +610,13 @@ _boss_ghz_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         } else if(boss->state > BOSS_STATE_MOCKPLAYER) {
             int32_t hitbox_vx = pos->vx - 23;
             int32_t hitbox_vy = pos->vy - 47;
-            if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                               hitbox_vx, hitbox_vy, 52, 32)) {
+            uint8_t extra_check;
+            RECT extra = player_get_extra_hitbox(&extra_check);
+            if((extra_check
+                && aabb_intersects(extra.x, extra.y, extra.w, extra.h,
+                                   hitbox_vx, hitbox_vy, 52, 32))
+               || aabb_intersects(player_vx, player_vy, player_width, player_height,
+                                  hitbox_vx, hitbox_vy, 52, 32)) {
                 if(player_attacking) {
                     boss->health--;
                     boss->hit_cooldown = 30;
