@@ -112,14 +112,21 @@ player_get_extra_hitbox(uint8_t *exists)
 {
     RECT hitbox = { 0 };
     *exists = 0;
-    if((player->action == ACTION_PIKOPIKO) && (player->framecount < 11))
-    {
+    if((player->action == ACTION_FLY) && (!player->underwater)) {
+        *exists = 1;
+        hitbox = (RECT) {
+            .x = player_vx - ((player->anim_dir > 0) ? 13 : -2),
+            .y = player_vy - 6,
+            .w = 26,
+            .h = 14,
+        };
+    } else if((player->action == ACTION_PIKOPIKO) && (player->framecount < 11)) {
         *exists = 1;
         hitbox = (RECT){
-            .x = player_vx + ((player->anim_dir > 0) ? 5 : -20),
-            .y = player_vy - 12,
+            .x = player_vx + ((player->anim_dir > 0) ? 5 : -5),
+            .y = player_vy - 6,
             .w = 30,
-            .h = 42,
+            .h = 24,
         };
     } else if(player->action == ACTION_PIKOSPIN) {
         *exists = 1;

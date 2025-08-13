@@ -113,7 +113,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
                         player->action == ACTION_PIKOSPIN
                         || ((player->action == ACTION_PIKOPIKO)
                             && (player->framecount < 11)));
-    player_height = (player_attacking
+    player_height = (((player_attacking) || (player->action == ACTION_FLY))
                      ? HEIGHT_RADIUS_ROLLING
                      : HEIGHT_RADIUS_NORMAL) << 1;
 
