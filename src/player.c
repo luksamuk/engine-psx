@@ -1525,7 +1525,6 @@ player_update(Player *player)
             player_set_animation_direct(player, ANIM_CLIMBRISE);
         } else if(player->action == ACTION_PIKOSPIN) {
             player_set_animation_direct(player, ANIM_HAMMERSPIN);
-            player_set_frame_duration(player, 0);
         } else {
             // NO ACTION
             // Only handle cases where we have certain animations that would
@@ -1627,6 +1626,9 @@ player_update(Player *player)
             case ANIM_HAMMERHIT:
                 player->loopback_frame = 2;
                 player_set_frame_duration(player, 6);
+                break;
+            case ANIM_HAMMERSPIN:
+                player_set_frame_duration(player, 0);
                 break;
 
                 // Single-frame animations
