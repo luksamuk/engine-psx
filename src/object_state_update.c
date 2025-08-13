@@ -291,6 +291,39 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 }
 
 static void
+_monitor_do_destroy(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    state->anim_state.animation = 1;
+    state->anim_state.frame = 0;
+    state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+    level_score_count += 10;
+    sound_play_vag(sfx_pop, 0);
+
+    // Create monitor image object.
+    // Account for fragment offset as well.
+    PoolObject *image = object_pool_create(OBJ_MONITOR_IMAGE);
+    image->freepos.vx = (pos->vx << 12) + ((int32_t)entry->fragment->offsetx << 12);
+    image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
+    uint16_t animation = ((MonitorExtra *)state->extra)->kind;
+    if(animation == MONITOR_KIND_1UP) {
+        switch(player->character) {
+        default:
+        case CHARA_SONIC:    animation = 5; break;
+        case CHARA_MILES:    animation = 7; break;
+        case CHARA_KNUCKLES: animation = 8; break;
+        case CHARA_AMY:      animation = 9; break;
+        }
+    }
+    image->state.anim_state.animation = animation;
+
+    // Create explosion effect
+    PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+    explosion->freepos.vx = (pos->vx << 12);
+    explosion->freepos.vy = (pos->vy << 12);
+    explosion->state.anim_state.animation = 0; // Small explosion
+}
+
+static void
 _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
     if(state->anim_state.animation == 0) {
@@ -302,40 +335,29 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         int32_t hitbox_vy = pos->vy - 34; // Monitor hitbox is a 28x34 solid box
         
         // Perform collision detection
+        // Extra hitbox collision
+        uint8_t extra_check;
+        RECT extra_hitbox = player_get_extra_hitbox(&extra_check);
+        if(extra_check) {
+            if(aabb_intersects(extra_hitbox.x, extra_hitbox.y,
+                           extra_hitbox.w, extra_hitbox.h,
+                           hitbox_vx, hitbox_vy, 28, 32))
+            {
+                _monitor_do_destroy(state, entry, pos);
+                if(player->action == ACTION_PIKOSPIN && player->vel.vy > 0) {
+                    player->vel.vy *= -1;
+                }
+            }
+        }
+
+        // Normal collision
         if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                            solidity_vx, solidity_vy, 32, 32))
         {
             if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                                hitbox_vx, hitbox_vy, 28, 32)
                && player_attacking) {
-                state->anim_state.animation = 1;
-                state->anim_state.frame = 0;
-                state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
-                level_score_count += 10;
-                sound_play_vag(sfx_pop, 0);
-
-                // Create monitor image object.
-                // Account for fragment offset as well.
-                PoolObject *image = object_pool_create(OBJ_MONITOR_IMAGE);
-                image->freepos.vx = (pos->vx << 12) + ((int32_t)entry->fragment->offsetx << 12);
-                image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
-                uint16_t animation = ((MonitorExtra *)state->extra)->kind;
-                if(animation == MONITOR_KIND_1UP) {
-                    switch(player->character) {
-                    default:
-                    case CHARA_SONIC:    animation = 5; break;
-                    case CHARA_MILES:    animation = 7; break;
-                    case CHARA_KNUCKLES: animation = 8; break;
-                    case CHARA_AMY:      animation = 9; break;
-                    }
-                }
-                image->state.anim_state.animation = animation;
-
-                // Create explosion effect
-                PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
-                explosion->freepos.vx = (pos->vx << 12);
-                explosion->freepos.vy = (pos->vy << 12);
-                explosion->state.anim_state.animation = 0; // Small explosion
+                _monitor_do_destroy(state, entry, pos);
 
                 if(!player->grnd && player->vel.vy > 0) {
                     player->vel.vy *= -1;

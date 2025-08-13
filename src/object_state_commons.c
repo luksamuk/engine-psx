@@ -107,6 +107,32 @@ _enemy_do_destruction(ObjectState *state, VECTOR *pos)
      animal->freepos.spdy = -0x05000;
 }
 
+RECT
+player_get_extra_hitbox(uint8_t *exists)
+{
+    RECT hitbox = { 0 };
+    *exists = 0;
+    if((player->action == ACTION_PIKOPIKO) && (player->framecount < 11))
+    {
+        *exists = 1;
+        hitbox = (RECT){
+            .x = player_vx + ((player->anim_dir > 0) ? 5 : -20),
+            .y = player_vy - 12,
+            .w = 30,
+            .h = 42,
+        };
+    } else if(player->action == ACTION_PIKOSPIN) {
+        *exists = 1;
+        hitbox = (RECT){
+            .x = player_vx - 12,
+            .y = player_vy - 14,
+            .w = 40,
+            .h = 40,
+        };
+    }
+    return hitbox;
+}
+
 ObjectBehaviour
 enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
 {
@@ -134,26 +160,7 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
     // Check extra hitbox intersection.
     // This is where we configure hitboxes such as Amy Rose's hammer
     uint8_t extra_check = 0;
-    RECT extra_hitbox;
-
-    if((player->action == ACTION_PIKOPIKO) && (player->framecount < 11))
-    {
-        extra_check = 1;
-        extra_hitbox = (RECT){
-            .x = player_vx + ((player->anim_dir > 0) ? 5 : -20),
-            .y = player_vy - 12,
-            .w = 30,
-            .h = 42,
-        };
-    } else if(player->action == ACTION_PIKOSPIN) {
-        extra_check = 1;
-        extra_hitbox = (RECT){
-            .x = player_vx - 12,
-            .y = player_vy - 14,
-            .w = 40,
-            .h = 40,
-        };
-    }
+    RECT extra_hitbox = player_get_extra_hitbox(&extra_check);
 
     if(extra_check) {
         if(debug_mode > 1)
