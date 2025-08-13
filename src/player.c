@@ -88,6 +88,8 @@ extern SoundEffect sfx_bubble;
 extern SoundEffect sfx_grab;
 extern SoundEffect sfx_land;
 extern SoundEffect sfx_drown;
+extern SoundEffect sfx_piko;
+extern SoundEffect sfx_pikoup;
 
 extern Camera     *camera;
 extern uint16_t   level_ring_count;
@@ -1010,8 +1012,10 @@ player_update(Player *player)
                    // Amy's speed at beginning of action was at least 5
                    && player->spinrev >= 0x5000) {
                     player_do_pikospin(player);
+                    sound_play_vag(sfx_pikoup, 0);
                     return;
                 }
+                sound_play_vag(sfx_piko, 0);
             }
 
             // Perform deceleration just like skidding
@@ -1242,7 +1246,7 @@ player_update(Player *player)
                         player->glide_turn_dir = 0;
                     case CHARA_AMY:
                         player_do_pikospin(player);
-                        sound_play_vag(sfx_jump, 0);
+                        sound_play_vag(sfx_pikoup, 0);
                         break;
                     default: break;
                     }

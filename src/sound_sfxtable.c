@@ -1,4 +1,6 @@
 #include "sound.h"
+#include <stdio.h>
+#include <assert.h>
 
 SoundEffect sfx_jump    = { 0 };
 SoundEffect sfx_skid    = { 0 };
@@ -25,6 +27,8 @@ SoundEffect sfx_land    = { 0 };
 SoundEffect sfx_kach    = { 0 };
 SoundEffect sfx_drown   = { 0 };
 SoundEffect sfx_destroy = { 0 };
+SoundEffect sfx_piko    = { 0 };
+SoundEffect sfx_pikoup  = { 0 };
 
 void
 sound_sfx_init()
@@ -54,4 +58,13 @@ sound_sfx_init()
     if(sfx_kach.addr == 0)    sfx_kach    = sound_load_vag("\\SFX\\KACH.VAG;1");
     if(sfx_drown.addr == 0)   sfx_drown   = sound_load_vag("\\SFX\\DROWN.VAG;1");
     if(sfx_destroy.addr == 0) sfx_destroy = sound_load_vag("\\SFX\\DESTROY.VAG;1");
+    if(sfx_piko.addr == 0)    sfx_piko    = sound_load_vag("\\SFX\\PIKO.VAG;1");
+    if(sfx_pikoup.addr == 0)  sfx_pikoup  = sound_load_vag("\\SFX\\PIKOUP.VAG;1");
+
+    uint32_t used = sound_vag_get_used_bytes();
+    uint32_t max  = sound_vag_get_capacity_bytes();
+    int32_t free = (int32_t)max - (int32_t)used;
+    assert(free >= 0);
+    printf("Used SRAM: %u / %u bytes (%d free)\n",
+           used, max, free);
 }

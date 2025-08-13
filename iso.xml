@@ -466,6 +466,12 @@
 	<file name="DESTROY.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/DESTROY.VAG" />
+	<file name="PIKO.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/PIKO.VAG" />
+	<file name="PIKOUP.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/PIKOUP.VAG" />
       </dir>
 
       <dummy sectors="1024"/>
