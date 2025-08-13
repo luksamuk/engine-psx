@@ -124,6 +124,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     }
 
     player_vy = (player->pos.vy >> 12) - (player_height >> 1) - 1;
+    if(player->action == ACTION_PIKOSPIN) player_vy -= 8;
 
     if(debug_mode > 1) {
         _draw_player_hitbox();

@@ -125,7 +125,7 @@ player_get_extra_hitbox(uint8_t *exists)
         *exists = 1;
         hitbox = (RECT){
             .x = player_vx - 12,
-            .y = player_vy - 14,
+            .y = player_vy - 6,
             .w = 40,
             .h = 40,
         };
