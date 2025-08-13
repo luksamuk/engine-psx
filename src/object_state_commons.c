@@ -80,6 +80,32 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
     return OBJECT_UPDATE_AS_FREE;
 }
 
+static void
+_enemy_do_destruction(ObjectState *state, VECTOR *pos)
+{
+     state->props |= OBJ_FLAG_DESTROYED;
+     if(state->parent) {
+         state->parent->props |= OBJ_FLAG_DESTROYED;
+         state->parent->parent = NULL;
+     }
+
+     level_score_count += 100;
+     sound_play_vag(sfx_pop, 0);
+
+     // Explosion
+     PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+     explosion->freepos.vx = (pos->vx << 12);
+     explosion->freepos.vy = (pos->vy << 12);
+     explosion->state.anim_state.animation = 0; // Small explosion
+
+     // Animal
+     PoolObject *animal = object_pool_create(OBJ_ANIMAL);
+     animal->state.subtype = rand() % 4;
+     animal->freepos.vx = (pos->vx << 12);
+     animal->freepos.vy = (pos->vy << 12);
+     animal->state.flipmask |= MASK_FLIP_FLIPX;
+     animal->freepos.spdy = -0x05000;
+}
 
 ObjectBehaviour
 enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
@@ -92,27 +118,7 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
                        hitbox->x, hitbox->y, hitbox->w, hitbox->h))
     {
         if(player_attacking) {
-            state->props |= OBJ_FLAG_DESTROYED;
-            if(state->parent) {
-                state->parent->props |= OBJ_FLAG_DESTROYED;
-                state->parent->parent = NULL;
-            }
-            level_score_count += 100;
-            sound_play_vag(sfx_pop, 0);
-
-            // Explosion
-            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
-            explosion->freepos.vx = (pos->vx << 12);
-            explosion->freepos.vy = (pos->vy << 12);
-            explosion->state.anim_state.animation = 0; // Small explosion
-
-            // Animal
-            PoolObject *animal = object_pool_create(OBJ_ANIMAL);
-            animal->state.subtype = rand() % 4;
-            animal->freepos.vx = (pos->vx << 12);
-            animal->freepos.vy = (pos->vy << 12);
-            animal->state.flipmask |= MASK_FLIP_FLIPX;
-            animal->freepos.spdy = -0x05000;
+            _enemy_do_destruction(state, pos);
 
             if(!player->grnd && player->vel.vy > 0) {
                 player->vel.vy *= -1;
@@ -124,6 +130,51 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
             }
         }
     }
+
+    // Check extra hitbox intersection.
+    // This is where we configure hitboxes such as Amy Rose's hammer
+    uint8_t extra_check = 0;
+    RECT extra_hitbox;
+
+    if((player->action == ACTION_PIKOPIKO) && (player->framecount < 11))
+    {
+        extra_check = 1;
+        extra_hitbox = (RECT){
+            .x = player_vx + ((player->anim_dir > 0) ? 5 : -20),
+            .y = player_vy - 12,
+            .w = 30,
+            .h = 42,
+        };
+    } else if(player->action == ACTION_PIKOSPIN) {
+        extra_check = 1;
+        extra_hitbox = (RECT){
+            .x = player_vx - 12,
+            .y = player_vy - 14,
+            .w = 40,
+            .h = 40,
+        };
+    }
+
+    if(extra_check) {
+        if(debug_mode > 1)
+            draw_collision_hitbox(
+                extra_hitbox.x,
+                extra_hitbox.y,
+                extra_hitbox.w,
+                extra_hitbox.h);
+
+        if(aabb_intersects(extra_hitbox.x, extra_hitbox.y,
+                           extra_hitbox.w, extra_hitbox.h,
+                           hitbox->x, hitbox->y, hitbox->w, hitbox->h))
+        {
+            _enemy_do_destruction(state, pos);
+            if(player->action == ACTION_PIKOSPIN && player->vel.vy > 0) {
+                player->vel.vy *= -1;
+            }
+            return OBJECT_DESPAWN;
+        }
+    }
+
     return OBJECT_DO_NOTHING;
 }
 

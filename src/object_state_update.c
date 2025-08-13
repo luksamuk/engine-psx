@@ -111,8 +111,8 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
                         player->action == ACTION_DROPDASH ||
                         player->action == ACTION_GLIDE ||
                         player->action == ACTION_PIKOSPIN
-                        || (player->action == ACTION_PIKOPIKO
-                            && (player->framecount >= 5 && player->framecount < 11)));
+                        || ((player->action == ACTION_PIKOPIKO)
+                            && (player->framecount < 11)));
     player_height = (player_attacking
                      ? HEIGHT_RADIUS_ROLLING
                      : HEIGHT_RADIUS_NORMAL) << 1;
