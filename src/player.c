@@ -1007,6 +1007,15 @@ player_update(Player *player)
             } else player->framecount--;
 
             if(player->framecount == 7) {
+                // Create hearts at hammer
+                for(int i = 0; i < 5; i++) {
+                    PoolObject *heart = object_pool_create(OBJ_AMY_HEART);
+                    heart->freepos.vx = player->pos.vx +
+                        (((20 + (2 * i)) << 12) * player->anim_dir);
+                    heart->freepos.vy = player->pos.vy + (16 << 12);
+                    heart->state.timer = 40 + (rand() % 30);
+                }
+
                 // Perform a Piko Spin if enough speed and pressing the button
                 if(input_pressing(&player->input, PAD_SQUARE)
                    // Amy's speed at beginning of action was at least 5

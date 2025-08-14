@@ -543,7 +543,8 @@ begin_render_routine:
     uint32_t layer = ((state->id == OBJ_RING)
                       || (state->id == OBJ_SHIELD)
                       || (state->id == OBJ_EXPLOSION)
-                      || (state->id == OBJ_BUBBLE))
+                      || (state->id == OBJ_BUBBLE)
+                      || (state->id == OBJ_AMY_HEART))
         ? OTZ_LAYER_OBJECTS
         : OTZ_LAYER_UNDER_PLAYER;
 

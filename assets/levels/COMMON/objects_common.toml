@@ -850,7 +850,30 @@ duration = 0
 loopback = 0
 frames = [[200, 384, 24, 16]]
 
-# ------------
+# ============
+
+[amy_heart]
+
+[[amy_heart.animations]]
+id = 0
+name = "fade_in"
+duration = 3
+loopback = 1
+frames = [
+    [96, 80, 16, 16],
+    [96, 96, 16, 16],
+]
+
+[[amy_heart.animations]]
+id = 1
+name = "fade_out"
+duration = 3
+loopback = 2
+frames = [
+    [96,  96, 16, 16],
+    [96, 112, 16, 16],
+    [96, 112, 16, 16],
+]
 
 # ============
 # Dummy objects

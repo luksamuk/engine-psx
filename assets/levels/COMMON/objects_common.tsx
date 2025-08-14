@@ -73,4 +73,5 @@
    <property name="subtype" type="int" value="0"/>
   </properties>
  </tile>
+ <tile id="22" type="amy_heart"/>
 </tileset>

@@ -64,6 +64,7 @@ static void _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *
 static void _end_capsule_button_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _door_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _animal_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _amy_heart_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Level-specific update functions
 extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
@@ -153,6 +154,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     case OBJ_END_CAPSULE_BUTTON:     _end_capsule_button_update(state, typedata, pos); break;
     case OBJ_DOOR:                   _door_update(state, typedata, pos);               break;
     case OBJ_ANIMAL:                 _animal_update(state, typedata, pos);             break;
+    case OBJ_AMY_HEART:              _amy_heart_update(state, typedata, pos);          break;
     }
     return;
 
@@ -1161,4 +1163,69 @@ _animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     // Leverage subtype for multiple animals
     animation += (state->subtype * 3);
     state->anim_state.animation = animation;
+}
+
+#define AMY_HEART_SPEED_UP   0x00000400
+#define AMY_HEART_SPEED_RAND 0x00000800
+#define AMY_HEART_SWAY_SPEED 0x00000500
+#define AMY_HEART_SWAY_RAND  0x00000300
+#define AMY_HEART_MOVE_RAND  16
+
+static void
+_amy_heart_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    (void)(entry);
+    (void)(pos);
+    // Should only exist as a free object
+    if(state->freepos == NULL) state->props |= OBJ_FLAG_DESTROYED;
+
+    // The heart works with two animations.
+    // The default fade-in animation plays, then it stays locked in the last
+    // frame. At this point, the timer counts down.
+    // Once the timer reaches zero, the fade-out animation plays and, once it
+    // reaches the third frame (frame 2), the object is destroyed.
+    if((state->anim_state.animation == 0) && (state->anim_state.frame == 1)) {
+        if(state->timer > 0) state->timer--;
+        else {
+            state->anim_state.animation = 1;
+            state->anim_state.frame = 0;
+        }
+    } else if((state->anim_state.animation == 1) && (state->anim_state.frame == 2)) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
+
+    // The heart goes up at a steady rate,
+    // with a threshold defined at random
+    if(state->freepos->spdy == 0) {
+        state->freepos->spdy = -(AMY_HEART_SPEED_UP + (rand() % AMY_HEART_SPEED_RAND));
+    }
+
+    // The heart sways back and forth on the X position.
+    // For that, store the initial relative X position.
+    // Amount of time swaying to one side is stored on timer2.
+    // This works just like the bubble
+    if(state->freepos->spdx == 0) {
+        state->freepos->spdx = AMY_HEART_SWAY_SPEED + (rand() % AMY_HEART_SWAY_RAND);
+        state->timer2 = 16;
+
+        // Start with a 50% chance random direction
+        state->timer2 *= ((rand() % 2) * 2) - 1;
+    }
+    // Change direction
+    if(state->timer2 > 0) state->timer2--;
+    else {
+        state->freepos->spdx *= -1;
+        state->timer2 = 16 + (rand() % AMY_HEART_MOVE_RAND);
+    }
+
+    // Transform position
+    state->freepos->vx += state->freepos->spdx;
+    state->freepos->vy += state->freepos->spdy;
+
+    // The heart also despawns naturally when far off screen.
+    if(object_should_despawn(state)) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
 }
