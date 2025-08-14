@@ -12,6 +12,7 @@ version.
 - Add Tails/Amy extra hitboxes (Piko Piko Hammer, Piko Spin, tail attack)
 - Generalize behaviours on bosses and objects for ease of use
 - Add SPU SRAM debriefing on space available/used/free
+- R0: Amy's Piko Piko Hammer can destroy Bouncebombs
 
 * SAGE 2025 Build: v0.5.1 (2025-08-05)
 

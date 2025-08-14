@@ -147,9 +147,23 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         goto explode;
     }
 
-    // When colliding with Sonic, explode and do some damage
+    /* Player interaction and hitboxes */
     int32_t hitbox_vx = pos->vx - 8;
     int32_t hitbox_vy = pos->vy - 16;
+
+    // When colliding with Amy's hammer, explode and do no harm (Piko Piko only)
+    if(player->action == ACTION_PIKOPIKO) {
+        uint8_t extra;
+        RECT extra_box = player_get_extra_hitbox(&extra);
+        if(aabb_intersects(extra_box.x, extra_box.y, extra_box.w, extra_box.h,
+                           hitbox_vx, hitbox_vy, 16, 16))
+        {
+            sound_play_vag(sfx_pop, 0);
+            goto explode;
+        }
+    }
+
+    // When colliding with player, explode and do some damage
     if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                        hitbox_vx, hitbox_vy, 16, 16))
     {
