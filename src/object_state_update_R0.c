@@ -478,39 +478,15 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         if(boss->hit_cooldown > 0) {
             boss->hit_cooldown--;
         } else {
-            int32_t hitbox_vx = pos->vx - 23;
-            int32_t hitbox_vy = pos->vy - 47;
-            uint8_t extra_check;
-            RECT extra = player_get_extra_hitbox(&extra_check);
-            if((extra_check
-                && aabb_intersects(extra.x, extra.y, extra.w, extra.h,
-                                   hitbox_vx, hitbox_vy, 52, 32))
-               || aabb_intersects(player_vx, player_vy, player_width, player_height,
-                                  hitbox_vx, hitbox_vy, 52, 32)) {
-                if(player_attacking) {
-                    boss->health--;
-                    boss->hit_cooldown = 30;
-                    boss->counter2 = 15; // Stop for half the cooldown time
-                    sound_play_vag(sfx_bomb, 0);
-
-                    // Rebound Sonic
-                    if(!player->grnd) {
-                        player->vel.vy = -(player->vel.vy >> 1);
-                        if(player->action == ACTION_GLIDE) {
-                            player_set_action(player, ACTION_DROP);
-                            player->airdirlock = 1;
-                            // To be a little more fair with Knuckles,
-                            // rebound him on the X axis by double the distance
-                            // otherwise Knuckles will always get hurt when
-                            // gliding onto the boss
-                            player->vel.vx = -player->vel.vx;
-                        } else player->vel.vx = -(player->vel.vx >> 1);
-                    } else player->vel.vz = -(player->vel.vz >> 1);
-                } else {
-                    if(player->action != ACTION_HURT && player->iframes == 0) {
-                        player_do_damage(player, pos->vx << 12);
-                    }
-                }
+            RECT hitbox = {
+                .x = pos->vx - 23,
+                .y = pos->vy - 47,
+                .w = 52,
+                .h = 32,
+            };
+            if(player_boss_interaction(pos, &hitbox)) {
+                // Boss got hit
+                boss->counter2 = 15; // Stop for half the cooldown time
             }
         }
     } else {

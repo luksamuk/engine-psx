@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "render.h"
 #include "sound.h"
+#include "boss.h"
 
 #define OBJ_MIN_SPAWN_DIST_X (CENTERX + (CENTERX >> 1))
 #define OBJ_MIN_SPAWN_DIST_Y (CENTERY + (CENTERY >> 1))
@@ -357,4 +358,57 @@ solid_object_player_interaction(ObjectState *obj, FRECT *box, uint8_t is_platfor
         player->pos.vx -= x_distance;
         return (x_distance < 0) ? OBJ_SIDE_RIGHT : OBJ_SIDE_LEFT;
     }
+}
+
+extern BossState *boss;
+extern SoundEffect sfx_bomb;
+
+static void
+_boss_get_hit()
+{
+    boss->health--;
+    boss->hit_cooldown = 30;
+    sound_play_vag(sfx_bomb, 0);
+
+    // Rebound player
+    if(!player->grnd) {
+        player->vel.vy = -(player->vel.vy >> 1);
+        if(player->action == ACTION_GLIDE) {
+            player_set_action(player, ACTION_DROP);
+            player->airdirlock = 1;
+            // To be a little more fair with Knuckles,
+            // rebound him on the X axis by double the distance
+            // otherwise Knuckles will always get hurt when
+            // gliding onto the boss
+            player->vel.vx = -player->vel.vx;
+        } else player->vel.vx = -(player->vel.vx >> 1);
+    } else player->vel.vz = -(player->vel.vz >> 1);
+}
+
+uint8_t
+player_boss_interaction(VECTOR *pos, RECT *hitbox)
+{
+    uint8_t extra_check;
+    RECT extra = player_get_extra_hitbox(&extra_check);
+    if(extra_check) {
+        if(aabb_intersects(extra.x, extra.y, extra.w, extra.h,
+                           hitbox->x, hitbox->y, hitbox->w, hitbox->h))
+        {
+            _boss_get_hit();
+            return 1;
+        }
+    }
+
+    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                          hitbox->x, hitbox->y, hitbox->w, hitbox->h)) {
+        if(player_attacking) {
+            _boss_get_hit();
+            return 1;
+        } else {
+            if(player->action != ACTION_HURT && player->iframes == 0) {
+                player_do_damage(player, pos->vx << 12);
+            }
+        }
+    }
+    return 0;
 }
