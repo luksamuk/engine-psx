@@ -65,6 +65,8 @@ sound_sfx_init()
     uint32_t max  = sound_vag_get_capacity_bytes();
     int32_t free = (int32_t)max - (int32_t)used;
     assert(free >= 0);
-    printf("Used SRAM: %u / %u bytes (%d free)\n",
-           used, max, free);
+    printf("SRAM bytes size: %u\n"
+           "SRAM bytes used: %u\n"
+           "SRAM bytes free: %d\n",
+           max, used, free);
 }
