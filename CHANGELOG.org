@@ -7,6 +7,11 @@ version.
 * Latest
 
 - Prevent situations where TOC wouldn't be loaded correctly
+- Add Amy Rose!
+- Add framework for extra hitboxes on player
+- Add Tails/Amy extra hitboxes (Piko Piko Hammer, Piko Spin, tail attack)
+- Generalize behaviours on bosses and objects for ease of use
+- Add SPU SRAM debriefing on space available/used/free
 
 * SAGE 2025 Build: v0.5.1 (2025-08-05)
 
