@@ -18,6 +18,7 @@
 #define XRADIUS 42
 
 extern SoundEffect sfx_switch;
+extern int campaign_finished;
 
 typedef struct {
     int8_t   character;
@@ -135,11 +136,14 @@ screen_charselect_update(void *d)
 
     if(data->alpha_speed == 0) {
         if(pad_pressed(PAD_CROSS) || pad_pressed(PAD_START)) {
-            screen_level_setcharacter(data->character);
-            // NOTE: screen_level_setlevel should have
-            // been called from previous screen
-            screen_level_setmode(LEVEL_MODE_NORMAL);
-            scene_change(SCREEN_LEVEL);
+            // Cannot select Amy if campaign is not finished
+            if(!((data->character == CHARA_AMY) && !campaign_finished)) {
+                screen_level_setcharacter(data->character);
+                // NOTE: screen_level_setlevel should have
+                // been called from previous screen
+                screen_level_setmode(LEVEL_MODE_NORMAL);
+                scene_change(SCREEN_LEVEL);
+            }
         } else {
             uint8_t changed = 0;
             if(pad_pressing(PAD_RIGHT)) {
@@ -181,7 +185,8 @@ _get_char_name(int8_t character)
     case CHARA_SONIC:    return "\asSONIC\r";
     case CHARA_MILES:    return "\atTAILS\r";
     case CHARA_KNUCKLES: return "\akKNUCKLES\r";
-    case CHARA_AMY:      return "\aaAMY\r";
+    case CHARA_AMY:
+        return (!campaign_finished) ? "\rLOCKED" : "\aaAMY\r";
     }
     return "\awWECHNIA\r";
 }
@@ -193,7 +198,10 @@ _get_char_subtitle(int8_t character)
     case CHARA_SONIC:    return "\awThe Hedgehog\r";
     case CHARA_MILES:    return "\awMiles Prower\r";
     case CHARA_KNUCKLES: return "\awThe Echidna\r";
-    case CHARA_AMY:      return "\awRose\r";
+    case CHARA_AMY:
+        return (!campaign_finished)
+            ? "Play campaign to unlock"
+            : "\awRose\r";
     }
     return "\awUNKNOWN\r";
 }
@@ -202,6 +210,7 @@ static void
 _draw_character(uint8_t c, VECTOR *v)
 {
     uint8_t intensity = ((v->vy >> 12) < CENTERY + (YRADIUS >> 1)) ? 64 : 128;
+    if((c == 1) && (!campaign_finished)) intensity = 0;
     POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
     increment_prim(sizeof(POLY_FT4));
     setPolyFT4(poly);
