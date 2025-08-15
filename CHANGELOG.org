@@ -20,6 +20,7 @@ version.
 - Make animals from end-of-level capsule jump around the player
 - Show number of disc tracks on options menu instead of level select
 - Add a secret code to unlock all unlockable features
+- Fix a bug with player top sensors that allowed weird vertical zips
 
 * SAGE 2025 Build: v0.5.1 (2025-08-05)
 

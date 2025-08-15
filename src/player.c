@@ -582,8 +582,8 @@ _player_update_collision_tb(Player *player)
     };
 
     // Recalculate ceiling sensor anchors
-    uint16_t anchorx_top_left = anchorx,
-        anchorx_top_right = anchorx,
+    uint16_t anchorx_top_left = anchorx_left,
+        anchorx_top_right = anchorx_right,
         anchory_top_left = anchory,
         anchory_top_right = anchory;
 
