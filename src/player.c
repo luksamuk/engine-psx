@@ -1389,7 +1389,7 @@ player_update(Player *player)
         }
         // Piko Piko Hammer
         else if((player->character == CHARA_AMY)
-                && player->col_ledge
+                && (abs(player->vel.vz) > 0 || player->col_ledge)
                 && input_pressed(&player->input, PAD_SQUARE)
                 && (player->action != ACTION_SPINDASH)
                 && (player->action != ACTION_PIKOPIKO)
