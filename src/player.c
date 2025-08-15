@@ -1253,6 +1253,7 @@ player_update(Player *player)
                         // 0.5 for left)
                         player->spinrev = (player->anim_dir > 0) ? 0 : (ONE >> 1);
                         player->glide_turn_dir = 0;
+                        break;
                     case CHARA_AMY:
                         player_do_pikospin(player);
                         sound_play_vag(sfx_pikoup, 0);
