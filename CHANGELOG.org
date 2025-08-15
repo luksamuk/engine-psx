@@ -13,6 +13,13 @@ version.
 - Generalize behaviours on bosses and objects for ease of use
 - Add SPU SRAM debriefing on space available/used/free
 - R0: Amy's Piko Piko Hammer can destroy Bouncebombs
+- Add hearts when Amy hits the ground with Piko Piko Hammer
+- Make Amy and Level Select unlockable upon beating campaign
+- Add a special text slide feature to show special messages
+- Render animals in front of player
+- Make animals from end-of-level capsule jump around the player
+- Show number of disc tracks on options menu instead of level select
+- Add a secret code to unlock all unlockable features
 
 * SAGE 2025 Build: v0.5.1 (2025-08-05)
 
