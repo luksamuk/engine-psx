@@ -1118,9 +1118,12 @@ _door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     solid_object_player_interaction(state, &solidity, 0);
 }
 
-#define ANIMAL_GRAVITY 0x00380
-#define ANIMAL_XSPD    0x04000
-#define ANIMAL_JMP_SPD 0x06000
+#define ANIMAL_GRAVITY  0x00380
+#define ANIMAL_XSPD     0x04000
+#define ANIMAL_JMP_SPD  0x06000
+#define ANIMAL_XSPD_ALT 0x02000
+#define ANIMAL_JMP_ALT  0x03400
+#define ANIMAL_ALT_RND  0x00800
 
 static void
 _animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
@@ -1144,9 +1147,26 @@ _animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         // as well
         if(state->freepos->spdy > 0) {
             CollisionEvent grn = linecast(pos->vx, pos->vy - 8, CDIR_FLOOR, 8, CDIR_FLOOR);
-            if(grn.collided) {
-                state->freepos->spdx = ANIMAL_XSPD * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
-                state->freepos->spdy = -ANIMAL_JMP_SPD;
+
+            // The following behaviour depends on level state.
+            if(level_finished) {
+                // If level is finished, animals are slower and jump toward player.
+                if(grn.collided) {
+                    // Face player
+                    if(state->freepos->vx > player->pos.vx)
+                        state->flipmask = MASK_FLIP_FLIPX;
+                    else state->flipmask = 0;
+                    // Speeds are also somewhat randomized
+                    state->freepos->spdx = (ANIMAL_XSPD_ALT + (rand() % ANIMAL_ALT_RND)) *
+                        ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+                    state->freepos->spdy = -(ANIMAL_JMP_ALT + (rand() % ANIMAL_ALT_RND));
+                }
+            } else {
+                // If not, animals just jump away at constant speed.
+                if(grn.collided) {
+                    state->freepos->spdx = ANIMAL_XSPD * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+                    state->freepos->spdy = -ANIMAL_JMP_SPD;
+                }
             }
         }
         state->freepos->vx += state->freepos->spdx;
