@@ -186,7 +186,7 @@ _get_char_name(int8_t character)
     case CHARA_MILES:    return "\atTAILS\r";
     case CHARA_KNUCKLES: return "\akKNUCKLES\r";
     case CHARA_AMY:
-        return (!campaign_finished) ? "\rLOCKED" : "\aaAMY\r";
+        return (!campaign_finished) ? "\r" : "\aaAMY\r";
     }
     return "\awWECHNIA\r";
 }

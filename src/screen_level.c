@@ -1580,8 +1580,6 @@ screen_level_transition_to_next()
         } else screen_level_setlevel(lvl + 1);
         scene_change(SCREEN_LEVEL);
     } else {
-        // FINISHED CAMPAIGN
-        campaign_finished = 1;
         /* screen_slide_set_next(SLIDE_COMINGSOON); */
         screen_slide_set_next(SLIDE_THANKS);
         scene_change(SCREEN_SLIDE);
