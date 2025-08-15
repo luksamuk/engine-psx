@@ -429,6 +429,21 @@ frames = [
 ]
 loopback = -1
 
+[[explosion.animations]]
+name = "spindash_dust"
+id = 3
+duration = 1
+frames = [
+    [ 96, 384, 32, 24],
+    [ 96, 408, 32, 24],
+    [ 96, 432, 32, 24],
+    [ 96, 456, 32, 24],
+    [ 96, 480, 32, 24],
+    [128, 384, 32, 24],
+    [128, 408, 32, 24],
+]
+loopback = 0
+
 # ============
 
 [monitor_image]

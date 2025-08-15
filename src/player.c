@@ -1101,6 +1101,11 @@ player_update(Player *player)
                     player_set_animation_direct(player, ANIM_SPINDASH);
                     player->spinrev = 0;
                     sound_play_vag(sfx_dash, 0);
+
+                    // Spindash dust
+                    PoolObject *dust = object_pool_create(OBJ_EXPLOSION);
+                    dust->state.anim_state.animation = 3; // Set to spindash dust
+                    // (X and Y position set as needed)
                 }
             } else if((player->character == CHARA_SONIC)
                 && input_pressing(&player->input, PAD_UP)) {

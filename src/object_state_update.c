@@ -652,11 +652,29 @@ static void
 _explosion_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
     (void)(entry);
-    (void)(pos);;
+    (void)(pos);
+
+    if(state->freepos == NULL)
+        goto destroy;
+
     // Explosions are simple particles: their animation is finished?
     // If so, destroy.
     if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION)
-        state->props |= OBJ_FLAG_DESTROYED;
+        goto destroy;
+
+    // Explosion special case: Spindash dust.
+    // Animation is infinite so it never reaches a state of no animation.
+    if(state->anim_state.animation == 3) { // Spindash dust
+        if(player->action != ACTION_SPINDASH) goto destroy;
+        // Always position spindash dust relative to player.
+        state->flipmask = (player->anim_dir < 0) ? MASK_FLIP_FLIPX : 0;
+        state->freepos->vx = player->pos.vx - ((24 << 12) * player->anim_dir);
+        state->freepos->vy = player->pos.vy + (15 << 12);
+    }
+
+    return;
+destroy:
+    state->props |= OBJ_FLAG_DESTROYED;
 }
 
 
