@@ -63,9 +63,6 @@ screen_charselect_load()
     screen_charselect_data *data = screen_alloc(sizeof(screen_charselect_data));
     data->character = screen_level_getcharacter();
     data->alpha_speed = 0;
-    /* data->char_angles[0] = 0x0000; */
-    /* data->char_angles[1] = 0x0555; */
-    /* data->char_angles[2] = 0x0aaa; */
     data->char_angles[0] = 0x0000;
     data->char_angles[1] = 0x0400;
     data->char_angles[2] = 0x0800;
