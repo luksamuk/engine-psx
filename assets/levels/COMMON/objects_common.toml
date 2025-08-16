@@ -147,6 +147,17 @@ frames = [
 ]
 loopback = 0
 
+[[monitor.fragment.animations]]
+id = 8
+name = "amy"
+duration = 2
+frames = [
+    [168, 0, 16, 16],
+    [160, 112, 16, 16],
+    [160, 112, 16, 16],
+]
+loopback = 0
+
 # ============
 
 [spikes]
@@ -320,6 +331,9 @@ frames = [
        [48, 288, 48, 32],       # Knuckles
        [32, 136,  8, 32, 1, 0], # flip 2 x
        [ 0, 136, 32, 32, 1, 0], # flip 1 x
+       [ 0, 320, 48, 32],       # Amy
+       [32, 136,  8, 32, 1, 0], # flip 2 x
+       [ 0, 136, 32, 32, 1, 0], # flip 1 x
 ]
 loopback = 0
 
@@ -342,6 +356,13 @@ id = 4
 name = "win_knuckles"
 duration = 0
 frames = [[48, 288, 48, 32]]
+loopback = 0
+
+[[goal_sign.fragment.animations]]
+id = 4
+name = "win_amy"
+duration = 0
+frames = [[0, 320, 48, 32]]
 loopback = 0
 
 # ============
@@ -408,6 +429,21 @@ frames = [
 ]
 loopback = -1
 
+[[explosion.animations]]
+name = "spindash_dust"
+id = 3
+duration = 1
+frames = [
+    [ 96, 384, 32, 24],
+    [ 96, 408, 32, 24],
+    [ 96, 432, 32, 24],
+    [ 96, 456, 32, 24],
+    [ 96, 480, 32, 24],
+    [128, 384, 32, 24],
+    [128, 408, 32, 24],
+]
+loopback = 0
+
 # ============
 
 [monitor_image]
@@ -426,57 +462,64 @@ loopback = 0
 [[monitor_image.animations]]
 id = 1
 name = "ring"
-duration = 2
+duration = 0
 frames = [[216, 0, 16, 16]]
 loopback = 0
 
 [[monitor_image.animations]]
 id = 2
 name = "speedshoes"
-duration = 2
+duration = 0
 frames = [[232, 0, 16, 16]]
 loopback = 0
 
 [[monitor_image.animations]]
 id = 3
 name = "shield"
-duration = 2
+duration = 0
 frames = [[168, 16, 16, 16]]
 loopback = 0
 
 [[monitor_image.animations]]
 id = 4
 name = "invincibility"
-duration = 2
+duration = 0
 frames = [[184, 16, 16, 16]]
 loopback = 0
 
 [[monitor_image.animations]]
 id = 5
 name = "sonic"
-duration = 2
+duration = 0
 frames = [[200, 16, 16, 16]]
 loopback = 0
 
 [[monitor_image.animations]]
 id = 6
 name = "super"
-duration = 2
+duration = 0
 frames = [[216, 16, 16, 16]]
 loopback = 0
 
 [[monitor_image.animations]]
 id = 7
 name = "miles"
-duration = 2
+duration = 0
 frames = [[232, 16, 16, 16]]
 loopback = 0
 
 [[monitor_image.animations]]
 id = 8
 name = "knuckles"
-duration = 2
+duration = 0
 frames = [[144, 112, 16, 16]]
+loopback = 0
+
+[[monitor_image.animations]]
+id = 9
+name = "amy"
+duration = 0
+frames = [[160, 112, 16, 16]]
 loopback = 0
 
 # ============
@@ -822,7 +865,30 @@ duration = 0
 loopback = 0
 frames = [[200, 384, 24, 16]]
 
-# ------------
+# ============
+
+[amy_heart]
+
+[[amy_heart.animations]]
+id = 0
+name = "fade_in"
+duration = 3
+loopback = 1
+frames = [
+    [96, 80, 16, 16],
+    [96, 96, 16, 16],
+]
+
+[[amy_heart.animations]]
+id = 1
+name = "fade_out"
+duration = 3
+loopback = 2
+frames = [
+    [96,  96, 16, 16],
+    [96, 112, 16, 16],
+    [96, 112, 16, 16],
+]
 
 # ============
 # Dummy objects

@@ -418,6 +418,9 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
                 case 'k':
                     font_set_color_knuckles();
                     break;
+                case 'a':
+                    font_set_color_amy();
+                    break;
                 case 'y':
                     font_set_color_yellow();
                     break;
@@ -510,6 +513,12 @@ void
 font_set_color_knuckles()
 {
     font_set_color(0xfc, 0x24, 0x48);
+}
+
+void
+font_set_color_amy()
+{
+    font_set_color(0xfc, 0x48, 0x6c);
 }
 
 void

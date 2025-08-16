@@ -41,6 +41,8 @@ void sound_reset_mem(void);
 SoundEffect sound_load_vag(const char *filename);
 uint32_t    sound_upload_vag(const uint32_t *data, uint32_t size);
 void        sound_play_vag(SoundEffect sfx, uint8_t loops);
+uint32_t    sound_vag_get_used_bytes();
+uint32_t    sound_vag_get_capacity_bytes();
 
 /* CD-DA direct playback functions */
 void    sound_cdda_init();

@@ -57,7 +57,18 @@ pad_pressed(PadButton b)
 }
 
 uint16_t
+pad_pressing_any()
+{
+    if(_gstate.current != 0x0000)
+        return _gstate.current;
+    return 0x0000;
+}
+
+uint16_t
 pad_pressed_any()
 {
-    return _gstate.current != 0x0000;
+    if((_gstate.current != 0x0000) && (_gstate.old == 0x0000))
+        return _gstate.current;
+    return 0x0000;
 }
+

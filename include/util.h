@@ -27,6 +27,7 @@
 #define MIN(x, y) (x < y ? x : y)
 #define CLUT_TO_RGB(x) ((x << 3) | (x >> 2))
 #define RGB_TO_CLUT(x) (x >> 3)
+#define CLAMP(x, min, max) (MIN(MAX(x, min), max))
 
 // Fixed-point RECT
 typedef struct _FRECT {

@@ -88,11 +88,13 @@ camera_update(Camera *c, Player *player)
         c->realpos.vx += deltax;
         c->realpos.vy += deltay;
 
+        int32_t run_spd = (player->character == CHARA_AMY) ? 0x5800 : 0x6000;
+
         if(c->lag == 0) {
             // Extended camera
             if(c->follow_player
                && (player != NULL)
-               && abs(player->vel.vz) >= 0x6000) {
+               && (abs(player->vel.vz) >= run_spd)) {
                 // Extend...
                 if((player->vel.vz < 0) && (c->extension_x > -CAMERA_EXTEND_X_MAX))
                     c->extension_x -= CAMERA_STEP;

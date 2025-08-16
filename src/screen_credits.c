@@ -10,7 +10,10 @@
 #include "util.h"
 #include "timer.h"
 
+#include "screens/slide.h"
+
 extern int debug_mode;
+extern int campaign_finished;
 
 static const char *creditstxt[] = {
     "SONIC XA CREDITS",
@@ -263,8 +266,19 @@ screen_credits_update(void *d)
         default: break;
         }
     } else {
-        // Go to title screen
-        scene_change(SCREEN_TITLE);
+        if(!campaign_finished) {
+            campaign_finished = 1;
+            screen_slide_set_custom_text(
+                "Amy Rose and Level Select\n"
+                "     are now unlocked!   ");
+            screen_slide_set_next(SLIDE_CUSTOM_TEXT);
+            scene_change(SCREEN_SLIDE);
+            return;
+        } else {
+            // Go to title screen
+            scene_change(SCREEN_TITLE);
+            return;
+        }
     }
 }
 

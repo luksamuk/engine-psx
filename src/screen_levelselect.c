@@ -82,7 +82,7 @@ typedef struct {
 /*     "              3", */
 /*     "WINDMILL ISLE 1", */
 /*     "\n", */
-/*     "BGM TEST *xx:xx*", */
+/*     "BGM TEST    *xx*", */
 /*     "SPLASH      *xx*", */
 /*     "PLAYER  xxxxxxxx", */
 /*     "\n", */
@@ -110,7 +110,7 @@ static const char *menutext[] = {
     "AMAZING OCEAN 1",
     "              2",
     "\n",
-    "BGM TEST *xx:xx*",
+    "BGM TEST    *xx*",
     "SPLASH      *xx*",
     "PLAYER  xxxxxxxx",
     "\n",
@@ -466,9 +466,8 @@ screen_levelselect_draw(void *d)
 
         if(cursel == CHOICE_SOUNDTEST) {
             char buffer[80];
-            snprintf(buffer, 80, "BGM TEST  *%02X:%02X*",
-                     data->soundtest_selection,
-                     MAX(0, sound_cdda_get_num_tracks() - 1));
+            snprintf(buffer, 80, "BGM TEST    *%02X*",
+                     data->soundtest_selection);
             font_draw_sm(buffer, vx, vy);
         } else if(cursel == CHOICE_SLIDE) {
             char buffer[80];
@@ -482,6 +481,7 @@ screen_levelselect_draw(void *d)
             case CHARA_SONIC:    charaname = "SONIC";    break;
             case CHARA_MILES:    charaname = "MILES";    break;
             case CHARA_KNUCKLES: charaname = "KNUCKLES"; break;
+            case CHARA_AMY:      charaname = "AMY";      break;
             default:          charaname = "UNKNOWN"; break;
             }
             snprintf(buffer, 80, "PLAYER  %8s",

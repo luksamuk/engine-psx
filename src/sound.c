@@ -297,3 +297,15 @@ sound_vag_get_volume()
 {
     return volume_vag;
 }
+
+uint32_t
+sound_vag_get_used_bytes()
+{
+    return next_sample_addr - SPU_ALLOC_START_ADDR;
+}
+
+uint32_t
+sound_vag_get_capacity_bytes()
+{
+    return SPU_ALLOC_MAX_ADDR - SPU_ALLOC_START_ADDR;
+}

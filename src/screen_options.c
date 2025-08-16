@@ -294,6 +294,15 @@ screen_options_draw(void *d)
     font_reset_color();
 #endif
 
+    // CD tracks
+    {
+        font_set_color(64, 64, 64);
+        char buffer[20];
+        snprintf(buffer, 20, "Disc tracks: %02d", sound_cdda_get_num_tracks());
+        font_draw_sm(buffer, 15, 188);
+        font_reset_color();
+    }
+
     if(data->selection == 5) font_set_color(128, 128, 0);
     font_draw_sm("Back", 270, 200);
     font_reset_color();
