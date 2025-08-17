@@ -74,6 +74,7 @@ typedef struct {
     BGMOption bgm;
     ScreenIndex next;
     const char *current_text;
+    int16_t text_y;
 } screen_slide_data;
 
 void
@@ -110,6 +111,14 @@ screen_slide_load()
         // By default, all alerts go to title screen
         data->next = SCREEN_TITLE;
         data->counter = 1500;
+
+        // Count number of lines on text
+        uint8_t lines = 1;
+        for(const char *itr = data->current_text; *itr != '\0'; itr++) {
+            if(*itr == '\n') lines++;
+        }
+        printf("Lines: %d\n", lines);
+        data->text_y = CENTERY - ((lines * GLYPH_SML_WHITE_HEIGHT) >> 1);
     }
 
     // Initialize counters
@@ -195,12 +204,9 @@ screen_slide_draw(void *d)
     } else {
         uint16_t hw = font_measurew_sm(data->current_text) >> 1;
         int16_t vx = CENTERX - hw;
-        int16_t vy = CENTERY - (GLYPH_SML_WHITE_HEIGHT >> 1);
-        font_set_color(
-            LERPC(data->fade, 128),
-            LERPC(data->fade, 128),
-            LERPC(data->fade, 0));
-        font_draw_sm(data->current_text, vx, vy);
+        font_reset_color();
+        font_set_fade(data->fade);
+        font_draw_sm(data->current_text, vx, data->text_y);
         font_reset_color();
     }
 }

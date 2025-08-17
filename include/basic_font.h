@@ -32,6 +32,8 @@ uint16_t font_measurew_sm(const char *text);
 uint16_t font_measurew_hg(const char *text);
 
 void font_set_color(uint8_t r0, uint8_t g0, uint8_t b0);
+void font_set_fade(uint8_t fade);
+void font_set_color_default();
 void font_set_color_sonic();
 void font_set_color_miles();
 void font_set_color_knuckles();

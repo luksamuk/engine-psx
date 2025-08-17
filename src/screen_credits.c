@@ -269,8 +269,11 @@ screen_credits_update(void *d)
         if(!campaign_finished) {
             campaign_finished = 1;
             screen_slide_set_custom_text(
-                "Amy Rose and Level Select\n"
-                "     are now unlocked!   ");
+                "  \aaAmy Rose\ad and \awLevel Select\ad\n"
+                "      are now unlocked!\n\n"
+                "Next time use the secret code:\n"
+                "      \ayUp Down Left Right\n"
+                "      Square plus Start\ad");
             screen_slide_set_next(SLIDE_CUSTOM_TEXT);
             scene_change(SCREEN_SLIDE);
             return;
