@@ -197,7 +197,8 @@ _get_char_subtitle(int8_t character)
     case CHARA_KNUCKLES: return "\awThe Echidna\r";
     case CHARA_AMY:
         return (!campaign_finished)
-            ? "Play campaign to unlock"
+            ? ("Play main levels\n"
+               "   to  unlock   ")
             : "\awRose\r";
     }
     return "\awUNKNOWN\r";

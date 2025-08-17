@@ -35,7 +35,7 @@ static const char *title_text[] = {
     "PRESS START",
 
     "PLAY TEST LEVELS",
-    "START CAMPAIGN",
+    "START GAME",
     "LEVEL SELECT",
     "OPTIONS",
 };
