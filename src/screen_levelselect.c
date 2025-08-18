@@ -460,6 +460,7 @@ screen_levelselect_draw(void *d)
     const char **txt = menutext;
     int16_t vx = 8;
     int16_t vy = 40;
+    font_set_color_default();
     while(*txt != NULL) {
         if((*txt)[0] == '\n') goto end_line;
         if(data->menu_choice == cursel) font_set_color(128, 128, 0);
@@ -489,7 +490,7 @@ screen_levelselect_draw(void *d)
             font_draw_sm(buffer, vx, vy);
         } else font_draw_sm(*txt, vx, vy);
         
-        if(data->menu_choice == cursel) font_reset_color();
+        if(data->menu_choice == cursel) font_set_color_default();
         cursel++;
 
         if((cursel + 1) % MAX_COLUMN_CHOICES == 0) {
