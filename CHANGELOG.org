@@ -28,6 +28,7 @@ version.
 - Add spindash dust, slightly fix spindash animations
 - Add default color function, escape sequence, and allow fade values for text
 - Amy's Piko Piko Hammer can destroy bombs (R0) and enemy projectiles (R2, R3)
+- Fix Tails's tails on Spindash animation
 
 * SAGE 2025 Build: v0.5.1 (2025-08-05)
 

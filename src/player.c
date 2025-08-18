@@ -1940,6 +1940,7 @@ player_draw(Player *player, VECTOR *pos)
 
         tail_distance_x -= (((facing_left ? 2 : 2) << 12) * tail_angle_cos) >> 24;
         tail_distance_y -= (((facing_left ? 0 : 2) << 12) * tail_angle_sin) >> 24;
+        if(player->action == ACTION_SPINDASH) tail_distance_x -= facing_left ? 6 : 2;
 
         chara_draw_prepare(&player->render_sub_area, SUB_OT_LENGTH - 3);
         chara_draw_offscreen(&player->chara, player->tail_anim_frame, facing_left, SUB_OT_LENGTH - 4);
