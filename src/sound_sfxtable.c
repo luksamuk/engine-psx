@@ -29,6 +29,7 @@ SoundEffect sfx_drown   = { 0 };
 SoundEffect sfx_destroy = { 0 };
 SoundEffect sfx_piko    = { 0 };
 SoundEffect sfx_pikoup  = { 0 };
+SoundEffect sfx_pikojmp = { 0 };
 
 void
 sound_sfx_init()
@@ -60,6 +61,7 @@ sound_sfx_init()
     if(sfx_destroy.addr == 0) sfx_destroy = sound_load_vag("\\SFX\\DESTROY.VAG;1");
     if(sfx_piko.addr == 0)    sfx_piko    = sound_load_vag("\\SFX\\PIKO.VAG;1");
     if(sfx_pikoup.addr == 0)  sfx_pikoup  = sound_load_vag("\\SFX\\PIKOUP.VAG;1");
+    if(sfx_pikojmp.addr == 0) sfx_pikojmp = sound_load_vag("\\SFX\\PIKOJMP.VAG;1");
 
     uint32_t used = sound_vag_get_used_bytes();
     uint32_t max  = sound_vag_get_capacity_bytes();

@@ -472,6 +472,9 @@
 	<file name="PIKOUP.VAG"
 	      type="data"
 	      source="${PROJECT_SOURCE_DIR}/assets/sfx/PIKOUP.VAG" />
+	<file name="PIKOJMP.VAG"
+	      type="data"
+	      source="${PROJECT_SOURCE_DIR}/assets/sfx/PIKOJMP.VAG" />
       </dir>
 
       <dummy sectors="1024"/>

@@ -90,6 +90,7 @@ extern SoundEffect sfx_land;
 extern SoundEffect sfx_drown;
 extern SoundEffect sfx_piko;
 extern SoundEffect sfx_pikoup;
+extern SoundEffect sfx_pikojmp;
 
 extern Camera     *camera;
 extern uint16_t   level_ring_count;
@@ -1262,7 +1263,7 @@ player_update(Player *player)
                         break;
                     case CHARA_AMY:
                         player_do_pikospin(player);
-                        sound_play_vag(sfx_pikoup, 0);
+                        sound_play_vag(sfx_pikojmp, 0);
                         break;
                     default: break;
                     }
