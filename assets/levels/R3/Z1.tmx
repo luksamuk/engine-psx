@@ -47,7 +47,7 @@
    <object id="7" gid="75" x="1423" y="832" width="64" height="64"/>
    <object id="8" gid="75" x="1456" y="832" width="64" height="64"/>
    <object id="9" gid="77" x="2464" y="384" width="64" height="64"/>
-   <object id="10" gid="79" x="2672" y="928" width="64" height="64"/>
+   <object id="10" gid="79" x="2672" y="920" width="64" height="64"/>
    <object id="11" gid="77" x="3152" y="1088" width="64" height="64"/>
    <object id="13" gid="74" x="1264" y="832" width="64" height="64">
     <properties>
@@ -60,9 +60,9 @@
    <object id="18" gid="81" x="2334" y="508" width="64" height="64"/>
    <object id="20" gid="81" x="2863" y="261" width="64" height="64"/>
    <object id="21" gid="81" x="2992" y="261" width="64" height="64"/>
-   <object id="22" gid="73" x="2706.5" y="896" width="64" height="64"/>
-   <object id="23" gid="73" x="2724.5" y="877" width="64" height="64"/>
-   <object id="24" gid="73" x="2743.5" y="859" width="64" height="64"/>
+   <object id="22" gid="73" x="2706.5" y="888" width="64" height="64"/>
+   <object id="23" gid="73" x="2724.5" y="869" width="64" height="64"/>
+   <object id="24" gid="73" x="2743.5" y="851" width="64" height="64"/>
    <object id="25" gid="81" x="1695.5" y="637.5" width="64" height="64"/>
    <object id="26" gid="74" x="2032" y="256" width="64" height="64">
     <properties>

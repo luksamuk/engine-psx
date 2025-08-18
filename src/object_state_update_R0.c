@@ -147,11 +147,20 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         goto explode;
     }
 
-    // When colliding with Sonic, explode and do some damage
-    int32_t hitbox_vx = pos->vx - 8;
-    int32_t hitbox_vy = pos->vy - 16;
+    /* Player interaction and hitboxes */
+    RECT hitbox = {
+        .x = pos->vx - 8,
+        .y = pos->vy - 16,
+        .w = 16,
+        .h = 16,
+    };
+
+    // When colliding with Amy's hammer, explode and do no harm (Piko Piko only)
+    if(pikopiko_object_interaction(state, pos, &hitbox)) return;
+
+    // When colliding with player, explode and do some damage
     if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                       hitbox_vx, hitbox_vy, 16, 16))
+                       hitbox.x, hitbox.y, 16, 16))
     {
         if(player->action != ACTION_HURT && player->iframes == 0) {
             player_do_damage(player, pos->vx << 12);
@@ -478,39 +487,21 @@ _boss_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         if(boss->hit_cooldown > 0) {
             boss->hit_cooldown--;
         } else {
-            int32_t hitbox_vx = pos->vx - 23;
-            int32_t hitbox_vy = pos->vy - 47;
-            if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                               hitbox_vx, hitbox_vy, 52, 32)) {
-                if(player_attacking) {
-                    boss->health--;
-                    boss->hit_cooldown = 30;
-                    boss->counter2 = 15; // Stop for half the cooldown time
-                    sound_play_vag(sfx_bomb, 0);
-
-                    // Rebound Sonic
-                    if(!player->grnd) {
-                        player->vel.vy = -(player->vel.vy >> 1);
-                        if(player->action == ACTION_GLIDE) {
-                            player_set_action(player, ACTION_DROP);
-                            player->airdirlock = 1;
-                            // To be a little more fair with Knuckles,
-                            // rebound him on the X axis by double the distance
-                            // otherwise Knuckles will always get hurt when
-                            // gliding onto the boss
-                            player->vel.vx = -player->vel.vx;
-                        } else player->vel.vx = -(player->vel.vx >> 1);
-                    } else player->vel.vz = -(player->vel.vz >> 1);
-                } else {
-                    if(player->action != ACTION_HURT && player->iframes == 0) {
-                        player_do_damage(player, pos->vx << 12);
-                    }
-                }
+            RECT hitbox = {
+                .x = pos->vx - 23,
+                .y = pos->vy - 47,
+                .w = 52,
+                .h = 32,
+            };
+            if(player_boss_interaction(pos, &hitbox)) {
+                // Boss got hit
+                boss->counter2 = 15; // Stop for half the cooldown time
             }
         }
     } else {
         if(boss->state < BOSS_STATE_DEAD) {
             boss->state = BOSS_STATE_DEAD;
+            state->freepos->spdx = 0;
             boss->counter6 = 0;
             boss->counter2 = 180; // 3 seconds exploding
             level_score_count += 1000;

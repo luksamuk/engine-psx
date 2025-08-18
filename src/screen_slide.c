@@ -7,8 +7,12 @@
 #include "util.h"
 #include "input.h"
 #include "sound.h"
+#include "basic_font.h"
 
 static SlideOption next_slide = 0xff;
+static const char *next_slide_text = NULL;
+
+extern SoundEffect sfx_event;
 
 ScreenIndex slide_screen_override = 0xff;
 
@@ -69,41 +73,64 @@ typedef struct {
     int16_t counter;
     BGMOption bgm;
     ScreenIndex next;
+    const char *current_text;
+    int16_t text_y;
 } screen_slide_data;
 
 void
 screen_slide_load()
 {   
     screen_slide_data *data = screen_alloc(sizeof(screen_slide_data));
-    data->current = next_slide; next_slide = -1;
-
-    // Prepare for next screen
-    const char *slide_image_path = slide_table[data->current].image;
-    data->next = slide_table[data->current].next;
-    data->bgm = slide_table[data->current].bgm;
-    data->counter = slide_table[data->current].duration;
+    data->current = next_slide;
+    data->current_text = next_slide_text;
+    next_slide = -1;
+    next_slide_text = NULL;
 
     if(slide_screen_override != 0xff) {
         data->next = slide_screen_override;
         slide_screen_override = 0xff;
     }
 
-    // Load image data
-    uint32_t length;
-    TIM_IMAGE img;
-    uint8_t *bin = file_read(slide_image_path, &length);
-    load_texture(bin, &img);
-    data->mode = img.mode;
-    data->prectx = img.prect->x;
-    data->precty = img.prect->y;
-    free(bin);
+    // Prepare for next screen
+    if(data->current != SLIDE_CUSTOM_TEXT) {
+        const char *slide_image_path = slide_table[data->current].image;
+        data->next = slide_table[data->current].next;
+        data->bgm = slide_table[data->current].bgm;
+        data->counter = slide_table[data->current].duration;
+
+        // Load image data
+        uint32_t length;
+        TIM_IMAGE img;
+        uint8_t *bin = file_read(slide_image_path, &length);
+        load_texture(bin, &img);
+        data->mode = img.mode;
+        data->prectx = img.prect->x;
+        data->precty = img.prect->y;
+        free(bin);
+    } else {
+        // By default, all alerts go to title screen
+        data->next = SCREEN_TITLE;
+        data->counter = 1500;
+
+        // Count number of lines on text
+        uint8_t lines = 1;
+        for(const char *itr = data->current_text; *itr != '\0'; itr++) {
+            if(*itr == '\n') lines++;
+        }
+        printf("Lines: %d\n", lines);
+        data->text_y = CENTERY - ((lines * GLYPH_SML_WHITE_HEIGHT) >> 1);
+    }
 
     // Initialize counters
     data->fade = 0;
     data->state = 0;
 
     // Play BGM if needed
-    if(data->bgm != 0xff) sound_bgm_play(data->bgm);
+    if(data->current != SLIDE_CUSTOM_TEXT) {
+        if(data->bgm != 0xff) sound_bgm_play(data->bgm);
+    } else {
+        sound_play_vag(sfx_event, 0);
+    }
 }
 
 void
@@ -138,6 +165,7 @@ screen_slide_update(void *d)
                 next_slide = slide_table[data->current].next_slide;
             }
             scene_change(data->next);
+            return;
         }
     }
 }
@@ -160,18 +188,27 @@ screen_slide_draw(void *d)
 {
     screen_slide_data *data = (screen_slide_data *)d;
 
-    POLY_FT4 *poly;
+    if(data->current != SLIDE_CUSTOM_TEXT) {
+        POLY_FT4 *poly;
 
-    // Draw slide in two parts.
-    poly = (POLY_FT4 *)get_next_prim();
-    increment_prim(sizeof(POLY_FT4));
-    _prepare_slide(poly, data, 0);
-    sort_prim(poly, OTZ_LAYER_TOPMOST);
+        // Draw slide in two parts.
+        poly = (POLY_FT4 *)get_next_prim();
+        increment_prim(sizeof(POLY_FT4));
+        _prepare_slide(poly, data, 0);
+        sort_prim(poly, OTZ_LAYER_TOPMOST);
 
-    poly = (POLY_FT4 *)get_next_prim();
-    increment_prim(sizeof(POLY_FT4));
-    _prepare_slide(poly, data, 1);
-    sort_prim(poly, OTZ_LAYER_TOPMOST);
+        poly = (POLY_FT4 *)get_next_prim();
+        increment_prim(sizeof(POLY_FT4));
+        _prepare_slide(poly, data, 1);
+        sort_prim(poly, OTZ_LAYER_TOPMOST);
+    } else {
+        uint16_t hw = font_measurew_sm(data->current_text) >> 1;
+        int16_t vx = CENTERX - hw;
+        font_reset_color();
+        font_set_fade(data->fade);
+        font_draw_sm(data->current_text, vx, data->text_y);
+        font_reset_color();
+    }
 }
 
 
@@ -179,4 +216,10 @@ void
 screen_slide_set_next(SlideOption opt)
 {
     next_slide = opt;
+}
+
+void
+screen_slide_set_custom_text(const char *text)
+{
+    next_slide_text = text;
 }

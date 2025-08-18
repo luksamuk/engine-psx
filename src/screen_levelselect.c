@@ -82,7 +82,7 @@ typedef struct {
 /*     "              3", */
 /*     "WINDMILL ISLE 1", */
 /*     "\n", */
-/*     "BGM TEST *xx:xx*", */
+/*     "BGM TEST    *xx*", */
 /*     "SPLASH      *xx*", */
 /*     "PLAYER  xxxxxxxx", */
 /*     "\n", */
@@ -110,7 +110,7 @@ static const char *menutext[] = {
     "AMAZING OCEAN 1",
     "              2",
     "\n",
-    "BGM TEST *xx:xx*",
+    "BGM TEST    *xx*",
     "SPLASH      *xx*",
     "PLAYER  xxxxxxxx",
     "\n",
@@ -460,15 +460,15 @@ screen_levelselect_draw(void *d)
     const char **txt = menutext;
     int16_t vx = 8;
     int16_t vy = 40;
+    font_set_color_default();
     while(*txt != NULL) {
         if((*txt)[0] == '\n') goto end_line;
         if(data->menu_choice == cursel) font_set_color(128, 128, 0);
 
         if(cursel == CHOICE_SOUNDTEST) {
             char buffer[80];
-            snprintf(buffer, 80, "BGM TEST  *%02X:%02X*",
-                     data->soundtest_selection,
-                     MAX(0, sound_cdda_get_num_tracks() - 1));
+            snprintf(buffer, 80, "BGM TEST    *%02X*",
+                     data->soundtest_selection);
             font_draw_sm(buffer, vx, vy);
         } else if(cursel == CHOICE_SLIDE) {
             char buffer[80];
@@ -482,6 +482,7 @@ screen_levelselect_draw(void *d)
             case CHARA_SONIC:    charaname = "SONIC";    break;
             case CHARA_MILES:    charaname = "MILES";    break;
             case CHARA_KNUCKLES: charaname = "KNUCKLES"; break;
+            case CHARA_AMY:      charaname = "AMY";      break;
             default:          charaname = "UNKNOWN"; break;
             }
             snprintf(buffer, 80, "PLAYER  %8s",
@@ -489,7 +490,7 @@ screen_levelselect_draw(void *d)
             font_draw_sm(buffer, vx, vy);
         } else font_draw_sm(*txt, vx, vy);
         
-        if(data->menu_choice == cursel) font_reset_color();
+        if(data->menu_choice == cursel) font_set_color_default();
         cursel++;
 
         if((cursel + 1) % MAX_COLUMN_CHOICES == 0) {

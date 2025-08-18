@@ -54,6 +54,7 @@
  */
 
 int debug_mode = 0;
+int campaign_finished = 0;
 
 #include "screens/level.h"
 

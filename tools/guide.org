@@ -145,6 +145,10 @@ names = [
     "GLIDECANCEL",
     "GLIDELAND",
     "GLIDERISE",
+    "HAMMERSTART",
+    "HAMMERHIT",
+    "HAMMEREND",
+    "HAMMERSPIN",
 ]
 
 def get_hash(name):
@@ -200,6 +204,10 @@ print_hashes(names)
 #define ANIM_GLIDECANCEL      0x1252030c
 #define ANIM_GLIDELAND        0x0cab0285
 #define ANIM_GLIDERISE        0x0ce60299
+#define ANIM_HAMMERSTART      0x13430349
+#define ANIM_HAMMERHIT        0x0ce102a0
+#define ANIM_HAMMEREND        0x0cd20292
+#define ANIM_HAMMERSPIN       0x0ffa02f5
 #+end_example
 
 * Generating 8x8 tiles and their 16x16 mappings

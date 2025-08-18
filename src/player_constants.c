@@ -104,7 +104,7 @@ static PlayerConstants CNST_DEFAULT_K = {
     .y_hurt_gravity   = 0x00300,
     .y_min_jump       = 0x04000,
     .x_jump_away      = 0x04000,
-    .y_jump_strength  = 0x06000,
+    .y_jump_strength  = 0x06000, // Changed
     .x_min_roll_spd   = 0x01000,
     .x_min_uncurl_spd = 0x00800,
     .x_roll_friction  = 0x00060,
@@ -181,6 +181,94 @@ static PlayerConstants CNST_SPEEDSHOES_K = {
     .y_dead_force     = 0x07000
 };
 
+/* Amy values */
+static PlayerConstants CNST_DEFAULT_A = {
+    .x_accel          = 0x000a8, // Changed
+    .x_air_accel      = 0x00160, // Changed
+    .x_friction       = 0x000c0,
+    .x_decel          = 0x00800,
+    .x_top_spd        = 0x05800, // Changed
+    .y_gravity        = 0x00380,
+    .y_hurt_gravity   = 0x00300,
+    .y_min_jump       = 0x04000,
+    .x_jump_away      = 0x04000,
+    .y_jump_strength  = 0x07000, // Changed
+    .x_min_roll_spd   = 0x01000,
+    .x_min_uncurl_spd = 0x00800,
+    .x_roll_friction  = 0x00060,
+    .x_roll_decel     = 0x00200,
+    .x_slope_min_spd  = 0x000d0,
+    .x_slope_normal   = 0x00200,
+    .x_slope_rollup   = 0x00140,
+    .x_slope_rolldown = 0x00500,
+    .x_max_spd        = 0x0f000, // Changed
+    .x_max_slip_spd   = 0x03400, // Changed
+    .x_drpspd         = 0x08000,
+    .x_drpmax         = 0x0c000,
+    .y_hurt_force     = 0x04000,
+    .x_hurt_force     = 0x02000,
+    .x_peelout_spd    = 0x0c000,
+    .y_dead_force     = 0x07000
+};
+
+static PlayerConstants CNST_UNDERWATER_A = {
+    .x_accel          = 0x00048, // Changed
+    .x_air_accel      = 0x000a0, // Changed
+    .x_friction       = 0x00060,
+    .x_decel          = 0x00400,
+    .x_top_spd        = 0x02e00, // Changed
+    .y_gravity        = 0x00100,
+    .y_hurt_gravity   = 0x000c0,
+    .y_min_jump       = 0x02000,
+    .x_jump_away      = 0x04000,
+    .y_jump_strength  = 0x04000, // Changed
+    .x_min_roll_spd   = 0x01000,
+    .x_min_uncurl_spd = 0x00800,
+    .x_roll_friction  = 0x00030,
+    .x_roll_decel     = 0x00200,
+    .x_slope_min_spd  = 0x000d0,
+    .x_slope_normal   = 0x00200,
+    .x_slope_rollup   = 0x00140,
+    .x_slope_rolldown = 0x00500,
+    .x_max_spd        = 0x0f000, // Changed
+    .x_max_slip_spd   = 0x03400, // Changed
+    .x_drpspd         = 0x08000,
+    .x_drpmax         = 0x0c000,
+    .y_hurt_force     = 0x02000,
+    .x_hurt_force     = 0x01000,
+    .x_peelout_spd    = 0x05fff,
+    .y_dead_force     = 0x07000
+};
+
+static PlayerConstants CNST_SPEEDSHOES_A = {
+    .x_accel          = 0x00120, // Changed
+    .x_air_accel      = 0x00238, // Changed
+    .x_friction       = 0x00180,
+    .x_decel          = 0x00800,
+    .x_top_spd        = 0x0a000, // Changed
+    .y_gravity        = 0x00380,
+    .y_hurt_gravity   = 0x00300,
+    .y_min_jump       = 0x04000,
+    .x_jump_away      = 0x04000,
+    .y_jump_strength  = 0x07000, // Changed
+    .x_min_roll_spd   = 0x01000,
+    .x_min_uncurl_spd = 0x00800,
+    .x_roll_friction  = 0x000c0,
+    .x_roll_decel     = 0x00200,
+    .x_slope_min_spd  = 0x000d0,
+    .x_slope_normal   = 0x00200,
+    .x_slope_rollup   = 0x00140,
+    .x_slope_rolldown = 0x00500,
+    .x_max_spd        = 0x0f000, // Changed
+    .x_max_slip_spd   = 0x03400, // Changed
+    .x_drpspd         = 0x08000,
+    .x_drpmax         = 0x0c000,
+    .y_hurt_force     = 0x04000,
+    .x_hurt_force     = 0x02000,
+    .x_peelout_spd    = 0x0c000,
+    .y_dead_force     = 0x07000
+};
+
 
 PlayerConstants *
 getconstants(PlayerCharacter c, PlayerConstantType pct)
@@ -190,6 +278,12 @@ getconstants(PlayerCharacter c, PlayerConstantType pct)
         default:            return &CNST_DEFAULT_K;
         case PC_UNDERWATER: return &CNST_UNDERWATER_K;
         case PC_SPEEDSHOES: return &CNST_SPEEDSHOES_K;
+        }
+    } else if(c == CHARA_AMY) {
+        switch(pct) {
+        default:            return &CNST_DEFAULT_A;
+        case PC_UNDERWATER: return &CNST_UNDERWATER_A;
+        case PC_SPEEDSHOES: return &CNST_SPEEDSHOES_A;
         }
     }
 

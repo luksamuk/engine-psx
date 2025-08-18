@@ -19,6 +19,8 @@ enum CommonId: s8 {
     END_CAPSULE = 15,
     END_CAPSULE_BUTTON = 16,
     DOOR = 17,
+    ANIMAL = 18,
+    AMY_HEART = 19
 };
 
 bitfield FlipMask {

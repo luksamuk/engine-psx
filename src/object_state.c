@@ -190,6 +190,7 @@ _emplace_object(
                 case CHARA_SONIC:    animation = 5; break;
                 case CHARA_MILES:    animation = 7; break;
                 case CHARA_KNUCKLES: animation = 8; break;
+                case CHARA_AMY:      animation = 9; break;
                 }
             }
             state->frag_anim_state->animation = animation;
@@ -542,7 +543,9 @@ begin_render_routine:
     uint32_t layer = ((state->id == OBJ_RING)
                       || (state->id == OBJ_SHIELD)
                       || (state->id == OBJ_EXPLOSION)
-                      || (state->id == OBJ_BUBBLE))
+                      || (state->id == OBJ_BUBBLE)
+                      || (state->id == OBJ_ANIMAL)
+                      || (state->id == OBJ_AMY_HEART))
         ? OTZ_LAYER_OBJECTS
         : OTZ_LAYER_UNDER_PLAYER;
 

@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "render.h"
 #include "sound.h"
+#include "boss.h"
 
 #define OBJ_MIN_SPAWN_DIST_X (CENTERX + (CENTERX >> 1))
 #define OBJ_MIN_SPAWN_DIST_Y (CENTERY + (CENTERY >> 1))
@@ -80,6 +81,65 @@ enemy_spawner_update(ObjectState *state, VECTOR *pos)
     return OBJECT_UPDATE_AS_FREE;
 }
 
+static void
+_enemy_do_destruction(ObjectState *state, VECTOR *pos)
+{
+     state->props |= OBJ_FLAG_DESTROYED;
+     if(state->parent) {
+         state->parent->props |= OBJ_FLAG_DESTROYED;
+         state->parent->parent = NULL;
+     }
+
+     level_score_count += 100;
+     sound_play_vag(sfx_pop, 0);
+
+     // Explosion
+     PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+     explosion->freepos.vx = (pos->vx << 12);
+     explosion->freepos.vy = (pos->vy << 12);
+     explosion->state.anim_state.animation = 0; // Small explosion
+
+     // Animal
+     PoolObject *animal = object_pool_create(OBJ_ANIMAL);
+     animal->state.subtype = rand() % 4;
+     animal->freepos.vx = (pos->vx << 12);
+     animal->freepos.vy = (pos->vy << 12);
+     animal->state.flipmask |= MASK_FLIP_FLIPX;
+     animal->freepos.spdy = -0x05000;
+}
+
+RECT
+player_get_extra_hitbox(uint8_t *exists)
+{
+    RECT hitbox = { 0 };
+    *exists = 0;
+    if((player->action == ACTION_FLY) && (!player->underwater)) {
+        *exists = 1;
+        hitbox = (RECT) {
+            .x = player_vx - ((player->anim_dir > 0) ? 13 : -2),
+            .y = player_vy - 6,
+            .w = 26,
+            .h = 14,
+        };
+    } else if((player->action == ACTION_PIKOPIKO) && (player->framecount < 11)) {
+        *exists = 1;
+        hitbox = (RECT){
+            .x = player_vx + ((player->anim_dir > 0) ? 5 : -20),
+            .y = player_vy - 12,
+            .w = 30,
+            .h = 42,
+        };
+    } else if(player->action == ACTION_PIKOSPIN) {
+        *exists = 1;
+        hitbox = (RECT){
+            .x = player_vx - 12,
+            .y = player_vy - 6,
+            .w = 40,
+            .h = 40,
+        };
+    }
+    return hitbox;
+}
 
 ObjectBehaviour
 enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
@@ -92,27 +152,7 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
                        hitbox->x, hitbox->y, hitbox->w, hitbox->h))
     {
         if(player_attacking) {
-            state->props |= OBJ_FLAG_DESTROYED;
-            if(state->parent) {
-                state->parent->props |= OBJ_FLAG_DESTROYED;
-                state->parent->parent = NULL;
-            }
-            level_score_count += 100;
-            sound_play_vag(sfx_pop, 0);
-
-            // Explosion
-            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
-            explosion->freepos.vx = (pos->vx << 12);
-            explosion->freepos.vy = (pos->vy << 12);
-            explosion->state.anim_state.animation = 0; // Small explosion
-
-            // Animal
-            PoolObject *animal = object_pool_create(OBJ_ANIMAL);
-            animal->state.subtype = rand() % 4;
-            animal->freepos.vx = (pos->vx << 12);
-            animal->freepos.vy = (pos->vy << 12);
-            animal->state.flipmask |= MASK_FLIP_FLIPX;
-            animal->freepos.spdy = -0x05000;
+            _enemy_do_destruction(state, pos);
 
             if(!player->grnd && player->vel.vy > 0) {
                 player->vel.vy *= -1;
@@ -124,6 +164,32 @@ enemy_player_interaction(ObjectState *state, RECT *hitbox, VECTOR *pos)
             }
         }
     }
+
+    // Check extra hitbox intersection.
+    // This is where we configure hitboxes such as Amy Rose's hammer
+    uint8_t extra_check = 0;
+    RECT extra_hitbox = player_get_extra_hitbox(&extra_check);
+
+    if(extra_check) {
+        if(debug_mode > 1)
+            draw_collision_hitbox(
+                extra_hitbox.x,
+                extra_hitbox.y,
+                extra_hitbox.w,
+                extra_hitbox.h);
+
+        if(aabb_intersects(extra_hitbox.x, extra_hitbox.y,
+                           extra_hitbox.w, extra_hitbox.h,
+                           hitbox->x, hitbox->y, hitbox->w, hitbox->h))
+        {
+            _enemy_do_destruction(state, pos);
+            if(player->action == ACTION_PIKOSPIN && player->vel.vy > 0) {
+                player->vel.vy *= -1;
+            }
+            return OBJECT_DESPAWN;
+        }
+    }
+
     return OBJECT_DO_NOTHING;
 }
 
@@ -292,4 +358,79 @@ solid_object_player_interaction(ObjectState *obj, FRECT *box, uint8_t is_platfor
         player->pos.vx -= x_distance;
         return (x_distance < 0) ? OBJ_SIDE_RIGHT : OBJ_SIDE_LEFT;
     }
+}
+
+extern BossState *boss;
+extern SoundEffect sfx_bomb;
+
+static void
+_boss_get_hit()
+{
+    boss->health--;
+    boss->hit_cooldown = 30;
+    sound_play_vag(sfx_bomb, 0);
+
+    // Rebound player
+    if(!player->grnd) {
+        player->vel.vy = -(player->vel.vy >> 1);
+        if(player->action == ACTION_GLIDE) {
+            player_set_action(player, ACTION_DROP);
+            player->airdirlock = 1;
+            // To be a little more fair with Knuckles,
+            // rebound him on the X axis by double the distance
+            // otherwise Knuckles will always get hurt when
+            // gliding onto the boss
+            player->vel.vx = -player->vel.vx;
+        } else player->vel.vx = -(player->vel.vx >> 1);
+    } else player->vel.vz = -(player->vel.vz >> 1);
+}
+
+uint8_t
+player_boss_interaction(VECTOR *pos, RECT *hitbox)
+{
+    uint8_t extra_check;
+    RECT extra = player_get_extra_hitbox(&extra_check);
+    if(extra_check) {
+        if(aabb_intersects(extra.x, extra.y, extra.w, extra.h,
+                           hitbox->x, hitbox->y, hitbox->w, hitbox->h))
+        {
+            _boss_get_hit();
+            return 1;
+        }
+    }
+
+    if(aabb_intersects(player_vx, player_vy, player_width, player_height,
+                          hitbox->x, hitbox->y, hitbox->w, hitbox->h)) {
+        if(player_attacking) {
+            _boss_get_hit();
+            return 1;
+        } else {
+            if(player->action != ACTION_HURT && player->iframes == 0) {
+                player_do_damage(player, pos->vx << 12);
+            }
+        }
+    }
+    return 0;
+}
+
+uint8_t
+pikopiko_object_interaction(ObjectState *state, VECTOR *pos, RECT *hitbox)
+{
+    // When colliding with Amy's hammer, explode and do no harm (Piko Piko only)
+    if(player->action == ACTION_PIKOPIKO) {
+        uint8_t extra;
+        RECT extra_box = player_get_extra_hitbox(&extra);
+        if(aabb_intersects(extra_box.x, extra_box.y, extra_box.w, extra_box.h,
+                           hitbox->x, hitbox->y, hitbox->w, hitbox->h))
+        {
+            sound_play_vag(sfx_pop, 0);
+            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+            explosion->freepos.vx = (pos->vx << 12);
+            explosion->freepos.vy = (pos->vy << 12);
+            explosion->state.anim_state.animation = 0; // Small explosion
+            state->props |= OBJ_FLAG_DESTROYED;
+            return 1;
+        }
+    }
+    return 0;
 }

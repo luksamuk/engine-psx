@@ -6,6 +6,7 @@
 
 static uint8_t font_mode;
 static uint8_t font_color[] = {128, 128, 128};
+static uint8_t font_fade = 128;
 
 static uint8_t glyph_info_big[] = {
     // u0, v0, w, h
@@ -253,7 +254,10 @@ _draw_glyph(
 {
     SPRT *sprt = get_next_prim();
     setSprt(sprt);
-    setRGB0(sprt, font_color[0], font_color[1], font_color[2]);
+    setRGB0(sprt,
+            LERPC(font_fade, font_color[0]),
+            LERPC(font_fade, font_color[1]),
+            LERPC(font_fade, font_color[2]));
     increment_prim(sizeof(SPRT));
     setXY0(sprt, vx, vy);
     setWH(sprt, w, h);
@@ -418,6 +422,9 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
                 case 'k':
                     font_set_color_knuckles();
                     break;
+                case 'a':
+                    font_set_color_amy();
+                    break;
                 case 'y':
                     font_set_color_yellow();
                     break;
@@ -426,6 +433,9 @@ _font_draw_generic(const char *text, int16_t vx, int16_t vy,
                     break;
                 case 'z':
                     font_set_color_super();
+                    break;
+                case 'd':
+                    font_set_color_default();
                     break;
                 }
                 offset = 0xfe;
@@ -491,7 +501,15 @@ font_draw_hg(const char *text, int16_t vx, int16_t vy)
 void
 font_set_color(uint8_t r0, uint8_t g0, uint8_t b0)
 {
-    font_color[0] = r0; font_color[1] = g0; font_color[2] = b0;
+    font_color[0] = r0;
+    font_color[1] = g0;
+    font_color[2] = b0;
+}
+
+void
+font_set_fade(uint8_t fade)
+{
+    font_fade = fade;
 }
 
 void
@@ -513,6 +531,12 @@ font_set_color_knuckles()
 }
 
 void
+font_set_color_amy()
+{
+    font_set_color(0xfc, 0x48, 0x6c);
+}
+
+void
 font_set_color_super()
 {
     font_set_color(0xbb, 0x8a, 0x0d);
@@ -531,7 +555,14 @@ font_set_color_white()
 }
 
 void
+font_set_color_default()
+{
+    font_set_color(128, 128, 128);
+}
+
+void
 font_reset_color()
 {
-    font_color[0] = font_color[1] = font_color[2] = 128;
+    font_set_color_default();
+    font_fade = 128;
 }

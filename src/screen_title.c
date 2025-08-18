@@ -20,6 +20,7 @@
 extern int      debug_mode;
 #endif
 extern uint32_t level_score_count;
+extern int      campaign_finished;
 
 uint16_t demo_number = 6;
 uint8_t  demo_character = CHARA_SONIC;
@@ -59,6 +60,7 @@ static const int16_t prl_data[] = {
 };
 
 extern SoundEffect sfx_switch;
+extern SoundEffect sfx_ring;
 
 typedef struct {
     texture_props props_title;
@@ -76,6 +78,8 @@ typedef struct {
     MATRIX  world;
 
     uint32_t autodemo_timer;
+
+    uint16_t code_state[5];
 
     /* Model planet; */
 } screen_title_data;
@@ -118,6 +122,8 @@ screen_title_load()
 
     data->autodemo_timer = 0;
 
+    bzero(data->code_state, 5 * sizeof(uint16_t));
+
     bzero(data->prl_pos, PRL_NUM_PIECES * sizeof(int32_t));
     data->prl_pos[0] = 32 << 12; // Island center
 
@@ -138,8 +144,9 @@ screen_title_load()
 }
 
 void
-screen_title_unload(void *)
+screen_title_unload(void *d)
 {
+    (void)(d);
     sound_cdda_stop();
     screen_free();
 }
@@ -180,7 +187,33 @@ screen_title_update(void *d)
                     data->selected = 1;
                 }
 
+                // Input cheat codes. Buffer has 5 positions.
+                // Input is always pushed at end
+                {
+                    uint16_t current;
+                    if((current = pad_pressed_any())) {
+                        // Move everyone backwards
+                        for(int i = 1; i < 5; i++) {
+                            data->code_state[i-1] = data->code_state[i];
+                        }
+                        data->code_state[4] = current;
+                    }
+                }
+
                 if(pad_pressed(PAD_START)) {
+                    // Check for campaign unlock code.
+                    // UP, DOWN, LEFT, RIGHT, SQUARE+START
+                    if((data->code_state[0] == PAD_UP)
+                       && (data->code_state[1] == PAD_DOWN)
+                       && (data->code_state[2] == PAD_LEFT)
+                       && (data->code_state[3] == PAD_RIGHT)
+                       && (data->code_state[4] == PAD_SQUARE)
+                       && pad_pressing(data->code_state[4]))
+                    {
+                        campaign_finished = 1;
+                        sound_play_vag(sfx_ring, 0);
+                    }
+                    
                     // TODO: Check for saved data?
                     data->menu_option = 2; // New Game
                     //data->menu_option = 1; // Continue
@@ -189,10 +222,18 @@ screen_title_update(void *d)
                 if(pad_pressed(PAD_LEFT) && (data->menu_option > 1)) {
                     sound_play_vag(sfx_switch, 0);
                     data->menu_option--;
+
+                    // Jump over level select if campaign was not finished
+                    if(data->menu_option == 3 && !campaign_finished)
+                        data->menu_option--;
                 } else if(pad_pressed(PAD_RIGHT)
                           && (data->menu_option < MENU_MAX_OPTION)) {
                     sound_play_vag(sfx_switch, 0);
                     data->menu_option++;
+
+                    // Jump over level select if campaign was not finished
+                    if(data->menu_option == 3 && !campaign_finished)
+                        data->menu_option++;
                 }
 
                 if(pad_pressed(PAD_START) || pad_pressed(PAD_CROSS)) {

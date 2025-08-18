@@ -18,6 +18,7 @@ uint16_t input_pressed(InputState *, PadButton);
 
 uint16_t pad_pressing(PadButton b);
 uint16_t pad_pressed(PadButton b);
+uint16_t pad_pressing_any();
 uint16_t pad_pressed_any();
 
 #endif

@@ -64,6 +64,7 @@ static void _end_capsule_update(ObjectState *state, ObjectTableEntry *, VECTOR *
 static void _end_capsule_button_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _door_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 static void _animal_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
+static void _amy_heart_update(ObjectState *state, ObjectTableEntry *, VECTOR *);
 
 // Level-specific update functions
 extern void object_update_R0(ObjectState *, ObjectTableEntry *, VECTOR *);
@@ -109,11 +110,22 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
                         player->action == ACTION_ROLLING ||
                         player->action == ACTION_SPINDASH ||
                         player->action == ACTION_DROPDASH ||
-                        player->action == ACTION_GLIDE);
-    player_height = (player_attacking
+                        player->action == ACTION_GLIDE ||
+                        player->action == ACTION_PIKOSPIN
+                        || ((player->action == ACTION_PIKOPIKO)
+                            && (player->framecount < 11)));
+    player_height = (((player_attacking) || (player->action == ACTION_FLY))
                      ? HEIGHT_RADIUS_ROLLING
                      : HEIGHT_RADIUS_NORMAL) << 1;
+
+    // Make a smaller hitbox if playing as Amy Rose
+    if(player->character == CHARA_AMY && !player_attacking) {
+        player_height = player_attacking ?
+            (player_height - 8) : (player_height - 12);
+    }
+
     player_vy = (player->pos.vy >> 12) - (player_height >> 1) - 1;
+    if(player->action == ACTION_PIKOSPIN) player_vy -= 8;
 
     if(debug_mode > 1) {
         _draw_player_hitbox();
@@ -142,6 +154,7 @@ object_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos, uint8
     case OBJ_END_CAPSULE_BUTTON:     _end_capsule_button_update(state, typedata, pos); break;
     case OBJ_DOOR:                   _door_update(state, typedata, pos);               break;
     case OBJ_ANIMAL:                 _animal_update(state, typedata, pos);             break;
+    case OBJ_AMY_HEART:              _amy_heart_update(state, typedata, pos);          break;
     }
     return;
 
@@ -269,6 +282,7 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             default:             state->frag_anim_state->animation = 2; break;
             case CHARA_MILES:    state->frag_anim_state->animation = 3; break;
             case CHARA_KNUCKLES: state->frag_anim_state->animation = 4; break;
+            case CHARA_AMY:      state->frag_anim_state->animation = 5; break;
             }
         }
     } else if(state->frag_anim_state->animation >= 2) {
@@ -277,6 +291,39 @@ _goal_sign_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             screen_level_transition_start_timer();
         }
     }
+}
+
+static void
+_monitor_do_destroy(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    state->anim_state.animation = 1;
+    state->anim_state.frame = 0;
+    state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
+    level_score_count += 10;
+    sound_play_vag(sfx_pop, 0);
+
+    // Create monitor image object.
+    // Account for fragment offset as well.
+    PoolObject *image = object_pool_create(OBJ_MONITOR_IMAGE);
+    image->freepos.vx = (pos->vx << 12) + ((int32_t)entry->fragment->offsetx << 12);
+    image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
+    uint16_t animation = ((MonitorExtra *)state->extra)->kind;
+    if(animation == MONITOR_KIND_1UP) {
+        switch(player->character) {
+        default:
+        case CHARA_SONIC:    animation = 5; break;
+        case CHARA_MILES:    animation = 7; break;
+        case CHARA_KNUCKLES: animation = 8; break;
+        case CHARA_AMY:      animation = 9; break;
+        }
+    }
+    image->state.anim_state.animation = animation;
+
+    // Create explosion effect
+    PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+    explosion->freepos.vx = (pos->vx << 12);
+    explosion->freepos.vy = (pos->vy << 12);
+    explosion->state.anim_state.animation = 0; // Small explosion
 }
 
 static void
@@ -291,39 +338,29 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         int32_t hitbox_vy = pos->vy - 34; // Monitor hitbox is a 28x34 solid box
         
         // Perform collision detection
+        // Extra hitbox collision
+        uint8_t extra_check;
+        RECT extra_hitbox = player_get_extra_hitbox(&extra_check);
+        if(extra_check) {
+            if(aabb_intersects(extra_hitbox.x, extra_hitbox.y,
+                           extra_hitbox.w, extra_hitbox.h,
+                           hitbox_vx, hitbox_vy, 28, 32))
+            {
+                _monitor_do_destroy(state, entry, pos);
+                if(player->action == ACTION_PIKOSPIN && player->vel.vy > 0) {
+                    player->vel.vy *= -1;
+                }
+            }
+        }
+
+        // Normal collision
         if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                            solidity_vx, solidity_vy, 32, 32))
         {
             if(aabb_intersects(player_vx, player_vy, player_width, player_height,
                                hitbox_vx, hitbox_vy, 28, 32)
                && player_attacking) {
-                state->anim_state.animation = 1;
-                state->anim_state.frame = 0;
-                state->frag_anim_state->animation = OBJ_ANIMATION_NO_ANIMATION;
-                level_score_count += 10;
-                sound_play_vag(sfx_pop, 0);
-
-                // Create monitor image object.
-                // Account for fragment offset as well.
-                PoolObject *image = object_pool_create(OBJ_MONITOR_IMAGE);
-                image->freepos.vx = (pos->vx << 12) + ((int32_t)entry->fragment->offsetx << 12);
-                image->freepos.vy = (pos->vy << 12) + ((int32_t)entry->fragment->offsety << 12);
-                uint16_t animation = ((MonitorExtra *)state->extra)->kind;
-                if(animation == MONITOR_KIND_1UP) {
-                    switch(player->character) {
-                    default:
-                    case CHARA_SONIC:    animation = 5; break;
-                    case CHARA_MILES:    animation = 7; break;
-                    case CHARA_KNUCKLES: animation = 8; break;
-                    }
-                }
-                image->state.anim_state.animation = animation;
-
-                // Create explosion effect
-                PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
-                explosion->freepos.vx = (pos->vx << 12);
-                explosion->freepos.vy = (pos->vy << 12);
-                explosion->state.anim_state.animation = 0; // Small explosion
+                _monitor_do_destroy(state, entry, pos);
 
                 if(!player->grnd && player->vel.vy > 0) {
                     player->vel.vy *= -1;
@@ -615,11 +652,29 @@ static void
 _explosion_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
 {
     (void)(entry);
-    (void)(pos);;
+    (void)(pos);
+
+    if(state->freepos == NULL)
+        goto destroy;
+
     // Explosions are simple particles: their animation is finished?
     // If so, destroy.
     if(state->anim_state.animation == OBJ_ANIMATION_NO_ANIMATION)
-        state->props |= OBJ_FLAG_DESTROYED;
+        goto destroy;
+
+    // Explosion special case: Spindash dust.
+    // Animation is infinite so it never reaches a state of no animation.
+    if(state->anim_state.animation == 3) { // Spindash dust
+        if(player->action != ACTION_SPINDASH) goto destroy;
+        // Always position spindash dust relative to player.
+        state->flipmask = (player->anim_dir < 0) ? MASK_FLIP_FLIPX : 0;
+        state->freepos->vx = player->pos.vx - ((24 << 12) * player->anim_dir);
+        state->freepos->vy = player->pos.vy + (15 << 12);
+    }
+
+    return;
+destroy:
+    state->props |= OBJ_FLAG_DESTROYED;
 }
 
 
@@ -639,8 +694,9 @@ _monitor_image_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
             sound_play_vag(sfx_death, 0);
             break;
         case MONITOR_KIND_1UP:
-        case 7: // !-up (Miles)
+        case 7: // 1-up (Miles)
         case 8: // 1-up (Knuckles)
+        case 9: // 1-up (Amy)
             screen_level_give_1up(-1); // (Plays sound effect)
             break;
         case MONITOR_KIND_RING:
@@ -1080,9 +1136,12 @@ _door_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     solid_object_player_interaction(state, &solidity, 0);
 }
 
-#define ANIMAL_GRAVITY 0x00380
-#define ANIMAL_XSPD    0x04000
-#define ANIMAL_JMP_SPD 0x06000
+#define ANIMAL_GRAVITY  0x00380
+#define ANIMAL_XSPD     0x04000
+#define ANIMAL_JMP_SPD  0x06000
+#define ANIMAL_XSPD_ALT 0x02000
+#define ANIMAL_JMP_ALT  0x03400
+#define ANIMAL_ALT_RND  0x00800
 
 static void
 _animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
@@ -1106,9 +1165,26 @@ _animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
         // as well
         if(state->freepos->spdy > 0) {
             CollisionEvent grn = linecast(pos->vx, pos->vy - 8, CDIR_FLOOR, 8, CDIR_FLOOR);
-            if(grn.collided) {
-                state->freepos->spdx = ANIMAL_XSPD * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
-                state->freepos->spdy = -ANIMAL_JMP_SPD;
+
+            // The following behaviour depends on level state.
+            if(level_finished) {
+                // If level is finished, animals are slower and jump toward player.
+                if(grn.collided) {
+                    // Face player
+                    if(state->freepos->vx > player->pos.vx)
+                        state->flipmask = MASK_FLIP_FLIPX;
+                    else state->flipmask = 0;
+                    // Speeds are also somewhat randomized
+                    state->freepos->spdx = (ANIMAL_XSPD_ALT + (rand() % ANIMAL_ALT_RND)) *
+                        ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+                    state->freepos->spdy = -(ANIMAL_JMP_ALT + (rand() % ANIMAL_ALT_RND));
+                }
+            } else {
+                // If not, animals just jump away at constant speed.
+                if(grn.collided) {
+                    state->freepos->spdx = ANIMAL_XSPD * ((state->flipmask & MASK_FLIP_FLIPX) ? -1 : 1);
+                    state->freepos->spdy = -ANIMAL_JMP_SPD;
+                }
             }
         }
         state->freepos->vx += state->freepos->spdx;
@@ -1125,4 +1201,69 @@ _animal_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
     // Leverage subtype for multiple animals
     animation += (state->subtype * 3);
     state->anim_state.animation = animation;
+}
+
+#define AMY_HEART_SPEED_UP   0x00000400
+#define AMY_HEART_SPEED_RAND 0x00000800
+#define AMY_HEART_SWAY_SPEED 0x00000500
+#define AMY_HEART_SWAY_RAND  0x00000300
+#define AMY_HEART_MOVE_RAND  16
+
+static void
+_amy_heart_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
+{
+    (void)(entry);
+    (void)(pos);
+    // Should only exist as a free object
+    if(state->freepos == NULL) state->props |= OBJ_FLAG_DESTROYED;
+
+    // The heart works with two animations.
+    // The default fade-in animation plays, then it stays locked in the last
+    // frame. At this point, the timer counts down.
+    // Once the timer reaches zero, the fade-out animation plays and, once it
+    // reaches the third frame (frame 2), the object is destroyed.
+    if((state->anim_state.animation == 0) && (state->anim_state.frame == 1)) {
+        if(state->timer > 0) state->timer--;
+        else {
+            state->anim_state.animation = 1;
+            state->anim_state.frame = 0;
+        }
+    } else if((state->anim_state.animation == 1) && (state->anim_state.frame == 2)) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
+
+    // The heart goes up at a steady rate,
+    // with a threshold defined at random
+    if(state->freepos->spdy == 0) {
+        state->freepos->spdy = -(AMY_HEART_SPEED_UP + (rand() % AMY_HEART_SPEED_RAND));
+    }
+
+    // The heart sways back and forth on the X position.
+    // For that, store the initial relative X position.
+    // Amount of time swaying to one side is stored on timer2.
+    // This works just like the bubble
+    if(state->freepos->spdx == 0) {
+        state->freepos->spdx = AMY_HEART_SWAY_SPEED + (rand() % AMY_HEART_SWAY_RAND);
+        state->timer2 = 16;
+
+        // Start with a 50% chance random direction
+        state->timer2 *= ((rand() % 2) * 2) - 1;
+    }
+    // Change direction
+    if(state->timer2 > 0) state->timer2--;
+    else {
+        state->freepos->spdx *= -1;
+        state->timer2 = 16 + (rand() % AMY_HEART_MOVE_RAND);
+    }
+
+    // Transform position
+    state->freepos->vx += state->freepos->spdx;
+    state->freepos->vy += state->freepos->spdy;
+
+    // The heart also despawns naturally when far off screen.
+    if(object_should_despawn(state)) {
+        state->props |= OBJ_FLAG_DESTROYED;
+        return;
+    }
 }
