@@ -1018,8 +1018,9 @@ player_update(Player *player)
 
                 // Perform a Piko Spin if enough speed and pressing the button
                 if(input_pressing(&player->input, PAD_SQUARE)
-                   // Amy's speed at beginning of action was at least 5
-                   && player->spinrev >= 0x5000) {
+                   // Amy's speed at beginning of action was at least 5.5
+                   // (this is Amy's minimum running speed)
+                   && player->spinrev >= 0x5800) {
                     player_do_pikospin(player);
                     sound_play_vag(sfx_pikoup, 0);
                     return;
