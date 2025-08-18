@@ -7,7 +7,9 @@ version.
 * Latest
 
 - Prevent situations where TOC wouldn't be loaded correctly
-- Add Amy Rose!
+- Add Amy Rose!  Amy jumps higher than the  cast, has a lower top  speed and has
+  a slips down steep slopes more easily than  the rest of the cast. She also has
+  a Piko Piko Hammer attack, a Piko Double Jump, and a Piko Spin Attack.
 - Add framework for extra hitboxes on player
 - Add Tails/Amy extra hitboxes (Piko Piko Hammer, Piko Spin, tail attack)
 - Generalize behaviours on bosses and objects for ease of use
