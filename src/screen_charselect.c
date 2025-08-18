@@ -207,7 +207,7 @@ _get_char_subtitle(int8_t character)
 static void
 _draw_character(uint8_t c, VECTOR *v)
 {
-    uint8_t intensity = ((v->vy >> 12) < CENTERY + (YRADIUS >> 1)) ? 64 : 128;
+    uint8_t intensity = ((v->vy >> 12) < CENTERY + (YRADIUS >> 1) + (YRADIUS >> 2)) ? 64 : 128;
     if((c == 1) && (!campaign_finished)) intensity = 0;
     POLY_FT4 *poly = (POLY_FT4 *)get_next_prim();
     increment_prim(sizeof(POLY_FT4));
