@@ -7,14 +7,16 @@ version.
 * Latest
 
 - Prevent situations where TOC wouldn't be loaded correctly
-- Add Amy Rose!  Amy jumps higher than the  cast, has a lower top  speed and has
-  a slips down steep slopes more easily than  the rest of the cast. She also has
-  a Piko Piko Hammer attack, a Piko Double Jump, and a Piko Spin Attack.
+- Add Amy  Rose!  Amy jumps higher  than the rest of  the cast, has a  lower top
+  speed and slips down  steep slopes more easily than the rest  of the cast. She
+  also  has a  Piko Piko  Hammer Attack,  a Piko  Double Jump,  and a  Piko Spin
+  Attack.
 - Add framework for extra hitboxes on player
 - Add Tails/Amy extra hitboxes (Piko Piko Hammer, Piko Spin, tail attack)
 - Generalize behaviours on bosses and objects for ease of use
+- [R0] Fix a bug  where the boss would continue going  forward when defeated out
+  of a swing animation
 - Add SPU SRAM debriefing on space available/used/free
-- R0: Amy's Piko Piko Hammer can destroy Bouncebombs
 - Add hearts when Amy hits the ground with Piko Piko Hammer
 - Make Amy and Level Select unlockable upon beating campaign
 - Add a special text slide feature to show special messages
@@ -24,6 +26,8 @@ version.
 - Add a secret code to unlock all unlockable features
 - Fix a bug with player top sensors that allowed weird vertical zips
 - Add spindash dust, slightly fix spindash animations
+- Add default color function, escape sequence, and allow fade values for text
+- Amy's Piko Piko Hammer can destroy bombs (R0) and enemy projectiles (R2, R3)
 
 * SAGE 2025 Build: v0.5.1 (2025-08-05)
 
