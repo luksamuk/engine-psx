@@ -412,3 +412,25 @@ player_boss_interaction(VECTOR *pos, RECT *hitbox)
     }
     return 0;
 }
+
+uint8_t
+pikopiko_object_interaction(ObjectState *state, VECTOR *pos, RECT *hitbox)
+{
+    // When colliding with Amy's hammer, explode and do no harm (Piko Piko only)
+    if(player->action == ACTION_PIKOPIKO) {
+        uint8_t extra;
+        RECT extra_box = player_get_extra_hitbox(&extra);
+        if(aabb_intersects(extra_box.x, extra_box.y, extra_box.w, extra_box.h,
+                           hitbox->x, hitbox->y, hitbox->w, hitbox->h))
+        {
+            sound_play_vag(sfx_pop, 0);
+            PoolObject *explosion = object_pool_create(OBJ_EXPLOSION);
+            explosion->freepos.vx = (pos->vx << 12);
+            explosion->freepos.vy = (pos->vy << 12);
+            explosion->state.anim_state.animation = 0; // Small explosion
+            state->props |= OBJ_FLAG_DESTROYED;
+            return 1;
+        }
+    }
+    return 0;
+}

@@ -180,5 +180,6 @@ void            hazard_player_interaction(RECT *hitbox, VECTOR *pos);
 ObjectCollision solid_object_player_interaction(ObjectState *obj, FRECT *solidity, uint8_t is_platform);
 uint8_t         player_boss_interaction(VECTOR *pos, RECT *hitbox);
 RECT            player_get_extra_hitbox(uint8_t *exists);
+uint8_t         pikopiko_object_interaction(ObjectState *state, VECTOR *pos, RECT *hitbox);
 
 #endif

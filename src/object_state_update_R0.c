@@ -148,24 +148,19 @@ _bouncebomb_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
     }
 
     /* Player interaction and hitboxes */
-    int32_t hitbox_vx = pos->vx - 8;
-    int32_t hitbox_vy = pos->vy - 16;
+    RECT hitbox = {
+        .x = pos->vx - 8,
+        .y = pos->vy - 16,
+        .w = 16,
+        .h = 16,
+    };
 
     // When colliding with Amy's hammer, explode and do no harm (Piko Piko only)
-    if(player->action == ACTION_PIKOPIKO) {
-        uint8_t extra;
-        RECT extra_box = player_get_extra_hitbox(&extra);
-        if(aabb_intersects(extra_box.x, extra_box.y, extra_box.w, extra_box.h,
-                           hitbox_vx, hitbox_vy, 16, 16))
-        {
-            sound_play_vag(sfx_pop, 0);
-            goto explode;
-        }
-    }
+    if(pikopiko_object_interaction(state, pos, &hitbox)) return;
 
     // When colliding with player, explode and do some damage
     if(aabb_intersects(player_vx, player_vy, player_width, player_height,
-                       hitbox_vx, hitbox_vy, 16, 16))
+                       hitbox.x, hitbox.y, 16, 16))
     {
         if(player->action != ACTION_HURT && player->iframes == 0) {
             player_do_damage(player, pos->vx << 12);

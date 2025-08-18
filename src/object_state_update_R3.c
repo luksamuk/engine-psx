@@ -326,8 +326,11 @@ _projectile_update(ObjectState *state, ObjectTableEntry *typedata, VECTOR *pos)
         hitbox.w = hitbox.h = 8;
     }
 
-    hazard_player_interaction(&hitbox, pos);
-
     state->freepos->vx += state->freepos->spdx;
     state->freepos->vy += state->freepos->spdy;
+
+    // When colliding with Amy's hammer, explode and do no harm (Piko Piko only)
+    if(pikopiko_object_interaction(state, pos, &hitbox)) return;
+
+    hazard_player_interaction(&hitbox, pos);
 }
