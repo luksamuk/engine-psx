@@ -19,6 +19,18 @@ Heavily inspired by Sonic The Hedgehog. Uses [[https://github.com/Lameguy64/PSn0
 
 *Also visit my website:*: [[https://luksamuk.codes/]]
 
+* HUGE DISCLAIMER FOR THIS BRANCH!!!
+
+#+html: <big><strong>
+This  is an  experimental branch  that  uses background  music created  thorough
+Generative AI. I DO NOT ENDORSE the usage of AI for generating art, but I wanted
+to  see for  myself if  anything  substantial could  be generated,  and here  we
+are. Mind that  right now I think  that this soundtrack is  "soulless" and feels
+rather out-of-touch with  the rest of the game,  but I will also let  you be the
+judge  of  that, just  for  fun.  This branch  will  probably  never be  merged,
+into the base game.
+#+html: </strong></big>
+
 * About
 
 This is a Sonic The Hedgehog fangame built for the PlayStation 1. The focus here
