@@ -50,8 +50,8 @@ static volatile const struct {
     {
         .image = "\\MISC\\CREATED.TIM;1",
         .bgm = 0xff,
-        .next = SCREEN_TITLE,
-        .next_slide = 0xff,
+        .next = SCREEN_SLIDE,
+        .next_slide = SLIDE_CUSTOM_TEXT,
         .duration = 180
     },
     {
@@ -163,6 +163,23 @@ screen_slide_update(void *d)
         else {
             if(data->next == SCREEN_SLIDE) {
                 next_slide = slide_table[data->current].next_slide;
+            }
+
+            /* AI SLOP DISCLAIMER */
+            // SMALL INTERMISSION!
+            // If this is the screen after "created by..." text,
+            // add a GenAI disclaimer for this build only.
+            if(data->current == SLIDE_CREATEDBY) {
+                screen_slide_set_custom_text(
+                    "     This is a \azvery experimental\ad      "  "\n"
+                    "     build with music generated       "  "\n"
+                    "       through Generative AI.         "  "\n\n"
+                    "   \akI do not endorse Generative AI\ad     "  "\n"
+                    "   usage. I think AI-generated art    "  "\n"
+                    " lacks depth and vision in some sense."  "\n\n"
+                    "However \asI will let you be the judge\ad of"  "\n"
+                    "   the quality of this soundtrack.    "
+                    );
             }
             scene_change(data->next);
             return;

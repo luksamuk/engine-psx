@@ -12,6 +12,7 @@ static uint8_t _bgm_loops[] = {
     1, // GREENHILL
     1, // SURELYWOOD
     1, // AMAZINGOCEAN
+    1, // DAWNCANYON
     0, // LEVELCLEAR
     0, // CREDITS
     1, // BOSS

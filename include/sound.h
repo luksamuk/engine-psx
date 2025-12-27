@@ -7,7 +7,7 @@
 #define BGM_MAX_VOLUME      0x3fff
 #define VAG_MAX_VOLUME      0x3fff
 #define VAG_DEFAULT_VOLUME  0x1fff
-#define BGM_DEFAULT_VOLUME  BGM_MAX_VOLUME
+#define BGM_DEFAULT_VOLUME  0x2ccc
 
 #define BGM_MONAURAL       0
 #define BGM_STEREO         1
@@ -77,9 +77,10 @@ typedef enum {
     BGM_GREENHILL    = 5,
     BGM_SURELYWOOD   = 6,
     BGM_AMAZINGOCEAN = 7,
-    BGM_LEVELCLEAR   = 8,
-    BGM_CREDITS      = 9,
-    BGM_BOSS         = 10,
+    BGM_DAWNCANYON   = 8,
+    BGM_LEVELCLEAR   = 9,
+    BGM_CREDITS      = 10,
+    BGM_BOSS         = 11,
 
     BGM_NUM_SONGS    = BGM_BOSS + 1,
 } BGMOption;

@@ -62,7 +62,7 @@ screen_disclaimer_update(void *d)
         }
 #endif
 
-        screen_slide_set_next(SLIDE_SEGALOGO);
+        screen_slide_set_next(SLIDE_CREATEDBY);
         scene_change(SCREEN_SLIDE);
     }
 }

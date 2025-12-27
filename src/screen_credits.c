@@ -84,56 +84,64 @@ static const char *creditstxt[] = {
 
 
     /* BGM */
-    "BGM Track Listing",
+    "Background Music Credits",
     "\r",
 
-    "Title Screen Theme",
-    "Amen Break Remixed Loop 01 160 BPM",
-    "By u_ul6ysm8501",
+    "",
+    "All tracks of this experimental build",
+    "were generated using MusicGPT",
     "\r",
 
-    "Test Level Zone",
-    "Let Mom Sleep",
-    "By Hideki Naganuma",
+    "",
+    "While this is an experiment",
+    "This project does not endorse",
+    "using AI for art nor vibe coding",
     "\r",
 
-    "Test Level Zone 3K",
-    "Let Mom Sleep: No Sleep Remix",
-    "By Hideki Naganuma",
-    "Remixed by Richard Jacques",
+    "",
+    "Please do not compare these songs",
+    "To the hard work of real artists",
     "\r",
 
-    "Green Hill Zone",
-    "Palmtree Panic P Mix",
-    "By Sonic Team",
-    "\r",
+    /* "Title Screen Theme", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
 
-    "Surely Wood Zone",
-    "El Gato Battle 2 Vortex Remake",
-    "By pkVortex",
-    "\r",
+    /* "Test Level Zone", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
 
-    "Amazing Ocean Zone",
-    "Aquarium Park -Dragon Dance Mashup-",
-    "By DarkHyperSonic7",
-    "\r",
+    /* "Test Level Zone K Mix", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
 
-    "Level Select Theme",
-    "Sonic 3D Blast Main Title:",
-    "Youre My Hero",
-    "By Richard Jacques",
-    "\r",
+    /* "Green Hill Zone", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
 
-    "Credits Theme",
-    "Sonic Generations Challenge Mission 5:",
-    "Youre My Hero Remix",
-    "By Richard Jacques",
-    "\r",
+    /* "Surely Wood Zone", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
 
-    "Boss Music",
-    "Sonic 3D Blast Boss Music",
-    "By Richard Jacques",
-    "\r",
+    /* "Amazing Ocean Zone", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
+
+    /* "Dawn Canyon Zone", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
+
+    /* "Level Select Theme", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
+
+    /* "Credits Theme", */
+    /* "Generated with MusicGPT", */
+    /* "\r", */
+
+    /* "Boss Music", */
+    /* "Generated with MusicGPT" */
+    /* "\r", */
 
 
     /* Ending */

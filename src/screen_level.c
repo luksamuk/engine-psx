@@ -1539,7 +1539,7 @@ screen_level_play_music(uint8_t round, uint8_t act)
         break;
     case 2: sound_bgm_play(BGM_GREENHILL);       break;
     case 3: sound_bgm_play(BGM_SURELYWOOD);      break;
-    /* case 4: sound_bgm_play(BGM_DAWNCANYON);      break; */
+    case 4: sound_bgm_play(BGM_DAWNCANYON);      break;
     case 5: sound_bgm_play(BGM_AMAZINGOCEAN);    break;
     case 6: break; // TODO
     case 7: break; // TODO

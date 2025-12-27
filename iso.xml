@@ -490,18 +490,20 @@
       <file name="audio09.da" trackid="10" type="da" />
       <file name="audio10.da" trackid="11" type="da" />
       <file name="audio11.da" trackid="12" type="da" />
+      <file name="audio12.da" trackid="13" type="da" />
     </directory_tree>
   </track>
-  <track type="audio" trackid="02" source="${PROJECT_SOURCE_DIR}/assets/bgm/amenbreak.flac" />
-  <track type="audio" trackid="03" source="${PROJECT_SOURCE_DIR}/assets/bgm/amenbreak2.flac" />
-  <track type="audio" trackid="04" source="${PROJECT_SOURCE_DIR}/assets/bgm/youremyhero.flac" />
-  <track type="audio" trackid="05" source="${PROJECT_SOURCE_DIR}/assets/bgm/letmomsleep.flac" />
-  <track type="audio" trackid="06" source="${PROJECT_SOURCE_DIR}/assets/bgm/letmomsleep2.flac" />
-  <track type="audio" trackid="07" source="${PROJECT_SOURCE_DIR}/assets/bgm/saladplain.flac" />
-  <track type="audio" trackid="08" source="${PROJECT_SOURCE_DIR}/assets/bgm/elgato2.flac" />
-  <track type="audio" trackid="09" source="${PROJECT_SOURCE_DIR}/assets/bgm/amazing.flac" />
-  <track type="audio" trackid="10" source="${PROJECT_SOURCE_DIR}/assets/bgm/levelclear.flac" />
-  <track type="audio" trackid="11" source="${PROJECT_SOURCE_DIR}/assets/bgm/herormx.flac" />
-  <track type="audio" trackid="12" source="${PROJECT_SOURCE_DIR}/assets/bgm/boss.flac" />
+  <track type="audio" trackid="02" source="${PROJECT_SOURCE_DIR}/assets/bgm/title.flac" />
+  <track type="audio" trackid="03" source="${PROJECT_SOURCE_DIR}/assets/bgm/speed.flac" />
+  <track type="audio" trackid="04" source="${PROJECT_SOURCE_DIR}/assets/bgm/menu.flac" />
+  <track type="audio" trackid="05" source="${PROJECT_SOURCE_DIR}/assets/bgm/testlevel1.flac" />
+  <track type="audio" trackid="06" source="${PROJECT_SOURCE_DIR}/assets/bgm/testlevel2.flac" />
+  <track type="audio" trackid="07" source="${PROJECT_SOURCE_DIR}/assets/bgm/ghz.flac" />
+  <track type="audio" trackid="08" source="${PROJECT_SOURCE_DIR}/assets/bgm/swz.flac" />
+  <track type="audio" trackid="09" source="${PROJECT_SOURCE_DIR}/assets/bgm/aoz.flac" />
+  <track type="audio" trackid="10" source="${PROJECT_SOURCE_DIR}/assets/bgm/dcz.flac" />
+  <track type="audio" trackid="11" source="${PROJECT_SOURCE_DIR}/assets/bgm/levelclear.flac" />
+  <track type="audio" trackid="12" source="${PROJECT_SOURCE_DIR}/assets/bgm/spin-and-dash.flac" />
+  <track type="audio" trackid="13" source="${PROJECT_SOURCE_DIR}/assets/bgm/boss.flac" />
 </iso_project>
 
