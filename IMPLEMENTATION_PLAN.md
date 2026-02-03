@@ -824,13 +824,13 @@ void test_TIM_ParseVQCompressed() {
 
 #### Test Coverage Goals
 
-| Component | Coverage Target |
-|-----------|-----------------|
-| TIM Parser | 95%+ |
-| Level Loader | 90%+ |
-| Tile Renderer | 85%+ |
-| UI Components | 80%+ |
-| Utility Functions | 95%+ |
+| Component         | Coverage Target |
+|-------------------|-----------------|
+| TIM Parser        | 95%+            |
+| Level Loader      | 90%+            |
+| Tile Renderer     | 85%+            |
+| UI Components     | 80%+            |
+| Utility Functions | 95%+            |
 
 #### Test Cases by Component
 
@@ -1217,18 +1217,18 @@ jobs:
 
 ## Implementation Timeline Summary
 
-| Phase | Duration | Key Deliverables |
-|-------|----------|------------------|
-| Core Setup | 3 days | Project skeleton, basic Raylib window |
-| TIM Parser | 4 days | Complete TIM parser with tests |
-| Rendering | 4 days | Raylib rendering pipeline |
-| Level Loading | 4 days | Level data parsing and management |
-| Tile Rendering | 5 days | Tile-based visualization |
-| User Interface | 5 days | Complete UI system |
-| Advanced Features | 5 days | Analysis and export tools |
-| Testing | 5 days | Comprehensive test suite |
-| Documentation | 3 days | Complete documentation |
-| **Total** | **38 days** | **Full-featured tool** |
+| Phase             | Duration    | Key Deliverables                      |
+|-------------------|-------------|---------------------------------------|
+| Core Setup        | 3 days      | Project skeleton, basic Raylib window |
+| TIM Parser        | 4 days      | Complete TIM parser with tests        |
+| Rendering         | 4 days      | Raylib rendering pipeline             |
+| Level Loading     | 4 days      | Level data parsing and management     |
+| Tile Rendering    | 5 days      | Tile-based visualization              |
+| User Interface    | 5 days      | Complete UI system                    |
+| Advanced Features | 5 days      | Analysis and export tools             |
+| Testing           | 5 days      | Comprehensive test suite              |
+| Documentation     | 3 days      | Complete documentation                |
+| **Total**         | **38 days** | **Full-featured tool**                |
 
 ---
 
