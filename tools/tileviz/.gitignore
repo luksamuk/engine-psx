@@ -1,0 +1,67 @@
+# Build directories
+build/
+bin/
+*.o
+*.obj
+*.exe
+*.out
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Raylib output
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tga
+*.pcx
+*.gif
+*.bmp
+*.psd
+*.hdr
+*.exr
+*.ktx
+*.ktx2
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.voc
+
+# Object files
+*.a
+*.lib
+*.so
+*.dylib
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test files
+test_*.bin
+*.test
+*.bench
+
+# Compiled shaders
+*.glsl
+*.hlsl
+*.cso
+
+# Raylib compiled shader cache
+shader_cache/
