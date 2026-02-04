@@ -177,14 +177,14 @@ tile-visualization-tool/
 **Tasks:**
 1. Define PS1 level data structures
 2. Implement MAP (level map) file parsing
-3. Implement PRG (level program) file parsing
-4. Handle level geometry data
-5. Implement collision data loading
-6. Add object data parsing
-7. Implement level metadata extraction
-8. Create memory-efficient level loading
-9. Add level file validation
-10. Implement level data caching
+3. Handle level geometry data
+4. Implement collision data loading
+5. Add object data parsing
+6. Implement level metadata extraction
+7. Create memory-efficient level loading
+8. Add level file validation
+9. Implement level data caching
+10. Reference .hexpat pattern files from tools/layouts/
 
 **Deliverables:**
 - Level loader implementation
@@ -485,6 +485,7 @@ find_package(JPEG REQUIRED)
 - **Rationale:** Supports multiple PS1 game formats
 - **Impact:** More complex parser but broader compatibility
 - **Alternative Considered:** Fixed format support
+- **Pattern Definition:** Pattern language files in tools/layouts/ provide format specifications for MAP, COL, LVL, and other formats
 
 ### 4.6 User Experience
 
