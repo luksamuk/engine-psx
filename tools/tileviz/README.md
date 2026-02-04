@@ -58,7 +58,6 @@ cd tools/tileviz/build/bin
 
 - **.TIM** - PlayStation 1 texture files
 - **.MAP** - PlayStation 1 level map files
-- **.PRG** - PlayStation 1 program data files (in development)
 
 ## Directory Structure
 
@@ -87,6 +86,18 @@ tools/tileviz/
 ## Documentation
 
 See [BUILD.md](BUILD.md) for detailed build instructions and [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the comprehensive implementation plan.
+
+## Binary Format References
+
+- **[Pattern Language Documentation](https://docs.werwolv.net/pattern-language/)** - DSL used in `tools/layouts/` for defining PS1 file format specifications
+- **`tools/layouts/*.hexpat`** - Pattern definitions for MAP, COL, LVL, MDL, and other PS1 file formats
+- **[ImHex](https://github.com/WerWolv/ImHex)** - Hex editor with Pattern Language support for inspecting binary data
+
+## Development Resources
+
+- PS1 format specifications
+- Level and texture file structure references
+- Binary parsing guidance
 
 ## License
 

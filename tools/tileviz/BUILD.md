@@ -74,3 +74,11 @@ sudo pacman -S cmake raylib
 # Run build with verbose output
 make VERBOSE=1
 ```
+
+## Binary Format Analysis
+
+- **Pattern Language Files**: `tools/layouts/*.hexpat` - Provide precise format definitions for PS1 binary files
+- **[Pattern Language Documentation](https://docs.werwolv.net/pattern-language/)** - Guide to understanding the .hexpat format specifications
+- **[ImHex](https://github.com/WerWolv/ImHex)** - Recommended hex editor for verifying binary structure and parsing results
+
+Use these resources when analyzing custom PS1 file formats or debugging parsing issues.
