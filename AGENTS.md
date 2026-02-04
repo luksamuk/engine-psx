@@ -1,58 +1,58 @@
-# AGENTS.org - Agent Configuration for engine-psx
+# AGENTS.md - Agent Configuration for engine-psx
 
-* Introduction
+## Introduction
 
 This file defines configurations and guidelines for code agents that will interact with the engine-psx project, a Sonic fangame for PlayStation 1.
 
-* Project Structure
+## Project Structure
 
 The project follows the typical structure of a C project with Makefile and CMake:
 
-- /src/: Main source code in C
-- /include/: Header files
-- /assets/: Game resources (sprites, sounds, levels)
-- /tools/: Development scripts and tools
-- /build/: Build directory
-- /cmake/: Auxiliary CMake files
+- `/src/`: Main source code in C
+- `/include/`: Header files
+- `/assets/`: Game resources (sprites, sounds, levels)
+- `/tools/`: Development scripts and tools
+- `/build/`: Build directory
+- `/cmake/`: Auxiliary CMake files
 
-* Build and Development Commands
+## Build and Development Commands
 
-** Default build
-#+begin_src bash
+**Default build**
+```bash
 make
-#+end_src
+```
 
-** Debug mode build
-#+begin_src bash
+**Debug mode build**
+```bash
 make build-debug
-#+end_src
+```
 
-** Run on emulator
-#+begin_src bash
+**Run on emulator**
+```bash
 make run
-#+end_src
+```
 
-** Run on specific emulator (Mednafen)
-#+begin_src bash
+**Run on specific emulator (Mednafen)**
+```bash
 make run-mednafen
-#+end_src
+```
 
-** Run on specific emulator (DuckStation)
-#+begin_src bash
+**Run on specific emulator (DuckStation)**
+```bash
 make run-duckstation
-#+end_src
+```
 
-** Generate CHD image (single file for recording)
-#+begin_src bash
+**Generate CHD image (single file for recording)**
+```bash
 make chd
-#+end_src
+```
 
-** Clean build
-#+begin_src bash
+**Clean build**
+```bash
 make clean
-#+end_src
+```
 
-* Coding Style
+## Coding Style
 
 - Language: C (with PSn00bSDK extensions)
 - Style: ANSI C, following PSn00bSDK conventions
@@ -60,20 +60,20 @@ make clean
 - Function names: lowercase with underscore (e.g., update_player)
 - Macro names: MAIÚSCULAS_COM_SUBLINHADO (e.g., MAX_PLAYERS)
 
-* Architecture Patterns
+## Architecture Patterns
 
 - Uses PSn00bSDK as base
 - Modular project structure
 - Focus on performance and PS1 hardware compatibility
 - Use of sprites and tilemaps optimized for PS1
 
-* Testing Guidelines
+## Testing Guidelines
 
 - Tests executed on PCSX-Redux, DuckStation, and Mednafen emulators
 - Tests on real hardware (PlayStation SCPH-5501)
 - Verification of compatibility with different PS1 versions
 
-* Specific Tools
+## Specific Tools
 
 - Compiler: gcc-mipsel
 - Build system: CMake and GNU Make
@@ -83,13 +83,13 @@ make clean
 - ISO creation: mkpsxiso
 - CHD creation: tochd
 
-* Security Guidelines
+## Security Guidelines
 
 - Open source code publicly available
 - No sensitive components or restricted intellectual property
 - Use of Mozilla Public License 2.0
 
-* Specific Considerations for Agents
+## Specific Considerations for Agents
 
 - The project requires knowledge about PS1 hardware
 - The architecture is based on PSn00bSDK
