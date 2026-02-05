@@ -55,8 +55,13 @@ Makefile
 
 # Test files
 test_*.bin
+test_*.map
 *.test
 *.bench
+tests/test_*.map
+tests/test_*.bin
+tests/**/test_*.bin
+tests/**/test_*.map
 
 # Compiled shaders
 *.glsl

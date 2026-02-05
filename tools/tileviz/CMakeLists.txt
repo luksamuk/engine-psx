@@ -4,6 +4,9 @@ project(tile-visualization-tool VERSION 1.0.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Build tests option
+option(BUILD_TESTS "Build test suite" ON)
+
 # Add executable
 add_executable(tileviz
     src/main.c
@@ -42,3 +45,8 @@ set_target_properties(tileviz PROPERTIES
 install(TARGETS tileviz
     RUNTIME DESTINATION bin
 )
+
+# Add tests directory if enabled
+if(BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
