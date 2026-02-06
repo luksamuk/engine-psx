@@ -48,5 +48,5 @@ install(TARGETS tileviz
 
 # Add tests directory if enabled
 if(BUILD_TESTS)
-    add_subdirectory(tests)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
 endif()

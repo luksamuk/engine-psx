@@ -6,10 +6,10 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 find_package(raylib REQUIRED)
 
-add_executable(test_viewer tests/unit/test_viewer.c
-                       tests/unit/test_tim_types.c
-                       tests/unit/test_tim_parser.c
-                       tests/unit/test_level_loader.c)
+add_executable(test_viewer test_viewer.c
+                       test_tim_types.c
+                       test_tim_parser.c
+                       test_level_loader.c)
 
 target_link_libraries(test_viewer PUBLIC raylib)
 target_include_directories(test_viewer PRIVATE
