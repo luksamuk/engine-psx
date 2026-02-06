@@ -4,6 +4,7 @@
 #include "log.h"
 #include <string.h>
 #include <stdlib.h>
+#include "raylib.h"
 
 bool TIM_ParseHeader(FILE* file, TIMFileHeader* header) {
     if (fread(header, sizeof(TIMFileHeader), 1, file) != 1) {
@@ -171,7 +172,9 @@ void TIM_FreeFile(TIMFile* tim) {
     if (!tim) return;
 
     if (tim->palette) {
-        free(tim->palette->colors);
+        if (tim->palette->colors) {
+            free(tim->palette->colors);
+        }
         free(tim->palette);
     }
 

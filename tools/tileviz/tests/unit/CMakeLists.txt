@@ -1,34 +1,22 @@
 cmake_minimum_required(VERSION 3.20)
+project(tile_viewer_tests VERSION 1.0.0 LANGUAGES C)
 
-# Unit tests executable
-add_executable(test_tim_types
-    tests/unit/test_tim_types.c
-    src/log.c
-    src/tim_parser.c
-    src/level_loader.c
-    src/util.c
-)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
-target_link_libraries(test_tim_types PRIVATE raylib)
+find_package(raylib REQUIRED)
 
-target_include_directories(test_tim_types PRIVATE
+add_executable(test_viewer tests/unit/test_viewer.c
+                       tests/unit/test_tim_types.c
+                       tests/unit/test_tim_parser.c
+                       tests/unit/test_level_loader.c)
+
+target_link_libraries(test_viewer PUBLIC raylib)
+target_include_directories(test_viewer PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
 )
 
-target_compile_options(test_tim_types PRIVATE
-    ${CMAKE_C_FLAGS}
-)
-
-# Enable test discovery
 enable_testing()
-
-# Add custom test target
-add_custom_target(unit_tests
-    COMMAND ${test_tim_types}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS test_tim_types
-)
-
-# Register test
-add_test(NAME TimTypesTests COMMAND test_tim_types)
+add_test(NAME viewer_test COMMAND test_viewer)

@@ -5,13 +5,14 @@
 
 #include "tim_types.h"
 #include "ps1_types.h"
+#include <stdint.h>
+#include <raylib.h>
 
-// Viewer configuration
 typedef struct {
     uint32_t level_width;
     uint32_t level_height;
     uint16_t* tile_data;
-    TIMFile* texture;
+    TIMFile* tim;
     PS1CLUT* palette;
     int selected_tile_x;
     int selected_tile_y;

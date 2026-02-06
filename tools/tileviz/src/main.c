@@ -20,7 +20,6 @@ typedef struct {
     LevelData* level;
     TIMFile* texture;
     PS1CLUT* palette;
-    TileRenderer* renderer;
     LevelViewer* viewer;
     char current_level_path[512];
     char current_texture_path[512];
@@ -32,7 +31,6 @@ void app_init(Application* app) {
     app->level = NULL;
     app->texture = NULL;
     app->palette = NULL;
-    app->renderer = NULL;
     app->viewer = NULL;
     app->current_level_path[0] = 0;
     app->current_texture_path[0] = 0;
@@ -46,11 +44,6 @@ void app_cleanup(Application* app) {
         app->viewer = NULL;
     }
 
-    if (app->renderer) {
-        tr_cleanup(app->renderer);
-        app->renderer = NULL;
-    }
-
     if (app->palette) {
         if (app->texture->palette) {
             free(app->texture->palette->colors);
@@ -58,6 +51,7 @@ void app_cleanup(Application* app) {
         }
         TIM_FreeFile(app->texture);
         app->texture = NULL;
+        app->palette = NULL;
     }
 
     if (app->level) {
@@ -96,13 +90,8 @@ void app_load_level(Application* app, const char* level_path, const char* textur
     // Create viewer
     app->viewer = viewer_create();
 
-    // Create renderer
-    int tile_size = TILE_WIDTH;
-    app->renderer = tr_create(WINDOW_WIDTH, WINDOW_HEIGHT, tile_size);
-
-    // Setup rendering
-    tr_set_texture(app->renderer, app->texture);
-    tr_set_palette(app->renderer, app->palette);
+    // Setup viewer
+    viewer_load_level(app->viewer, level_path, texture_path);
 
     app->level_loaded = true;
     strncpy(app->current_level_path, level_path, sizeof(app->current_level_path) - 1);
@@ -115,6 +104,7 @@ void app_update(Application* app) {
     if (!app->level_loaded) return;
 
     viewer_update(app->viewer);
+    viewer_handle_input(app->viewer);
 }
 
 void app_render(Application* app) {
@@ -130,7 +120,7 @@ void app_render(Application* app) {
     ClearBackground(RAYWHITE);
 
     // Draw level
-    tr_render_level(app->renderer, app->level->tile_data, app->level->width_tiles, app->level->height_tiles);
+    viewer_render(app->viewer);
 
     // Draw UI
     DrawRectangle(10, 10, 300, 100, BLACK);

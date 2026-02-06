@@ -7,6 +7,6 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Find raylib for test dependencies
 find_package(raylib REQUIRED)
 
-# Build tests directory
+# Build test executables
 add_subdirectory(tests/unit)
 add_subdirectory(tests/integration)
