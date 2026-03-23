@@ -124,95 +124,116 @@ Texture2D TIM_ToRaylibTexture(const TIMFile* tim) {
     
     Image image = {0};
     
-    // Standard PS1 TIM formats (no compression)
-    switch (tim->header.image_format) {
-        case TIM_FORMAT_CLUT_RAW_4BIT: {
-            image.width = (width + 1) / 2;
-            image.height = height;
-            image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
-            image.data = (unsigned char*)malloc(image.width * image.height * 2);
+    // Process based on BPP mode
+    switch (tim->bpp) {
+        case TIM_BPP_4BIT: {
+            // 4-bit indexed color: each 16-bit word contains 4 pixels
+            // Width is actual pixel width
+            uint16_t img_w_words = tim->image_rect.width;
             
-            for (int y = 0; y < image.height; y++) {
-                for (int x = 0; x < image.width; x++) {
-                    uint8_t byte = src_data[(y * image.width) + x];
-                    
-                    uint16_t pixel1 = 0, pixel2 = 0;
-                    if ((x * 2 + 1) < (int)width && palette->entry_count > 0) {
-                        uint8_t idx = byte & 0x0F;
-                        pixel1 = ((palette->colors[idx].r & 0x1F) << 11) |
-                               ((palette->colors[idx].g & 0x1F) << 6) |
-                               (palette->colors[idx].b & 0x1F);
-                    } else if (palette->entry_count > 0) {
-                        uint8_t idx = byte >> 4;
-                        pixel1 = ((palette->colors[idx].r & 0x1F) << 11) |
-                               ((palette->colors[idx].g & 0x1F) << 6) |
-                               (palette->colors[idx].b & 0x1F);
-                    }
-                    
-                    if ((x * 2 + 1) < (int)width && palette->entry_count > 0) {
-                        uint8_t idx = (byte >> 4) & 0x0F;
-                        pixel2 = ((palette->colors[idx].r & 0x1F) << 11) |
-                               ((palette->colors[idx].g & 0x1F) << 6) |
-                               (palette->colors[idx].b & 0x1F);
-                    } else if ((x * 2) >= (int)width) {
-                        uint8_t idx = byte >> 4;
-                        pixel2 = ((palette->colors[idx].r & 0x1F) << 11) |
-                               ((palette->colors[idx].g & 0x1F) << 6) |
-                               (palette->colors[idx].b & 0x1F);
-                    }
-                    
-                    uint16_t* dst = &(((uint16_t*)image.data)[(y * image.width) + x]);
-                    dst[0] = pixel1;
-                    dst[1] = pixel2;
-                }
-            }
-            break;
-        }
-        
-        case TIM_FORMAT_CLUT_RAW_8BIT: {
             image.width = width;
             image.height = height;
-            image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
-            image.data = (unsigned char*)malloc(image.width * image.height * 2);
+            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.mipmaps = 1;
+            image.data = (unsigned char*)malloc(image.width * image.height * 4);
             
-            for (int y = 0; y < image.height; y++) {
-                for (int x = 0; x < image.width; x++) {
-                    uint8_t idx = src_data[(y * image.width) + x];
-                    uint16_t pixel = 0;
+            Color* pixels = (Color*)image.data;
+            
+            for (uint32_t y = 0; y < height; y++) {
+                for (uint32_t x = 0; x < width; x++) {
+                    // Each 16-bit word contains 4 pixels (4 bits each)
+                    // Word offset in image data
+                    uint32_t word_x = x / 4;
+                    uint32_t word_offset = (y * img_w_words + word_x);
+                    uint16_t word_data = ((uint16_t*)src_data)[word_offset];
+                    
+                    // Pixel index within word (0-3)
+                    uint32_t pixel_in_word = x % 4;
+                    // Shift amount: bits 0-3 are different positions
+                    // PS1 stores pixels as: [p3:p2:p1:p0] in big-endian sense
+                    // Actually it's [hi:lo] where bits 15-12=p0, 11-8=p1, etc... no
+                    // Let's try the correct order: bits 0-3=p0, 4-7=p1, 8-11=p2, 12-15=p3
+                    uint8_t shift = pixel_in_word * 4;
+                    uint8_t idx = (word_data >> shift) & 0x0F;
+                    
                     if (idx < palette->entry_count) {
-                        pixel = ((palette->colors[idx].r & 0x1F) << 11) |
-                               ((palette->colors[idx].g & 0x1F) << 6) |
-                               (palette->colors[idx].b & 0x1F);
+                        PS1Color* c = &palette->colors[idx];
+                        pixels[y * width + x] = (Color){c->r, c->g, c->b, 255};
+                    } else {
+                        pixels[y * width + x] = (Color){0, 0, 0, 255};
                     }
-                    memcpy(&(((uint16_t*)image.data)[(y * image.width) + x]), &pixel, sizeof(uint16_t));
                 }
             }
             break;
         }
         
-        case TIM_FORMAT_CLUT_RAW_16BIT: {
+        case TIM_BPP_8BIT: {
+            // 8-bit indexed color: each 16-bit word contains 2 pixels
+            uint16_t img_w_words = tim->image_rect.width;
+            
             image.width = width;
             image.height = height;
-            image.format = PIXELFORMAT_UNCOMPRESSED_R5G6B5;
-            image.data = (unsigned char*)malloc(image.width * image.height * 2);
+            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.mipmaps = 1;
+            image.data = (unsigned char*)malloc(image.width * image.height * 4);
             
-            // PS1 TIM 16-bit is RGB555, convert to RGB565 for Raylib
-            for (uint32_t i = 0; i < image.width * image.height; i++) {
-                uint16_t psx_pixel = ((uint16_t*)src_data)[i];
-                // PS1 RGB555: 0-4=Blue, 5-9=Green, 10-14=Red, 15=mask
-                // Raylib RGB565: 0-4=Blue, 5-10=Green, 11-15=Red
-                uint8_t r = (psx_pixel >> 10) & 0x1F;
+            Color* pixels = (Color*)image.data;
+            
+            for (uint32_t y = 0; y < height; y++) {
+                for (uint32_t x = 0; x < width; x++) {
+                    // Each 16-bit word contains 2 pixels (8 bits each)
+                    uint32_t word_x = x / 2;
+                    uint32_t word_offset = (y * img_w_words + word_x);
+                    uint16_t word_data = ((uint16_t*)src_data)[word_offset];
+                    
+                    // Pixel index within word (0 or 1)
+                    uint32_t pixel_in_word = x % 2;
+                    uint8_t idx;
+                    if (pixel_in_word == 0) {
+                        idx = word_data & 0xFF;  // Low byte = first pixel
+                    } else {
+                        idx = (word_data >> 8) & 0xFF;  // High byte = second pixel
+                    }
+                    
+                    if (idx < palette->entry_count) {
+                        PS1Color* c = &palette->colors[idx];
+                        pixels[y * width + x] = (Color){c->r, c->g, c->b, 255};
+                    } else {
+                        pixels[y * width + x] = (Color){0, 0, 0, 255};
+                    }
+                }
+            }
+            break;
+        }
+        
+        case TIM_BPP_16BIT: {
+            // 16-bit direct color RGB555
+            image.width = width;
+            image.height = height;
+            image.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8;
+            image.mipmaps = 1;
+            image.data = (unsigned char*)malloc(image.width * image.height * 4);
+            
+            Color* pixels = (Color*)image.data;
+            uint16_t* src_pixels = (uint16_t*)src_data;
+            
+            for (uint32_t i = 0; i < width * height; i++) {
+                uint16_t psx_pixel = src_pixels[i];
+                uint8_t r = (psx_pixel >> 0) & 0x1F;
                 uint8_t g = (psx_pixel >> 5) & 0x1F;
-                uint8_t b = psx_pixel & 0x1F;
-                // Expand 5-bit to 6-bit for green
-                uint16_t raylib_pixel = (r << 11) | ((g << 1) | (g >> 4)) | b;
-                memcpy(&(((uint16_t*)image.data)[i]), &raylib_pixel, sizeof(uint16_t));
+                uint8_t b = (psx_pixel >> 10) & 0x1F;
+                
+                // Scale 5-bit to 8-bit
+                pixels[i].r = (r << 3) | (r >> 2);
+                pixels[i].g = (g << 3) | (g >> 2);
+                pixels[i].b = (b << 3) | (b >> 2);
+                pixels[i].a = 255;
             }
             break;
         }
         
         default:
-            LOG_ERROR("level_viewer.c", __LINE__, "Unsupported TIM format for texture: 0x%04X", tim->header.image_format);
+            LOG_ERROR("level_viewer.c", __LINE__, "Unsupported TIM BPP: %d", tim->bpp);
             return texture;
     }
 

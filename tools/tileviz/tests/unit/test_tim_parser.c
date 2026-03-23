@@ -7,384 +7,368 @@
 #include <stdlib.h>
 #include <string.h>
 
-void create_test_file_16bit_clut() {
-    FILE* file = fopen("test_tim_16bit.bin", "wb");
+// Helper: create a minimal valid PS1 TIM file with CLUT
+void create_test_tim_4bit(const char* filename) {
+    FILE* file = fopen(filename, "wb");
     if (!file) {
         printf("Test skipped: cannot create test file\n");
         return;
     }
 
-    uint8_t* data = (uint8_t*)malloc(512);
-    if (!data) {
-        fclose(file);
-        return;
-    }
+    // PS1 TIM format:
+    // uint32 magic (0x10)
+    // uint32 flags (bpp + has_clut)
+    // If has_clut:
+    //   uint32 clut_len
+    //   uint16 vram_x, vram_y, width, height
+    //   uint16[] colors
+    // uint32 img_len
+    // uint16 vram_x, vram_y, width, height
+    // uint16[] pixel_data
 
+    uint8_t data[512];
     memset(data, 0, 512);
 
-    // TIM files are little-endian, but parser does bswap, so write swapped values
-    data[0] = 0x4C; data[1] = 0x01;         // Signature (0x014C after bswap)
-    data[2] = 0x00; data[3] = 0x00;         // Image format: 16-bit (0x0000 after bswap = TIM_FORMAT_CLUT_RAW_16BIT)
-    data[4] = 0x00;                       // Palette format: direct
-    data[5] = 0x20;                       // 32 CLUT entries
-    data[8] = 0x80; data[9] = 0x00; data[10] = 0x00; data[11] = 0x00;  // CLUT offset: 0x80
-    data[12] = 0x80; data[13] = 0x00; data[14] = 0x00; data[15] = 0x00; // Image offset: 0x80
+    uint32_t offset = 0;
 
-    for (int i = 0; i < 32; i++) {
-        data[16 + i * 4 + 0] = 0xFF;
-        data[16 + i * 4 + 1] = (i * 4 + 1) & 0xFF;
-        data[16 + i * 4 + 2] = (i * 4 + 2) & 0xFF;
-        data[16 + i * 4 + 3] = (i * 4 + 3) & 0xFF;
+    // Magic = 0x10
+    uint32_t magic = 0x00000010;
+    memcpy(data + offset, &magic, 4); offset += 4;
+
+    // Flags: 4-bit (bpp=0) + has_clut (bit 3)
+    uint32_t flags = 0x08; // TIM_BPP_4BIT | TIM_FLAG_HAS_CLUT
+    memcpy(data + offset, &flags, 4); offset += 4;
+
+    // CLUT block
+    uint32_t clut_len = 12 + 16 * 2; // header (12) + 16 colors * 2 bytes
+    memcpy(data + offset, &clut_len, 4); offset += 4;
+
+    // CLUT rect: vram_x, vram_y, width (colors per row), height (rows)
+    uint16_t clut_x = 0, clut_y = 0, clut_w = 16, clut_h = 1;
+    memcpy(data + offset, &clut_x, 2); offset += 2;
+    memcpy(data + offset, &clut_y, 2); offset += 2;
+    memcpy(data + offset, &clut_w, 2); offset += 2;
+    memcpy(data + offset, &clut_h, 2); offset += 2;
+
+    // CLUT colors (16 RGB555 colors)
+    for (int i = 0; i < 16; i++) {
+        // RGB555: bits 0-4=R, 5-9=G, 10-14=B
+        uint16_t color = ((i * 2) << 10) | ((i * 4) << 5) | (i * 8);
+        memcpy(data + offset, &color, 2); offset += 2;
     }
 
-    fwrite(data, 1, 512, file);
+    // Image block
+    uint32_t img_len = 12 + 64; // header + pixel data (4x4 pixels in 4 words)
+    memcpy(data + offset, &img_len, 4); offset += 4;
+
+    // Image rect
+    uint16_t img_x = 0, img_y = 0, img_w = 1, img_h = 1; // 1 word = 4 pixels (4-bit)
+    memcpy(data + offset, &img_x, 2); offset += 2;
+    memcpy(data + offset, &img_y, 2); offset += 2;
+    memcpy(data + offset, &img_w, 2); offset += 2;
+    memcpy(data + offset, &img_h, 2); offset += 2;
+
+    // Pixel data (dummy)
+    for (int i = 0; i < 32; i++) {
+        uint16_t pixel = 0x1234;
+        memcpy(data + offset, &pixel, 2); offset += 2;
+    }
+
+    fwrite(data, 1, offset, file);
     fclose(file);
-    free(data);
 }
 
-void create_test_file_4bit_clut() {
-    FILE* file = fopen("test_tim_4bit.bin", "wb");
+// Create 8-bit TIM with CLUT
+void create_test_tim_8bit(const char* filename) {
+    FILE* file = fopen(filename, "wb");
     if (!file) {
         printf("Test skipped: cannot create test file\n");
         return;
     }
 
-    uint8_t* data = (uint8_t*)malloc(256);
-    if (!data) {
-        fclose(file);
+    uint8_t data[1024];
+    memset(data, 0, 1024);
+
+    uint32_t offset = 0;
+
+    // Magic
+    uint32_t magic = 0x00000010;
+    memcpy(data + offset, &magic, 4); offset += 4;
+
+    // Flags: 8-bit (bpp=1) + has_clut
+    uint32_t flags = 0x09; // TIM_BPP_8BIT | TIM_FLAG_HAS_CLUT
+    memcpy(data + offset, &flags, 4); offset += 4;
+
+    // CLUT block
+    uint32_t clut_len = 12 + 256 * 2;
+    memcpy(data + offset, &clut_len, 4); offset += 4;
+
+    uint16_t clut_x = 0, clut_y = 0, clut_w = 256, clut_h = 1;
+    memcpy(data + offset, &clut_x, 2); offset += 2;
+    memcpy(data + offset, &clut_y, 2); offset += 2;
+    memcpy(data + offset, &clut_w, 2); offset += 2;
+    memcpy(data + offset, &clut_h, 2); offset += 2;
+
+    // 256 colors
+    for (int i = 0; i < 256; i++) {
+        uint16_t color = (i << 10) | (i << 5) | i;
+        memcpy(data + offset, &color, 2); offset += 2;
+    }
+
+    // Image block
+    uint32_t img_len = 12 + 128;
+    memcpy(data + offset, &img_len, 4); offset += 4;
+
+    uint16_t img_x = 0, img_y = 0, img_w = 8, img_h = 8; // 8 words per row, 8 rows
+    memcpy(data + offset, &img_x, 2); offset += 2;
+    memcpy(data + offset, &img_y, 2); offset += 2;
+    memcpy(data + offset, &img_w, 2); offset += 2;
+    memcpy(data + offset, &img_h, 2); offset += 2;
+
+    // Pixel data
+    for (int i = 0; i < 64; i++) {
+        uint16_t pixel = 0xABCD;
+        memcpy(data + offset, &pixel, 2); offset += 2;
+    }
+
+    fwrite(data, 1, offset, file);
+    fclose(file);
+}
+
+// Create 16-bit TIM (no CLUT)
+void create_test_tim_16bit(const char* filename) {
+    FILE* file = fopen(filename, "wb");
+    if (!file) {
+        printf("Test skipped: cannot create test file\n");
         return;
     }
 
+    uint8_t data[256];
     memset(data, 0, 256);
 
-    data[0] = 0x4C; data[1] = 0x01;         // Signature
-    data[2] = 0x03; data[3] = 0x00;         // Image format: 4-bit
-    data[4] = 0x00;                       // Palette format: direct
-    data[5] = 0x10;                       // 16 CLUT entries
-    data[8] = 0x80; data[9] = 0x00; data[10] = 0x00; data[11] = 0x00;  // CLUT offset: 0x80
-    data[12] = 0xC0; data[13] = 0x00; data[14] = 0x00; data[15] = 0x00; // Image offset: 0xC0
+    uint32_t offset = 0;
 
-    for (int i = 0; i < 16; i++) {
-        data[16 + i * 4 + 0] = 0xFF;
-        data[16 + i * 4 + 1] = i & 0xFF;
-        data[16 + i * 4 + 2] = (i * 2) & 0xFF;
-        data[16 + i * 4 + 3] = (i * 3) & 0xFF;
+    // Magic
+    uint32_t magic = 0x00000010;
+    memcpy(data + offset, &magic, 4); offset += 4;
+
+    // Flags: 16-bit (bpp=2), no CLUT
+    uint32_t flags = 0x02;
+    memcpy(data + offset, &flags, 4); offset += 4;
+
+    // Image block directly (no CLUT)
+    uint32_t img_len = 12 + 64;
+    memcpy(data + offset, &img_len, 4); offset += 4;
+
+    uint16_t img_x = 0, img_y = 0, img_w = 8, img_h = 8;
+    memcpy(data + offset, &img_x, 2); offset += 2;
+    memcpy(data + offset, &img_y, 2); offset += 2;
+    memcpy(data + offset, &img_w, 2); offset += 2;
+    memcpy(data + offset, &img_h, 2); offset += 2;
+
+    // RGB555 pixel data
+    for (int i = 0; i < 32; i++) {
+        uint16_t pixel = 0x7FFF; // White
+        memcpy(data + offset, &pixel, 2); offset += 2;
     }
 
-    fwrite(data, 1, 256, file);
+    fwrite(data, 1, offset, file);
     fclose(file);
-    free(data);
-}
-
-void create_test_file_8bit_clut() {
-    FILE* file = fopen("test_tim_8bit.bin", "wb");
-    if (!file) {
-        printf("Test skipped: cannot create test file\n");
-        return;
-    }
-
-    uint8_t* data = (uint8_t*)malloc(384);
-    if (!data) {
-        fclose(file);
-        return;
-    }
-
-    memset(data, 0, 384);
-
-    data[0] = 0x4C; data[1] = 0x01;         // Signature
-    data[2] = 0x04; data[3] = 0x00;         // Image format: 8-bit
-    data[4] = 0x00;                       // Palette format: direct
-    data[5] = 0x80;                       // 128 CLUT entries
-    data[8] = 0x80; data[9] = 0x00; data[10] = 0x00; data[11] = 0x00;  // CLUT offset: 0x80
-    data[12] = 0x1E0; data[13] = 0x00; data[14] = 0x00; data[15] = 0x00; // Image offset: 0x1E0
-
-    for (int i = 0; i < 128; i++) {
-        data[16 + i * 4 + 0] = 0xFF;
-        data[16 + i * 4 + 1] = i & 0xFF;
-        data[16 + i * 4 + 2] = (i * 2) & 0xFF;
-        data[16 + i * 4 + 3] = (i * 3) & 0xFF;
-    }
-
-    fwrite(data, 1, 384, file);
-    fclose(file);
-    free(data);
-}
-
-void create_test_file_1bit_clut() {
-    FILE* file = fopen("test_tim_1bit.bin", "wb");
-    if (!file) {
-        printf("Test skipped: cannot create test file\n");
-        return;
-    }
-
-    uint8_t* data = (uint8_t*)malloc(224);
-    if (!data) {
-        fclose(file);
-        return;
-    }
-
-    memset(data, 0, 224);
-
-    data[0] = 0x4C; data[1] = 0x01;         // Signature
-    data[2] = 0x05; data[3] = 0x00;         // Image format: 1-bit
-    data[4] = 0x00;                       // Palette format: direct
-    data[5] = 0x08;                       // 8 CLUT entries
-    data[8] = 0x80; data[9] = 0x00; data[10] = 0x00; data[11] = 0x00;  // CLUT offset: 0x80
-    data[12] = 0x100; data[13] = 0x00; data[14] = 0x00; data[15] = 0x00; // Image offset: 0x100
-
-    for (int i = 0; i < 8; i++) {
-        data[16 + i * 4 + 0] = 0xFF;
-        data[16 + i * 4 + 1] = i & 0xFF;
-        data[16 + i * 4 + 2] = (i * 2) & 0xFF;
-        data[16 + i * 4 + 3] = (i * 3) & 0xFF;
-    }
-
-    fwrite(data, 1, 224, file);
-    fclose(file);
-    free(data);
-}
-
-void test_TIM_ParseHeader_16bit() {
-    create_test_file_16bit_clut();
-
-    TIMFileHeader header;
-    TIMFile* tim = TIM_LoadFile("test_tim_16bit.bin");
-
-    if (tim) {
-        // Use already-parsed header from TIMFile
-        if (tim->header.signature == 0x014C) {
-            printf("✓ test_TIM_ParseHeader_16bit: valid signature\n");
-        }
-        if (tim->header.image_format == TIM_FORMAT_CLUT_RAW_16BIT) {
-            printf("✓ test_TIM_ParseHeader_16bit: correct image format\n");
-        }
-        if (tim->header.palette_format == TIM_PALETTE_DIRECT) {
-            printf("✓ test_TIM_ParseHeader_16bit: correct palette format\n");
-        }
-        if (tim->header.clut_entries == 32) {
-            printf("✓ test_TIM_ParseHeader_16bit: correct CLUT entry count\n");
-        }
-        TIM_FreeFile(tim);
-    } else {
-        printf("✗ test_TIM_ParseHeader_16bit failed\n");
-    }
-
-    remove("test_tim_16bit.bin");
 }
 
 void test_TIM_ParseHeader_4bit() {
-    create_test_file_4bit_clut();
+    printf("Testing 4-bit TIM with CLUT...\n");
 
-    TIMFileHeader header;
+    create_test_tim_4bit("test_tim_4bit.bin");
+
     TIMFile* tim = TIM_LoadFile("test_tim_4bit.bin");
 
     if (tim) {
-        if (tim->header.image_format == TIM_FORMAT_CLUT_RAW_4BIT) {
-            printf("✓ test_TIM_ParseHeader_4bit: correct image format\n");
+        if (tim->header.magic == TIM_MAGIC) {
+            printf("✓ test_TIM_4bit: valid magic (0x%08X)\n", tim->header.magic);
+        } else {
+            printf("✗ test_TIM_4bit: invalid magic (expected 0x%08X, got 0x%08X)\n", TIM_MAGIC, tim->header.magic);
         }
-        if (tim->header.clut_entries == 16) {
-            printf("✓ test_TIM_ParseHeader_4bit: correct CLUT entry count\n");
+
+        if (tim->bpp == TIM_BPP_4BIT) {
+            printf("✓ test_TIM_4bit: correct BPP mode (%d)\n", tim->bpp);
+        } else {
+            printf("✗ test_TIM_4bit: wrong BPP (expected %d, got %d)\n", TIM_BPP_4BIT, tim->bpp);
         }
+
+        if (tim->has_clut) {
+            printf("✓ test_TIM_4bit: CLUT flag set\n");
+        } else {
+            printf("✗ test_TIM_4bit: CLUT flag not set\n");
+        }
+
+        if (tim->palette && tim->palette->entry_count == 16) {
+            printf("✓ test_TIM_4bit: CLUT has %d colors\n", tim->palette->entry_count);
+        } else {
+            printf("✗ test_TIM_4bit: CLUT missing or wrong count\n");
+        }
+
         TIM_FreeFile(tim);
     } else {
-        printf("✗ test_TIM_ParseHeader_4bit failed\n");
+        printf("✗ test_TIM_4bit: failed to load\n");
     }
 
     remove("test_tim_4bit.bin");
 }
 
 void test_TIM_ParseHeader_8bit() {
-    create_test_file_8bit_clut();
+    printf("\nTesting 8-bit TIM with CLUT...\n");
 
-    TIMFileHeader header;
+    create_test_tim_8bit("test_tim_8bit.bin");
+
     TIMFile* tim = TIM_LoadFile("test_tim_8bit.bin");
 
     if (tim) {
-        if (tim->header.image_format == TIM_FORMAT_CLUT_RAW_8BIT) {
-            printf("✓ test_TIM_ParseHeader_8bit: correct image format\n");
+        if (tim->bpp == TIM_BPP_8BIT) {
+            printf("✓ test_TIM_8bit: correct BPP mode (%d)\n", tim->bpp);
+        } else {
+            printf("✗ test_TIM_8bit: wrong BPP\n");
         }
-        if (tim->header.clut_entries == 128) {
-            printf("✓ test_TIM_ParseHeader_8bit: correct CLUT entry count\n");
+
+        if (tim->has_clut) {
+            printf("✓ test_TIM_8bit: CLUT flag set\n");
+        } else {
+            printf("✗ test_TIM_8bit: CLUT flag not set\n");
         }
+
+        if (tim->palette && tim->palette->entry_count == 256) {
+            printf("✓ test_TIM_8bit: CLUT has %d colors\n", tim->palette->entry_count);
+        } else {
+            printf("✗ test_TIM_8bit: CLUT missing or wrong count\n");
+        }
+
         TIM_FreeFile(tim);
     } else {
-        printf("✗ test_TIM_ParseHeader_8bit failed\n");
+        printf("✗ test_TIM_8bit: failed to load\n");
     }
 
     remove("test_tim_8bit.bin");
 }
 
-void test_TIM_ParseHeader_1bit() {
-    create_test_file_1bit_clut();
+void test_TIM_ParseHeader_16bit() {
+    printf("\nTesting 16-bit TIM (no CLUT)...\n");
 
-    TIMFileHeader header;
-    TIMFile* tim = TIM_LoadFile("test_tim_1bit.bin");
-
-    if (tim) {
-        if (tim->header.image_format == TIM_FORMAT_CLUT_RAW_1BIT) {
-            printf("✓ test_TIM_ParseHeader_1bit: correct image format\n");
-        }
-        if (tim->header.clut_entries == 8) {
-            printf("✓ test_TIM_ParseHeader_1bit: correct CLUT entry count\n");
-        }
-        TIM_FreeFile(tim);
-    } else {
-        printf("✗ test_TIM_ParseHeader_1bit failed\n");
-    }
-
-    remove("test_tim_1bit.bin");
-}
-
-void test_TIM_LoadCLUT() {
-    TIMFile* tim = TIM_LoadFile("test_tim_16bit.bin");
-    if (!tim) {
-        printf("✗ test_TIM_LoadCLUT: failed to load file\n");
-        return;
-    }
-
-    FILE* file = fmemopen(tim->file_data, tim->file_size, "rb");
-    if (!file) {
-        printf("✗ test_TIM_LoadCLUT: failed to open memory stream\n");
-        TIM_FreeFile(tim);
-        return;
-    }
-
-    PS1CLUT* clut = NULL;
-    if (TIM_LoadCLUT(file, 0x80, tim->header.palette_format, tim->header.clut_entries, &clut)) {
-        if (clut && clut->entry_count == 32) {
-            printf("✓ test_TIM_LoadCLUT: successfully loaded CLUT with 32 entries\n");
-        }
-        if (clut) {
-            if (clut->colors) free(clut->colors);
-            free(clut);
-        }
-    } else {
-        printf("✗ test_TIM_LoadCLUT: failed to load CLUT\n");
-    }
-
-    fclose(file);
-    TIM_FreeFile(tim);
-}
-
-void test_TIM_LoadFile_NULL() {
-    TIMFile* tim = TIM_LoadFile("nonexistent_file.bin");
-    if (!tim) {
-        printf("✓ test_TIM_LoadFile_NULL: correctly returned NULL for missing file\n");
-    } else {
-        printf("✗ test_TIM_LoadFile_NULL: should return NULL for missing file\n");
-        TIM_FreeFile(tim);
-    }
-}
-
-void test_TIM_FreeFile() {
-    create_test_file_16bit_clut();
+    create_test_tim_16bit("test_tim_16bit.bin");
 
     TIMFile* tim = TIM_LoadFile("test_tim_16bit.bin");
+
     if (tim) {
+        if (tim->bpp == TIM_BPP_16BIT) {
+            printf("✓ test_TIM_16bit: correct BPP mode (%d)\n", tim->bpp);
+        } else {
+            printf("✗ test_TIM_16bit: wrong BPP\n");
+        }
+
+        if (!tim->has_clut) {
+            printf("✓ test_TIM_16bit: No CLUT flag (correct)\n");
+        } else {
+            printf("✗ test_TIM_16bit: CLUT flag incorrectly set\n");
+        }
+
+        if (tim->width == 8 && tim->height == 8) {
+            printf("✓ test_TIM_16bit: dimensions %dx%d\n", tim->width, tim->height);
+        } else {
+            printf("✗ test_TIM_16bit: wrong dimensions %dx%d\n", tim->width, tim->height);
+        }
+
         TIM_FreeFile(tim);
-        printf("✓ test_TIM_FreeFile: successfully freed TIM file\n");
     } else {
-        printf("✗ test_TIM_LoadFile failed before free\n");
+        printf("✗ test_TIM_16bit: failed to load\n");
     }
 
     remove("test_tim_16bit.bin");
 }
 
-void test_TIM_InvalidSignature() {
-    FILE* file = fopen("test_bad_signature.bin", "wb");
-    if (!file) {
-        printf("Test skipped: cannot create test file\n");
-        return;
-    }
+void test_TIM_InvalidFile() {
+    printf("\nTesting invalid file handling...\n");
 
-    uint8_t bad_sig[] = {0x00, 0x00, 0x00, 0x00};
-    fwrite(bad_sig, sizeof(bad_sig), 1, file);
-    fclose(file);
-
-    TIMFile* tim = TIM_LoadFile("test_bad_signature.bin");
+    TIMFile* tim = TIM_LoadFile("nonexistent_file.bin");
     if (!tim) {
-        printf("✓ test_TIM_InvalidSignature: correctly rejected invalid signature\n");
+        printf("✓ test_TIM_InvalidFile: correctly returned NULL for missing file\n");
     } else {
-        printf("✗ test_TIM_InvalidSignature: should reject invalid signature\n");
+        printf("✗ test_TIM_InvalidFile: should return NULL\n");
         TIM_FreeFile(tim);
     }
-
-    remove("test_bad_signature.bin");
 }
 
-void test_TIM_Endianness() {
-    create_test_file_4bit_clut();
+void test_TIM_InvalidMagic() {
+    printf("\nTesting invalid magic handling...\n");
 
-    TIMFile* tim = TIM_LoadFile("test_tim_4bit.bin");
-    if (tim) {
-        // Header is already parsed by TIM_LoadFile
-        if (tim->header.clut_offset == 0x80 && tim->header.image_offset == 0xC0) {
-            printf("✓ test_TIM_Endianness: correctly handled little-endian format\n");
-        }
-        TIM_FreeFile(tim);
-    } else {
-        printf("✗ test_TIM_Endianness: failed to load file\n");
-    }
-
-    remove("test_tim_4bit.bin");
-}
-
-void test_TIM_LargeFile() {
-    FILE* file = fopen("test_tim_large.bin", "wb");
+    FILE* file = fopen("test_bad_magic.bin", "wb");
     if (!file) {
         printf("Test skipped: cannot create test file\n");
         return;
     }
 
-    uint8_t* data = (uint8_t*)malloc(1024);
-    memset(data, 0, 1024);
+    // Bad magic
+    uint32_t bad_magic = 0xDEADBEEF;
+    uint32_t flags = 0x02;
+    fwrite(&bad_magic, 4, 1, file);
+    fwrite(&flags, 4, 1, file);
+    fclose(file);
 
-    data[0] = 0x4C; data[1] = 0x01;         // Signature
-    data[2] = 0x01; data[3] = 0x00;         // Image format
-    data[4] = 0x00;                       // Palette format
-    data[5] = 0x80;                       // CLUT entries
-    data[8] = 0x80; data[9] = 0x00; data[10] = 0x00; data[11] = 0x00;  // CLUT offset
-    data[12] = 0x400; data[13] = 0x00; data[14] = 0x00; data[15] = 0x00; // Image offset
-
-    for (int i = 0; i < 128; i++) {
-        data[16 + i * 4 + 0] = 0xFF;
-        data[16 + i * 4 + 1] = i & 0xFF;
-        data[16 + i * 4 + 2] = (i * 2) & 0xFF;
-        data[16 + i * 4 + 3] = (i * 3) & 0xFF;
+    TIMFile* tim = TIM_LoadFile("test_bad_magic.bin");
+    if (!tim) {
+        printf("✓ test_TIM_InvalidMagic: correctly rejected bad magic\n");
+    } else {
+        printf("✗ test_TIM_InvalidMagic: should reject bad magic\n");
+        TIM_FreeFile(tim);
     }
 
-    fwrite(data, 1, 1024, file);
-    fclose(file);
-    free(data);
+    remove("test_bad_magic.bin");
+}
 
-    TIMFile* tim = TIM_LoadFile("test_tim_large.bin");
+void test_TIM_RealFile() {
+    printf("\nTesting real TIM file...\n");
+
+    // Try the actual asset file
+    TIMFile* tim = TIM_LoadFile("~/git/engine-psx/assets/levels/R0/TILES.TIM");
     if (tim) {
-        printf("✓ test_TIM_LargeFile: successfully loaded large TIM file (1024 bytes)\n");
+        printf("✓ test_TIM_RealFile: Loaded TILES.TIM\n");
+        printf("  Magic: 0x%08X\n", tim->header.magic);
+        printf("  Flags: 0x%08X\n", tim->header.flags);
+        printf("  BPP: %d\n", tim->bpp);
+        printf("  Has CLUT: %s\n", tim->has_clut ? "yes" : "no");
+        printf("  Dimensions: %dx%d\n", tim->width, tim->height);
+
+        if (tim->palette) {
+            printf("  CLUT entries: %d\n", tim->palette->entry_count);
+            if (tim->palette->entry_count > 0) {
+                printf("  First color: RGB(%d,%d,%d)\n",
+                       tim->palette->colors[0].r,
+                       tim->palette->colors[0].g,
+                       tim->palette->colors[0].b);
+            }
+        }
+
+        printf("  Image rect: vram(%d,%d) %dx%d words\n",
+               tim->image_rect.vram_x, tim->image_rect.vram_y,
+               tim->image_rect.width, tim->image_rect.height);
+
         TIM_FreeFile(tim);
     } else {
-        printf("✗ test_TIM_LargeFile: failed to load large file\n");
+        printf("Note: TILES.TIM not found (this is OK if file doesn't exist)\n");
     }
-
-    remove("test_tim_large.bin");
 }
 
 int main(int argc, char* argv[]) {
     log_set_level(LOG_LEVEL_DEBUG);
 
     printf("==============================================\n");
-    printf("TIM Parser Comprehensive Tests\n");
+    printf("TIM Parser Tests (PS1 TIM Format)\n");
     printf("==============================================\n\n");
 
-    test_TIM_ParseHeader_16bit();
     test_TIM_ParseHeader_4bit();
     test_TIM_ParseHeader_8bit();
-    test_TIM_ParseHeader_1bit();
-    test_TIM_LoadCLUT();
-    test_TIM_LoadFile_NULL();
-    test_TIM_FreeFile();
-    test_TIM_InvalidSignature();
-    test_TIM_Endianness();
-    test_TIM_LargeFile();
+    test_TIM_ParseHeader_16bit();
+    test_TIM_InvalidFile();
+    test_TIM_InvalidMagic();
+    test_TIM_RealFile();
 
     printf("\n==============================================\n");
     printf("All TIM parser tests completed\n");

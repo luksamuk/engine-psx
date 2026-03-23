@@ -5,14 +5,14 @@
 
 #include "tim_types.h"
 #include <stdio.h>
+#include <stdbool.h>
 
-// Parse TIM file header from file
+// Parse TIM file header from file (validates magic number)
 bool TIM_ParseHeader(FILE* file, TIMFileHeader* header);
 
-// Load CLUT from file at specified offset
-bool TIM_LoadCLUT(FILE* file, uint32_t offset, uint8_t palette_format, uint8_t clut_entries, PS1CLUT** out_clut);
-
 // Load complete TIM file from filepath
+// Returns NULL on failure, pointer to TIMFile on success
+// The TIMFile structure contains parsed header, palette (if present), and image data
 TIMFile* TIM_LoadFile(const char* filepath);
 
 // Free TIM file resources

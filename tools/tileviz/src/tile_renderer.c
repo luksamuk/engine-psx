@@ -30,8 +30,8 @@ void tr_set_texture(TileRenderer* renderer, TIMFile* texture) {
 
     renderer->texture = texture;
     // Standard PS1 TIMs use CLUT-based color indexing
-    renderer->use_clut = (texture->header.image_format == TIM_FORMAT_CLUT_RAW_4BIT ||
-                          texture->header.image_format == TIM_FORMAT_CLUT_RAW_8BIT);
+    renderer->use_clut = (texture->bpp == TIM_BPP_4BIT ||
+                          texture->bpp == TIM_BPP_8BIT);
     LOG_INFO("tile_renderer.c", __LINE__, "Texture set for rendering: %dx%d", texture->width, texture->height);
 }
 

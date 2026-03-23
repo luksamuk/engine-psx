@@ -6,43 +6,21 @@
 #include <stdint.h>
 #include "ps1_types.h"
 
-// TIM signature (little-endian: 0x014C = ASCII 'L')
-#define TIM_SIGNATURE 0x014C
+// TIM magic number
+#define TIM_MAGIC 0x00000010
 
-// TIM image format codes
-#define TIM_FORMAT_CLUT_RAW_16BIT 0x00
-#define TIM_FORMAT_CLUT_RAW_4BIT  0x01
-#define TIM_FORMAT_CLUT_RAW_8BIT  0x02
-#define TIM_FORMAT_CLUT_RAW_1BIT  0x03
-#define TIM_FORMAT_VQ_CLUT_16BIT  0x04
-#define TIM_FORMAT_VQ_CLUT_4BIT   0x05
-#define TIM_FORMAT_VQ_CLUT_8BIT   0x06
-#define TIM_FORMAT_VQ_CLUT_1BIT   0x07
+// TIM flags - BPP mode (bits 0-1)
+#define TIM_BPP_4BIT   0  // 4-bit indexed (16 colors)
+#define TIM_BPP_8BIT   1  // 8-bit indexed (256 colors)
+#define TIM_BPP_16BIT  2  // 16-bit direct (RGB555)
+#define TIM_BPP_24BIT  3  // 24-bit direct (rare)
 
-// TIM palette format codes
-#define TIM_PALETTE_DIRECT 0x00
-#define TIM_PALETTE_INDIRECT 0x10
-#define TIM_PALETTE_COMPRESSED 0x20
+// TIM flags - CLUT flag (bit 3)
+#define TIM_FLAG_HAS_CLUT 0x08
 
-// TIM compression structures
-typedef struct {
-    uint8_t code1;
-    uint8_t code2;
-    uint16_t offset;
-    uint8_t clut_index;
-} TIMVQCode;
-
-// Complete TIM file structure
-typedef struct {
-    TIMFileHeader header;
-    PS1CLUT* palette;
-    uint8_t* image_data;
-    uint32_t width;
-    uint32_t height;
-    TIMCompression compression;
-    uint32_t file_size;
-    uint8_t* file_data;
-} TIMFile;
+// Helper macros
+#define TIM_GET_BPP(flags)    ((flags) & 0x03)
+#define TIM_HAS_CLUT(flags)  (((flags) & TIM_FLAG_HAS_CLUT) != 0)
 
 // Pixel data structure for different formats
 typedef enum {
@@ -52,11 +30,19 @@ typedef enum {
     PS1_PIXEL_FORMAT_16BIT
 } PS1PixelFormat;
 
-// VQ codebook entry
+// Complete TIM file structure
 typedef struct {
-    uint8_t* block_data;
-    uint8_t* codebook;
-    int block_size;
-} VQCodebookEntry;
+    TIMFileHeader header;
+    TIMBlockHeader clut_rect;      // CLUT position/dimensions (if present)
+    PS1CLUT* palette;              // Parsed CLUT data
+    TIMBlockHeader image_rect;     // Image position/dimensions
+    uint8_t* image_data;           // Raw pixel/index data
+    uint32_t width;                // Image width in pixels
+    uint32_t height;               // Image height in pixels
+    uint32_t bpp;                  // Bits per pixel
+    bool has_clut;                 // Has CLUT flag
+    uint32_t file_size;
+    uint8_t* file_data;
+} TIMFile;
 
 #endif // TIM_TYPES_H

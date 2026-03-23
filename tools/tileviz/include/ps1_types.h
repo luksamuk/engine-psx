@@ -49,14 +49,18 @@ typedef struct {
     PS1Color* colors;
 } PS1CLUT;
 
-// TIM file header
+// PS1 TIM file header (first 8 bytes)
 typedef struct {
-    uint16_t signature;
-    uint16_t image_format;
-    uint8_t palette_format;
-    uint8_t clut_entries;
-    uint32_t clut_offset;
-    uint32_t image_offset;
+    uint32_t magic;         // Must be 0x10
+    uint32_t flags;         // Bits 0-1: bpp (0=4bit, 1=8bit, 2=16bit), Bit 3: has_clut
 } TIMFileHeader;
+
+// PS1 TIM CLUT/image block header (after length field)
+typedef struct {
+    uint16_t vram_x;        // VRAM X coordinate
+    uint16_t vram_y;        // VRAM Y coordinate
+    uint16_t width;         // Width (in 16-bit words for pixel data, or colors for CLUT)
+    uint16_t height;        // Height
+} TIMBlockHeader;
 
 #endif // PS1_TYPES_H

@@ -2,34 +2,34 @@
 
 ## Current Status
 - ✅ Basic infrastructure (CMake, logging, Raylib window)
-- ✅ TIM parser for standard PS1 formats (CLUT 4-bit, 8-bit, 16-bit direct)
-- ✅ Level viewer core (tile rendering)
 - ✅ VQ code removed (not used in standard PS1 TIMs)
+- ✅ Endianness bugs fixed (PS1 files are LE, no bswap needed)
 - ✅ Executable compiles successfully
-- ⚠️ Tests need cleanup (but not blocking main functionality)
+- ✅ Unit tests compiling (some need fixing)
+- ⚠️ TIM parser needs proper implementation
+- ⚠️ Need to test with actual game assets
 
 ## Next Priority Tasks
 
-### Phase 1: Core Functionality Improvements
-- [ ] Test with actual TIM files from Sonic XA assets
-- [ ] Add proper dimension calculation from TIM headers
-- [ ] Implement image_data parsing from TIM files
+### Phase 1: Test with Real Assets
+- [ ] Test TIM parsing with TILES.TIM from game assets
+- [ ] Verify MAP file loading from game assets
+- [ ] Check if parser reads CLUT and pixel data correctly
+- [ ] Debug and fix any parsing issues
 
 ### Phase 2: UI Improvements
-- [ ] Add mouse hover to highlight tiles
-- [ ] Add tile info panel (coordinates, pixel values)
-- [ ] Add file open dialog via CLI args
+- [ ] Add CLI arguments for loading files
 - [ ] Add keyboard navigation (arrows, +/- for zoom)
+- [ ] Add mouse hover to highlight tiles
+- [ ] Add tile info panel (coordinates, properties)
 
 ### Phase 3: Integration with Sonic XA
 - [ ] Test with level TIM/MAP files
-- [ ] Add support for level collision visualization
 - [ ] Verify tile rendering matches game output
 
 ## Notes
-- VQ compression removed - not used in standard PS1 TIM format
-- Format codes standardized: CLUT_4BIT (0x00), CLUT_8BIT (0x01), 16BIT (0x02)
-- Next: test with real game assets to verify parsing works correctly
+- PS1 TIMs use standard little-endian format
+- Format codes: CLUT_RAW_4BIT (0x00), CLUT_RAW_8BIT (0x01), CLUT_RAW_16BIT (0x02)
 - [ ] Implement VQ codebook parsing
 - [ ] Implement VQ decompression algorithm
 - [ ] Add VQ support to TIM_LoadFile()
