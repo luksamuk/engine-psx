@@ -1,10 +1,10 @@
 // Viewer unit tests
 
 #include <string.h>
-#include "level_viewer.h"
-#include "tim_parser.h"
-#include "level_loader.h"
-#include "log.h"
+#include "../include/level_viewer.h"
+#include "../src/tim_parser.h"
+#include "../include/level_loader.h"
+#include "../include/log.h"
 #include <stdio.h>
 #include <assert.h>
 
@@ -86,7 +86,7 @@ void test_viewer_render_empty(void) {
 
     LevelViewer* viewer = viewer_create();
 
-    viewer->tim = TIM_LoadFile("tests/unit/test_tim_16bit.bin");
+    viewer->tim = TIM_LoadFile("test_tim_16bit.bin");
 
     if (viewer->tim) {
         viewer->palette = viewer->tim->palette;
@@ -112,4 +112,9 @@ void run_viewer_tests(void) {
     test_viewer_render_empty();
 
     LOG_INFO("test_viewer.c", __LINE__, "All viewer tests completed");
+}
+
+int main(int argc, char* argv[]) {
+    run_viewer_tests();
+    return 0;
 }

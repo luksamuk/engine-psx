@@ -1,7 +1,8 @@
 // TIM parser comprehensive tests
 
-#include "../src/tim_parser.h"
-#include "../include/log.h"
+#include "tim_parser.h"
+#include "log.h"
+#include "tim_types.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,8 +22,9 @@ void create_test_file_16bit_clut() {
 
     memset(data, 0, 512);
 
-    data[0] = 0x4C; data[1] = 0x01;         // Signature
-    data[2] = 0x01; data[3] = 0x00;         // Image format: 16-bit
+    // TIM files are little-endian, but parser does bswap, so write swapped values
+    data[0] = 0x4C; data[1] = 0x01;         // Signature (0x014C after bswap)
+    data[2] = 0x00; data[3] = 0x00;         // Image format: 16-bit (0x0000 after bswap = TIM_FORMAT_CLUT_RAW_16BIT)
     data[4] = 0x00;                       // Palette format: direct
     data[5] = 0x20;                       // 32 CLUT entries
     data[8] = 0x80; data[9] = 0x00; data[10] = 0x00; data[11] = 0x00;  // CLUT offset: 0x80
@@ -148,17 +150,18 @@ void test_TIM_ParseHeader_16bit() {
     TIMFileHeader header;
     TIMFile* tim = TIM_LoadFile("test_tim_16bit.bin");
 
-    if (tim && TIM_ParseHeader(tim->file, &header)) {
-        if (header.signature == 0x014C) {
+    if (tim) {
+        // Use already-parsed header from TIMFile
+        if (tim->header.signature == 0x014C) {
             printf("✓ test_TIM_ParseHeader_16bit: valid signature\n");
         }
-        if (header.image_format == TIM_FORMAT_CLUT_RAW_16BIT) {
+        if (tim->header.image_format == TIM_FORMAT_CLUT_RAW_16BIT) {
             printf("✓ test_TIM_ParseHeader_16bit: correct image format\n");
         }
-        if (header.palette_format == TIM_PALETTE_DIRECT) {
+        if (tim->header.palette_format == TIM_PALETTE_DIRECT) {
             printf("✓ test_TIM_ParseHeader_16bit: correct palette format\n");
         }
-        if (header.clut_entries == 32) {
+        if (tim->header.clut_entries == 32) {
             printf("✓ test_TIM_ParseHeader_16bit: correct CLUT entry count\n");
         }
         TIM_FreeFile(tim);
@@ -175,11 +178,11 @@ void test_TIM_ParseHeader_4bit() {
     TIMFileHeader header;
     TIMFile* tim = TIM_LoadFile("test_tim_4bit.bin");
 
-    if (tim && TIM_ParseHeader(tim->file, &header)) {
-        if (header.image_format == TIM_FORMAT_CLUT_RAW_4BIT) {
+    if (tim) {
+        if (tim->header.image_format == TIM_FORMAT_CLUT_RAW_4BIT) {
             printf("✓ test_TIM_ParseHeader_4bit: correct image format\n");
         }
-        if (header.clut_entries == 16) {
+        if (tim->header.clut_entries == 16) {
             printf("✓ test_TIM_ParseHeader_4bit: correct CLUT entry count\n");
         }
         TIM_FreeFile(tim);
@@ -196,11 +199,11 @@ void test_TIM_ParseHeader_8bit() {
     TIMFileHeader header;
     TIMFile* tim = TIM_LoadFile("test_tim_8bit.bin");
 
-    if (tim && TIM_ParseHeader(tim->file, &header)) {
-        if (header.image_format == TIM_FORMAT_CLUT_RAW_8BIT) {
+    if (tim) {
+        if (tim->header.image_format == TIM_FORMAT_CLUT_RAW_8BIT) {
             printf("✓ test_TIM_ParseHeader_8bit: correct image format\n");
         }
-        if (header.clut_entries == 128) {
+        if (tim->header.clut_entries == 128) {
             printf("✓ test_TIM_ParseHeader_8bit: correct CLUT entry count\n");
         }
         TIM_FreeFile(tim);
@@ -217,11 +220,11 @@ void test_TIM_ParseHeader_1bit() {
     TIMFileHeader header;
     TIMFile* tim = TIM_LoadFile("test_tim_1bit.bin");
 
-    if (tim && TIM_ParseHeader(tim->file, &header)) {
-        if (header.image_format == TIM_FORMAT_CLUT_RAW_1BIT) {
+    if (tim) {
+        if (tim->header.image_format == TIM_FORMAT_CLUT_RAW_1BIT) {
             printf("✓ test_TIM_ParseHeader_1bit: correct image format\n");
         }
-        if (header.clut_entries == 8) {
+        if (tim->header.clut_entries == 8) {
             printf("✓ test_TIM_ParseHeader_1bit: correct CLUT entry count\n");
         }
         TIM_FreeFile(tim);
@@ -239,15 +242,27 @@ void test_TIM_LoadCLUT() {
         return;
     }
 
+    FILE* file = fmemopen(tim->file_data, tim->file_size, "rb");
+    if (!file) {
+        printf("✗ test_TIM_LoadCLUT: failed to open memory stream\n");
+        TIM_FreeFile(tim);
+        return;
+    }
+
     PS1CLUT* clut = NULL;
-    if (TIM_LoadCLUT(tim->file, 0x80, tim->header.palette_format, tim->header.clut_entries, &clut)) {
+    if (TIM_LoadCLUT(file, 0x80, tim->header.palette_format, tim->header.clut_entries, &clut)) {
         if (clut && clut->entry_count == 32) {
             printf("✓ test_TIM_LoadCLUT: successfully loaded CLUT with 32 entries\n");
+        }
+        if (clut) {
+            if (clut->colors) free(clut->colors);
+            free(clut);
         }
     } else {
         printf("✗ test_TIM_LoadCLUT: failed to load CLUT\n");
     }
 
+    fclose(file);
     TIM_FreeFile(tim);
 }
 
@@ -302,10 +317,9 @@ void test_TIM_Endianness() {
 
     TIMFile* tim = TIM_LoadFile("test_tim_4bit.bin");
     if (tim) {
-        if (TIM_ParseHeader(tim->file, &tim->header)) {
-            if (tim->header.clut_offset == 0x80 && tim->header.image_offset == 0xC0) {
-                printf("✓ test_TIM_Endianness: correctly handled little-endian format\n");
-            }
+        // Header is already parsed by TIM_LoadFile
+        if (tim->header.clut_offset == 0x80 && tim->header.image_offset == 0xC0) {
+            printf("✓ test_TIM_Endianness: correctly handled little-endian format\n");
         }
         TIM_FreeFile(tim);
     } else {

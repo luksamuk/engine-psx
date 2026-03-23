@@ -1,7 +1,7 @@
 // TIM type structure tests
 
-#include "../include/tim_types.h"
-#include "../include/log.h"
+#include "tim_types.h"
+#include "log.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,12 +47,11 @@ void test_TIMCompression_Enum() {
 void test_TIMFormatCodes() {
     printf("\nTesting TIM format codes...\n");
 
-    printf("TIM_FORMAT_CLUT_4BIT = %d (4-bit CLUT, 16 colors)\n", TIM_FORMAT_CLUT_4BIT);
-    printf("TIM_FORMAT_CLUT_8BIT = %d (8-bit CLUT, 256 colors)\n", TIM_FORMAT_CLUT_8BIT);
-    printf("TIM_FORMAT_16BIT = %d (16-bit direct color)\n", TIM_FORMAT_16BIT);
-    printf("TIM_FORMAT_MIXED = %d (mixed mode, reserved)\n", TIM_FORMAT_MIXED);
+    printf("TIM_FORMAT_CLUT_RAW_4BIT = %d (4-bit CLUT, 16 colors)\n", TIM_FORMAT_CLUT_RAW_4BIT);
+    printf("TIM_FORMAT_CLUT_RAW_8BIT = %d (8-bit CLUT, 256 colors)\n", TIM_FORMAT_CLUT_RAW_8BIT);
+    printf("TIM_FORMAT_CLUT_RAW_16BIT = %d (16-bit direct color)\n", TIM_FORMAT_CLUT_RAW_16BIT);
 
-    printf("✓ TIM format codes defined for standard PS1 formats\n");
+    printf("✓ TIM format codes defined for standard PS1 RAW formats\n");
 }
 
 void test_TIMPaletteFormat() {
@@ -154,7 +153,7 @@ int main(int argc, char* argv[]) {
     test_TIMPaletteFormat();
     test_PS1PixelFormat_Enum();
     test_TIMSignature_Constant();
-    test_PS1CLUT_Structure();
+    test_TILEDATA_Structure();
     test_TIMFile_Structure();
 
     printf("\n========================================\n");
