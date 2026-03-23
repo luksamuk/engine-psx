@@ -116,7 +116,7 @@ tools/tileviz/
 
 ## Project Status
 
-**Phase 2 In Progress** - TIM parsing implemented, testing with real game assets.
+**Phase 2 Complete** - TIM parsing implemented and tested with real game assets.
 
 ### Completed
 
@@ -125,10 +125,11 @@ tools/tileviz/
 - [x] Level MAP file loading
 - [x] CLI arguments for loading files
 - [x] Endianness handling (PS1 is little-endian)
+- [x] Tested with Sonic XA level assets (R0-R9)
 
 ### In Progress
 
-- [ ] Test with all game level assets
+- [ ] Improve MAP file parsing (placeholder format currently)
 - [ ] Zoom and pan controls
 - [ ] Tile info panel (coordinates, properties)
 
