@@ -146,7 +146,7 @@ void app_handle_input(Application* app) {
     }
 }
 
-int main(void) {
+int main(int argc, char** argv) {
     LOG_INFO("main.c", __LINE__, "Initializing tile visualization tool");
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PS1 Tile Visualization Tool");
@@ -154,6 +154,27 @@ int main(void) {
 
     Application app;
     app_init(&app);
+
+    // Load files from command line arguments
+    if (argc >= 2) {
+        // First argument: level file (MAP)
+        strncpy(app.current_level_path, argv[1], sizeof(app.current_level_path) - 1);
+        LOG_INFO("main.c", __LINE__, "Level path from CLI: %s", argv[1]);
+    }
+    if (argc >= 3) {
+        // Second argument: texture file (TIM)
+        strncpy(app.current_texture_path, argv[2], sizeof(app.current_texture_path) - 1);
+        LOG_INFO("main.c", __LINE__, "Texture path from CLI: %s", argv[2]);
+    }
+
+    // Auto-load if both files provided
+    if (argc >= 3) {
+        LOG_INFO("main.c", __LINE__, "Auto-loading level and texture from CLI args");
+        app_load_level(&app, app.current_level_path, app.current_texture_path);
+    } else if (argc >= 2) {
+        LOG_INFO("main.c", __LINE__, "Auto-loading level only from CLI arg");
+        app_load_level(&app, app.current_level_path, NULL);
+    }
 
     LOG_INFO("main.c", __LINE__, "Entering main loop");
 
