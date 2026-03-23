@@ -12,6 +12,7 @@ typedef struct {
     uint16_t* tile_data;
     uint32_t width_tiles;
     uint32_t height_tiles;
+    uint32_t tile_size;     // Size of each tile in pixels (16 or 128)
     uint64_t file_size;
 } LevelData;
 

@@ -7,6 +7,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Find raylib for test dependencies
 find_package(raylib REQUIRED)
 
+# Link math library
+set(CMAKE_REQUIRED_LIBRARIES m)
+
 # Build test executables
 add_subdirectory(unit)
 add_subdirectory(integration)

@@ -23,7 +23,7 @@ target_include_directories(test_tim_types PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
 )
-target_link_libraries(test_tim_types PUBLIC raylib)
+target_link_libraries(test_tim_types PUBLIC raylib m)
 
 # Test: TIM parser
 add_executable(test_tim_parser test_tim_parser.c ${TEST_SOURCES})
@@ -32,7 +32,7 @@ target_include_directories(test_tim_parser PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
 )
-target_link_libraries(test_tim_parser PUBLIC raylib)
+target_link_libraries(test_tim_parser PUBLIC raylib m)
 
 # Test: Level loader
 add_executable(test_level_loader test_level_loader.c ${TEST_SOURCES})
@@ -41,7 +41,7 @@ target_include_directories(test_level_loader PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
 )
-target_link_libraries(test_level_loader PUBLIC raylib)
+target_link_libraries(test_level_loader PUBLIC raylib m)
 
 # Test: Viewer (needs raylib)
 add_executable(test_viewer test_viewer.c ${TEST_SOURCES})
@@ -50,7 +50,7 @@ target_include_directories(test_viewer PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/include
 )
-target_link_libraries(test_viewer PUBLIC raylib)
+target_link_libraries(test_viewer PUBLIC raylib m)
 
 enable_testing()
 add_test(NAME tim_types_test COMMAND test_tim_types)

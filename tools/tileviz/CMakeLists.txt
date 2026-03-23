@@ -21,7 +21,7 @@ add_executable(tileviz
 # Raylib dependency
 find_package(raylib REQUIRED)
 
-target_link_libraries(tileviz PUBLIC raylib)
+target_link_libraries(tileviz PUBLIC raylib m)
 
 # Include directories
 target_include_directories(tileviz PUBLIC

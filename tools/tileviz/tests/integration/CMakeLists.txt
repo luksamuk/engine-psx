@@ -11,7 +11,7 @@ add_executable(test_integration
     ${CMAKE_SOURCE_DIR}/src/util.c
 )
 
-target_link_libraries(test_integration PRIVATE raylib)
+target_link_libraries(test_integration PRIVATE raylib m)
 
 target_include_directories(test_integration PRIVATE
     ${CMAKE_SOURCE_DIR}/src

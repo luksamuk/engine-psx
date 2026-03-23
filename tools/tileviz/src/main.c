@@ -12,7 +12,7 @@
 
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
-#define DEFAULT_ZOOM 1.0f
+#define DEFAULT_ZOOM 2.0f
 
 typedef struct {
     bool running;
@@ -35,7 +35,7 @@ void app_init(Application* app) {
     app->current_level_path[0] = 0;
     app->current_texture_path[0] = 0;
 
-    LOG_INFO("app.c", __LINE__, "Application initialized");
+    LOG_INFO("main.c", __LINE__, "Application initialized");
 }
 
 void app_cleanup(Application* app) {
@@ -44,94 +44,110 @@ void app_cleanup(Application* app) {
         app->viewer = NULL;
     }
 
-    if (app->palette) {
+    if (app->level) {
+        level_free(app->level);
+        app->level = NULL;
+    }
+    
+    if (app->texture) {
         if (app->texture->palette) {
-            free(app->texture->palette->colors);
+            if (app->texture->palette->colors) {
+                free(app->texture->palette->colors);
+            }
             free(app->texture->palette);
+        }
+        if (app->texture->image_data) {
+            free(app->texture->image_data);
         }
         TIM_FreeFile(app->texture);
         app->texture = NULL;
         app->palette = NULL;
     }
 
-    if (app->level) {
-        level_free(app->level);
-        app->level = NULL;
-    }
-
-    LOG_INFO("app.c", __LINE__, "Application cleaned up");
+    LOG_INFO("main.c", __LINE__, "Application cleaned up");
 }
 
 void app_load_level(Application* app, const char* level_path, const char* texture_path) {
     app_cleanup(app);
 
-    LOG_INFO("app.c", __LINE__, "Loading level: %s", level_path);
-    LOG_INFO("app.c", __LINE__, "Loading texture: %s", texture_path);
+    LOG_INFO("main.c", __LINE__, "Loading level: %s", level_path);
+    LOG_INFO("main.c", __LINE__, "Loading texture: %s", texture_path);
 
-    // Load level
+    // Load texture first (TIM file)
+    app->texture = TIM_LoadFile(texture_path);
+    if (!app->texture) {
+        LOG_ERROR("main.c", __LINE__, "Failed to load texture");
+        return;
+    }
+    
+    app->palette = app->texture->palette;
+
+    // Load level (MAP file)
     app->level = level_load(level_path);
     if (!app->level) {
-        LOG_ERROR("app.c", __LINE__, "Failed to load level");
+        LOG_ERROR("main.c", __LINE__, "Failed to load level");
+        if (app->texture->palette) {
+            free(app->texture->palette->colors);
+            free(app->texture->palette);
+        }
+        if (app->texture->image_data) {
+            free(app->texture->image_data);
+        }
+        TIM_FreeFile(app->texture);
+        app->texture = NULL;
+        app->palette = NULL;
         return;
     }
 
-    // Load texture
-    app->texture = TIM_LoadFile(texture_path);
-    if (!app->texture) {
-        LOG_ERROR("app.c", __LINE__, "Failed to load texture");
+    // Create viewer
+    app->viewer = viewer_create();
+    if (!app->viewer) {
+        LOG_ERROR("main.c", __LINE__, "Failed to create viewer");
         level_free(app->level);
         app->level = NULL;
         return;
     }
-
-    // Load palette
-    app->palette = app->texture->palette;
-
-    // Create viewer
-    app->viewer = viewer_create();
 
     // Setup viewer
     viewer_load_level(app->viewer, level_path, texture_path);
 
     app->level_loaded = true;
     strncpy(app->current_level_path, level_path, sizeof(app->current_level_path) - 1);
+    app->current_level_path[sizeof(app->current_level_path) - 1] = 0;
     strncpy(app->current_texture_path, texture_path, sizeof(app->current_texture_path) - 1);
+    app->current_texture_path[sizeof(app->current_texture_path) - 1] = 0;
 
-    LOG_INFO("app.c", __LINE__, "Level and texture loaded successfully");
+    LOG_INFO("main.c", __LINE__, "Level and texture loaded successfully");
 }
 
 void app_update(Application* app) {
-    if (!app->level_loaded) return;
+    if (!app->level_loaded || !app->viewer) return;
 
     viewer_update(app->viewer);
-    viewer_handle_input(app->viewer);
 }
 
 void app_render(Application* app) {
-    if (!app->level_loaded) {
-        DrawText("Tile Visualization Tool", 20, 20, 32, WHITE);
-        DrawText("Press F5 to load level", 20, 80, 24, GRAY);
-        DrawText("Press ESC to exit", 20, 120, 24, GRAY);
-
+    if (!app->level_loaded || !app->viewer) {
+        // Draw welcome screen
+        ClearBackground((Color){30, 30, 40, 255});
+        
+        DrawText("PS1 Tile Visualization Tool (TileViz)", 20, 20, 32, WHITE);
+        
+        if (app->current_level_path[0] == 0) {
+            DrawText("Usage: tileviz <MAP_FILE> <TIM_FILE>", 20, 80, 24, GRAY);
+            DrawText("", 20, 110, 24, GRAY);
+            DrawText("Example:", 20, 140, 24, (Color){200, 200, 100, 255});
+            DrawText("  ./tileviz MAP16.MAP TILES.TIM", 20, 170, 20, GRAY);
+        } else {
+            DrawText("Loading...", 20, 80, 24, YELLOW);
+        }
+        
+        DrawText("Press ESC to exit", 20, GetScreenHeight() - 40, 20, GRAY);
         return;
     }
 
-    // Clear background
-    ClearBackground(RAYWHITE);
-
-    // Draw level
+    // Render the viewer
     viewer_render(app->viewer);
-
-    // Draw UI
-    DrawRectangle(10, 10, 300, 100, BLACK);
-    DrawText(app->current_level_path, 20, 20, 20, WHITE);
-    char size_text[256];
-    snprintf(size_text, sizeof(size_text), "Size: %dx%d tiles", app->level->width_tiles, app->level->height_tiles);
-    DrawText(size_text, 20, 45, 20, WHITE);
-    char file_text[256];
-    snprintf(file_text, sizeof(file_text), "File size: %.2f KB", app->level->file_size / 1024.0f);
-    DrawText(file_text, 20, 70, 20, WHITE);
-    DrawText("ESC - Exit, F5 - Reload", 20, 95, 16, GRAY);
 }
 
 void app_handle_input(Application* app) {
@@ -140,16 +156,21 @@ void app_handle_input(Application* app) {
     }
 
     if (IsKeyPressed(KEY_F5)) {
-        if (app->current_level_path[0] != 0) {
+        if (app->current_level_path[0] != 0 && app->current_texture_path[0] != 0) {
             app_load_level(app, app->current_level_path, app->current_texture_path);
         }
+    }
+    
+    // Pass input to viewer
+    if (app->viewer) {
+        viewer_handle_input(app->viewer);
     }
 }
 
 int main(int argc, char** argv) {
-    LOG_INFO("main.c", __LINE__, "Initializing tile visualization tool");
+    LOG_INFO("main.c", __LINE__, "Initializing PS1 Tile Visualization Tool");
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PS1 Tile Visualization Tool");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PS1 TileViz - Tile/Texture Viewer");
     SetTargetFPS(60);
 
     Application app;
@@ -157,12 +178,10 @@ int main(int argc, char** argv) {
 
     // Load files from command line arguments
     if (argc >= 2) {
-        // First argument: level file (MAP)
         strncpy(app.current_level_path, argv[1], sizeof(app.current_level_path) - 1);
         LOG_INFO("main.c", __LINE__, "Level path from CLI: %s", argv[1]);
     }
     if (argc >= 3) {
-        // Second argument: texture file (TIM)
         strncpy(app.current_texture_path, argv[2], sizeof(app.current_texture_path) - 1);
         LOG_INFO("main.c", __LINE__, "Texture path from CLI: %s", argv[2]);
     }
@@ -172,15 +191,16 @@ int main(int argc, char** argv) {
         LOG_INFO("main.c", __LINE__, "Auto-loading level and texture from CLI args");
         app_load_level(&app, app.current_level_path, app.current_texture_path);
     } else if (argc >= 2) {
-        LOG_INFO("main.c", __LINE__, "Auto-loading level only from CLI arg");
-        app_load_level(&app, app.current_level_path, NULL);
+        LOG_INFO("main.c", __LINE__, "Missing texture file, showing usage");
     }
 
     LOG_INFO("main.c", __LINE__, "Entering main loop");
 
-    while (app.running) {
+    while (app.running && !WindowShouldClose()) {
         app_handle_input(&app);
         app_update(&app);
+        
+        BeginDrawing();
         app_render(&app);
         EndDrawing();
     }
