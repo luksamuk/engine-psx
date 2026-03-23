@@ -12,12 +12,9 @@ bool TIM_ParseHeader(FILE* file, TIMFileHeader* header) {
         return false;
     }
 
-    // Convert from little-endian to host endianness
-    header->signature = __builtin_bswap16(header->signature);
-    header->image_format = __builtin_bswap16(header->image_format);
-    header->clut_offset = __builtin_bswap32(header->clut_offset);
-    header->image_offset = __builtin_bswap32(header->image_offset);
-
+    // PS1 TIM files are little-endian, no byte swap needed on LE hosts
+    // Note: If running on big-endian system, would need bswap here
+    
     LOG_DEBUG("tim_parser.c", __LINE__, "TIM header: sig=0x%04X fmt=%d palette=%d clut=%d offset_clut=%d offset_img=%d",
              header->signature, header->image_format, header->palette_format,
              header->clut_entries, header->clut_offset, header->image_offset);
@@ -54,7 +51,7 @@ bool TIM_LoadCLUT(FILE* file, uint32_t offset, uint8_t palette_format, uint8_t c
                 free(clut);
                 return false;
             }
-            color_value = __builtin_bswap32(color_value);
+            // PS1 TIM is little-endian, no swap needed on LE hosts
 
             clut->colors[i].r = (color_value >> 10) & 0x1F;
             clut->colors[i].g = (color_value >> 5) & 0x1F;
@@ -67,7 +64,7 @@ bool TIM_LoadCLUT(FILE* file, uint32_t offset, uint8_t palette_format, uint8_t c
                 free(clut);
                 return false;
             }
-            color_value = __builtin_bswap16(color_value);
+            // PS1 TIM is little-endian, no swap needed on LE hosts
 
             clut->colors[i].r = (color_value >> 10) & 0x1F;
             clut->colors[i].g = (color_value >> 5) & 0x1F;
@@ -127,10 +124,8 @@ TIMFile* TIM_LoadFile(const char* filepath) {
     TIMFileHeader* header = &tim->header;
     memcpy(header, file_data, sizeof(TIMFileHeader));
 
-    header->signature = __builtin_bswap16(header->signature);
-    header->image_format = __builtin_bswap16(header->image_format);
-    header->clut_offset = __builtin_bswap32(header->clut_offset);
-    header->image_offset = __builtin_bswap32(header->image_offset);
+    // PS1 TIM files are little-endian, no byte swap needed on LE hosts
+    // Note: If running on big-endian system, would need bswap here
 
     tim->file_size = file_size;
     tim->file_data = file_data;

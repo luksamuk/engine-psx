@@ -76,8 +76,9 @@ LevelData* level_load(const char* level_path) {
 
         uint32_t* header = (uint32_t*)file_data;
 
-        level->width_tiles = __builtin_bswap32(header[2]);
-        level->height_tiles = __builtin_bswap32(header[3]);
+        // PS1 files are little-endian, no byte swap needed on LE hosts
+        level->width_tiles = header[2];
+        level->height_tiles = header[3];
 
         if (level->width_tiles > MAX_LEVEL_WIDTH) {
             LOG_WARNING("level_loader.c", __LINE__, "Level width exceeds max: %u", level->width_tiles);
@@ -97,13 +98,15 @@ LevelData* level_load(const char* level_path) {
             return NULL;
         }
 
-        // Copy tile data from file
-        uint32_t tile_offset = __builtin_bswap32(header[2]);
-        if (tile_offset > 0 && tile_offset + level->width_tiles * level->height_tiles * 2 <= file_size) {
-            for (uint32_t i = 0; i < level->width_tiles * level->height_tiles; i++) {
-                level->tile_data[i] = __builtin_bswap16(((uint16_t*)(file_data + tile_offset))[i]);
-                LOG_TRACE("level_loader.c", __LINE__, "Tile[%d] = %u", i, level->tile_data[i]);
-            }
+        // Tile data starts after header (16 bytes = 4 uint32_t)
+        uint32_t tile_offset = sizeof(uint32_t) * 4;
+        if (tile_offset + level->width_tiles * level->height_tiles * sizeof(uint16_t) <= file_size) {
+            memcpy(level->tile_data, file_data + tile_offset, 
+                   level->width_tiles * level->height_tiles * sizeof(uint16_t));
+            LOG_INFO("level_loader.c", __LINE__, "Loaded %d tile indices", level->width_tiles * level->height_tiles);
+        } else {
+            LOG_WARNING("level_loader.c", __LINE__, "Tile data truncated, expected %d bytes", 
+                       tile_offset + level->width_tiles * level->height_tiles * 2);
         }
     } else {
         LOG_WARNING("level_loader.c", __LINE__, "PRG file format support not yet implemented");

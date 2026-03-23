@@ -196,13 +196,16 @@ Texture2D TIM_ToRaylibTexture(const TIMFile* tim) {
             image.format = PIXELFORMAT_UNCOMPRESSED_R5G6B5;
             image.data = (unsigned char*)malloc(image.width * image.height * 2);
             
+            // PS1 TIM 16-bit is RGB555, convert to RGB565 for Raylib
             for (uint32_t i = 0; i < image.width * image.height; i++) {
                 uint16_t psx_pixel = ((uint16_t*)src_data)[i];
-                psx_pixel = __builtin_bswap16(psx_pixel);
-                
-                uint16_t raylib_pixel = ((psx_pixel >> 10) & 0x1F) |
-                                       ((psx_pixel >> 6) & 0xFC) |
-                                       ((psx_pixel & 0x1F) << 11);
+                // PS1 RGB555: 0-4=Blue, 5-9=Green, 10-14=Red, 15=mask
+                // Raylib RGB565: 0-4=Blue, 5-10=Green, 11-15=Red
+                uint8_t r = (psx_pixel >> 10) & 0x1F;
+                uint8_t g = (psx_pixel >> 5) & 0x1F;
+                uint8_t b = psx_pixel & 0x1F;
+                // Expand 5-bit to 6-bit for green
+                uint16_t raylib_pixel = (r << 11) | ((g << 1) | (g >> 4)) | b;
                 memcpy(&(((uint16_t*)image.data)[i]), &raylib_pixel, sizeof(uint16_t));
             }
             break;
