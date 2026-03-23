@@ -29,7 +29,9 @@ void tr_set_texture(TileRenderer* renderer, TIMFile* texture) {
     if (!renderer) return;
 
     renderer->texture = texture;
-    renderer->use_clut = (texture->compression == TIM_COMPRESSION_NONE);
+    // Standard PS1 TIMs use CLUT-based color indexing
+    renderer->use_clut = (texture->header.image_format == TIM_FORMAT_CLUT_RAW_4BIT ||
+                          texture->header.image_format == TIM_FORMAT_CLUT_RAW_8BIT);
     LOG_INFO("tile_renderer.c", __LINE__, "Texture set for rendering: %dx%d", texture->width, texture->height);
 }
 

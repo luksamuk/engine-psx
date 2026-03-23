@@ -124,122 +124,93 @@ Texture2D TIM_ToRaylibTexture(const TIMFile* tim) {
     
     Image image = {0};
     
-    if (tim->compression == TIM_COMPRESSION_NONE) {
-        switch (tim->header.image_format) {
-            case TIM_FORMAT_CLUT_RAW_1BIT: {
-                image.width = (width + 7) / 8;
-                image.height = height;
-                image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
-                image.data = (unsigned char*)malloc(image.width * image.height * 2);
-                
-                for (uint32_t y = 0; y < image.height; y++) {
-                    for (uint32_t x = 0; x < image.width; x++) {
-                        uint8_t byte = src_data[(y * image.width) + x];
-                        for (uint32_t bit = 0; bit < 8 && (x * 8 + bit) < width; bit++) {
-                            uint8_t bit_val = (byte >> (7 - bit)) & 1;
-                            uint32_t dst_x = (y * image.width) + x;
-                            uint16_t pixel = 0;
-                            if (bit_val && palette->entry_count > 0) {
-                                pixel = ((palette->colors[0].r & 0x1F) << 11) |
-                                       ((palette->colors[0].g & 0x1F) << 6) |
-                                       (palette->colors[0].b & 0x1F);
-                            }
-                            memcpy(&(((uint16_t*)image.data)[dst_x]), &pixel, sizeof(uint16_t));
-                        }
-                    }
-                }
-                break;
-            }
+    // Standard PS1 TIM formats (no compression)
+    switch (tim->header.image_format) {
+        case TIM_FORMAT_CLUT_RAW_4BIT: {
+            image.width = (width + 1) / 2;
+            image.height = height;
+            image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+            image.data = (unsigned char*)malloc(image.width * image.height * 2);
             
-            case TIM_FORMAT_CLUT_RAW_4BIT: {
-                image.width = (width + 1) / 2;
-                image.height = height;
-                image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
-                image.data = (unsigned char*)malloc(image.width * image.height * 2);
-                
-                for (uint32_t y = 0; y < image.height; y++) {
-                    for (uint32_t x = 0; x < image.width; x++) {
-                        uint8_t byte = src_data[(y * image.width) + x];
-                        
-                        uint16_t pixel1 = 0, pixel2 = 0;
-                        if ((x * 2 + 1) < width && palette->entry_count > 0) {
-                            uint8_t idx = byte & 0x0F;
-                            pixel1 = ((palette->colors[idx].r & 0x1F) << 11) |
-                                   ((palette->colors[idx].g & 0x1F) << 6) |
-                                   (palette->colors[idx].b & 0x1F);
-                        } else if (palette->entry_count > 0) {
-                            uint8_t idx = byte >> 4;
-                            pixel1 = ((palette->colors[idx].r & 0x1F) << 11) |
-                                   ((palette->colors[idx].g & 0x1F) << 6) |
-                                   (palette->colors[idx].b & 0x1F);
-                        }
-                        
-                        if ((x * 2 + 1) < width && palette->entry_count > 0) {
-                            uint8_t idx = (byte >> 4) & 0x0F;
-                            pixel2 = ((palette->colors[idx].r & 0x1F) << 11) |
-                                   ((palette->colors[idx].g & 0x1F) << 6) |
-                                   (palette->colors[idx].b & 0x1F);
-                        } else if ((x * 2) >= width) {
-                            uint8_t idx = byte >> 4;
-                            pixel2 = ((palette->colors[idx].r & 0x1F) << 11) |
-                                   ((palette->colors[idx].g & 0x1F) << 6) |
-                                   (palette->colors[idx].b & 0x1F);
-                        }
-                        
-                        uint16_t* dst = &(((uint16_t*)image.data)[(y * image.width) + x]);
-                        dst[0] = pixel1;
-                        dst[1] = pixel2;
-                    }
-                }
-                break;
-            }
-            
-            case TIM_FORMAT_CLUT_RAW_8BIT: {
-                image.width = width;
-                image.height = height;
-                image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
-                image.data = (unsigned char*)malloc(image.width * image.height * 2);
-                
-                for (uint32_t y = 0; y < image.height; y++) {
-                    for (uint32_t x = 0; x < image.width; x++) {
-                        uint8_t idx = src_data[(y * image.width) + x];
-                        uint16_t pixel = 0;
-                        if (idx < palette->entry_count) {
-                            pixel = ((palette->colors[idx].r & 0x1F) << 11) |
-                                   ((palette->colors[idx].g & 0x1F) << 6) |
-                                   (palette->colors[idx].b & 0x1F);
-                        }
-                        memcpy(&(((uint16_t*)image.data)[(y * image.width) + x]), &pixel, sizeof(uint16_t));
-                    }
-                }
-                break;
-            }
-            
-            case TIM_FORMAT_CLUT_RAW_16BIT: {
-                image.width = width;
-                image.height = height;
-                image.format = PIXELFORMAT_UNCOMPRESSED_R5G6B5;
-                image.data = (unsigned char*)malloc(image.width * image.height * 2);
-                
-                for (uint32_t i = 0; i < image.width * image.height; i++) {
-                    uint16_t psx_pixel = ((uint16_t*)src_data)[i];
-                    psx_pixel = __builtin_bswap16(psx_pixel);
+            for (int y = 0; y < image.height; y++) {
+                for (int x = 0; x < image.width; x++) {
+                    uint8_t byte = src_data[(y * image.width) + x];
                     
-                    uint16_t raylib_pixel = ((psx_pixel >> 10) & 0x1F) | 
-                                           ((psx_pixel >> 6) & 0xFC) | 
-                                           ((psx_pixel & 0x1F) << 11);
-                    memcpy(&(((uint16_t*)image.data)[i]), &raylib_pixel, sizeof(uint16_t));
+                    uint16_t pixel1 = 0, pixel2 = 0;
+                    if ((x * 2 + 1) < (int)width && palette->entry_count > 0) {
+                        uint8_t idx = byte & 0x0F;
+                        pixel1 = ((palette->colors[idx].r & 0x1F) << 11) |
+                               ((palette->colors[idx].g & 0x1F) << 6) |
+                               (palette->colors[idx].b & 0x1F);
+                    } else if (palette->entry_count > 0) {
+                        uint8_t idx = byte >> 4;
+                        pixel1 = ((palette->colors[idx].r & 0x1F) << 11) |
+                               ((palette->colors[idx].g & 0x1F) << 6) |
+                               (palette->colors[idx].b & 0x1F);
+                    }
+                    
+                    if ((x * 2 + 1) < (int)width && palette->entry_count > 0) {
+                        uint8_t idx = (byte >> 4) & 0x0F;
+                        pixel2 = ((palette->colors[idx].r & 0x1F) << 11) |
+                               ((palette->colors[idx].g & 0x1F) << 6) |
+                               (palette->colors[idx].b & 0x1F);
+                    } else if ((x * 2) >= (int)width) {
+                        uint8_t idx = byte >> 4;
+                        pixel2 = ((palette->colors[idx].r & 0x1F) << 11) |
+                               ((palette->colors[idx].g & 0x1F) << 6) |
+                               (palette->colors[idx].b & 0x1F);
+                    }
+                    
+                    uint16_t* dst = &(((uint16_t*)image.data)[(y * image.width) + x]);
+                    dst[0] = pixel1;
+                    dst[1] = pixel2;
                 }
-                break;
             }
-            
-            default:
-                LOG_ERROR("level_viewer.c", __LINE__, "Unsupported TIM format for texture: 0x%04X", tim->header.image_format);
-                return texture;
+            break;
         }
-    } else {
-        LOG_ERROR("level_viewer.c", __LINE__, "VQ compression not yet supported for texture conversion");
-        return texture;
+        
+        case TIM_FORMAT_CLUT_RAW_8BIT: {
+            image.width = width;
+            image.height = height;
+            image.format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE;
+            image.data = (unsigned char*)malloc(image.width * image.height * 2);
+            
+            for (int y = 0; y < image.height; y++) {
+                for (int x = 0; x < image.width; x++) {
+                    uint8_t idx = src_data[(y * image.width) + x];
+                    uint16_t pixel = 0;
+                    if (idx < palette->entry_count) {
+                        pixel = ((palette->colors[idx].r & 0x1F) << 11) |
+                               ((palette->colors[idx].g & 0x1F) << 6) |
+                               (palette->colors[idx].b & 0x1F);
+                    }
+                    memcpy(&(((uint16_t*)image.data)[(y * image.width) + x]), &pixel, sizeof(uint16_t));
+                }
+            }
+            break;
+        }
+        
+        case TIM_FORMAT_CLUT_RAW_16BIT: {
+            image.width = width;
+            image.height = height;
+            image.format = PIXELFORMAT_UNCOMPRESSED_R5G6B5;
+            image.data = (unsigned char*)malloc(image.width * image.height * 2);
+            
+            for (uint32_t i = 0; i < image.width * image.height; i++) {
+                uint16_t psx_pixel = ((uint16_t*)src_data)[i];
+                psx_pixel = __builtin_bswap16(psx_pixel);
+                
+                uint16_t raylib_pixel = ((psx_pixel >> 10) & 0x1F) |
+                                       ((psx_pixel >> 6) & 0xFC) |
+                                       ((psx_pixel & 0x1F) << 11);
+                memcpy(&(((uint16_t*)image.data)[i]), &raylib_pixel, sizeof(uint16_t));
+            }
+            break;
+        }
+        
+        default:
+            LOG_ERROR("level_viewer.c", __LINE__, "Unsupported TIM format for texture: 0x%04X", tim->header.image_format);
+            return texture;
     }
 
     texture = LoadTextureFromImage(image);

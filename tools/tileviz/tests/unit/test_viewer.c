@@ -22,7 +22,7 @@ void test_viewer_create(void) {
     assert(viewer->camera_y == 0);
     assert(viewer->zoom == 1.0f);
     assert(viewer->tile_data == NULL);
-    assert(viewer->texture == NULL);
+    assert(viewer->tim == NULL);
     assert(viewer->palette == NULL);
 
     viewer_cleanup(viewer);
@@ -86,18 +86,18 @@ void test_viewer_render_empty(void) {
 
     LevelViewer* viewer = viewer_create();
 
-    viewer->texture = TIM_LoadFile("tests/unit/test_tim_16bit.bin");
+    viewer->tim = TIM_LoadFile("tests/unit/test_tim_16bit.bin");
 
-    if (viewer->texture) {
-        viewer->palette = viewer->texture->palette;
+    if (viewer->tim) {
+        viewer->palette = viewer->tim->palette;
 
         int screen_width = GetScreenWidth();
         int screen_height = GetScreenHeight();
 
         viewer_render(viewer);
 
-        TIM_FreeFile(viewer->texture);
-        viewer->texture = NULL;
+        TIM_FreeFile(viewer->tim);
+        viewer->tim = NULL;
     }
 
     viewer_cleanup(viewer);

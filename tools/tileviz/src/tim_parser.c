@@ -141,26 +141,26 @@ TIMFile* TIM_LoadFile(const char* filepath) {
 
     // Detect format and set dimensions
     uint16_t img_format = header->image_format;
-    uint8_t palette_fmt = header->palette_format;
     uint8_t clut_count = header->clut_entries;
 
-    if (img_format == TIM_FORMAT_CLUT_RAW_16BIT) {
-        tim->compression = TIM_COMPRESSION_NONE;
-        tim->width = 64;
-        tim->height = 64;
-    } else if (img_format <= TIM_FORMAT_CLUT_RAW_1BIT) {
-        tim->compression = TIM_COMPRESSION_NONE;
-        tim->width = 64;
-        tim->height = 64;
-    } else if (img_format >= TIM_FORMAT_VQ_CLUT_16BIT && img_format <= TIM_FORMAT_VQ_CLUT_1BIT) {
-        tim->compression = TIM_COMPRESSION_VQ;
-        tim->width = 64;
-        tim->height = 64;
-    } else {
-        LOG_ERROR("tim_parser.c", __LINE__, "Unsupported image format: 0x%04X", img_format);
-        free(tim);
-        free(file_data);
-        return NULL;
+    switch (img_format) {
+        case TIM_FORMAT_CLUT_RAW_4BIT:
+            tim->width = 64;  // Will be calculated from actual data
+            tim->height = 64;
+            break;
+        case TIM_FORMAT_CLUT_RAW_8BIT:
+            tim->width = 64;
+            tim->height = 64;
+            break;
+        case TIM_FORMAT_CLUT_RAW_16BIT:
+            tim->width = 64;
+            tim->height = 64;
+            break;
+        default:
+            LOG_ERROR("tim_parser.c", __LINE__, "Unsupported image format: 0x%04X", img_format);
+            free(tim);
+            free(file_data);
+            return NULL;
     }
 
     LOG_INFO("tim_parser.c", __LINE__, "TIM file loaded: %s (%dx%d) format=0x%04X", filepath, tim->width, tim->height, img_format);

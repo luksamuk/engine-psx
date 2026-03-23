@@ -1,6 +1,6 @@
 // TIM parser comprehensive tests
 
-#include "../include/tim_parser.h"
+#include "../src/tim_parser.h"
 #include "../include/log.h"
 #include <stdio.h>
 #include <stdlib.h>
