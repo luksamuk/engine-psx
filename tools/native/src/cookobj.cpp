@@ -234,14 +234,26 @@ void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef
                     toml_array_t* frame_arr = toml_array_at(frames, j);
                     if (!frame_arr) break;
                     Frame fr = {};
+                    fr.flipmask = 0;
                     toml_datum_t d0 = toml_int_at(frame_arr, 0);
                     toml_datum_t d1 = toml_int_at(frame_arr, 1);
                     toml_datum_t d2 = toml_int_at(frame_arr, 2);
                     toml_datum_t d3 = toml_int_at(frame_arr, 3);
+                    // Optional flip flags [u0, v0, width, height, flipx, flipy]
+                    int frame_len = toml_array_nelem(frame_arr);
+                    toml_datum_t d4 = {0};
+                    toml_datum_t d5 = {0};
+                    if (frame_len > 4) d4 = toml_int_at(frame_arr, 4);
+                    if (frame_len > 5) d5 = toml_int_at(frame_arr, 5);
                     if (d0.ok) fr.u0 = d0.u.i;
                     if (d1.ok) fr.v0 = d1.u.i;
                     if (d2.ok) fr.width = d2.u.i;
                     if (d3.ok) fr.height = d3.u.i;
+                    if (d4.ok && d4.u.i) { 
+                        fr.flipmask |= 0x01;
+                        fprintf(stderr, "DEBUG: Set flipx for %s\n", obj_name);
+                    }
+                    if (d5.ok && d5.u.i) fr.flipmask |= 0x02;  // flipy = bit 1
                     fr.tpage = fr.v0 / 256;
                     fr.v0 %= 256;
                     anim.frames.push_back(fr);
@@ -255,10 +267,15 @@ void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef
     toml_table_t* frag = toml_table_in(obj_tab, "fragment");
     if (frag) {
         obj.fragment = new Fragment();
-        toml_datum_t offx = toml_int_in(frag, "offsetx");
-        toml_datum_t offy = toml_int_in(frag, "offsety");
-        if (offx.ok) obj.fragment->offsetx = offx.u.i;
-        if (offy.ok) obj.fragment->offsety = offy.u.i;
+        
+        // Read offset as array: offset = [x, y]
+        toml_array_t* offset_arr = toml_array_in(frag, "offset");
+        if (offset_arr) {
+            toml_datum_t x = toml_int_at(offset_arr, 0);
+            toml_datum_t y = toml_int_at(offset_arr, 1);
+            if (x.ok) obj.fragment->offsetx = x.u.i;
+            if (y.ok) obj.fragment->offsety = y.u.i;
+        }
         
         toml_array_t* fanims = toml_array_in(frag, "animations");
         if (fanims) {
@@ -270,6 +287,36 @@ void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef
                 toml_datum_t dur = toml_int_in(anim_tab, "duration");
                 anim.loopback = loop.ok ? loop.u.i : 0;
                 anim.duration = dur.ok ? dur.u.i : 0;
+                
+                // Read frames for fragment animation
+                toml_array_t* frames = toml_array_in(anim_tab, "frames");
+                if (frames) {
+                    for (int j = 0; ; j++) {
+                        toml_array_t* frame_arr = toml_array_at(frames, j);
+                        if (!frame_arr) break;
+                        Frame fr = {};
+                        fr.flipmask = 0;
+                        toml_datum_t d0 = toml_int_at(frame_arr, 0);
+                        toml_datum_t d1 = toml_int_at(frame_arr, 1);
+                        toml_datum_t d2 = toml_int_at(frame_arr, 2);
+                        toml_datum_t d3 = toml_int_at(frame_arr, 3);
+                        int frame_len = toml_array_nelem(frame_arr);
+                        toml_datum_t d4 = {0};
+                        toml_datum_t d5 = {0};
+                        if (frame_len > 4) d4 = toml_int_at(frame_arr, 4);
+                        if (frame_len > 5) d5 = toml_int_at(frame_arr, 5);
+                        if (d0.ok) fr.u0 = d0.u.i;
+                        if (d1.ok) fr.v0 = d1.u.i;
+                        if (d2.ok) fr.width = d2.u.i;
+                        if (d3.ok) fr.height = d3.u.i;
+                        if (d4.ok && d4.u.i) fr.flipmask |= 0x01;
+                        if (d5.ok && d5.u.i) fr.flipmask |= 0x02;
+                        fr.tpage = fr.v0 / 256;
+                        fr.v0 %= 256;
+                        anim.frames.push_back(fr);
+                    }
+                }
+                
                 obj.fragment->animations.push_back(anim);
             }
         }
