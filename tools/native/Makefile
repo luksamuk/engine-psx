@@ -15,7 +15,7 @@ CJSON_SRC = lib/cJSON.c
 TOML_SRC = lib/tomlc99.c
 
 # Tools to build
-TOOLS = cooklvl buildprl framepacker chunkgen
+TOOLS = cooklvl buildprl framepacker chunkgen chunkmapper cookcollision
 
 .PHONY: all clean directories
 
@@ -34,6 +34,12 @@ $(BIN_DIR)/framepacker: src/framepacker.c $(COMMON_SRC) $(CJSON_SRC) | directori
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 $(BIN_DIR)/chunkgen: src/chunkgen.c $(COMMON_SRC) | directories
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+$(BIN_DIR)/chunkmapper: src/chunkmapper.c $(COMMON_SRC) $(CJSON_SRC) | directories
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+$(BIN_DIR)/cookcollision: src/cookcollision.c $(COMMON_SRC) $(CJSON_SRC) | directories
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
