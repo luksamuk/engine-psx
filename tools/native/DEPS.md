@@ -110,3 +110,40 @@ CXXFLAGS = -std=c++17 -O2
 - yyjson: MIT License
 - rapidxml: Boost Software License
 - jansson: MIT License
+
+## cookobj (C++ with rapidxml)
+
+### Dependencies
+
+```bash
+# Download rapidxml (header-only)
+mkdir -p lib/rapidxml
+curl -L https://raw.githubusercontent.com/g-truc/glm/master/contrib/rapidxml/rapidxml.hpp \
+  -o lib/rapidxml/rapidxml.hpp
+```
+
+### Analysis of cookobj
+
+The Python cookobj does:
+1. Parse Tiled TMX (XML) - uses BeautifulSoup
+2. Parse TOML for animation data
+3. Generate OTD (Object Type Definition) - binary
+4. Generate OMP (Object Map Placement) - binary
+
+Key structures:
+- Object definitions with animations (u0, v0, width, height)
+- Object placements (x, y, flip, rotation)
+- Animation tags with frame ranges
+
+### Implementation Plan
+
+Use C++ with:
+- rapidxml for TMX parsing
+- existing tomlc99 (C) OR toml++ (C++17 header-only)
+
+Build:
+```bash
+g++ -std=c++17 -O2 -I./lib/rapidxml -I./include \
+    cookobj.cpp lib/minilib.c lib/tomlc99.c -o cookobj
+```
+
