@@ -13,6 +13,7 @@ BIN_DIR = bin
 COMMON_SRC = lib/minilib.c
 CJSON_SRC = lib/cJSON.c
 TOML_SRC = lib/tomlc99.c
+YYJSON_SRC = lib/yyjson/yyjson.c
 
 # Tools to build
 TOOLS = cooklvl buildprl framepacker chunkgen chunkmapper cookcollision
@@ -39,8 +40,9 @@ $(BIN_DIR)/chunkgen: src/chunkgen.c $(COMMON_SRC) | directories
 $(BIN_DIR)/chunkmapper: src/chunkmapper.c $(COMMON_SRC) $(CJSON_SRC) | directories
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-$(BIN_DIR)/cookcollision: src/cookcollision.c $(COMMON_SRC) $(CJSON_SRC) | directories
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+# cookcollision uses yyjson for fast JSON parsing
+$(BIN_DIR)/cookcollision: src/cookcollision.c $(YYJSON_SRC) $(COMMON_SRC) | directories
+	$(CC) $(CFLAGS) -I./lib/yyjson $^ -o $@ $(LDFLAGS)
 
 clean:
 	rm -rf $(BIN_DIR)

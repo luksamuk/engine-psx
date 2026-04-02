@@ -166,10 +166,10 @@ cleancook:
 	$(FRAMEPACKER) --tilemap $< $@
 
 # =========== 16x16 collision ===========
-# (Depends on tiles16.tsx tile map with collision data, generated on Tiled).
-%/MAP16.COL: %/tiles16.tsx
+# Now using native C tool with yyjson
+%/MAP16.COL: %/tiles16.tsx native-tools
 	tiled --export-tileset $< "$(dir $<)collision16.json"
-	./tools/cookcollision.py "$(dir $<)collision16.json" $@
+	./tools/native/bin/cookcollision "$(dir $<)collision16.json" $@
 	rm "$(dir $@)collision16.json"
 
 # =========== 128x128 tile mapping ===========
