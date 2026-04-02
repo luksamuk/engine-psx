@@ -12,7 +12,7 @@ BIN_DIR = bin
 # Common library files
 COMMON_SRC = lib/minilib.c
 CJSON_SRC = lib/cJSON.c
-TOML_SRC = lib/tomlc99.c
+TOML_SRC = lib/toml.c
 YYJSON_SRC = lib/yyjson/yyjson.c
 
 # Tools to build
