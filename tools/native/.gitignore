@@ -1,0 +1,20 @@
+# Binários compilados
+bin/
+build/
+
+# Objetos temporários
+*.o
+*.obj
+
+# Debug
+*.dSYM/
+
+# Editor
+*~
+.*.swp
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

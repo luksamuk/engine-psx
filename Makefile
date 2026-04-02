@@ -21,6 +21,29 @@ MDLOUT    := $(addsuffix .mdl,$(basename $(MDLSRC)))
 PRLOUT    := $(addsuffix PRL.PRL,$(dir $(PRLSRC)))
 VAGOUT    := $(addsuffix .VAG,$(basename $(VAGSRC)))
 
+# Native tools (C versions - mandatory)
+NATIVE_TOOLS := ./tools/native/bin/cooklvl \
+                ./tools/native/bin/buildprl \
+                ./tools/native/bin/framepacker \
+                ./tools/native/bin/chunkgen
+
+FRAMEPACKER := ./tools/native/bin/framepacker
+COOKLVL     := ./tools/native/bin/cooklvl
+BUILDPRL    := ./tools/native/bin/buildprl
+CHUNKGEN    := ./tools/native/bin/chunkgen
+
+.PHONY: native-tools clean-native
+
+# Build native tools if not present
+native-tools: $(NATIVE_TOOLS)
+
+$(NATIVE_TOOLS):
+	@echo "Building native tools..."
+	$(MAKE) -C tools/native
+
+clean-native:
+	$(MAKE) -C tools/native clean
+
 .PHONY: clean ${CUESHEET} run configure chd cook iso elf debug cooktest purge rebuild repack packrun
 
 # Final product is CUE+BIN files
@@ -49,8 +72,7 @@ run-duckstation: ${CUESHEET}
 	duckstation "$<"
 
 # Run debugger
-debug:
-	gdb
+debug:	gdb
 
 # =======================================
 #  Targets for executable building
@@ -114,7 +136,7 @@ prl:    $(PRLOUT)
 objs:   $(OMPOUT)
 vag:    $(VAGOUT)
 
-cook: mdls map16 map128 lvl objs prl vag
+cook: native-tools mdls map16 map128 lvl objs prl vag
 
 cleancook:
 	rm -rf assets/models/**/*.mdl \
@@ -140,8 +162,8 @@ cleancook:
 
 # =========== 16x16 tile mapping ===========
 # (Depends on mapping generated on Aseprite)
-%/MAP16.MAP: %/map16.json
-	./tools/framepacker.py --tilemap $< $@
+%/MAP16.MAP: %/map16.json native-tools
+	$(FRAMEPACKER) --tilemap $< $@
 
 # =========== 16x16 collision ===========
 # (Depends on tiles16.tsx tile map with collision data, generated on Tiled).
@@ -153,11 +175,11 @@ cleancook:
 # =========== 128x128 tile mapping ===========
 # Also generates 128.png to create a 128x128 tileset (should be done manually)
 # (Depends on tilemap128.tmx map generated on Tiled)
-%/MAP128.MAP: %/tilemap128.tmx
+# Exporta arquivo .cnk (ou múltiplos _solid.cnk, _oneway.cnk, etc.)
+%/MAP128.MAP: %/tilemap128.tmx native-tools
 	tiled --export-map $< "$(basename $<).cnk"
 	tmxrasterizer $< "$(dir $<)128.png"
-	./tools/chunkgen.py "$(basename $<).cnk" $@
-	rm -f "$(basename $<).cnk"
+	$(CHUNKGEN) "$(basename $<)" $@
 	rm -f "$(basename $<)_solid.cnk"
 	rm -f "$(basename $<)_oneway.cnk"
 	rm -f "$(basename $<)_none.cnk"
@@ -166,9 +188,9 @@ cleancook:
 # =========== Level maps ===========
 # These maps should use a tileset generated from "128.png".
 # (Depends on files such as Z1.tmx, Z2.tmx, etc., generated on Tiled)
-%.LVL: %.tmx
+%.LVL: %.tmx native-tools
 	tiled --export-map $< "$(basename $@).psxlvl"
-	./tools/cooklvl.py "$(basename $@).psxlvl" $@
+	$(COOKLVL) "$(basename $@).psxlvl" $@
 	rm "$(basename $@).psxlvl"
 
 
@@ -179,8 +201,8 @@ cleancook:
 
 # =========== Level parallax data ===========
 # (Depends on a specific file named parallax.toml within level directory)
-%/PRL.PRL: %/parallax.toml
-	./tools/buildprl/buildprl.py $<
+%/PRL.PRL: %/parallax.toml native-tools
+	$(BUILDPRL) $<
 
 # =========== VAG audio encoding ===========
 %.VAG: %.ogg
