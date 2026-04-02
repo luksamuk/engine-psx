@@ -196,17 +196,28 @@ void write_omp(const char* filename, std::vector<Placement>& placements) {
     std::cout << "Created " << filename << " (" << placements.size() << " placements)" << std::endl;
 }
 
-void parse_toml_animations(const char* filename, ObjectDef& obj) {
+void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef& obj) {
     FILE* f = fopen(filename, "r");
-    if (!f) return;
+    if (!f) { std::cout << "TOML not found: " << filename << std::endl; return; }
     
     char errbuf[256];
     toml_table_t* root = toml_parse_file(f, errbuf, sizeof(errbuf));
     fclose(f);
-    if (!root) return;
+    if (!root) { std::cout << "TOML parse error: " << errbuf << std::endl; return; }
     
-    toml_array_t* anims = toml_array_in(root, "animations");
+    // Find object table by name (e.g., [motobug])
+    toml_table_t* obj_tab = toml_table_in(root, obj_name);
+    if (!obj_tab) { 
+        std::cout << "Object " << obj_name << " not found in TOML" << std::endl;
+        toml_free(root); 
+        return; 
+    }
+    
+    std::cout << "Found object " << obj_name << " in TOML" << std::endl;
+    
+    toml_array_t* anims = toml_array_in(obj_tab, "animations");
     if (anims) {
+        std::cout << "  Found " << toml_array_nelem(anims) << " animations" << std::endl;
         for (int i = 0; ; i++) {
             toml_table_t* anim_tab = toml_table_at(anims, i);
             if (!anim_tab) break;
@@ -240,7 +251,8 @@ void parse_toml_animations(const char* filename, ObjectDef& obj) {
         }
     }
     
-    toml_table_t* frag = toml_table_in(root, "fragment");
+    // Check for fragment in object table, not root
+    toml_table_t* frag = toml_table_in(obj_tab, "fragment");
     if (frag) {
         obj.fragment = new Fragment();
         toml_datum_t offx = toml_int_in(frag, "offsetx");
@@ -308,16 +320,21 @@ void parse_tileset(const char* tsx_path, int firstgid, ObjectMap& map) {
         }
         
         int obj_type = get_obj_id(type);
-        if (obj_type < 0) continue;
+        
+        // If level-specific, always add (even if type unknown)
+        // If common, only add if type is known
+        if (obj_type < 0 && !map.is_level_specific) continue;
         
         ObjectDef obj;
         obj.id = obj_id++;
         obj.name = type;
         obj.fragment = nullptr;
         
-        parse_toml_animations(toml_path, obj);
+        parse_toml_animations(toml_path, type, obj);
         
         map.objects[gid] = obj;
+        // For level-specific, use sequential local ID
+        // For common, use global ObjectId
         map.obj_mapping[gid] = map.is_level_specific ? (gid - firstgid) : obj_type;
     }
     
