@@ -11,7 +11,7 @@ Ferramentas nativas em C para build de assets do engine-psx, substituindo as ver
 | **framepacker** | ✅ Pronto | `framepacker [--tilemap] in.json out.CHARA` | Empacota frames de Aseprite |
 | **chunkgen** | ✅ Pronto | `chunkgen input.cnk output.MAP` | Converte chunks CSV para MAP |
 | **chunkmapper** | ✅ Pronto | `chunkmapper input.json` | Gera TMX a partir de JSON de mapeamento |
-| **cookobj** | ⏳ TODO | - | Cozinha objetos Tiled (XML + TOML) |
+| **cookobj** | ✅ Pronto | \ | Cozinha objetos Tiled (C++ rapidxml) |
 | **cookcollision** | ✅ Pronto | `cookcollision tiles.json tiles.COL` | Gerado dados de colisão (yyjson) |
 | **convrsd** | ⏳ TODO | `convrsd input.rsd` | Converte modelos RSD para MDL |
 
