@@ -1,0 +1,27 @@
+# License Information
+
+## Code Authored by Project (MPL 2.0)
+
+All original code in this directory is licensed under MPL 2.0:
+- `src/*.c` - Tool implementations
+- `lib/cJSON.c/h` - Minimal JSON parser (original implementation)
+- `lib/tomlc99.c` - Minimal TOML parser (original implementation)  
+- `lib/minilib.c` - Common utilities (original implementation)
+- `include/*.h` - Headers (original implementation)
+
+## Third-Party Code
+
+### yyjson (MIT License)
+**Location:** `lib/yyjson/`  
+**Author:** Yao Yuan (ibireme@gmail.com)  
+**Source:** https://github.com/ibireme/yyjson  
+**License:** MIT License (see header in yyjson.h)
+
+Used for high-performance JSON parsing in cookcollision.
+
+## Summary
+
+- Native tools: MPL 2.0
+- yyjson library: MIT License ( Copyright (c) 2020 Yao Yuan )
+
+Both licenses are permissive and compatible for distribution.
