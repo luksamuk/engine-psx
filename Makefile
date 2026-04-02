@@ -25,7 +25,9 @@ VAGOUT    := $(addsuffix .VAG,$(basename $(VAGSRC)))
 NATIVE_TOOLS := ./tools/native/bin/cooklvl \
                 ./tools/native/bin/buildprl \
                 ./tools/native/bin/framepacker \
-                ./tools/native/bin/chunkgen
+                ./tools/native/bin/chunkgen \
+                ./tools/native/bin/cookcollision \
+                ./tools/native/bin/cookobj
 
 FRAMEPACKER := ./tools/native/bin/framepacker
 COOKLVL     := ./tools/native/bin/cooklvl
@@ -107,8 +109,8 @@ build-debug: cook
 	cmake --preset default .
 	cd build && make sonic && make iso
 
-# Clean build directory
-clean:
+# Clean build directory and native tools
+clean: clean-native
 	rm -rf ./build
 
 # Clean build directory and purge cooked assets
@@ -196,8 +198,8 @@ cleancook:
 
 # =========== Object level placement ===========
 # (Depends on files such as Z1.tmx, Z2.tmx, etc., generated on Tiled)
-%.OMP: %.tmx
-	./tools/cookobj/cookobj.py $<
+%.OMP: %.tmx native-tools
+	./tools/native/bin/cookobj $<
 
 # =========== Level parallax data ===========
 # (Depends on a specific file named parallax.toml within level directory)
