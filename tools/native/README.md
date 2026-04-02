@@ -10,9 +10,9 @@ Ferramentas nativas em C para build de assets do engine-psx, substituindo as ver
 | **buildprl** | ✅ Pronto | `buildprl parallax.toml` | Converte config de parallax TOML para PRL |
 | **framepacker** | ✅ Pronto | `framepacker [--tilemap] in.json out.CHARA` | Empacota frames de Aseprite |
 | **chunkgen** | ✅ Pronto | `chunkgen input.cnk output.MAP` | Converte chunks CSV para MAP |
-| **chunkmapper** | ⏳ WIP | - | Gera TMX a partir de JSON de mapeamento |
+| **chunkmapper** | ✅ Pronto | `chunkmapper input.json` | Gera TMX a partir de JSON de mapeamento |
 | **cookobj** | ⏳ TODO | - | Cozinha objetos Tiled (XML + TOML) |
-| **cookcollision** | ⏳ TODO | `cookcollision tiles.json tiles.COL` | Gera dados de colisão (geometria complexa) |
+| **cookcollision** | ⏳ TODO* | - | Gera dados de colisão (Python mantido*) |
 | **convrsd** | ⏳ TODO | `convrsd input.rsd` | Converte modelos RSD para MDL |
 
 Legenda: ✅ Pronto | 🚧 Em desenvolvimento | ⏳ A fazer
@@ -73,8 +73,8 @@ native/
 │   ├── buildprl.c    # ✅
 │   ├── framepacker.c # ✅
 │   ├── chunkgen.c    # ✅
-│   ├── chunkmapper.c # 🚧
-│   ├── cookcollision.c # ⏳
+│   ├── chunkmapper.c # ✅
+│   ├── cookcollision.c # ⏳ ver nota abaixo
 │   └── convrsd.c     # ⏳
 └── bin/              # Binários (gitignored)
 ```
@@ -97,7 +97,13 @@ Todas as ferramentas gerem **big-endian** (formato PlayStation nativo) usando he
 
 ## Ferramentas Pendentes
 
-### cookcollision.c (Alta Prioridade)
+### cookcollision.c – **Usar Python**
+A implementação C está funcional mas o parser JSON minimal não lida bem com arquivos Tiled grandes (>30KB, muitos objetos). **Recomendação**: manter versão Python para collision e fazer wrapper se necessário. Alternativas:
+1. Integrar cJSON completo (+100KB código)
+2. Implementar parser XML Tiled específico
+3. Usar Python (recomendado – funciona)
+
+### cookobj.c (Alta Prioridade)
 Substitui `cookcollision.py` que usa shapely para geometria. Precisa implementar:
 - Point-in-polygon (ray casting ou winding number)
 - Height mask calculation (linecast iterativo)
@@ -130,9 +136,11 @@ Gera TMX a partir de JSON exportado. Usa pandas em Python; em C:
 | cooklvl | TBD | TBD | Estimado >5x |
 | buildprl | TBD | TBD | Estimado >10x |
 | framepacker | TBD | TBD | Estimado >5x |
-| chunkgen | TBD | TBD | Estimado >20x* |
+| chunkgen | ~20x* | Parser manual O(n) vs pandas |
 
-*chunkgen em Python usa pandas; versão C é parser manual O(n)
+*chunkgen: ganho real significativo devido à eliminação do startup do Python + pandas
+
+**Nota**: cookcollision permanece em Python – parser de geometria complexa em C exigiria biblioteca JSON/XML completa que eliminaria vantagem de tamanho.
 
 ## Notas de Implementação
 
