@@ -530,8 +530,20 @@ void parse_tmx(const char* tmx_path, std::map<std::string, ObjectMap>& maps, std
                 if (r == -90) p.flipmask |= 8;
             }
             
+            // Check for properties
+            // BUG COMPATIBILITY: Python checks type_id == 1 for MONITOR
+            // but level-specific objects use local_id where 1 could be buzzbomber!
+            // We must replicate Python's buggy behavior.
             p.has_props = 0;
             p.prop_kind = 0;
+            
+            // Python checks: if p.otype == ObjectId.MONITOR.value (which is 1)
+            // This incorrectly matches any object with type_id == 1
+            if (type_id == OBJ_MONITOR) {
+                p.has_props = 1;
+                // Default kind = 0 (NONE)
+                p.prop_kind = 0;
+            }
             
             rapidxml::xml_node<>* props = obj->first_node("properties");
             if (props) {
@@ -539,8 +551,9 @@ void parse_tmx(const char* tmx_path, std::map<std::string, ObjectMap>& maps, std
                     const char* pname = prop->first_attribute("name")->value();
                     const char* pval = prop->first_attribute("value") ? prop->first_attribute("value")->value() : "";
                     
+                    // BUG COMPATIBILITY: Python only sets Kind if type is MONITOR
+                    // But it processes the prop for any object with type==1
                     if (strcmp(pname, "Kind") == 0 && type_id == OBJ_MONITOR) {
-                        p.has_props = 1;
                         p.prop_kind = get_monitor_kind(pval);
                     }
                     if (strcmp(pname, "frequency") == 0 && type_id == OBJ_BUBBLE_PATCH) {
