@@ -30,7 +30,7 @@ s32 to_psx(float r) {
     float d = r * 180.0f / M_PI;
     while (d < 0) d += 360;
     while (d >= 360) d -= 360;
-    return (s32)(d / 360.0f * 4096);
+    return (s32)(d / 360.0f * 4096 + 0.5f);  // Round to nearest
 }
 
 void get_mask(Mask *m, int dir, Vec2 *v, int n, int pre, int has) {
@@ -54,14 +54,15 @@ void get_mask(Mask *m, int dir, Vec2 *v, int n, int pre, int has) {
     memcpy(m->h, hm, sizeof(hm));
     if (has) { m->a = pre; return; }
     int d = hm[0] - hm[lp];
-    float vx = 0, vy = 0, dx = 0, dy = 0;
-    if (dir == 0) { vx = 16; vy = d; dx = 1; }
-    else if (dir == 1) { vx = -16; vy = -d; dx = -1; }
-    else if (dir == 2) { vx = -d; vy = 16; dy = 1; }
-    else { vx = d; vy = -16; dy = -1; }
+    float vx = 0, vy = 0;
+    if (dir == 0) { vx = 16; vy = d; }
+    else if (dir == 1) { vx = -16; vy = -d; }
+    else if (dir == 2) { vx = -d; vy = 16; }
+    else { vx = d; vy = -16; }
     float len = sqrtf(vx*vx + vy*vy);
     if (len > 0.0001f) { vx /= len; vy /= len; }
-    float ang = atan2f(dy, dx) - atan2f(vy, vx);
+    // Calculate angle relative to +X axis (right), matching Python behavior
+    float ang = -atan2f(vy, vx);
     if (ang < 0) ang += 2 * M_PI;
     m->a = to_psx(ang);
 }
@@ -131,7 +132,8 @@ int parse(const char *fn, Tile **ts, int *nt) {
             float h = yyjson_get_num(yyjson_obj_get(o, "height"));
             tc->v[0] = (Vec2){ox, oy};
             tc->v[1] = (Vec2){ox+w, oy};
-            tc->v[2] = (Vec2){ox+w, oy+h};
+            // Bug compatibility: Python uses 'x + height' instead of 'y + height'
+            tc->v[2] = (Vec2){ox+w, ox+h};
             tc->v[3] = (Vec2){ox, oy+h};
         }
         vc++;

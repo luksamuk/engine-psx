@@ -246,7 +246,11 @@ void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef
                     if (frame_len > 4) d4 = toml_int_at(frame_arr, 4);
                     if (frame_len > 5) d5 = toml_int_at(frame_arr, 5);
                     if (d0.ok) fr.u0 = d0.u.i;
-                    if (d1.ok) fr.v0 = d1.u.i;
+                    if (d1.ok) {
+                        int tmp_v0 = d1.u.i;  // Keep full value before modulo
+                        fr.tpage = tmp_v0 / 256;
+                        fr.v0 = tmp_v0 % 256;
+                    }
                     if (d2.ok) fr.width = d2.u.i;
                     if (d3.ok) fr.height = d3.u.i;
                     if (d4.ok && d4.u.i) { 
@@ -254,8 +258,6 @@ void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef
                         fprintf(stderr, "DEBUG: Set flipx for %s\n", obj_name);
                     }
                     if (d5.ok && d5.u.i) fr.flipmask |= 0x02;  // flipy = bit 1
-                    fr.tpage = fr.v0 / 256;
-                    fr.v0 %= 256;
                     anim.frames.push_back(fr);
                 }
             }
@@ -306,13 +308,15 @@ void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef
                         if (frame_len > 4) d4 = toml_int_at(frame_arr, 4);
                         if (frame_len > 5) d5 = toml_int_at(frame_arr, 5);
                         if (d0.ok) fr.u0 = d0.u.i;
-                        if (d1.ok) fr.v0 = d1.u.i;
+                        if (d1.ok) {
+                            int tmp_v0 = d1.u.i;
+                            fr.tpage = tmp_v0 / 256;
+                            fr.v0 = tmp_v0 % 256;
+                        }
                         if (d2.ok) fr.width = d2.u.i;
                         if (d3.ok) fr.height = d3.u.i;
                         if (d4.ok && d4.u.i) fr.flipmask |= 0x01;
                         if (d5.ok && d5.u.i) fr.flipmask |= 0x02;
-                        fr.tpage = fr.v0 / 256;
-                        fr.v0 %= 256;
                         anim.frames.push_back(fr);
                     }
                 }
