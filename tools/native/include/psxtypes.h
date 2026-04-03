@@ -35,7 +35,7 @@ static inline void write_s8(FILE *f, s8 val) {
 }
 
 static inline void write_u16_be(FILE *f, u16 val) {
-    u8 buf[2] = { (val >> 8) & 0xFF, val & 0xFF };
+    u8 buf[2] = { (u8)((val >> 8) & 0xFF), (u8)(val & 0xFF) };
     fwrite(buf, 1, 2, f);
 }
 
@@ -45,10 +45,10 @@ static inline void write_s16_be(FILE *f, s16 val) {
 
 static inline void write_u32_be(FILE *f, u32 val) {
     u8 buf[4] = { 
-        (val >> 24) & 0xFF,
-        (val >> 16) & 0xFF,
-        (val >> 8) & 0xFF,
-        val & 0xFF
+        (u8)((val >> 24) & 0xFF),
+        (u8)((val >> 16) & 0xFF),
+        (u8)((val >> 8) & 0xFF),
+        (u8)(val & 0xFF)
     };
     fwrite(buf, 1, 4, f);
 }

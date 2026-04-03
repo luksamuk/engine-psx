@@ -241,8 +241,8 @@ void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef
                     toml_datum_t d3 = toml_int_at(frame_arr, 3);
                     // Optional flip flags [u0, v0, width, height, flipx, flipy]
                     int frame_len = toml_array_nelem(frame_arr);
-                    toml_datum_t d4 = {0};
-                    toml_datum_t d5 = {0};
+                    toml_datum_t d4 = {};
+                    toml_datum_t d5 = {};
                     if (frame_len > 4) d4 = toml_int_at(frame_arr, 4);
                     if (frame_len > 5) d5 = toml_int_at(frame_arr, 5);
                     if (d0.ok) fr.u0 = d0.u.i;
@@ -303,8 +303,8 @@ void parse_toml_animations(const char* filename, const char* obj_name, ObjectDef
                         toml_datum_t d2 = toml_int_at(frame_arr, 2);
                         toml_datum_t d3 = toml_int_at(frame_arr, 3);
                         int frame_len = toml_array_nelem(frame_arr);
-                        toml_datum_t d4 = {0};
-                        toml_datum_t d5 = {0};
+                        toml_datum_t d4 = {};
+                        toml_datum_t d5 = {};
                         if (frame_len > 4) d4 = toml_int_at(frame_arr, 4);
                         if (frame_len > 5) d5 = toml_int_at(frame_arr, 5);
                         if (d0.ok) fr.u0 = d0.u.i;

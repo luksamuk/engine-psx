@@ -79,7 +79,6 @@ int parse_chunks(const char *filename, Chunk **chunks, int *num_chunks) {
         cJSON *cel = cJSON_GetArrayItem(cels, i);
         cJSON *tilemap = cJSON_GetObjectItem(cel, "tilemap");
         cJSON *tiles = cJSON_GetObjectItem(tilemap, "tiles");
-        cJSON *bounds = cJSON_GetObjectItem(cel, "bounds");
         
         int cols = cJSON_GetObjectItem(tilemap, "width")->valueint;
         int rows = cJSON_GetObjectItem(tilemap, "height")->valueint;

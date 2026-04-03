@@ -96,15 +96,18 @@ int parse_level(const char *filename, LevelData *level) {
             continue;
         }
         
-        level->layers[i].width = (u8)width->valueint;
-        level->layers[i].height = (u8)height->valueint;
+        int width_val = width->valueint;
+        int height_val = height->valueint;
         
-        if (level->layers[i].width == 0 || level->layers[i].width >= MAX_WIDTH ||
-            level->layers[i].height == 0 || level->layers[i].height >= MAX_HEIGHT) {
+        if (width_val == 0 || width_val >= MAX_WIDTH ||
+            height_val == 0 || height_val >= MAX_HEIGHT) {
             fprintf(stderr, "Error: layer %d exceeds max dimensions\n", i);
             cJSON_Delete(root);
             return -1;
         }
+        
+        level->layers[i].width = (u8)width_val;
+        level->layers[i].height = (u8)height_val;
         
         int tile_count = cJSON_GetArraySize(tiles);
         level->layers[i].tiles = malloc(tile_count * sizeof(u16));
