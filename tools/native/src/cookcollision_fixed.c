@@ -1,7 +1,7 @@
 // cookcollision.c - Cook 16x16 tile collision - Uses yyjson
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 #include <math.h>
 #include <stdbool.h>
 #include "yyjson.h"
@@ -57,12 +57,13 @@ void get_mask(Mask *m, int dir, Vec2 *v, int n, int pre, int has) {
     
     int d = hm[0] - hm[lp];
     
-    // Special case: flat wall (delta = 0)
+    // Special case: flat wall (delta=0)
+    // Return standard angles matching Python behavior
     if (d == 0) {
-        if (dir == 0) m->a = 0;      // DOWN
-        else if (dir == 1) m->a = 2048; // UP
-        else if (dir == 2) m->a = 3072; // LEFT
-        else m->a = 1024;              // RIGHT
+        if (dir == 0) m->a = 0;      // DOWN: 0
+        else if (dir == 1) m->a = 2048; // UP: 180° = pi
+        else if (dir == 2) m->a = 3072; // LEFT: 270° = 3pi/2
+        else m->a = 1024;              // RIGHT: 90° = pi/2
         return;
     }
     
@@ -145,7 +146,7 @@ int parse(const char *fn, Tile **ts, int *nt) {
             float h = yyjson_get_num(yyjson_obj_get(o, "height"));
             tc->v[0] = (Vec2){ox, oy};
             tc->v[1] = (Vec2){ox+w, oy};
-            // Bug compatibility: Python uses ox+h instead of oy+h
+            // Bug compatibility: Python uses 'x + height' instead of 'y + height'
             tc->v[2] = (Vec2){ox+w, ox+h};
             tc->v[3] = (Vec2){ox, oy+h};
         }

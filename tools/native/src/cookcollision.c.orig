@@ -1,4 +1,4 @@
-// cookcollision.c - Cook 16x16 tile collision - Uses yyjson
+/* cookcollision.c - Cook 16x16 tile collision - Uses yyjson */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +30,7 @@ s32 to_psx(float r) {
     float d = r * 180.0f / M_PI;
     while (d < 0) d += 360;
     while (d >= 360) d -= 360;
-    return (s32)(d / 360.0f * 4096 + 0.5f);
+    return (s32)(d / 360.0f * 4096 + 0.5f);  // Round to nearest
 }
 
 void get_mask(Mask *m, int dir, Vec2 *v, int n, int pre, int has) {
@@ -52,29 +52,16 @@ void get_mask(Mask *m, int dir, Vec2 *v, int n, int pre, int has) {
         if (!found) hm[p] = 0;
     }
     memcpy(m->h, hm, sizeof(hm));
-    
     if (has) { m->a = pre; return; }
-    
     int d = hm[0] - hm[lp];
-    
-    // Special case: flat wall (delta = 0)
-    if (d == 0) {
-        if (dir == 0) m->a = 0;      // DOWN
-        else if (dir == 1) m->a = 2048; // UP
-        else if (dir == 2) m->a = 3072; // LEFT
-        else m->a = 1024;              // RIGHT
-        return;
-    }
-    
+    fprintf(stderr, "DEBUG: dir=%d, delta=%d\n", dir, d);
     float vx = 0, vy = 0, dx = 0, dy = 0;
     if (dir == 0) { vx = 16; vy = d; dx = 1; dy = 0; }
     else if (dir == 1) { vx = -16; vy = -d; dx = -1; dy = 0; }
     else if (dir == 2) { vx = -d; vy = 16; dx = 0; dy = 1; }
     else { vx = d; vy = -16; dx = 0; dy = -1; }
-    
     float len = sqrtf(vx*vx + vy*vy);
     if (len > 0.0001f) { vx /= len; vy /= len; }
-    
     float ang = atan2f(dy, dx) - atan2f(vy, vx);
     if (ang < 0) ang += 2 * M_PI;
     m->a = to_psx(ang);
@@ -145,7 +132,7 @@ int parse(const char *fn, Tile **ts, int *nt) {
             float h = yyjson_get_num(yyjson_obj_get(o, "height"));
             tc->v[0] = (Vec2){ox, oy};
             tc->v[1] = (Vec2){ox+w, oy};
-            // Bug compatibility: Python uses ox+h instead of oy+h
+            // Bug compatibility: Python uses 'x + height' instead of 'y + height'
             tc->v[2] = (Vec2){ox+w, ox+h};
             tc->v[3] = (Vec2){ox, oy+h};
         }
@@ -183,12 +170,14 @@ void write(const char *fn, Tile *ts, TileMask *ms, int nt) {
         write_s32_be(f, ms[i].lw.a); wmask(f, ms[i].lw.h);
     }
     fclose(f);
+    printf("Created %s (%d tiles)\n", fn, nt);
 }
 
 int main(int argc, char **argv) {
     if (argc != 3) { fprintf(stderr, "Usage: %s in.json out.COL\n", argv[0]); return 1; }
     Tile *ts; int nt;
     if (parse(argv[1], &ts, &nt) != 0) return 1;
+    printf("Parsed %d tiles\n", nt);
     TileMask *ms;
     proc(ts, nt, &ms);
     write(argv[2], ts, ms, nt);
