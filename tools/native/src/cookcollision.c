@@ -30,7 +30,8 @@ s32 to_psx(float r) {
     float d = r * 180.0f / M_PI;
     while (d < 0) d += 360;
     while (d >= 360) d -= 360;
-    return (s32)(d / 360.0f * 4096 + 0.5f);
+    // Match Python: use floor() instead of round-to-nearest
+    return (s32)floorf(d / 360.0f * 4096);
 }
 
 void get_mask(Mask *m, int dir, Vec2 *v, int n, int pre, int has) {
@@ -66,11 +67,15 @@ void get_mask(Mask *m, int dir, Vec2 *v, int n, int pre, int has) {
         return;
     }
     
-    float vx = 0, vy = 0, dx = 0, dy = 0;
-    if (dir == 0) { vx = 16; vy = d; dx = 1; dy = 0; }
-    else if (dir == 1) { vx = -16; vy = -d; dx = -1; dy = 0; }
-    else if (dir == 2) { vx = -d; vy = 16; dx = 0; dy = 1; }
-    else { vx = d; vy = -16; dx = 0; dy = -1; }
+    // Bug compatibility: Python uses dirvec=[1,0] for ALL directions
+    // (the specific dirvec assignments are commented out in Python)
+    float vx = 0, vy = 0; 
+    const float dx = 1, dy = 0;  // Always [1, 0] for all directions
+    
+    if (dir == 0) { vx = 16; vy = d; }
+    else if (dir == 1) { vx = -16; vy = -d; }
+    else if (dir == 2) { vx = -d; vy = 16; }
+    else { vx = d; vy = -16; }
     
     float len = sqrtf(vx*vx + vy*vy);
     if (len > 0.0001f) { vx /= len; vy /= len; }
@@ -128,25 +133,27 @@ int parse(const char *fn, Tile **ts, int *nt) {
             }
         }
         
-        float ox = yyjson_get_num(yyjson_obj_get(o, "x"));
-        float oy = yyjson_get_num(yyjson_obj_get(o, "y"));
+        // MATCH PYTHON: round coordinates to nearest integer
+        float ox = roundf(yyjson_get_num(yyjson_obj_get(o, "x")));
+        float oy = roundf(yyjson_get_num(yyjson_obj_get(o, "y")));
         yyjson_val *poly = yyjson_obj_get(o, "polygon");
         if (poly && yyjson_is_arr(poly)) {
             tc->nv = yyjson_arr_size(poly);
             if (tc->nv > MAX_VERTICES) tc->nv = MAX_VERTICES;
             for (int i = 0; i < tc->nv; i++) {
                 yyjson_val *v = yyjson_arr_get(poly, i);
-                tc->v[i].x = yyjson_get_num(yyjson_obj_get(v, "x")) + ox;
-                tc->v[i].y = yyjson_get_num(yyjson_obj_get(v, "y")) + oy;
+                // MATCH PYTHON: round after adding origin offset
+                tc->v[i].x = roundf(yyjson_get_num(yyjson_obj_get(v, "x")) + ox);
+                tc->v[i].y = roundf(yyjson_get_num(yyjson_obj_get(v, "y")) + oy);
             }
         } else {
             tc->nv = 4;
-            float w = yyjson_get_num(yyjson_obj_get(o, "width"));
-            float h = yyjson_get_num(yyjson_obj_get(o, "height"));
+            float w = roundf(yyjson_get_num(yyjson_obj_get(o, "width")));
+            float h = roundf(yyjson_get_num(yyjson_obj_get(o, "height")));
+            // Bug compatibility: Python uses ox+h instead of oy+h for v2.y
             tc->v[0] = (Vec2){ox, oy};
             tc->v[1] = (Vec2){ox+w, oy};
-            // Bug compatibility: Python uses ox+h instead of oy+h
-            tc->v[2] = (Vec2){ox+w, ox+h};
+            tc->v[2] = (Vec2){ox+w, ox+h};  // Bug: should be oy+h
             tc->v[3] = (Vec2){ox, oy+h};
         }
         vc++;
