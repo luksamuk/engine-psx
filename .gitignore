@@ -11,3 +11,6 @@ build/
 *.tiled-session
 /.pcsx
 temp/
+__pycache__/
+*.pyc
+*.pyo
