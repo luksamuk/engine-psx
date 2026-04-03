@@ -481,9 +481,8 @@ void parse_tmx(const char* tmx_path, std::map<std::string, ObjectMap>& maps, std
             if (!gid_attr) continue;
             
             int gid = atoi(gid_attr->value());
-            int type_id = 0;
+            int type_id = -1;
             uint8_t is_level_specific = 0;
-            bool found_gid = false;
             
             // Clean GID: mask out flip/rotation bits
             // Python: gid & ~(0b1111 << 29) where 0b1111 << 29 = 0x1E0000000
@@ -491,18 +490,20 @@ void parse_tmx(const char* tmx_path, std::map<std::string, ObjectMap>& maps, std
             unsigned long long mask = 0xfULL << 29;
             unsigned long long uclean = ((unsigned long long)(unsigned int)gid) & ~mask;
             int clean_gid = (int)uclean;
+
+            // Debug: print GIDs that aren't being found
+            static int debug_count = 0;
             
             for (auto& [name, map] : maps) {
                 auto it = map.obj_mapping.find(clean_gid);
                 if (it != map.obj_mapping.end()) {
                     type_id = it->second;
                     is_level_specific = map.is_level_specific;
-                    found_gid = true;
                     break;
                 }
             }
             
-            if (!found_gid) {
+            if (type_id == -1) {
                 static int debug_skipped = 0;
                 if (debug_skipped++ < 5) {
                     fprintf(stderr, "SKIP: gid=%d clean_gid=%d (not in mapping)\n", gid, clean_gid);
@@ -515,8 +516,7 @@ void parse_tmx(const char* tmx_path, std::map<std::string, ObjectMap>& maps, std
             p.otype = type_id;
             p.unique_id = atoi(obj->first_attribute("id") ? obj->first_attribute("id")->value() : "0");
             p.parent_id = 0;
-            // Python adds +32 to center X position
-            p.x = atoi(obj->first_attribute("x")->value()) + 32;
+            p.x = atoi(obj->first_attribute("x")->value());
             p.y = atoi(obj->first_attribute("y")->value());
             
             p.flipmask = 0;
