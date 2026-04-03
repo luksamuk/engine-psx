@@ -370,6 +370,26 @@ void parse_tileset(const char* tsx_path, int firstgid, ObjectMap& map) {
             continue;
         }
         
+        // Also check TOML for dummy flag (Python compatibility)
+        FILE* toml_f = fopen(toml_path, "r");
+        if (toml_f) {
+            char errbuf[256];
+            toml_table_t* root = toml_parse_file(toml_f, errbuf, sizeof(errbuf));
+            fclose(toml_f);
+            if (root) {
+                toml_table_t* obj_tab = toml_table_in(root, type);
+                if (obj_tab) {
+                    toml_datum_t dummy_val = toml_bool_in(obj_tab, "dummy");
+                    if (dummy_val.ok && dummy_val.u.b) {
+                        map.obj_mapping[gid] = DUMMY_RING_3H; // Any dummy value
+                        toml_free(root);
+                        continue;
+                    }
+                }
+                toml_free(root);
+            }
+        }
+        
         int obj_type = get_obj_id(type);
         
         // If level-specific, always add (even if type unknown)
@@ -430,8 +450,18 @@ void parse_tmx(const char* tmx_path, std::map<std::string, ObjectMap>& maps, std
             int type_id = -1;
             uint8_t is_level_specific = 0;
             
+            // Clean GID: mask out flip/rotation bits
+            // Python: gid & ~(0b1111 << 29) where 0b1111 << 29 = 0x1E0000000
+            // Using unsigned long long to avoid overflow
+            unsigned long long mask = 0xfULL << 29;
+            unsigned long long uclean = ((unsigned long long)(unsigned int)gid) & ~mask;
+            int clean_gid = (int)uclean;
+
+            // Debug: print GIDs that aren't being found
+            static int debug_count = 0;
+            
             for (auto& [name, map] : maps) {
-                auto it = map.obj_mapping.find(gid & ~(0x7u << 29));
+                auto it = map.obj_mapping.find(clean_gid);
                 if (it != map.obj_mapping.end()) {
                     type_id = it->second;
                     is_level_specific = map.is_level_specific;
@@ -439,7 +469,13 @@ void parse_tmx(const char* tmx_path, std::map<std::string, ObjectMap>& maps, std
                 }
             }
             
-            if (type_id == -1) continue;
+            if (type_id == -1) {
+                static int debug_skipped = 0;
+                if (debug_skipped++ < 5) {
+                    fprintf(stderr, "SKIP: gid=%d clean_gid=%d (not in mapping)\n", gid, clean_gid);
+                }
+                continue;
+            }
             
             Placement p;
             p.is_level_specific = is_level_specific;
@@ -546,6 +582,7 @@ int main(int argc, char** argv) {
             strncpy(n, name, dot - name);
             n[dot - name] = '\0';
             obj_maps[n] = omap;
+            std::cout << "DEBUG: Loaded tileset '" << n << "' with " << omap.obj_mapping.size() << " objects" << std::endl;
         }
         
         char otd_path[1024];
