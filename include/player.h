@@ -161,6 +161,30 @@ void      player_do_dropdash(Player *player);
 void player_update(Player *player);
 void player_draw(Player *player, VECTOR *screen_pos);
 
+/* DEBUG TELEMETRY */
+// Real-time collision state, exported every frame to a fixed location so
+// external debuggers (e.g. PCSX-Redux Lua scripts) can inspect the player
+// without knowing the Player struct layout. Field offsets must be kept in
+// sync with debug/lua scripts.
+typedef struct {
+    int32_t pos_vx, pos_vy;              // +0,  +4
+    int32_t vel_vx, vel_vy, vel_vz;      // +8, +12, +16
+    int32_t angle;                       // +20
+    int32_t gsmode, psmode, action;      // +24, +28, +32
+    int32_t grnd, ceil, push;            // +36, +40, +44
+    int32_t cam_vx, cam_vy;              // +48, +52
+    // Raw (pre-acceptance) ground and ceiling sensor coordinates
+    int32_t raw_g1, raw_g2;              // +56, +60
+    int32_t raw_c1, raw_c2;              // +64, +68
+    // Sensor events, 12 bytes each: uint8 collided, int32 coord, int32 angle
+    CollisionEvent ev_grnd1, ev_grnd2;   // +72, +84
+    CollisionEvent ev_left, ev_right;    // +96, +108
+    CollisionEvent ev_ceil1, ev_ceil2;   // +120, +132
+} PlayerDebugState;
+
+extern PlayerDebugState player_debug;
+void player_dump_debug(Player *player);
+
 void player_do_die(Player *player, PlayerDeath kind);
 void player_do_damage(Player *player, int32_t hazard_x);
 

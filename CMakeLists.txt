@@ -32,6 +32,19 @@ endif()
 # Allows debug mode. Debug can be activated through the options menu at will,
 add_definitions("-DALLOW_DEBUG")
 
+# Optional test warp: configure with -DTEST_WARP_LEVEL=<id> to boot straight
+# into a level; -DTEST_WARP_CHARACTER=<id> selects the character and
+# -DTEST_WARP_DEBUG_MODE=1|2 activates the debug HUD/sensors.
+if(TEST_WARP_LEVEL)
+  add_definitions("-DTEST_WARP_LEVEL=${TEST_WARP_LEVEL}")
+endif()
+if(TEST_WARP_CHARACTER)
+  add_definitions("-DTEST_WARP_CHARACTER=${TEST_WARP_CHARACTER}")
+endif()
+if(TEST_WARP_DEBUG_MODE)
+  add_definitions("-DTEST_WARP_DEBUG_MODE=${TEST_WARP_DEBUG_MODE}")
+endif()
+
 set(CMAKE_C_FLAGS "-Wall")
 
 psn00bsdk_add_executable(sonic

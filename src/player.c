@@ -99,24 +99,26 @@ extern int32_t    level_water_y;
 
 
 /* GROUND SENSOR COLLISION ANGLES */
-// As a rule of thumb, only floor and ceiling min/max
-// angles are well-defined.
-// Floor: floor left <= x OR x <= floor right
-// R.wall: floor right < x < ceiling min
-// Ceiling: ceiling min <= x <= ceiling max
-// L.wall: ceiling max < x < floor left
-#define GSMODE_ANGLE_FLOOR_RIGHT    0x01d5 // ~41° (original: 45°)
-#define GSMODE_ANGLE_CEIL_MIN       0x0600 // 135°
-#define GSMODE_ANGLE_CEIL_MAX       0x0a00 // 225°
-#define GSMODE_ANGLE_FLOOR_LEFT     0x0e94 // ~318° (original: 315°)
+// Ranges from the SPG (Slope Collision), converted to the 0x1000 base.
+// Note that ranges aren't symmetric since each 45 can't be shared
+// between sectors:
+//   Floor:   angle <= 44 or >= 316
+//   R.Wall:  45..135
+//   Ceiling: 136..224
+//   L.Wall:  225..315
+#define GSMODE_ANGLE_FLOOR_RIGHT    0x01c2 // 44
+#define GSMODE_ANGLE_CEIL_MIN       0x0600 // 135
+#define GSMODE_ANGLE_CEIL_MAX       0x09ff // ~224
+#define GSMODE_ANGLE_FLOOR_LEFT     0x0e37 // ~316
 
 /* PUSH SENSOR COLLISION ANGLES */
-// As opposed to ground sensors, here the L.Wall and R.Wall modes are
-// well-defined.
-#define PSMODE_ANGLE_RWALL_MIN    0x014e // ~41°
-#define PSMODE_ANGLE_RWALL_MAX    0x0579 // 135°
-#define PSMODE_ANGLE_LWALL_MIN    0x0a87 // 225°
-#define PSMODE_ANGLE_LWALL_MAX    0x0db9 // ~318°
+// As opposed to ground sensors, push sensors have larger wall ranges,
+// so the L.Wall and R.Wall modes have precedence over the floor/ceiling
+// modes.
+#define PSMODE_ANGLE_RWALL_MIN    0x014e // ~29
+#define PSMODE_ANGLE_RWALL_MAX    0x0579 // ~134
+#define PSMODE_ANGLE_LWALL_MIN    0x0a87 // ~226
+#define PSMODE_ANGLE_LWALL_MAX    0x0db9 // ~330
 
 /* LANDING SPEED TRANSFER ANGLES */
 // Depending on these angle ranges, X and Y air speed transfer to
@@ -125,6 +127,57 @@ extern int32_t    level_water_y;
 #define LANDING_ANGLE_FLAT_RIGHT  0x0105 // 23
 #define LANDING_ANGLE_SLOPE_LEFT  0x0e0b // 316
 #define LANDING_ANGLE_SLOPE_RIGHT 0x0200 // 45
+
+/* CEILING LANDING ANGLES */
+// When hitting a ceiling while airborne, a steep enough ceiling (i.e.,
+// outside of the flat range) makes the player land on it.
+#define CEILING_ANGLE_FLAT_MIN    0x0600 // 135
+#define CEILING_ANGLE_FLAT_MAX    0x0a00 // 225
+
+/* TERRAIN SNAPPING */
+// The body "radius" used when snapping out of terrain, in pixels.
+// All of the character's sensors are cast from the position anchor,
+// so this is also the distance from the anchor to each body edge.
+#define TERRAIN_SNAP_RADIUS    16
+// Terrain sensors reach this many pixels away from the anchor. The
+// extra tile beyond the body radius follows the SPG extension rule;
+// whether a hit registers is decided by distance acceptance afterwards.
+#define TERRAIN_SENSOR_REACH   (TERRAIN_SNAP_RADIUS + 16)
+
+/* DEBUG TELEMETRY STATE */
+// See player.h for details. These hold the raw (pre-acceptance) sensor
+// coordinates so the acceptance decisions are auditable from outside.
+PlayerDebugState player_debug;
+static int32_t _dbg_raw_g1, _dbg_raw_g2, _dbg_raw_c1, _dbg_raw_c2;
+
+void
+player_dump_debug(Player *player)
+{
+    player_debug.pos_vx = player->pos.vx;
+    player_debug.pos_vy = player->pos.vy;
+    player_debug.vel_vx = player->vel.vx;
+    player_debug.vel_vy = player->vel.vy;
+    player_debug.vel_vz = player->vel.vz;
+    player_debug.angle  = player->angle;
+    player_debug.gsmode = player->gsmode;
+    player_debug.psmode = player->psmode;
+    player_debug.action = player->action;
+    player_debug.grnd   = player->grnd;
+    player_debug.ceil   = player->ceil;
+    player_debug.push   = player->push;
+    player_debug.cam_vx = camera ? camera->pos.vx : 0;
+    player_debug.cam_vy = camera ? camera->pos.vy : 0;
+    player_debug.raw_g1 = _dbg_raw_g1;
+    player_debug.raw_g2 = _dbg_raw_g2;
+    player_debug.raw_c1 = _dbg_raw_c1;
+    player_debug.raw_c2 = _dbg_raw_c2;
+    player_debug.ev_grnd1 = player->ev_grnd1;
+    player_debug.ev_grnd2 = player->ev_grnd2;
+    player_debug.ev_left  = player->ev_left;
+    player_debug.ev_right = player->ev_right;
+    player_debug.ev_ceil1 = player->ev_ceil1;
+    player_debug.ev_ceil2 = player->ev_ceil2;
+}
 
 /* Forward declarations */
 void player_do_pikospin(Player *);
@@ -350,15 +403,76 @@ _draw_sensor(uint16_t anchorx, uint16_t anchory, LinecastDirection dir,
     sort_prim(line, OTZ_LAYER_OBJECTS);
 }
 
+// Signed distance from the player's body edge to a surface coordinate
+// along a sensor direction. Positive means separation (surface away
+// from the body), negative means the body is embedded into terrain.
+// anchor_axis_px is the player's anchor (position) on the cast axis,
+// always at the center.
+static int32_t
+_sensor_dist(LinecastDirection dir, int32_t anchor_axis_px, int32_t coord)
+{
+    switch(dir) {
+    case CDIR_FLOOR:
+    case CDIR_RWALL:
+        return coord - (anchor_axis_px + TERRAIN_SNAP_RADIUS);
+    case CDIR_CEILING:
+    case CDIR_LWALL:
+        return (anchor_axis_px - TERRAIN_SNAP_RADIUS) - coord;
+    }
+    return 0;
+}
+
+static int32_t
+_sensor_axis(LinecastDirection dir, int32_t px, int32_t py)
+{
+    return ((dir == CDIR_FLOOR) || (dir == CDIR_CEILING)) ? py : px;
+}
+
+// Ground sensor acceptance range, from the SPG (Slope Collision):
+// while grounded, distances must lie within -14 to
+// min(abs(ground speed in pixels) + 4, 14), so the faster the player
+// moves, the more separation is tolerated before detaching.
+// While airborne, only embedded surfaces (distance below zero) count,
+// since a landing needs the player to actually reach the ground; and
+// distances lower than -(Y speed in pixels + 8) are disregarded.
+static uint8_t
+_accept_ground_event(Player *player, int32_t dist)
+{
+    if(player->grnd) {
+        int32_t max_dist = MIN(4 + (abs(player->vel.vz) >> 12), 14);
+        return (dist >= -14) && (dist <= max_dist);
+    }
+    if(player->vel.vy < 0) return 0; // Moving up: can't land
+    return (dist <= 0) && (dist >= -((player->vel.vy >> 12) + 8));
+}
+
+// Ceiling sensors perform in the exact same way as the ground sensors,
+// but flipped: only a negative distance (embedded) means a collision.
+static uint8_t
+_accept_ceiling_event(int32_t dist)
+{
+    return (dist <= 0);
+}
+
+// Picks the winning out of two ground/ceiling sensor events:
+// the one with the lesser distance (the surface that is effectively
+// closer to the player center); sensor 1 wins on ties.
+static CollisionEvent *
+_winning_sensor(CollisionEvent *ev1, CollisionEvent *ev2,
+                LinecastDirection dir, int32_t axis)
+{
+    if(ev1->collided && ev2->collided) {
+        int32_t d1 = _sensor_dist(dir, axis, ev1->coord);
+        int32_t d2 = _sensor_dist(dir, axis, ev2->coord);
+        return (d2 < d1) ? ev2 : ev1;
+    }
+    return ev1->collided ? ev1 : ev2;
+}
+
 void
 _player_update_collision_lr(Player *player)
 {
     player->push = 0;
-
-    // NOTE: Push sensors are ONLY used when in floor mode OR when
-    // the angle in question is a multiple of 90 degrees.
-    if((player->gsmode != CDIR_FLOOR) && ((player->angle % 0x400) != 0))
-        return;
 
     /* Collider linecasts */
     uint16_t
@@ -391,17 +505,30 @@ _player_update_collision_lr(Player *player)
         return;
     }
 
-    // Adjust y anchor to y + 8 when on totally flat ground
-    int32_t push_anchory = anchory
-        + ((player->grnd && player->angle == 0) ? 8 : 0);
+    // NOTE: Push sensors are ONLY used when in floor mode OR when
+    // the angle in question is a multiple of 90 degrees (S3K behaviour).
+    if((player->psmode != CDIR_FLOOR) && ((player->angle % 0x400) != 0))
+        return;
+
+    // When on totally flat ground, adjust the anchor to y + 8 so small
+    // floor bumps don't register as walls. On wall/ceiling push modes,
+    // sensors simply radiate from the center position.
+    int32_t push_anchory =
+        (player->psmode == CDIR_FLOOR)
+        ? (anchory + ((player->grnd && player->angle == 0) ? 8 : 0))
+        : (int32_t)(player->pos.vy >> 12);
 
     uint16_t left_mag  = PUSH_RADIUS;
     uint16_t right_mag = PUSH_RADIUS;
 
-    // Adjust modes
-    LinecastDirection ldir = CDIR_LWALL;
-    LinecastDirection rdir = CDIR_RWALL;
-
+    // Adjust sensor directions according to the push mode.
+    // The sensors always radiate from the player anchor, so we just
+    // pick the direction each of them ("E" and "F") points towards.
+    //   Floor:   E = left,  F = right
+    //   R.Wall:  E = down,  F = up
+    //   Ceiling: E = right, F = left
+    //   L.Wall:  E = up,    F = down
+    LinecastDirection ldir, rdir;
     switch(player->psmode) {
     case CDIR_RWALL:
         ldir = CDIR_FLOOR;
@@ -422,31 +549,24 @@ _player_update_collision_lr(Player *player)
         break;
     };
 
-    // Push sensors
-    uint8_t is_push_active;
-    is_push_active = (!player->grnd && abs(player->vel.vx) > 0);
-    is_push_active = is_push_active ||
-        ((player->grnd && abs(player->vel.vz) > 0)
-         && ((player->angle >= 0x0 && player->angle <= 0x400)
-             || (player->angle >= 0xc00 && player->angle <= 0x1000)));
+    // Push sensors are only active when moving.
+    uint8_t is_push_active = (player->grnd)
+        ? (player->vel.vz != 0)
+        : (abs(player->vel.vx) > 0);
 
-    int32_t vel_x = player->grnd ? player->vel.vz : player->vel.vx;
+    int32_t spd = player->grnd ? player->vel.vz : player->vel.vx;
 
     if(is_push_active) {
         // "E" sensor
-        if(!player->ev_left.collided) {
-            if(vel_x < 0) {
-                player->ev_left = linecast(anchorx, push_anchory,
-                                           ldir, left_mag, player->gsmode);
-            }
+        if(!player->ev_left.collided && (spd < 0)) {
+            player->ev_left = linecast(anchorx, push_anchory,
+                                       ldir, left_mag, player->gsmode);
         }
 
         // "F" sensor
-        if(!player->ev_right.collided) {
-            if(vel_x > 0) {
-                player->ev_right = linecast(anchorx, push_anchory,
-                                            rdir, right_mag, player->gsmode);
-            }
+        if(!player->ev_right.collided && (spd > 0)) {
+            player->ev_right = linecast(anchorx, push_anchory,
+                                        rdir, right_mag, player->gsmode);
         }
     }
 
@@ -458,209 +578,200 @@ _player_update_collision_lr(Player *player)
 
 
     /* HANDLE COLLISION */
+    // When hitting a wall, the player's center is repositioned at a
+    // push radius away from the wall surface and the relevant speed
+    // is killed. Sensor casts are only accepted when they hit within
+    // the push radius from the anchor. Coordinate snaps depend on the
+    // sensor direction, not the push mode:
+    //   right/down casts: axis = coord - PUSH_RADIUS
+    //   left/up casts:    axis = coord + PUSH_RADIUS
     switch(player->psmode) {
-    /* case CDIR_RWALL: */
-    /*     if(player->ev_right.collided && vel_x > 0) { */
-    /*         player->grnd = 0; */
-    /*         player->angle = 0; */
-    /*         player->vel.vz = 0; */
-    /*         // TODO: Same as hitting the head. Adjust this to look like ceiling */
-    /*         player->pos.vy = (player->ev_right.coord + 10) << 12; */
-    /*     } */
-
-    /*     if(player->ev_left.collided && vel_x < 0) { */
-    /*         player->grnd = 00; */
-    /*         player->angle = 0; */
-    /*         player->vel.vz = 0; */
-    /*         // TODO: Hit your ass down there, Adjust this to look like floor */
-    /*         player->pos.vy = (player->ev_left.coord - 25) << 12; */
-    /*     } */
-    /*     break; */
-    /* case CDIR_LWALL: */
-    /*     if(player->ev_right.collided && vel_x > 0) { */
-    /*         player->grnd = 0; */
-    /*         player->angle = 0; */
-    /*         player->vel.vz = 0; */
-    /*         // TODO: Hit your ass down there, Adjust this to look like floor */
-    /*         player->pos.vy = (player->ev_right.coord + 25) << 12; */
-    /*     } */
-
-    /*     if(player->ev_left.collided && vel_x < 0) { */
-    /*         player->grnd = 00; */
-    /*         player->angle = 0; */
-    /*         player->vel.vz = 0; */
-    /*         // TODO: Same as hitting the head. Adjust this to look like ceiling */
-       /*         player->pos.vy = (player->ev_left.coord - 10) << 12; */
-    /*     } */
-    /*     break; */
-    /* case CDIR_CEILING: */
-    /*     if(player->ev_right.collided && vel_x > 0) { */
-    /*         player->grnd = 0; */
-    /*         player->angle = 0; */
-    /*         player->vel.vz = 0; */
-    /*         player->pos.vx = (player->ev_right.coord + 25) << 12; */
-    /*     } */
-
-    /*     if(player->ev_left.collided && vel_x > 0) { */
-    /*         player->grnd = 0; */
-    /*         player->angle = 0; */
-    /*         player->vel.vz = 0; */
-    /*         player->pos.vx = (player->ev_left.coord - 10) << 12; */
-    /*     } */
-    /*     break; */
+    case CDIR_RWALL:
+        // Motion happens along the Y axis; F points up, E points down
+        if(player->ev_right.collided && spd > 0) {
+            if(player->grnd) { player->vel.vz = 0; player->push = 1; }
+            else player->vel.vx = 0;
+            player->pos.vy = (player->ev_right.coord + PUSH_RADIUS) << 12;
+        }
+        if(player->ev_left.collided && spd < 0) {
+            if(player->grnd) { player->vel.vz = 0; player->push = 1; }
+            else player->vel.vx = 0;
+            player->pos.vy = (player->ev_left.coord - PUSH_RADIUS) << 12;
+        }
+        break;
+    case CDIR_LWALL:
+        // Motion happens along the Y axis; F points down, E points up
+        if(player->ev_right.collided && spd > 0) {
+            if(player->grnd) { player->vel.vz = 0; player->push = 1; }
+            else player->vel.vx = 0;
+            player->pos.vy = (player->ev_right.coord - PUSH_RADIUS) << 12;
+        }
+        if(player->ev_left.collided && spd < 0) {
+            if(player->grnd) { player->vel.vz = 0; player->push = 1; }
+            else player->vel.vx = 0;
+            player->pos.vy = (player->ev_left.coord + PUSH_RADIUS) << 12;
+        }
+        break;
+    case CDIR_CEILING:
+        // Motion happens along the X axis; F points left, E points right
+        if(player->ev_right.collided && spd > 0) {
+            if(player->grnd) { player->vel.vz = 0; player->push = 1; }
+            else player->vel.vx = 0;
+            player->pos.vx = (player->ev_right.coord + PUSH_RADIUS) << 12;
+        }
+        if(player->ev_left.collided && spd < 0) {
+            if(player->grnd) { player->vel.vz = 0; player->push = 1; }
+            else player->vel.vx = 0;
+            player->pos.vx = (player->ev_left.coord - PUSH_RADIUS) << 12;
+        }
+        break;
     case CDIR_FLOOR:
-        if(player->ev_right.collided && vel_x > 0) {
+    default:
+        if(player->ev_right.collided && spd > 0) {
             if(player->grnd) player->vel.vz = 0;
             else player->vel.vx = 0;
-            player->pos.vx = (player->ev_right.coord - 10) << 12;
+            player->pos.vx = (player->ev_right.coord - PUSH_RADIUS) << 12;
             if(player->grnd) player->push = 1;
         }
 
-        if(player->ev_left.collided && vel_x < 0) {
+        if(player->ev_left.collided && spd < 0) {
             if(player->grnd) player->vel.vz = 0;
             else player->vel.vx = 0;
-            player->pos.vx = (player->ev_left.coord + 25) << 12;
+            player->pos.vx = (player->ev_left.coord + PUSH_RADIUS) << 12;
             if(player->grnd) player->push = 1;
         }
         break;
-    default: break;
     };
-    
 }
 
 void
 _player_update_collision_tb(Player *player)
 {
-    /* Collider linecasts */
-    uint16_t
-        anchorx = (player->pos.vx >> 12),
-        anchory = (player->pos.vy >> 12);
+    /* Collider linecasts, from the player anchor (center position).
+     * Sensors radiate from the anchor with a reach of
+     * TERRAIN_SENSOR_REACH pixels; distance acceptance afterwards
+     * decides what really registers as a hit. */
+    int32_t px = (player->pos.vx >> 12);
+    int32_t py = (player->pos.vy >> 12);
 
-    uint16_t grn_grnd_dist = WIDTH_RADIUS_NORMAL;
-    uint16_t grn_mag   = HEIGHT_RADIUS_NORMAL;
-    uint16_t ceil_mag  = HEIGHT_RADIUS_NORMAL;
+    uint16_t lat_dist = WIDTH_RADIUS_NORMAL;
+    if(player->action == ACTION_JUMPING)
+        lat_dist = WIDTH_RADIUS_ROLLING;
 
-    if(player->action == ACTION_JUMPING) {
-        grn_grnd_dist = WIDTH_RADIUS_ROLLING;
-        grn_mag = ceil_mag = HEIGHT_RADIUS_ROLLING;
-    }
+    /* Ground and ceiling sensor directions are determined by the
+     * ground collision mode, which itself comes from the ground angle.
+     * The sensor lateral (A/B) offsets follow the mode as well:
+     *   Floor:   sensors point down, offsets along X
+     *   R.Wall:  sensors point right, offsets along Y
+     *   Ceiling: sensors point up, offsets along X (inverted)
+     *   L.Wall:  sensors point left, offsets along Y
+     */
+    LinecastDirection grndir = player->gsmode;
+    LinecastDirection ceildir;
 
-    ceil_mag = ceil_mag >> 1; // Halve ceiling sensor magnitude
-
-    uint16_t anchorx_left = anchorx,
-        anchorx_right = anchorx,
-        anchory_left = anchory,
-        anchory_right = anchory;
-
-    LinecastDirection grndir, ceildir;
+    int32_t ax_l = px, ax_r = px, ay_l = py, ay_r = py;
 
     switch(player->gsmode) {
     case CDIR_RWALL:
-        grndir = CDIR_RWALL;
         ceildir = CDIR_LWALL;
-        anchory_left += grn_grnd_dist;
-        anchory_right -= grn_grnd_dist - 1;
+        ay_l += lat_dist;
+        ay_r -= lat_dist - 1;
         break;
     case CDIR_LWALL:
-        grndir = CDIR_LWALL;
         ceildir = CDIR_RWALL;
-        anchory_left -= grn_grnd_dist - 1;
-        anchory_right += grn_grnd_dist;
+        ay_l -= lat_dist;
+        ay_r += lat_dist - 1;
         break;
     case CDIR_CEILING:
-        grndir = CDIR_CEILING;
         ceildir = CDIR_FLOOR;
-        anchorx_left += grn_grnd_dist - 1;
-        anchorx_right -= grn_grnd_dist;
+        ax_l += lat_dist;
+        ax_r -= lat_dist - 1;
         break;
     case CDIR_FLOOR:
     default:
-        grndir = CDIR_FLOOR;
         ceildir = CDIR_CEILING;
-        anchorx_left -= grn_grnd_dist;
-        anchorx_right += grn_grnd_dist - 1;
+        ax_l -= lat_dist;
+        ax_r += lat_dist - 1;
         break;
     };
 
-    // Recalculate ceiling sensor anchors
-    uint16_t anchorx_top_left = anchorx_left,
-        anchorx_top_right = anchorx_right,
-        anchory_top_left = anchory,
-        anchory_top_right = anchory;
-
-    switch(player->gsmode) {
-    case CDIR_RWALL:
-        anchorx_top_left += ceil_mag;
-        anchorx_top_right += ceil_mag;
-        break;
-    case CDIR_LWALL:
-        anchorx_top_left -= ceil_mag;
-        anchorx_top_right -= ceil_mag;
-        break;
-    case CDIR_CEILING:
-        anchory_top_left += ceil_mag;
-        anchory_top_right += ceil_mag;
-        break;
-    case CDIR_FLOOR:
-    default:
-        anchory_top_left -= ceil_mag;
-        anchory_top_right -= ceil_mag;
-        break;
-    };
+    int32_t ground_axis = _sensor_axis(grndir, px, py);
+    int32_t ceil_axis   = _sensor_axis(ceildir, px, py);
 
     // Ground sensors
     if(!player->ev_grnd1.collided) {
-        player->ev_grnd1 = linecast(anchorx_left, anchory_left,
-                                    grndir, grn_mag, player->gsmode);
+        player->ev_grnd1 = linecast(ax_l, ay_l, grndir,
+                                    TERRAIN_SENSOR_REACH, player->gsmode);
+        _dbg_raw_g1 = player->ev_grnd1.collided ? player->ev_grnd1.coord : -1;
+        if(player->ev_grnd1.collided
+           && !_accept_ground_event(
+               player,
+               _sensor_dist(grndir, ground_axis, player->ev_grnd1.coord)))
+            player->ev_grnd1 = (CollisionEvent){ 0 };
     }
     if(!player->ev_grnd2.collided) {
-        player->ev_grnd2 = linecast(anchorx_right, anchory_right,
-                                    grndir, grn_mag, player->gsmode);
+        player->ev_grnd2 = linecast(ax_r, ay_r, grndir,
+                                    TERRAIN_SENSOR_REACH, player->gsmode);
+        _dbg_raw_g2 = player->ev_grnd2.collided ? player->ev_grnd2.coord : -1;
+        if(player->ev_grnd2.collided
+           && !_accept_ground_event(
+               player,
+               _sensor_dist(grndir, ground_axis, player->ev_grnd2.coord)))
+            player->ev_grnd2 = (CollisionEvent){ 0 };
     }
 
     // Ledge sensor
     if(player->over_object == NULL) {
         if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
-            CollisionEvent ev_ledge = linecast(anchorx, anchory_left,
+            CollisionEvent ev_ledge = linecast(px, py,
                                                CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
                                                CDIR_FLOOR);
             player->col_ledge = ev_ledge.collided;
         }
     }
 
+    // Ceiling sensors (checked in the same way as ground sensors,
+    // but flipped; they aren't active while grounded)
     if(!player->grnd) {
-        // Ceiling sensors
         if(!player->ev_ceil1.collided) {
-            player->ev_ceil1 = linecast(anchorx_top_left, anchory_top_left,
-                                        ceildir, ceil_mag, player->gsmode);
+            player->ev_ceil1 = linecast(ax_l, ay_l, ceildir,
+                                        TERRAIN_SENSOR_REACH, player->gsmode);
+            _dbg_raw_c1 = player->ev_ceil1.collided ? player->ev_ceil1.coord : -1;
+            if(player->ev_ceil1.collided
+               && !_accept_ceiling_event(
+                   _sensor_dist(ceildir, ceil_axis, player->ev_ceil1.coord)))
+                player->ev_ceil1 = (CollisionEvent){ 0 };
         }
         if(!player->ev_ceil2.collided) {
-            player->ev_ceil2 = linecast(anchorx_top_right, anchory_top_right,
-                                        ceildir, ceil_mag, player->gsmode);
+            player->ev_ceil2 = linecast(ax_r, ay_r, ceildir,
+                                        TERRAIN_SENSOR_REACH, player->gsmode);
+            _dbg_raw_c2 = player->ev_ceil2.collided ? player->ev_ceil2.coord : -1;
+            if(player->ev_ceil2.collided
+               && !_accept_ceiling_event(
+                   _sensor_dist(ceildir, ceil_axis, player->ev_ceil2.coord)))
+                player->ev_ceil2 = (CollisionEvent){ 0 };
         }
     }
 
     // Draw sensors
     if(debug_mode > 1) {
         // Ground sensors
-        _draw_sensor(anchorx_left, anchory_left,
-                     grndir, grn_mag,
+        _draw_sensor(ax_l, ay_l, grndir, TERRAIN_SENSOR_REACH,
                      0x00, 0xf0, 0x00);
-        _draw_sensor(anchorx_right, anchory_right,
-                     grndir, grn_mag,
+        _draw_sensor(ax_r, ay_r, grndir, TERRAIN_SENSOR_REACH,
                      0x38, 0xff, 0xa2);
 
         // Ceiling sensors
-        _draw_sensor(anchorx_top_left, anchory_top_left,
-                     ceildir, ceil_mag,
-                     0x00, 0xae, 0xef);
-        _draw_sensor(anchorx_top_right, anchory_top_right,
-                     ceildir, ceil_mag,
-                     0xff, 0xf2, 0x38);
+        if(!player->grnd) {
+            _draw_sensor(ax_l, ay_l, ceildir, TERRAIN_SENSOR_REACH,
+                         0x00, 0xae, 0xef);
+            _draw_sensor(ax_r, ay_r, ceildir, TERRAIN_SENSOR_REACH,
+                         0xff, 0xf2, 0x38);
+        }
 
         // Ledge sensor
         if((player->vel.vz == 0) && (player->gsmode == CDIR_FLOOR)) {
-            _draw_sensor(anchorx, anchory_right,
+            _draw_sensor(px, py,
                          CDIR_FLOOR, LEDGE_SENSOR_MAGNITUDE,
                          0x1c, 0xf7, 0x51);
         }
@@ -672,20 +783,12 @@ _player_update_collision_tb(Player *player)
         player->gsmode = player->psmode = CDIR_FLOOR;
 
         // Landing on solid ground
-        if((player->ev_grnd1.collided || player->ev_grnd2.collided) && (player->vel.vy >= 0)) {
-            // Set angle according to movement
-            if(player->ev_grnd1.collided && !player->ev_grnd2.collided)
-                player->angle = player->ev_grnd1.angle;
-            else if(!player->ev_grnd1.collided && player->ev_grnd2.collided)
-                player->angle = player->ev_grnd2.angle;
-            else {
-                // In case both are available, get them based on gsp,
-                // but if gsp is zero, favor left sensor
-                player->angle =
-                    (player->vel.vz <= 0)
-                    ? player->ev_grnd1.angle
-                    : player->ev_grnd2.angle;
-            }
+        if((player->ev_grnd1.collided || player->ev_grnd2.collided)
+           && (player->vel.vy >= 0)) {
+            CollisionEvent *win = _winning_sensor(&player->ev_grnd1,
+                                                  &player->ev_grnd2,
+                                                  grndir, ground_axis);
+            player->angle = win->angle;
 
             if((player->angle >= LANDING_ANGLE_FLAT_LEFT)
                || (player->angle <= LANDING_ANGLE_FLAT_RIGHT)) {
@@ -702,13 +805,7 @@ _player_update_collision_tb(Player *player)
                     player->vel.vy * -SIGNUM(rsin(player->angle));
             }
 
-            int32_t new_coord = 0;
-            if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
-            if((player->ev_grnd2.collided && (player->ev_grnd2.coord < new_coord))
-               || (new_coord == 0))
-                new_coord = player->ev_grnd2.coord;
-
-            player->pos.vy = ((new_coord - 16) << 12);
+            player->pos.vy = (win->coord - TERRAIN_SNAP_RADIUS) << 12;
 
             // When gliding, apply friction
             player->sliding = 0;
@@ -762,16 +859,30 @@ _player_update_collision_tb(Player *player)
             }
         }
 
-        if((player->ev_ceil1.collided || player->ev_ceil2.collided) && (player->vel.vy < 0)) {
-            player->vel.vy = 0;
-            int32_t new_coord = 0;
-            if(player->ev_ceil1.collided) new_coord = player->ev_ceil1.coord;
-            if((player->ev_ceil2.collided && (player->ev_ceil2.coord < new_coord))
-               || (new_coord == 0))
-                new_coord = player->ev_ceil2.coord;
-            
-            player->pos.vy = (new_coord + 32) << 12;
+        // Hitting a ceiling
+        if((player->ev_ceil1.collided || player->ev_ceil2.collided)
+           && (player->vel.vy < 0)) {
+            CollisionEvent *win = _winning_sensor(&player->ev_ceil1,
+                                                  &player->ev_ceil2,
+                                                  ceildir, ceil_axis);
+            player->pos.vy = (win->coord + TERRAIN_SNAP_RADIUS) << 12;
             player->ceil = 1;
+
+            // Whether we should land on the ceiling depends on its angle:
+            // a flat ceiling is simply bumped, but a steep ceiling makes
+            // the player land on it (see Slope Physics). When moving
+            // mostly horizontally, all ceilings are treated as flat.
+            uint8_t mostly_horizontal =
+                (abs(player->vel.vx) > abs(player->vel.vy));
+            if(!mostly_horizontal
+               && ((win->angle < CEILING_ANGLE_FLAT_MIN)
+                   || (win->angle > CEILING_ANGLE_FLAT_MAX))) {
+                player->angle = win->angle;
+                player->vel.vz = player->vel.vy * -SIGNUM(rsin(player->angle));
+                player->grnd = 1;
+            } else {
+                player->vel.vy = 0;
+            }
         } else player->ceil = 0;
 
         // Cancel drop dash if not holding jump
@@ -785,57 +896,30 @@ _player_update_collision_tb(Player *player)
         }
 
         if(!player->ev_grnd1.collided && !player->ev_grnd2.collided) {
+            // No ground within sensor range: leave the ground
             player->grnd = 0;
             player->gsmode = player->psmode = CDIR_FLOOR;
         } else {
-            // Set angle according to movement
-            if(player->ev_grnd1.collided && !player->ev_grnd2.collided)
-                player->angle = player->ev_grnd1.angle;
-            else if(!player->ev_grnd1.collided && player->ev_grnd2.collided)
-                player->angle = player->ev_grnd2.angle;
-            else {
-                if(player->ev_grnd1.coord < player->ev_grnd2.coord)
-                    player->angle = player->ev_grnd1.angle;
-                else player->angle = player->ev_grnd2.angle;
-            }
-            /* // In case both are available, get the angle on the left. */
-            /* // This introduces certain collision bugs but let's leave it */
-            /* // like this for now */
-            /* else player->angle = player->ev_grnd1.angle; */
+            // Winning ground sensor determines both the ground angle
+            // and the position to snap into
+            CollisionEvent *win = _winning_sensor(&player->ev_grnd1,
+                                                  &player->ev_grnd2,
+                                                  grndir, ground_axis);
+            player->angle = win->angle;
 
-            // Calculate which of the two coords we should use.
-            int32_t new_coord = 0;
-            
-            // Positioning resolution according to collision mode
             switch(player->gsmode) {
             case CDIR_RWALL:
-                if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
-                if((player->ev_grnd2.collided && (player->ev_grnd2.coord < new_coord))
-                   || (new_coord == 0))
-                    new_coord = player->ev_grnd2.coord;
-                player->pos.vx = (new_coord - 16) << 12;
+                player->pos.vx = (win->coord - TERRAIN_SNAP_RADIUS) << 12;
                 break;
             case CDIR_LWALL:
-                if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
-                if((player->ev_grnd2.collided && (player->ev_grnd2.coord > new_coord))
-                   || (new_coord == 0))
-                    new_coord = player->ev_grnd2.coord;
-                player->pos.vx = (new_coord + 16) << 12;
+                player->pos.vx = (win->coord + TERRAIN_SNAP_RADIUS) << 12;
                 break;
             case CDIR_CEILING:
-                if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
-                if((player->ev_grnd2.collided && (player->ev_grnd2.coord > new_coord))
-                   || (new_coord == 0))
-                    new_coord = player->ev_grnd2.coord;
-                player->pos.vy = (new_coord + 16) << 12;
+                player->pos.vy = (win->coord + TERRAIN_SNAP_RADIUS) << 12;
                 break;
             case CDIR_FLOOR:
             default:
-                if(player->ev_grnd1.collided) new_coord = player->ev_grnd1.coord;
-                if((player->ev_grnd2.collided && (player->ev_grnd2.coord < new_coord))
-                   || (new_coord == 0))
-                    new_coord = player->ev_grnd2.coord;
-                player->pos.vy = (new_coord - 16) << 12;
+                player->pos.vy = (win->coord - TERRAIN_SNAP_RADIUS) << 12;
                 break;
             };
         }
@@ -849,51 +933,46 @@ _player_resolve_collision_modes(Player *player)
     // One must call input_get_state on player->input so that
     // player input is recognized. This is done in screen_level.c.
 
-    // NOTE: Relative to the Sonic Physics Guide, angles are offset
-    // by 43 units towards the direction that makes more sense for
-    // that region, so angles may be increased or decreased depending
-    // on convenience.
+    // Collision modes are determined by the ground angle alone, and
+    // the ranges follow the SPG (Slope Collision). They operate
+    // somewhat like quadrants, with the player sensors pointing at
+    // one of the four cardinal directions.
     int32_t p_angle = player->angle;
 
     /* GROUND SENSORS COLLISION MODES */
-    if((p_angle >= GSMODE_ANGLE_FLOOR_LEFT) || (p_angle <= GSMODE_ANGLE_FLOOR_RIGHT))
+    if((p_angle <= GSMODE_ANGLE_FLOOR_RIGHT)
+       || (p_angle >= GSMODE_ANGLE_FLOOR_LEFT))
         // floor
         player->gsmode = CDIR_FLOOR;
-    else if((p_angle > GSMODE_ANGLE_FLOOR_RIGHT) && (p_angle < GSMODE_ANGLE_CEIL_MIN))
-        // r.wall (l.wall if angle is negative)
-        player->gsmode = (player->angle >= 0)
-            ? CDIR_RWALL
-            : CDIR_LWALL;
-    else if((p_angle >= GSMODE_ANGLE_CEIL_MIN) && (p_angle <= GSMODE_ANGLE_CEIL_MAX))
+    else if(p_angle < GSMODE_ANGLE_CEIL_MIN)
+        // r.wall
+        player->gsmode = CDIR_RWALL;
+    else if(p_angle <= GSMODE_ANGLE_CEIL_MAX)
         // ceiling
         player->gsmode = CDIR_CEILING;
-    else if((p_angle > GSMODE_ANGLE_CEIL_MAX) && (p_angle < GSMODE_ANGLE_FLOOR_LEFT))
-        // l.wall (r.wall if angle negative)
-        player->gsmode = (player->angle >= 0)
-            ? CDIR_LWALL
-            : CDIR_RWALL;
+    else
+        // l.wall
+        player->gsmode = CDIR_LWALL;
 
     /* PUSH SENSORS COLLISION MODES */
-    if((p_angle > PSMODE_ANGLE_LWALL_MAX) || (p_angle < PSMODE_ANGLE_RWALL_MIN))
+    // Push sensors have larger wall ranges, so they switch to wall
+    // modes first as the angle tilts towards them.
+    if((p_angle < PSMODE_ANGLE_RWALL_MIN)
+       || (p_angle > PSMODE_ANGLE_LWALL_MAX))
         player->psmode = CDIR_FLOOR;
-    else if((PSMODE_ANGLE_RWALL_MIN <= p_angle) && (p_angle <= PSMODE_ANGLE_RWALL_MAX))
-        player->psmode = (player->angle >= 0)
-            ? CDIR_RWALL
-            : CDIR_LWALL;
-    else if((p_angle > PSMODE_ANGLE_RWALL_MAX) && (p_angle < PSMODE_ANGLE_LWALL_MIN))
+    else if(p_angle <= PSMODE_ANGLE_RWALL_MAX)
+        player->psmode = CDIR_RWALL;
+    else if(p_angle < PSMODE_ANGLE_LWALL_MIN)
         player->psmode = CDIR_CEILING;
-    else if((PSMODE_ANGLE_LWALL_MIN >= p_angle) && (p_angle <= PSMODE_ANGLE_LWALL_MAX))
-        player->psmode = (player->angle >= 0)
-            ? CDIR_LWALL
-            : CDIR_RWALL;
+    else
+        player->psmode = CDIR_LWALL;
 }
 
 void
 player_update(Player *player)
 {
     if(player->death_type == 0) {
-        // Angle slope pattern in degrees: 3, 12, 30, 45, 60, 78, 87
-        //_player_resolve_collision_modes(player);
+        _player_resolve_collision_modes(player);
 
         _player_update_collision_lr(player); // Push sensor collision detection
         _player_update_collision_tb(player); // Ground sensor collision detection
@@ -1819,6 +1898,10 @@ player_update(Player *player)
                  player->ev_clamber.collided ? "U" : " ");
         font_draw_sm(buffer, 8, 74);
     }
+
+    // Export debug telemetry (see player.h). Notice how the sensor
+    // events are dumped before being reset below.
+    player_dump_debug(player);
 
     // Reset sensors
     player->ev_left  = (CollisionEvent){ 0 };

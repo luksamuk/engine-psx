@@ -1453,9 +1453,12 @@ level_load_level(screen_level_data *data)
     printf("Number of level layers: %d\n", leveldata->num_layers);
 
     // Start playback after we don't need the CD anymore.
+    printf("DBG: before play_music\n");
     screen_level_play_music(level_round, level_act);
+    printf("DBG: after play_music\n");
 
     prepare_titlecard(data);
+    printf("DBG: level load done\n");
 }
 
 static void

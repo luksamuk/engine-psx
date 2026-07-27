@@ -381,7 +381,7 @@ _monitor_update(ObjectState *state, ObjectTableEntry *entry, VECTOR *pos)
                         player->ev_right.angle = 0;
                     } else {
                         player->ev_left.collided = 1;
-                        player->ev_left.coord = solidity_vx + 16;
+                        player->ev_left.coord = solidity_vx + 30;
                         player->ev_right.angle = 0;
                     }
                 }

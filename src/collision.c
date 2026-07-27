@@ -21,24 +21,24 @@ _move_point_linecast(uint8_t direction, int32_t vx, int32_t vy,
                      uint8_t *lm)
 {
     const int32_t step = 16;
-    //const int32_t step = 1;
-    // Move simulated sensor position backwards within range
+    // Move simulated sensor position backwards within range,
+    // never crossing the sensor anchor.
     switch(direction) {
     case CDIR_FLOOR: // Directed down
         (*ly) -= step;
         if(*ly < vy) *ly = vy;
         goto adjusty;
-    case CDIR_RWALL: // Directed left
-        (*lx) -= step; // TODO
-        if(*lx > vx) *lx = vx;
+    case CDIR_RWALL: // Directed right
+        (*lx) -= step;
+        if(*lx < vx) *lx = vx;
         goto adjustx;
     case CDIR_CEILING: // Directed up
         (*ly) += step;
         if(*ly > vy) *ly = vy;
         goto adjusty;
-    case CDIR_LWALL: // Directed right
-        (*lx) += step; // TODO
-        if(*lx < vx) *lx = vx;
+    case CDIR_LWALL: // Directed left
+        (*lx) += step;
+        if(*lx > vx) *lx = vx;
         goto adjustx;
     }
 
@@ -52,10 +52,13 @@ adjusty:
 uint8_t
 _get_height_position(int32_t vx, int32_t vy, LinecastDirection direction)
 {
+    // Notice how the height masks for right wall and ceiling are
+    // generated with a flipped index (15 - pos, see cookcollision.py),
+    // so here we must sample it accordingly.
     switch(direction) {
     case CDIR_FLOOR:   return (vx & 0x0f);
-    case CDIR_RWALL:   return 16 - (vy & 0x0f);
-    case CDIR_CEILING: return 16 - (vx & 0x0f);
+    case CDIR_RWALL:   return 15 - (vy & 0x0f);
+    case CDIR_CEILING: return 15 - (vx & 0x0f);
     case CDIR_LWALL:   return (vy & 0x0f);
     }
     return 0;
@@ -105,12 +108,20 @@ _get_new_position(uint8_t direction,
                   int32_t cx, int32_t cy, int32_t px, int32_t py,
                   uint8_t h)
 {
-    h = 16 - h;
+    // Compute the absolute coordinate of the contact face within a tile.
+    // Height masks are stored differently per direction (see
+    // cookcollision.py and _get_height_position):
+    //   floor/rwall: height counts away from the bottom/right edge, so
+    //                the contact face of the tile is (16 - h) into it.
+    //   ceil/lwall:  the mask value directly indexes the contact face
+    //                (lowest filled pixel / rightmost filled pixel).
     switch(direction) {
     case CDIR_FLOOR:
+        return (cy << 7) + (py << 4) + (16 - (int32_t)h);
     case CDIR_CEILING:
         return (cy << 7) + (py << 4) + (int32_t)h;
     case CDIR_RWALL:
+        return (cx << 7) + (px << 4) + (16 - (int32_t)h);
     case CDIR_LWALL:
         return (cx << 7) + (px << 4) + (int32_t)h;
     }

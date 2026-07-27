@@ -77,10 +77,24 @@ main(void)
     sound_cdda_init();
 
     // Set first scene
+#ifdef TEST_WARP_LEVEL
+    // Debug hook: warp straight into a level for testing. Define
+    // TEST_WARP_LEVEL (and optionally TEST_WARP_CHARACTER,
+    // TEST_WARP_DEBUG_MODE) through the build.
+    screen_level_setlevel(TEST_WARP_LEVEL);
+    screen_level_setmode(LEVEL_MODE_NORMAL);
+#ifdef TEST_WARP_CHARACTER
+    screen_level_setcharacter(TEST_WARP_CHARACTER);
+#else
+    screen_level_setcharacter(CHARA_SONIC);
+#endif
+#ifdef TEST_WARP_DEBUG_MODE
+    debug_mode = TEST_WARP_DEBUG_MODE;
+#endif
+    scene_change(SCREEN_LEVEL);
+#else
     scene_change(SCREEN_DISCLAIMER);
-
-    /* screen_level_setlevel(5); */
-    /* scene_change(SCREEN_LEVEL); */
+#endif
 
     while(1) {
         // Update systems
