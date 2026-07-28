@@ -99,26 +99,27 @@ extern int32_t    level_water_y;
 
 
 /* GROUND SENSOR COLLISION ANGLES */
-// Ranges from the SPG (Slope Collision), converted to the 0x1000 base.
+// Ranges from the SPG (Slope Collision), converted to the 0x1000 base
+// (1 angle unit = 360/4096 degrees; 256-base hex angles x 16).
 // Note that ranges aren't symmetric since each 45 can't be shared
 // between sectors:
-//   Floor:   angle <= 44 or >= 316
-//   R.Wall:  45..135
-//   Ceiling: 136..224
-//   L.Wall:  225..315
-#define GSMODE_ANGLE_FLOOR_RIGHT    0x01c2 // 44
-#define GSMODE_ANGLE_CEIL_MIN       0x0600 // 135
-#define GSMODE_ANGLE_CEIL_MAX       0x09ff // ~224
-#define GSMODE_ANGLE_FLOOR_LEFT     0x0e37 // ~316
+//   Floor:   angle <= 44 (0x1f0) or >= 316 (0xe10)
+//   R.Wall:  45..135  (0x200..0x600)
+//   Ceiling: 136..224 (0x610..0x9f0)
+//   L.Wall:  225..315 (0xa00..0xe00)
+#define GSMODE_ANGLE_FLOOR_RIGHT    0x01f0 // 44
+#define GSMODE_ANGLE_CEIL_MIN       0x0610 // 136
+#define GSMODE_ANGLE_CEIL_MAX       0x09f0 // 224
+#define GSMODE_ANGLE_FLOOR_LEFT     0x0e10 // 316
 
 /* PUSH SENSOR COLLISION ANGLES */
 // As opposed to ground sensors, push sensors have larger wall ranges,
 // so the L.Wall and R.Wall modes have precedence over the floor/ceiling
 // modes.
-#define PSMODE_ANGLE_RWALL_MIN    0x014e // ~29
-#define PSMODE_ANGLE_RWALL_MAX    0x0579 // ~134
-#define PSMODE_ANGLE_LWALL_MIN    0x0a87 // ~226
-#define PSMODE_ANGLE_LWALL_MAX    0x0db9 // ~330
+#define PSMODE_ANGLE_RWALL_MIN    0x01b0 // ~26
+#define PSMODE_ANGLE_RWALL_MAX    0x05b0 // ~127
+#define PSMODE_ANGLE_LWALL_MIN    0x0a50 // ~233
+#define PSMODE_ANGLE_LWALL_MAX    0x0e50 // ~320
 
 /* LANDING SPEED TRANSFER ANGLES */
 // Depending on these angle ranges, X and Y air speed transfer to
@@ -448,10 +449,15 @@ _accept_ground_event(Player *player, int32_t dist)
 
 // Ceiling sensors perform in the exact same way as the ground sensors,
 // but flipped: only a negative distance (embedded) means a collision.
+// However, the surface must be found anywhere from a tile above the body
+// edge up to the edge itself: a "ceiling face" below the player center is
+// no ceiling at all (it is usually the bottom of a solid tile the body
+// already crossed -- e.g. when entering a wall), and snapping into it
+// would push the player down into terrain.
 static uint8_t
 _accept_ceiling_event(int32_t dist)
 {
-    return (dist <= 0);
+    return (dist <= 0) && (dist >= -TERRAIN_SNAP_RADIUS);
 }
 
 // Picks the winning out of two ground/ceiling sensor events:
@@ -505,9 +511,12 @@ _player_update_collision_lr(Player *player)
         return;
     }
 
-    // NOTE: Push sensors are ONLY used when in floor mode OR when
-    // the angle in question is a multiple of 90 degrees (S3K behaviour).
-    if((player->psmode != CDIR_FLOOR) && ((player->angle % 0x400) != 0))
+    // NOTE: Push sensors are only active while the ground angle is a
+    // multiple of 90 degrees, i.e. on flat ground, vertical walls and the
+    // ceiling (S3K behaviour). On arbitrary slope angles, diagonal terrain
+    // in front must never register as a wall to bump into -- it is
+    // climbable ground handled by the ground sensors.
+    if((player->angle % 0x400) != 0)
         return;
 
     // When on totally flat ground, adjust the anchor to y + 8 so small
@@ -937,6 +946,13 @@ _player_resolve_collision_modes(Player *player)
     // the ranges follow the SPG (Slope Collision). They operate
     // somewhat like quadrants, with the player sensors pointing at
     // one of the four cardinal directions.
+    // While airborne, the player's angle does NOT rotate the sensors:
+    // they always work in floor mode until the player lands.
+    if(!player->grnd) {
+        player->gsmode = player->psmode = CDIR_FLOOR;
+        return;
+    }
+
     int32_t p_angle = player->angle;
 
     /* GROUND SENSORS COLLISION MODES */

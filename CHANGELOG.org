@@ -10,6 +10,13 @@ version.
   left wall), following the Sonic Physics Guide ranges
 - Fix ground/push collision mode resolution: the left wall mode could
   never be selected before, and push mode ranges were inconsistent
+- Use exact SPG mode angle boundaries (44/45/136/224/225/315/316 degrees)
+- Never rotate collision modes while airborne (SPG rule): fixes the
+  "teleport up" bug when leaving a wall with a non-zero angle, where a
+  wall-mode sensor coordinate (X) would be snapped into the Y position
+- Only enable push sensors while the ground angle is a multiple of 90
+  degrees (S3K behaviour): fixes diagonal slope faces registering as
+  walls and killing the player's speed, especially on left ramps
 - Fix linecast backwards scan for horizontal sensors, which would sample
   tiles behind the anchor or skip tiles in-between
 - Fix a coordinate bug where ceiling and left wall sensors would return
@@ -21,6 +28,9 @@ version.
   one tile of extra reach and apply distance acceptance rules from the
   Sonic Physics Guide (-14 to min(|gsp|+4, 14) when grounded)
 - Allow landing on steep ceilings when airborne
+- Add player debug telemetry export (player_debug struct) and Lua probes
+  for PCSX-Redux (debug/lua), plus a TEST_WARP_LEVEL build hook to boot
+  straight into a level for testing
 
 * SAGE 2025 Build: v0.6 (2025-08-18)
 

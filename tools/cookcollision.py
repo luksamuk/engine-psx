@@ -147,7 +147,13 @@ def get_height_mask(d: Direction, points, predef_angle):
     return (heightmask, angle)
 
 
+import os
+NOPREDEF = os.environ.get('COOK_NOPREDEF') is not None
+
 def parse_masks(tiles):
+    if NOPREDEF:
+        for t in tiles:
+            t['predef'] = {}
     res = []
     for tile in tiles:
         points = tile.get("points")
