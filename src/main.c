@@ -1,98 +1,128 @@
-#include <stdlib.h>
+#include <sys/types.h>
 #include <stdio.h>
-#include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <psxgte.h>
-#include <psxcd.h>
-#include <inline_c.h>
-#include <hwregs_c.h>
-#include <string.h>
+#include <libgte.h>
+#include <libgpu.h>
+#include <libetc.h>
+#include <libpad.h>
 
-#include "render.h"
-#include "util.h"
-#include "chara.h"
-#include "sound.h"
-#include "input.h"
-#include "player.h"
-#include "level.h"
-#include "timer.h"
-#include "camera.h"
-#include "memalloc.h"
-#include "screen.h"
-#include "basic_font.h"
+#define SCREEN_WIDTH  320
+#define SCREEN_HEIGHT 240
 
-/*
-  Locations of common textures on frame buffer:
-  ================================================
-  Title screen:   320x0      No CLUT
-  Player 1:       320x0;     CLUT: 0x480
-  Common objects: 576x0;     CLUT: 0x481 (8-bit only)
-  Level tiles:    448x0;     CLUT: 0x482 (4 or 8-bit CLUT)
-  Level BG0:      448x256;   CLUT: 0x483 (4-bit only)
-  Level BG1:      512x256;   CLUT: 0x484 (4-bit only)
-  Level objects:  704x0;     CLUT: 0x485 (8-bit only)
-  Level boss:     704x256;   CLUT: 0x486 (8-bit only, loaded over level objects)
-                             CLUT: 0x487 (8-bit only, alt palette when hit)
+// Estructuras para el Doble Buffer de la PS1 (Evita parpadeos)
+DISPENV disp;
+DRAWENV draw;
+int db = 0;
 
-  Character offscreen renderer: 960x0, 16-bit (do not upload textures here)
-  Basic fonts:    960x256;   CLUT: 0x490 (4-bit always)
- */
+// Variables de movimiento de Leon (Estilo Tanque RE4)
+u_long pad_state;
+int leon_x = 0;
+int leon_z = 1000;    // Distancia inicial de la camara
+int leon_angulo = 0;  // Rotacion de la camara al hombro
 
-/*
-  General depth for elements in ordering table
-  (Ordering table depths act like sprite planes)
-  ================================================
-        0       | Highest plane (debug information, etc)
-        1       | Heads-up display and text layer
-        2       | Level tile (SPRT_8 + DR_TPAGE) layer (front) -- UNUSED
-        3       | Object sprite layer (upper objects such as rings, and hitboxes)
-        4       | Player sprite layer (most objects, player is atop)
-       ...      | ...
-  OT_LENGTH - 3 | Level tile (SPRT_8 + DR_TPAGE) layer (back)
-  OT_LENGTH - 2 | Level background (parallax)
- */
+// Variables nativas del procesador geometrico 3D de la Play 1
+SVECTOR cam_rot = { 0, 0, 0 };
+VECTOR  cam_pos = { 0, 0, 0 };
+MATRIX  matriz_vista;
 
-int debug_mode = 0;
-int campaign_finished = 0;
+void init_game_system() {
+    ResetGraph(0);
+    
+    // Inicializamos el doble buffer en la memoria de video (VRAM)
+    SetDefDispEnv(&disp, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SetDefDrawEnv(&draw, 0, 240, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SetDefDispEnv(&disp, 0, 240, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SetDefDrawEnv(&draw, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    
+    // Fondo negro puro (Estilo Survival Horror)
+    setRGB0(&draw, 0, 0, 0);
+    setRGB0(&draw, 0, 0, 0);
+    
+    PutDispEnv(&disp[db]);
+    PutDrawEnv(&draw[db]);
+    SetDispMask(1);
+    
+    // Encendemos el chip de calculo 3D (GTE) y los controles
+    InitGeom();
+    PadInit(0);
+    
+    // Seteamos la perspectiva del lente de la camara
+    SetGeomOffset(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+    SetGeomScreen(512); 
+}
 
-#include "screens/level.h"
-
-int
-main(void)
-{
-    // Engine initialization
-    setup_context();
-    CdInit();
-    sound_init();
-    pad_init();
-    timer_init();
-    fastalloc_init();
-    font_init();
-    scene_init();
-
-    // Initial loads from disc
-    render_loading_logo();
-    sound_sfx_init();
-    sound_cdda_init();
-
-    // Set first scene
-    scene_change(SCREEN_DISCLAIMER);
-
-    /* screen_level_setlevel(5); */
-    /* scene_change(SCREEN_LEVEL); */
-
-    while(1) {
-        // Update systems
-        pad_update();
-        scene_update();
-        timer_update();
-
-        // Draw scene
-        scene_draw();
-        font_flush();
-        swap_buffers();
+void procesar_input() {
+    // Leemos el Joystick en el Puerto 1
+    pad_state = PadRead(0);
+    
+    // Configuracion de botones de RE4 Mobile
+    if (pad_state & PADLup) {
+        leon_z -= 20; // Camina hacia adelante en profundidad
     }
+    if (pad_state & PADLdown) {
+        leon_z += 20; // Camina hacia atras
+    }
+    if (pad_state & PADLleft) {
+        leon_angulo -= 32; // Gira sobre su eje a la izquierda
+    }
+    if (pad_state & PADLright) {
+        leon_angulo += 32; // Gira sobre su eje a la derecha
+    }
+}
 
+void actualizar_camara_3d() {
+    // Vinculamos tus variables de tanque con las matrices de la PS1
+    cam_rot.vy = leon_angulo;
+    cam_pos.vx = leon_x;
+    cam_pos.vz = leon_z;
+    cam_pos.vy = -100; // Altura fija al hombro de Leon
+    
+    RotMatrix(&cam_rot, &matriz_vista);
+    TransMatrix(&matriz_vista, &cam_pos);
+    SetTransMatrix(&matriz_vista);
+}
+
+void dibujar_piso_pueblo() {
+    POLY_F4 piso;
+    long p, flag;
+    
+    // Coordenadas de los 4 extremos del suelo en el mapa 3D
+    SVECTOR v0 = { -500, 0, -500 };
+    SVECTOR v1 = {  500, 0, -500 };
+    SVECTOR v2 = { -500, 0,  500 };
+    SVECTOR v3 = {  500, 0,  500 };
+    
+    SetPolyF4(&piso);
+    setRGB0(&piso, 128, 128, 128); // Color gris para el suelo
+    
+    // El chip GTE procesa la perspectiva 3D
+    RotTransPers(&v0, (long*)&piso.x0, &p, &flag);
+    RotTransPers(&v1, (long*)&piso.x1, &p, &flag);
+    RotTransPers(&v2, (long*)&piso.x2, &p, &flag);
+    RotTransPers(&v3, (long*)&piso.x3, &p, &flag);
+    
+    // Mandamos el poligono directo a dibujar en la pantalla
+    DrawPrim(&piso);
+}
+
+int main() {
+    init_game_system();
+    
+    // Bucle principal del juego (Game Loop)
+    while (1) {
+        procesar_input();
+        actualizar_camara_3d();
+        
+        PutDrawEnv(&draw[db]);
+        
+        // Renderizamos nuestro piso tridimensional
+        dibujar_piso_pueblo();
+        
+        DrawSync(0);
+        VSync(0);
+        
+        // Intercambio de buffers para evitar parpadeos
+        db = !db;
+        PutDispEnv(&disp[db]);
+    }
     return 0;
 }
