@@ -199,6 +199,8 @@ load_player(Player *player,
     player->vel   = (VECTOR){ 0 };
     player->angle = 0;
     player->prev_angle = 0;
+    player->prev_prev_angle = 0;
+    player->prev_prev_prev_angle = 0;
     player->spinrev = 0;
     player->ctrllock = 0;
     player->airdirlock = 0;
@@ -527,10 +529,25 @@ _player_update_collision_lr(Player *player)
     if((player->angle % 0x400) != 0)
         return;
 
-    // Abort push detection if the ground angle just flipped between two
-    // distant values this frame: the player is on a mixed-slope seam, not a
-    // clean flat surface. (Threshold = 22.5 degrees, half a 45-degree notch.)
+    // Abort push detection while the player is transitioning through a
+    // steep slope: ground_angle only becomes meaningful for wall/ceiling
+    // sensors after a few frames of stability. A frame where the angle
+    // just returned to cardinal after swinging through a ramp (Surely Wood
+    // chunk 56: tiles 26/9 at 43-36 deg sit right before a 0-deg tile at
+    // x=1008, then 43 again) is a seam inside a ramp, not a flat floor.
+    // Require the angle to have stayed cardinal for 4 consecutive frames.
     if(player->grnd) {
+        // push_frame_streak counts how long the ground angle has been
+        // continuously cardinal while grounded.
+        if((player->angle % 0x400) == 0
+           && (player->prev_angle % 0x400) == 0
+           && (player->prev_prev_angle % 0x400) == 0
+           && (player->prev_prev_prev_angle % 0x400) == 0) {
+            // angle stable on cardinal for 4 frames, ok to push
+        } else {
+            return;
+        }
+
         int32_t diff = abs(player->angle - player->prev_angle);
         if(diff > 0x100)
             diff = 0x1000 - diff;
@@ -1941,7 +1958,11 @@ player_update(Player *player)
     // Remember the current angle for next frame's seam detection in the
     // push-sensor code. Grounded only; airborne frames keep the last
     // grounded angle so push never fires from a sudden rotate mid-air.
-    if(player->grnd) player->prev_angle = player->angle;
+    if(player->grnd) {
+        player->prev_prev_prev_angle = player->prev_prev_angle;
+        player->prev_prev_angle = player->prev_angle;
+        player->prev_angle = player->angle;
+    }
 
     // Reset sensors
     player->ev_left  = (CollisionEvent){ 0 };
