@@ -89,6 +89,7 @@ typedef struct {
     VECTOR    pos;
     VECTOR    vel; // vel.vz = ground speed
     int32_t   angle;
+    int32_t   prev_angle; // last grounded angle; used to tame the push sensor
     uint8_t   anim_frame;
     uint8_t   anim_timer;
     uint8_t   tail_anim_frame;

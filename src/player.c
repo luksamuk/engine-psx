@@ -198,6 +198,7 @@ load_player(Player *player,
     player->pos   = (VECTOR){ 0 };
     player->vel   = (VECTOR){ 0 };
     player->angle = 0;
+    player->prev_angle = 0;
     player->spinrev = 0;
     player->ctrllock = 0;
     player->airdirlock = 0;
@@ -511,13 +512,31 @@ _player_update_collision_lr(Player *player)
         return;
     }
 
-    // NOTE: Push sensors are only active while the ground angle is a
+    // Push sensors are only active while the ground angle is a
     // multiple of 90 degrees, i.e. on flat ground, vertical walls and the
     // ceiling (S3K behaviour). On arbitrary slope angles, diagonal terrain
     // in front must never register as a wall to bump into -- it is
     // climbable ground handled by the ground sensors.
+    //
+    // Furthermore, don't let the sensors fire when the ground angle just
+    // changed abruptly: a sudden step between two angles (e.g. a flat pixel
+    // wedged between ramp tiles, like Surely Wood's tile 61 in chunk 56)
+    // means we are traversing a steep feature, not pressing into a wall.
+    // The push sensor only makes sense once the angle is stable on a
+    // cardinal direction.
     if((player->angle % 0x400) != 0)
         return;
+
+    // Abort push detection if the ground angle just flipped between two
+    // distant values this frame: the player is on a mixed-slope seam, not a
+    // clean flat surface. (Threshold = 22.5 degrees, half a 45-degree notch.)
+    if(player->grnd) {
+        int32_t diff = abs(player->angle - player->prev_angle);
+        if(diff > 0x100)
+            diff = 0x1000 - diff;
+        if(diff > 0x100) // > 45 degrees
+            return;
+    }
 
     // When on totally flat ground, adjust the anchor to y + 8 so small
     // floor bumps don't register as walls. On wall/ceiling push modes,
@@ -1918,6 +1937,11 @@ player_update(Player *player)
     // Export debug telemetry (see player.h). Notice how the sensor
     // events are dumped before being reset below.
     player_dump_debug(player);
+
+    // Remember the current angle for next frame's seam detection in the
+    // push-sensor code. Grounded only; airborne frames keep the last
+    // grounded angle so push never fires from a sudden rotate mid-air.
+    if(player->grnd) player->prev_angle = player->angle;
 
     // Reset sensors
     player->ev_left  = (CollisionEvent){ 0 };

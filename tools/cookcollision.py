@@ -192,6 +192,8 @@ def load_json(filename):
 
 
 def hex_to_int(s):
+    if isinstance(s, (int, float)):
+        return int(s)
     return int(s, 16)
 
 
@@ -305,10 +307,34 @@ def write_file(f, tile_data):
 def main():
     jsonfile = sys.argv[1]
     outfile = sys.argv[2]
+    map128 = sys.argv[3] if len(sys.argv) > 3 else None
     j = load_json(jsonfile)
     parsed = parse_json(j)
     masks = parse_masks(parsed)
-    # pprint(list(filter(lambda x: x.get("id") == 1, masks))[0])
+
+    if map128 is not None:
+        # Guard: warn about tiles referenced by the 128x128 chunk map that
+        # have no collision definition in this tileset. They fall through
+        # terrain at runtime (h=0), which is almost always a level-design bug.
+        import struct
+        data = open(map128, "rb").read()
+        ntiles = struct.unpack(">H", data[2:4])[0]
+        used = set()
+        off = 6
+        for _ in range(ntiles * 64):
+            if off + 3 > len(data):
+                break
+            index, props = struct.unpack(">HB", data[off:off + 3])
+            off += 3
+            if index > 0 and props != 2:  # skip MAP128_PROP_NONE
+                used.add(index)
+        cooked = {t.get("id") for t in masks}
+        missing = sorted(used - cooked)
+        if missing:
+            print(f"WARNING: {len(missing)} tiles used by the chunk map have "
+                  f"no collision data in {jsonfile}:", file=sys.stderr)
+            print(f"  {missing}", file=sys.stderr)
+
     with open(outfile, "wb") as f:
         write_file(f, masks)
 

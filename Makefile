@@ -145,10 +145,10 @@ cleancook:
 
 # =========== 16x16 collision ===========
 # (Depends on tiles16.tsx tile map with collision data, generated on Tiled).
-%/MAP16.COL: %/tiles16.tsx
+%/MAP16.COL: %/tiles16.tsx %/MAP128.MAP
 	tiled --export-tileset $< "$(dir $<)collision16.json"
-	./tools/cookcollision.py "$(dir $<)collision16.json" $@
-	rm "$(dir $@)collision16.json"
+	./tools/cookcollision.py "$(dir $<)collision16.json" $@ "$(dir $<)MAP128.MAP"
+	rm "$(dir $<)collision16.json"
 
 # =========== 128x128 tile mapping ===========
 # Also generates 128.png to create a 128x128 tileset (should be done manually)
